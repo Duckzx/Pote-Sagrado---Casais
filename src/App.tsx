@@ -9,6 +9,7 @@ import { MissoesTab } from './components/MissoesTab';
 import { DisputaTab } from './components/DisputaTab';
 import { ConfigTab } from './components/ConfigTab';
 import { ToastContainer, ToastMessage } from './components/Toast';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 import { handleFirestoreError, OperationType } from './lib/firestore-errors';
 
@@ -294,6 +295,7 @@ export default function App() {
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {showOnboarding && <OnboardingModal onComplete={handleCompleteOnboarding} />}
+        <SpeedInsights />
       </div>
     </ErrorBoundary>
   );
