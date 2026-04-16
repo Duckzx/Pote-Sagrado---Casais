@@ -102,10 +102,11 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
   };
 
   const confirmEdit = async () => {
-    if (!editing || !editAmount) return;
+    const parsedAmount = Number(editAmount.replace(',', '.'));
+    if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     try {
       await updateDoc(doc(db, 'deposits', editing.id), {
-        amount: Number(editAmount),
+        amount: parsedAmount,
         action: editAction
       });
       addToast('Atualizado', 'Transação editada com sucesso.', 'success');
@@ -362,10 +363,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
               </div>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setEditing(null)} className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold">
+              <button onClick={() => setEditing(null)} className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold hover:bg-cookbook-border/50 transition-colors">
                 Cancelar
               </button>
-              <button onClick={confirmEdit} className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold">
+              <button 
+                onClick={confirmEdit} 
+                disabled={!editAmount || isNaN(Number(editAmount.replace(',', '.'))) || Number(editAmount.replace(',', '.')) <= 0}
+                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+              >
                 Salvar
               </button>
             </div>

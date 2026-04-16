@@ -57,13 +57,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   }, []);
 
   const handleQuickDeposit = async () => {
-    if (!quickAmount || isNaN(Number(quickAmount)) || Number(quickAmount) <= 0) return;
+    const parsedAmount = Number(quickAmount.replace(',', '.'));
+    if (!quickAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     setIsQuickSubmitting(true);
     try {
       const user = auth.currentUser;
       if (!user) throw new Error('Not authenticated');
       await addDoc(collection(db, 'deposits'), {
-        amount: Number(quickAmount),
+        amount: parsedAmount,
         action: quickDesc || 'Depósito rápido',
         who: user.uid,
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
@@ -72,7 +73,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       // Haptic feedback
       if (navigator.vibrate) navigator.vibrate(50);
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
-      addToast('Guardado!', `+R$ ${Number(quickAmount).toFixed(2)} no pote!`, 'success');
+      addToast('Guardado!', `+R$ ${parsedAmount.toFixed(2)} no pote!`, 'success');
       setShowQuickDeposit(false);
       setQuickAmount('');
       setQuickDesc('');
@@ -438,7 +439,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             
             <button
               onClick={handleQuickDeposit}
-              disabled={!quickAmount || isQuickSubmitting || Number(quickAmount) <= 0}
+              disabled={!quickAmount || isQuickSubmitting || isNaN(Number(quickAmount.replace(',', '.'))) || Number(quickAmount.replace(',', '.')) <= 0}
               className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98]"
             >
               {isQuickSubmitting ? 'Guardando...' : 'Guardar no Pote'}

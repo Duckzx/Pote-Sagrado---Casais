@@ -195,9 +195,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
   const handleComplete = async () => {
     if (!selectedMission) return;
     
+    let parsedAmount = 0;
+    if (amount) {
+      parsedAmount = Number(amount.replace(',', '.'));
+    }
+
     const finalAmount = selectedMission.reward > 0 
       ? selectedMission.reward 
-      : Number(amount);
+      : parsedAmount;
     
     if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) return;
     
@@ -673,7 +678,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
               
               <button
                 onClick={handleComplete}
-                disabled={isSubmitting || (selectedMission.reward === 0 && (!amount || Number(amount) <= 0))}
+                disabled={isSubmitting || (selectedMission.reward === 0 && (!amount || isNaN(Number(amount.replace(',', '.'))) || Number(amount.replace(',', '.')) <= 0))}
                 className={`w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold disabled:opacity-50 transition-all active:scale-95 shadow-lg ${
                   selectedMission.category === 'economia' 
                     ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500' 
