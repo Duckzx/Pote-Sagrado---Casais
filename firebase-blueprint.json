@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the app",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "TripConfig": {
+      "title": "TripConfig",
+      "description": "Configuration for the couple's trip",
+      "type": "object",
+      "properties": {
+        "destination": { "type": "string" },
+        "goalAmount": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["destination", "goalAmount"]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "A deposit made by a user",
+      "type": "object",
+      "properties": {
+        "amount": { "type": "number" },
+        "action": { "type": "string" },
+        "who": { "type": "string" },
+        "whoName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["amount", "action", "who", "whoName", "createdAt"]
+    },
+    "BingoStat": {
+      "title": "BingoStat",
+      "description": "Stats for bingo actions",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "count": { "type": "number" }
+      },
+      "required": ["action", "count"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/trip_config/main": {
+      "schema": { "$ref": "#/entities/TripConfig" },
+      "description": "The single trip configuration for the couple"
+    },
+    "/deposits/{depositId}": {
+      "schema": { "$ref": "#/entities/Deposit" },
+      "description": "All deposits made towards the trip"
+    },
+    "/bingo_stats/{actionId}": {
+      "schema": { "$ref": "#/entities/BingoStat" },
+      "description": "Aggregated stats for each bingo action"
+    }
+  }
+}

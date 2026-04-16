@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - theme: string (required) - App theme preference
+    //   - displayName: string (optional) - User's display name
+    //
+    // Collection: trip_config
+    // Document ID: main
+    // Fields:
+    //   - destination: string (required) - Trip destination
+    //   - goalAmount: number (required) - Financial goal
+    //   - lat: number (optional) - Latitude
+    //   - lng: number (optional) - Longitude
+    //   - updatedAt: timestamp (optional) - Last update
+    //
+    // Collection: deposits
+    // Document ID: {depositId}
+    // Fields:
+    //   - amount: number (required) - Saved amount
+    //   - action: string (optional) - Action description
+    //   - who: string (required) - User UID
+    //   - whoName: string (optional) - User display name
+    //   - createdAt: timestamp (required) - Entry creation time
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['theme']) &&
+             data.theme is string && data.theme.size() < 50 &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
+    }
+
+    function isValidTripConfig(data) {
+      return data.keys().hasAll(['destination', 'goalAmount']) &&
+             data.destination is string && data.destination.size() < 200 &&
+             data.goalAmount is number && data.goalAmount >= 0 &&
+             (!('lat' in data) || data.lat is number) &&
+             (!('lng' in data) || data.lng is number) &&
+             (!('origin' in data) || (data.origin is string && data.origin.size() < 100)) &&
+             (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
+             (!('customChallenges' in data) || data.customChallenges is list);
+    }
+
+    function isValidDeposit(data) {
+      return data.keys().hasAll(['amount', 'who', 'createdAt']) &&
+             data.amount is number && data.amount > 0 &&
+             data.who == request.auth.uid &&
+             data.createdAt == request.time &&
+             (!('type' in data) || data.type in ['income', 'expense']);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /trip_config/main {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidTripConfig(request.resource.data);
+    }
+
+    match /deposits/{depositId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.who == request.auth.uid;
+      allow update: if false; // Deposits are immutable for history integrity
+    }
+  }
+}

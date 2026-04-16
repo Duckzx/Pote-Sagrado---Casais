@@ -1,0 +1,106 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  /* Default Cookbook */
+  --theme-bg: #FDFBF7;
+  --theme-text: #2C2A26;
+  --theme-border: #E8E4D9;
+  --theme-primary: #8E7F6D;
+  --theme-primary-hover: #7A6C5C;
+  --theme-gold: #C5A059;
+  --theme-battle: #F4F1EA;
+  --theme-mural: #FFF9E6;
+}
+
+[data-theme="mediterranean"] {
+  --theme-bg: #FFF5EE;
+  --theme-text: #4A2E2B;
+  --theme-border: #F4D5CB;
+  --theme-primary: #E07A5F;
+  --theme-primary-hover: #D06A4F;
+  --theme-gold: #F2CC8F;
+  --theme-battle: #FDF0EA;
+  --theme-mural: #FFFDF9;
+}
+
+[data-theme="nordic"] {
+  --theme-bg: #F0F4F8;
+  --theme-text: #1A2B3C;
+  --theme-border: #D9E2EC;
+  --theme-primary: #5C7C8A;
+  --theme-primary-hover: #4A6A78;
+  --theme-gold: #829AB1;
+  --theme-battle: #E1E8F0;
+  --theme-mural: #F8FAFC;
+}
+
+[data-theme="tropical"] {
+  --theme-bg: #F2FAF5;
+  --theme-text: #1E392A;
+  --theme-border: #CDEBDB;
+  --theme-primary: #2A9D8F;
+  --theme-primary-hover: #21867A;
+  --theme-gold: #E9C46A;
+  --theme-battle: #E6F5EC;
+  --theme-mural: #FAFDFA;
+}
+
+@theme {
+  --color-cookbook-bg: var(--theme-bg);
+  --color-cookbook-text: var(--theme-text);
+  --color-cookbook-border: var(--theme-border);
+  --color-cookbook-primary: var(--theme-primary);
+  --color-cookbook-primary-hover: var(--theme-primary-hover);
+  --color-cookbook-gold: var(--theme-gold);
+  --color-cookbook-battle: var(--theme-battle);
+  --color-cookbook-mural: var(--theme-mural);
+  
+  --font-serif: "Georgia", "Times New Roman", serif;
+  --font-sans: "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-cookbook-bg text-cookbook-text font-sans transition-colors duration-500;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.bg-dotted {
+  background-image: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="1" cy="1" r="0.5" fill="%23E8E4D9"/></svg>');
+}
+
+/* Leaflet Customizations */
+.leaflet-container {
+  font-family: var(--font-sans);
+  z-index: 1;
+}
+.leaflet-popup-content-wrapper {
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.leaflet-popup-tip {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+}
+
+/* Custom Date Input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  filter: sepia(1) hue-rotate(330deg) saturate(0.5); /* Gives a slightly warm/brownish tint */
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+input[type="date"] {
+  color-scheme: light;
+}
