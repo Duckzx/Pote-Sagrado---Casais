@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil, Plus, X } from 'lucide-react';
 import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
@@ -409,7 +410,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       </button>
 
       {/* Quick Deposit Modal */}
-      {showQuickDeposit && (
+      {showQuickDeposit && createPortal(
         <div
           className="fixed inset-0 z-[60] flex items-end justify-center animate-modal-backdrop"
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
@@ -473,7 +474,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               {isQuickSubmitting ? 'Guardando...' : (quickType === 'income' ? 'Guardar no Pote' : 'Registrar Gasto')}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
