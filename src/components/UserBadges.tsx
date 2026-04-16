@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { Award, Flame, Coffee, Trophy, Target, X } from 'lucide-react';
+import { Award, Flame, Coffee, Trophy, Target, X, Star, Zap } from 'lucide-react';
 import { clsx } from 'clsx';
 import confetti from 'canvas-confetti';
 
@@ -23,7 +23,7 @@ const ALL_BADGES = [
   { 
     id: 'mestre_cuca', 
     title: 'Mestre Cuca', 
-    desc: 'Guardou 5 vezes com comida em casa.',
+    desc: 'Guardou 5x com comida em casa.',
     icon: <Coffee size={20} />,
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
@@ -33,7 +33,7 @@ const ALL_BADGES = [
   { 
     id: 'foco_total', 
     title: 'Foco Total', 
-    desc: 'Alcançou 50% da meta global.',
+    desc: 'Alcançou 50% da meta.',
     icon: <Award size={20} />,
     color: 'text-cookbook-gold',
     bg: 'bg-cookbook-gold/10',
@@ -43,12 +43,52 @@ const ALL_BADGES = [
   { 
     id: 'combo_3', 
     title: 'Combo 3 Dias', 
-    desc: 'Guardou dinheiro por 3 dias seguidos.',
+    desc: '3 dias seguidos economizando.',
     icon: <Flame size={20} />,
     color: 'text-red-500',
     bg: 'bg-red-500/10',
     border: 'border-red-500/20',
     glowColor: 'rgba(239, 68, 68, 0.4)'
+  },
+  { 
+    id: 'combo_7', 
+    title: 'Combo 7 Dias', 
+    desc: '7 dias seguidos economizando!',
+    icon: <Zap size={20} />,
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+    glowColor: 'rgba(168, 85, 247, 0.4)'
+  },
+  { 
+    id: 'sem_delivery', 
+    title: 'Sem Delivery', 
+    desc: 'Resistiu ao iFood 5 vezes.',
+    icon: <Star size={20} />,
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+    glowColor: 'rgba(16, 185, 129, 0.4)'
+  },
+  { 
+    id: 'centenario', 
+    title: 'Centenário', 
+    desc: '100+ depósitos no pote!',
+    icon: <Trophy size={20} />,
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    glowColor: 'rgba(245, 158, 11, 0.4)'
+  },
+  { 
+    id: 'meta_batida', 
+    title: 'Meta Batida', 
+    desc: 'Atingiu 100% da meta!',
+    icon: <Award size={20} />,
+    color: 'text-yellow-500',
+    bg: 'bg-yellow-500/10',
+    border: 'border-yellow-500/20',
+    glowColor: 'rgba(234, 179, 8, 0.5)'
   },
 ];
 
@@ -122,6 +162,31 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
 
     if (maxStreak >= 3) {
       earned.add('combo_3');
+    }
+
+    // 5. Combo 7 Dias (7-day streak)
+    if (maxStreak >= 7) {
+      earned.add('combo_7');
+    }
+
+    // 6. Sem Delivery (resisted iFood 5 times)
+    const noDeliveryDeposits = userDeposits.filter(d => 
+      d.action?.toLowerCase().includes('ifood') || 
+      d.action?.toLowerCase().includes('delivery') ||
+      d.action?.toLowerCase().includes('resistiu')
+    );
+    if (noDeliveryDeposits.length >= 5) {
+      earned.add('sem_delivery');
+    }
+
+    // 7. Centenário (100+ total deposits)
+    if (userDeposits.length >= 100) {
+      earned.add('centenario');
+    }
+
+    // 8. Meta Batida (100% of goal)
+    if (goalAmount > 0 && totalGlobalSaved >= goalAmount) {
+      earned.add('meta_batida');
     }
 
     return earned;

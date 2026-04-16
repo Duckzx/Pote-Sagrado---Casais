@@ -278,60 +278,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
           </div>
         </div>
 
-        {/* Desafios Personalizados */}
-        <div className="space-y-4 pt-6 border-t border-cookbook-border">
-          <div className="text-center mb-4">
-            <h3 className="font-serif text-lg text-cookbook-text mb-1">Desafios Personalizados</h3>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-              Crie suas próprias regras de economia
-            </p>
-          </div>
-
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={newChallengeIcon}
-              onChange={(e) => setNewChallengeIcon(e.target.value)}
-              placeholder="⭐"
-              className="w-16 bg-white border border-cookbook-border rounded px-2 py-3 font-serif text-center text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-              maxLength={2}
-            />
-            <input
-              type="text"
-              value={newChallengeLabel}
-              onChange={(e) => setNewChallengeLabel(e.target.value)}
-              placeholder="Ex: Fazer marmita"
-              className="flex-1 bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-            />
-            <button
-              onClick={handleAddChallenge}
-              disabled={!newChallengeLabel.trim()}
-              className="bg-cookbook-primary text-white p-3 rounded disabled:opacity-50 transition-opacity"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
-
-          {challenges.length > 0 && (
-            <div className="space-y-2 mt-4">
-              {challenges.map((c) => (
-                <div key={c.id} className="flex items-center justify-between bg-white border border-cookbook-border rounded p-3 shadow-sm">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{c.icon}</span>
-                    <span className="font-serif text-sm text-cookbook-text">{c.label}</span>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveChallenge(c.id)}
-                    className="text-red-400 hover:text-red-600 transition-colors p-1"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         <button
           onClick={handleSave}
           disabled={isSaving}

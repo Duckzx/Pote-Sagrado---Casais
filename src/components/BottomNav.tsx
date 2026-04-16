@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Grid, Swords, Settings, Receipt } from 'lucide-react';
+import { Home, Target, Swords, Settings, Receipt } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface BottomNavProps {
@@ -10,7 +10,7 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: 'home', icon: Home, label: 'Diário' },
-    { id: 'bingo', icon: Grid, label: 'Bingo' },
+    { id: 'missoes', icon: Target, label: 'Missões' },
     { id: 'gastos', icon: Receipt, label: 'Gastos' },
     { id: 'disputa', icon: Swords, label: 'Batalha' },
     { id: 'config', icon: Settings, label: 'Ajustes' },

@@ -5,7 +5,7 @@ import { auth, db, loginWithGoogle } from './firebase';
 import { ColorBends } from './components/ColorBends';
 import { BottomNav } from './components/BottomNav';
 import { HomeTab } from './components/HomeTab';
-import { BingoTab } from './components/BingoTab';
+import { MissoesTab } from './components/MissoesTab';
 import { DisputaTab } from './components/DisputaTab';
 import { ConfigTab } from './components/ConfigTab';
 import { ToastContainer, ToastMessage } from './components/Toast';
@@ -265,9 +265,18 @@ export default function App() {
               addToast={addToast}
             />
           )}
-          {activeTab === 'bingo' && <BingoTab stats={bingoStats} customChallenges={tripConfig.customChallenges} />}
+          {activeTab === 'missoes' && (
+            <MissoesTab 
+              stats={bingoStats} 
+              customChallenges={tripConfig.customChallenges}
+              battleChallenges={tripConfig.battleChallenges}
+              deposits={deposits}
+              currentUser={user}
+              addToast={addToast}
+            />
+          )}
           {activeTab === 'gastos' && <ExpensesTab addToast={addToast} />}
-          {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} battleChallenges={tripConfig.battleChallenges} />}
+          {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
           {activeTab === 'config' && (
             <ConfigTab 
               currentDestination={tripConfig.destination} 
