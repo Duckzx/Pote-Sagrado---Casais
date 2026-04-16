@@ -17,7 +17,8 @@ const ALL_BADGES = [
     icon: <Target size={20} />,
     color: 'text-cookbook-primary',
     bg: 'bg-cookbook-primary/10',
-    border: 'border-cookbook-primary/20'
+    border: 'border-cookbook-primary/20',
+    glowColor: 'rgba(142, 127, 109, 0.4)'
   },
   { 
     id: 'mestre_cuca', 
@@ -26,7 +27,8 @@ const ALL_BADGES = [
     icon: <Coffee size={20} />,
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
-    border: 'border-orange-500/20'
+    border: 'border-orange-500/20',
+    glowColor: 'rgba(249, 115, 22, 0.4)'
   },
   { 
     id: 'foco_total', 
@@ -35,7 +37,8 @@ const ALL_BADGES = [
     icon: <Award size={20} />,
     color: 'text-cookbook-gold',
     bg: 'bg-cookbook-gold/10',
-    border: 'border-cookbook-gold/20'
+    border: 'border-cookbook-gold/20',
+    glowColor: 'rgba(197, 160, 89, 0.4)'
   },
   { 
     id: 'combo_3', 
@@ -44,12 +47,16 @@ const ALL_BADGES = [
     icon: <Flame size={20} />,
     color: 'text-red-500',
     bg: 'bg-red-500/10',
-    border: 'border-red-500/20'
+    border: 'border-red-500/20',
+    glowColor: 'rgba(239, 68, 68, 0.4)'
   },
 ];
 
+const CELEBRATION_PARTICLES = ['✨', '🌟', '⭐', '💫', '🎉', '🎊'];
+
 export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, goalAmount }) => {
   const [newlyUnlocked, setNewlyUnlocked] = useState<typeof ALL_BADGES[0] | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const prevEarnedRef = useRef<Set<string>>(new Set());
   const isInitialLoad = useRef(true);
 
@@ -135,17 +142,47 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
       const badgeData = ALL_BADGES.find(b => b.id === newBadgesList[0]);
       if (badgeData) {
         setNewlyUnlocked(badgeData);
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.5 },
-          zIndex: 100,
-          colors: ['#8E7F6D', '#2C2A26', '#C5A059', '#F2CC8F']
-        });
+        setShowCelebration(true);
+        
+        // Staggered confetti bursts for more drama
+        setTimeout(() => {
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { x: 0.3, y: 0.5 },
+            zIndex: 100,
+            colors: ['#8E7F6D', '#C5A059', '#F2CC8F', '#FFD700']
+          });
+        }, 300);
+        
+        setTimeout(() => {
+          confetti({
+            particleCount: 100,
+            spread: 90,
+            origin: { x: 0.7, y: 0.5 },
+            zIndex: 100,
+            colors: ['#8E7F6D', '#2C2A26', '#C5A059', '#F2CC8F']
+          });
+        }, 600);
+
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            spread: 120,
+            origin: { x: 0.5, y: 0.4 },
+            zIndex: 100,
+            colors: ['#FFD700', '#FFA500', '#FF6347']
+          });
+        }, 900);
       }
       prevEarnedRef.current = new Set(earnedBadges);
     }
   }, [earnedBadges, deposits]);
+
+  const handleClose = () => {
+    setShowCelebration(false);
+    setTimeout(() => setNewlyUnlocked(null), 400);
+  };
 
   return (
     <>
@@ -167,21 +204,24 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
             <div 
               key={badge.id}
               className={clsx(
-                "snap-start shrink-0 w-[140px] rounded p-4 flex flex-col items-center text-center border transition-all",
+                "snap-start shrink-0 w-[140px] rounded p-4 flex flex-col items-center text-center border transition-all duration-500",
                 isEarned 
-                  ? `bg-white ${badge.border} shadow-sm` 
+                  ? `bg-white ${badge.border} shadow-sm badge-newly-earned` 
                   : "bg-cookbook-bg/50 border-cookbook-border/50 opacity-60 grayscale"
               )}
+              style={isEarned ? { 
+                boxShadow: `0 4px 20px ${badge.glowColor}` 
+              } : undefined}
             >
               <div className={clsx(
-                "w-12 h-12 rounded-full flex items-center justify-center mb-3 text-current",
+                "w-12 h-12 rounded-full flex items-center justify-center mb-3 text-current transition-all duration-500",
                 isEarned ? badge.bg : "bg-cookbook-border/50 text-cookbook-text/40",
                 isEarned ? badge.color : ""
               )}>
                 {badge.icon}
               </div>
               <h4 className={clsx(
-                "font-serif italic text-sm mb-1 leading-tight",
+                "font-serif italic text-sm mb-1 leading-tight transition-colors duration-500",
                 isEarned ? "text-cookbook-text" : "text-cookbook-text/50"
               )}>
                 {badge.title}
@@ -195,41 +235,119 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
       </div>
     </div>
 
+    {/* Achievement Unlock Celebration Modal */}
     {newlyUnlocked && (
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm animate-in fade-in duration-300">
-        <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-8 shadow-2xl relative text-center">
-          <button 
-            onClick={() => setNewlyUnlocked(null)}
-            className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text"
-          >
-            <X size={20} />
-          </button>
-          
-          <div className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-primary font-bold mb-4">
-            Nova Conquista Desbloqueada!
+      <div 
+        className={clsx(
+          "fixed inset-0 z-[70] flex items-center justify-center p-4",
+          showCelebration ? "animate-badge-unlock-backdrop" : "opacity-0 pointer-events-none"
+        )}
+        style={{ 
+          background: 'radial-gradient(circle at center, rgba(253,251,247,0.95) 0%, rgba(44,42,38,0.85) 100%)',
+          backdropFilter: 'blur(8px)',
+          transition: 'opacity 0.3s ease-out'
+        }}
+        onClick={handleClose}
+      >
+        {/* Floating celebration particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {CELEBRATION_PARTICLES.map((particle, i) => (
+            <div
+              key={i}
+              className="absolute text-2xl"
+              style={{
+                left: `${15 + i * 14}%`,
+                bottom: '30%',
+                animation: `float-particle ${1.5 + i * 0.3}s ease-out ${i * 0.15}s forwards`,
+                opacity: 0
+              }}
+            >
+              {particle}
+            </div>
+          ))}
+        </div>
+
+        <div 
+          className={clsx(
+            "relative w-full max-w-sm",
+            showCelebration ? "animate-badge-unlock-card" : ""
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Shimmer rings behind card */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: '-20%' }}>
+            <div 
+              className="w-48 h-48 rounded-full border-2 animate-badge-shimmer"
+              style={{ borderColor: newlyUnlocked.glowColor }}
+            />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: '-20%' }}>
+            <div 
+              className="w-64 h-64 rounded-full border animate-badge-shimmer-delayed"
+              style={{ borderColor: newlyUnlocked.glowColor }}
+            />
           </div>
 
-          <div className={clsx(
-            "w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner",
-            newlyUnlocked.bg,
-            newlyUnlocked.color
-          )}>
-            {React.cloneElement(newlyUnlocked.icon as React.ReactElement, { size: 48, className: newlyUnlocked.color })}
-          </div>
-          
-          <h3 className="font-serif italic text-3xl text-cookbook-text mb-2">
-            {newlyUnlocked.title}
-          </h3>
-          <p className="font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-8 leading-relaxed">
-            {newlyUnlocked.desc}
-          </p>
+          <div className="bg-white border border-cookbook-border rounded-2xl w-full p-8 shadow-2xl relative text-center overflow-hidden">
+            {/* Top shine decoration */}
+            <div 
+              className="absolute top-0 left-0 w-full h-1"
+              style={{ 
+                background: `linear-gradient(90deg, transparent, ${newlyUnlocked.glowColor}, transparent)` 
+              }}
+            />
 
-          <button
-            onClick={() => setNewlyUnlocked(null)}
-            className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold hover:bg-cookbook-primary/90 transition-colors shadow-md"
-          >
-            Continuar
-          </button>
+            <button 
+              onClick={handleClose}
+              className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text z-10 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            {/* Label */}
+            <div className="animate-badge-text-reveal reveal-delay-1 font-sans text-[10px] uppercase tracking-[0.25em] text-cookbook-primary font-bold mb-6">
+              🏆 Nova Conquista Desbloqueada!
+            </div>
+
+            {/* Glowing icon */}
+            <div className="relative w-28 h-28 mx-auto mb-6">
+              {/* Glow ring */}
+              <div 
+                className="absolute inset-0 rounded-full animate-badge-glow"
+                style={{ background: `radial-gradient(circle, ${newlyUnlocked.glowColor} 0%, transparent 70%)` }}
+              />
+              
+              {/* Icon container */}
+              <div className={clsx(
+                "relative w-28 h-28 rounded-full flex items-center justify-center shadow-lg animate-badge-icon-spin",
+                newlyUnlocked.bg,
+                newlyUnlocked.color
+              )}>
+                {React.cloneElement(newlyUnlocked.icon as React.ReactElement, { size: 52, className: newlyUnlocked.color })}
+              </div>
+            </div>
+            
+            {/* Title with staggered reveal */}
+            <h3 className="animate-badge-text-reveal reveal-delay-2 font-serif italic text-3xl text-cookbook-text mb-3">
+              {newlyUnlocked.title}
+            </h3>
+            
+            {/* Description */}
+            <p className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-8 leading-relaxed px-4">
+              {newlyUnlocked.desc}
+            </p>
+
+            {/* CTA Button */}
+            <button
+              onClick={handleClose}
+              className="animate-badge-text-reveal reveal-delay-4 w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+              style={{ 
+                background: `linear-gradient(135deg, var(--theme-primary), var(--theme-gold))`,
+              }}
+            >
+              ✨ Incrível! Continuar
+            </button>
+          </div>
         </div>
       </div>
     )}

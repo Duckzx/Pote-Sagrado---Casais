@@ -104,3 +104,142 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 input[type="date"] {
   color-scheme: light;
 }
+
+/* ===== Achievement Unlock Animations ===== */
+
+@keyframes badge-unlock-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes badge-unlock-card {
+  0% { opacity: 0; transform: scale(0.6) translateY(40px); }
+  50% { opacity: 1; transform: scale(1.05) translateY(-5px); }
+  70% { transform: scale(0.97) translateY(2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+@keyframes badge-glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.3), 0 0 60px rgba(197, 160, 89, 0.1);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(197, 160, 89, 0.6), 0 0 80px rgba(197, 160, 89, 0.25);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes badge-shimmer-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  50% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+@keyframes badge-shimmer-ring-delayed {
+  0%, 30% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.0); opacity: 0.4; }
+  80% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+@keyframes badge-text-reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes badge-icon-spin {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes badge-stars {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  20% { opacity: 1; transform: scale(1) rotate(30deg); }
+  80% { opacity: 1; transform: scale(1) rotate(150deg); }
+  100% { opacity: 0; transform: scale(0) rotate(180deg); }
+}
+
+@keyframes modal-enter {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float-particle {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-120px) rotate(180deg); opacity: 0; }
+}
+
+/* Utility classes for animations */
+.animate-badge-unlock-backdrop {
+  animation: badge-unlock-backdrop 0.4s ease-out forwards;
+}
+
+.animate-badge-unlock-card {
+  animation: badge-unlock-card 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-badge-glow {
+  animation: badge-glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-badge-shimmer {
+  animation: badge-shimmer-ring 2s ease-out infinite;
+}
+
+.animate-badge-shimmer-delayed {
+  animation: badge-shimmer-ring-delayed 2s ease-out infinite;
+}
+
+.animate-badge-text-reveal {
+  animation: badge-text-reveal 0.5s ease-out forwards;
+}
+
+.animate-badge-icon-spin {
+  animation: badge-icon-spin 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-modal-enter {
+  animation: modal-enter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-modal-backdrop {
+  animation: modal-backdrop-enter 0.3s ease-out forwards;
+}
+
+/* Staggered text reveal utilities */
+.reveal-delay-1 { animation-delay: 0.2s; opacity: 0; }
+.reveal-delay-2 { animation-delay: 0.4s; opacity: 0; }
+.reveal-delay-3 { animation-delay: 0.6s; opacity: 0; }
+.reveal-delay-4 { animation-delay: 0.8s; opacity: 0; }
+
+/* Badge card newly earned shimmer */
+.badge-newly-earned {
+  position: relative;
+  overflow: hidden;
+}
+.badge-newly-earned::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(197, 160, 89, 0.15) 50%,
+    transparent 70%
+  );
+  animation: sweep-shine 2s ease-in-out;
+}
+
+@keyframes sweep-shine {
+  from { transform: translateX(-100%) rotate(0deg); }
+  to { transform: translateX(100%) rotate(0deg); }
+}

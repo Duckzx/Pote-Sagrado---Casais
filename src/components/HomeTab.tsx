@@ -259,8 +259,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
       {/* Edit Confirmation Modal */}
       {depositToEdit && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm">
-          <div className="bg-white border border-cookbook-border rounded w-full max-w-sm p-6 shadow-2xl relative text-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
             <div className="space-y-4 mb-6">
               <div className="relative">
@@ -302,8 +302,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
       {/* Delete Confirmation Modal */}
       {depositToDelete && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm">
-          <div className="bg-white border border-cookbook-border rounded w-full max-w-sm p-6 shadow-2xl relative text-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div className="w-12 h-12 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
               <AlertCircle size={24} className="text-red-500" />
             </div>
