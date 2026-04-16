@@ -56,7 +56,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showOnboarding, setShowOnboarding] = useState(false);
   
-  const [tripConfig, setTripConfig] = useState({ destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [] as any[], targetDate: '', monthlyPrize: '' });
+  const [tripConfig, setTripConfig] = useState({ destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [] as any[], targetDate: '', monthlyPrize: '', battleChallenges: [] as any[] });
   const [deposits, setDeposits] = useState<any[]>([]);
   const [totalSaved, setTotalSaved] = useState(0);
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
@@ -267,7 +267,7 @@ export default function App() {
           )}
           {activeTab === 'bingo' && <BingoTab stats={bingoStats} customChallenges={tripConfig.customChallenges} />}
           {activeTab === 'gastos' && <ExpensesTab addToast={addToast} />}
-          {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
+          {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} battleChallenges={tripConfig.battleChallenges} />}
           {activeTab === 'config' && (
             <ConfigTab 
               currentDestination={tripConfig.destination} 

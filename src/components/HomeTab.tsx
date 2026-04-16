@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle } from 'lucide-react';
-import { deleteDoc, doc } from 'firebase/firestore';
+import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil } from 'lucide-react';
+import { deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { AnimatedNumber } from './AnimatedNumber';
 import Carousel from './Carousel';
@@ -24,6 +24,10 @@ interface HomeTabProps {
 export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, origin, goalAmount, totalSaved, deposits, targetDate, addToast }) => {
   const [showAIModal, setShowAIModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
+  const [depositToEdit, setDepositToEdit] = useState<any>(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   const galleryItems = useMemo(() => [
     { image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || 'travel')},landscape/all?random=1`, text: 'Paisagem' },
@@ -68,6 +72,32 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       addToast('Erro', 'Não foi possível excluir. Você só pode excluir suas próprias economias.', 'info');
     } finally {
       setDepositToDelete(null);
+    }
+  };
+
+  const handleEditClick = (deposit: any) => {
+    setDepositToEdit(deposit);
+    setEditAmount(deposit.amount.toString());
+    setEditDescription(deposit.action || '');
+  };
+
+  const confirmEdit = async () => {
+    if (!depositToEdit || !editAmount || isNaN(Number(editAmount)) || Number(editAmount) <= 0) return;
+    
+    setIsEditing(true);
+    try {
+      await setDoc(doc(db, 'deposits', depositToEdit.id), {
+        amount: Number(editAmount),
+        action: editDescription
+      }, { merge: true });
+      
+      addToast('Atualizado', 'O valor foi atualizado com sucesso.', 'success');
+      setDepositToEdit(null);
+    } catch (error) {
+      console.error("Error updating deposit:", error);
+      addToast('Erro', 'Não foi possível atualizar.', 'info');
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -195,13 +225,22 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
                   ),
                   description: `"${deposit.action}" • ${deposit.createdAt?.toDate ? formatDistanceToNow(deposit.createdAt.toDate(), { addSuffix: true, locale: ptBR }) : 'agora'}`,
                   actionNode: deposit.who === currentUser?.uid ? (
-                    <button 
-                      onClick={() => setDepositToDelete(deposit.id)}
-                      className="text-cookbook-text/30 hover:text-red-500 transition-colors p-2 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
-                      title="Remover registro"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex space-x-1">
+                      <button 
+                        onClick={() => handleEditClick(deposit)}
+                        className="text-cookbook-text/30 hover:text-cookbook-primary transition-colors p-2 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
+                        title="Editar registro"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button 
+                        onClick={() => setDepositToDelete(deposit.id)}
+                        className="text-cookbook-text/30 hover:text-red-500 transition-colors p-2 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
+                        title="Remover registro"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   ) : null
                 };
               })}
@@ -216,6 +255,49 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           origin={origin}
           onClose={() => setShowAIModal(false)} 
         />
+      )}
+
+      {/* Edit Confirmation Modal */}
+      {depositToEdit && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm">
+          <div className="bg-white border border-cookbook-border rounded w-full max-w-sm p-6 shadow-2xl relative text-center">
+            <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
+            <div className="space-y-4 mb-6">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
+                <input
+                  type="number"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full bg-cookbook-bg border border-cookbook-border rounded py-3 pl-12 pr-4 font-serif text-2xl text-cookbook-text focus:outline-none focus:border-red-300 transition-colors"
+                />
+              </div>
+              <input
+                type="text"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Descrição"
+                className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-red-300 transition-colors shadow-sm"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setDepositToEdit(null)}
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded font-bold hover:bg-cookbook-border/50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmEdit}
+                disabled={isEditing}
+                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+              >
+                {isEditing ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

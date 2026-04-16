@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
-import { Award, Flame, Coffee, Trophy, Target } from 'lucide-react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
+import { Award, Flame, Coffee, Trophy, Target, X } from 'lucide-react';
 import { clsx } from 'clsx';
+import confetti from 'canvas-confetti';
 
 interface UserBadgesProps {
   deposits: any[];
@@ -48,6 +49,10 @@ const ALL_BADGES = [
 ];
 
 export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, goalAmount }) => {
+  const [newlyUnlocked, setNewlyUnlocked] = useState<typeof ALL_BADGES[0] | null>(null);
+  const prevEarnedRef = useRef<Set<string>>(new Set());
+  const isInitialLoad = useRef(true);
+
   const earnedBadges: Set<string> = useMemo(() => {
     if (!currentUser) return new Set<string>();
 
@@ -115,8 +120,36 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
     return earned;
   }, [deposits, currentUser, goalAmount]);
 
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      if (deposits.length > 0) { // Wait until we actually loaded some data to drop initial load guard
+        prevEarnedRef.current = new Set(earnedBadges);
+        isInitialLoad.current = false;
+      }
+      return;
+    }
+
+    const newBadgesList = Array.from(earnedBadges).filter(id => !prevEarnedRef.current.has(id));
+    
+    if (newBadgesList.length > 0) {
+      const badgeData = ALL_BADGES.find(b => b.id === newBadgesList[0]);
+      if (badgeData) {
+        setNewlyUnlocked(badgeData);
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.5 },
+          zIndex: 100,
+          colors: ['#8E7F6D', '#2C2A26', '#C5A059', '#F2CC8F']
+        });
+      }
+      prevEarnedRef.current = new Set(earnedBadges);
+    }
+  }, [earnedBadges, deposits]);
+
   return (
-    <div className="space-y-4">
+    <>
+      <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
           Medalhas
@@ -161,5 +194,45 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
         })}
       </div>
     </div>
+
+    {newlyUnlocked && (
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-8 shadow-2xl relative text-center">
+          <button 
+            onClick={() => setNewlyUnlocked(null)}
+            className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text"
+          >
+            <X size={20} />
+          </button>
+          
+          <div className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-primary font-bold mb-4">
+            Nova Conquista Desbloqueada!
+          </div>
+
+          <div className={clsx(
+            "w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner",
+            newlyUnlocked.bg,
+            newlyUnlocked.color
+          )}>
+            {React.cloneElement(newlyUnlocked.icon as React.ReactElement, { size: 48, className: newlyUnlocked.color })}
+          </div>
+          
+          <h3 className="font-serif italic text-3xl text-cookbook-text mb-2">
+            {newlyUnlocked.title}
+          </h3>
+          <p className="font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-8 leading-relaxed">
+            {newlyUnlocked.desc}
+          </p>
+
+          <button
+            onClick={() => setNewlyUnlocked(null)}
+            className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold hover:bg-cookbook-primary/90 transition-colors shadow-md"
+          >
+            Continuar
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
