@@ -48,6 +48,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   const [showQuickDeposit, setShowQuickDeposit] = useState(false);
   const [quickAmount, setQuickAmount] = useState('');
   const [quickDesc, setQuickDesc] = useState('');
+  const [quickType, setQuickType] = useState<'income' | 'expense'>('income');
   const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
 
   // Daily motivational quote (deterministic based on day of year)
@@ -65,18 +66,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       if (!user) throw new Error('Not authenticated');
       await addDoc(collection(db, 'deposits'), {
         amount: parsedAmount,
-        action: quickDesc || 'Depósito rápido',
+        type: quickType,
+        action: quickDesc || (quickType === 'income' ? 'Depósito rápido' : 'Gasto rápido'),
         who: user.uid,
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
         createdAt: serverTimestamp()
       });
       // Haptic feedback
       if (navigator.vibrate) navigator.vibrate(50);
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
-      addToast('Guardado!', `+R$ ${parsedAmount.toFixed(2)} no pote!`, 'success');
+      if (quickType === 'income') {
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
+        addToast('Guardado!', `+R$ ${parsedAmount.toFixed(2)} no pote!`, 'success');
+      } else {
+        addToast('Gasto Registrado', `-R$ ${parsedAmount.toFixed(2)}`, 'info');
+      }
       setShowQuickDeposit(false);
       setQuickAmount('');
       setQuickDesc('');
+      setQuickType('income');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'deposits');
     } finally {
@@ -416,6 +423,25 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             
             <h3 className="font-serif text-lg text-cookbook-text mb-4 text-center">Depósito Rápido</h3>
             
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setQuickType('income')}
+                className={`flex-1 py-2 rounded-lg font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${
+                  quickType === 'income' ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-cookbook-bg border-cookbook-border text-cookbook-text/50'
+                }`}
+              >
+                ↑ Entrada
+              </button>
+              <button
+                onClick={() => setQuickType('expense')}
+                className={`flex-1 py-2 rounded-lg font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${
+                  quickType === 'expense' ? 'bg-red-50 border-red-300 text-red-700' : 'bg-cookbook-bg border-cookbook-border text-cookbook-text/50'
+                }`}
+              >
+                ↓ Saída
+              </button>
+            </div>
+            
             <div className="space-y-3 mb-5">
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
@@ -440,9 +466,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             <button
               onClick={handleQuickDeposit}
               disabled={!quickAmount || isQuickSubmitting || isNaN(Number(quickAmount.replace(',', '.'))) || Number(quickAmount.replace(',', '.')) <= 0}
-              className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98]"
+              className={`w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98] ${
+                quickType === 'expense' ? 'bg-red-500 hover:bg-red-600' : 'bg-cookbook-primary hover:bg-cookbook-primary-hover'
+              }`}
             >
-              {isQuickSubmitting ? 'Guardando...' : 'Guardar no Pote'}
+              {isQuickSubmitting ? 'Guardando...' : (quickType === 'income' ? 'Guardar no Pote' : 'Registrar Gasto')}
             </button>
           </div>
         </div>
