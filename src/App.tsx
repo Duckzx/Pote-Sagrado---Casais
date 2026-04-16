@@ -176,9 +176,13 @@ export default function App() {
       const msg = `Mais ${Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(diff)} para a viagem!`;
       addToast('Novo Depósito!', msg, 'success');
       
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Pote Sagrado: Novo Depósito!', { body: msg, icon: '/vite.svg' });
-      }
+   try {
+     if ('Notification' in window && Notification.permission === 'granted') {
+       new Notification('Pote Sagrado: Novo Depósito!', { body: msg, icon: '/vite.svg' });
+     }
+   } catch (e) {
+     console.log('Notificação bloqueada pelo celular');
+   }
 
       if (goal > 0) {
         const prevPercentage = (prevTotal / goal) * 100;
@@ -198,9 +202,12 @@ export default function App() {
               addToast(mTitle, mBody, 'milestone');
             }
 
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(mTitle, { body: mBody, icon: '/vite.svg' });
-            }
+            try {
+     if ('Notification' in window && Notification.permission === 'granted') {
+       new Notification(mTitle, { body: mBody, icon: '/vite.svg' });
+     }
+   } catch (e) {}
+          }
             break; // Only trigger the highest crossed milestone
           }
         }
