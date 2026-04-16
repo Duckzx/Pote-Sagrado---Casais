@@ -6,6 +6,7 @@ import { ColorBends } from './components/ColorBends';
 import { BottomNav } from './components/BottomNav';
 import { HomeTab } from './components/HomeTab';
 import { MissoesTab } from './components/MissoesTab';
+import { ExtratoTab } from './components/ExtratoTab';
 import { DisputaTab } from './components/DisputaTab';
 import { ConfigTab } from './components/ConfigTab';
 import { ToastContainer, ToastMessage } from './components/Toast';
@@ -264,7 +265,7 @@ export default function App() {
               addToast={addToast}
             />
           )}
-          {activeTab === 'gastos' && <ExpensesTab addToast={addToast} />}
+          {activeTab === 'extrato' && <ExtratoTab deposits={deposits} addToast={addToast} />}
           {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
           {activeTab === 'config' && (
             <ConfigTab 

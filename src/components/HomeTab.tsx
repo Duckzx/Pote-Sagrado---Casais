@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil } from 'lucide-react';
-import { deleteDoc, doc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil, Plus, X } from 'lucide-react';
+import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import confetti from 'canvas-confetti';
+import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { AnimatedNumber } from './AnimatedNumber';
 import Carousel from './Carousel';
 import { formatDistanceToNow, differenceInMonths, differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
@@ -21,6 +23,19 @@ interface HomeTabProps {
   addToast: (title: string, message: string, type: 'info' | 'success' | 'milestone') => void;
 }
 
+const MOTIVATIONAL_QUOTES = [
+  { text: 'Quem economiza hoje, viaja amanhã.', emoji: '✈️' },
+  { text: 'Cada centavo é um passo mais perto do destino.', emoji: '👣' },
+  { text: 'Pequenas escolhas, grandes viagens.', emoji: '🌍' },
+  { text: 'O paraíso está a um depósito de distância.', emoji: '🏝️' },
+  { text: 'Juntos, até o impossível fica perto.', emoji: '💑' },
+  { text: 'O pote de hoje é a passagem de amanhã.', emoji: '🎫' },
+  { text: 'Disciplina é o combustível das aventuras.', emoji: '⛽' },
+  { text: 'Economizar a dois é dobrar a felicidade.', emoji: '💛' },
+  { text: 'Sua próxima memória inesquecível começa agora.', emoji: '📸' },
+  { text: 'Não é sobre gastar menos, é sobre viver mais.', emoji: '🌅' },
+];
+
 export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, origin, goalAmount, totalSaved, deposits, targetDate, addToast }) => {
   const [showAIModal, setShowAIModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
@@ -28,6 +43,45 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   const [editAmount, setEditAmount] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  
+  // FAB quick deposit
+  const [showQuickDeposit, setShowQuickDeposit] = useState(false);
+  const [quickAmount, setQuickAmount] = useState('');
+  const [quickDesc, setQuickDesc] = useState('');
+  const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
+
+  // Daily motivational quote (deterministic based on day of year)
+  const dailyQuote = useMemo(() => {
+    const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    return MOTIVATIONAL_QUOTES[day % MOTIVATIONAL_QUOTES.length];
+  }, []);
+
+  const handleQuickDeposit = async () => {
+    if (!quickAmount || isNaN(Number(quickAmount)) || Number(quickAmount) <= 0) return;
+    setIsQuickSubmitting(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('Not authenticated');
+      await addDoc(collection(db, 'deposits'), {
+        amount: Number(quickAmount),
+        action: quickDesc || 'Depósito rápido',
+        who: user.uid,
+        whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
+        createdAt: serverTimestamp()
+      });
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate(50);
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
+      addToast('Guardado!', `+R$ ${Number(quickAmount).toFixed(2)} no pote!`, 'success');
+      setShowQuickDeposit(false);
+      setQuickAmount('');
+      setQuickDesc('');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'deposits');
+    } finally {
+      setIsQuickSubmitting(false);
+    }
+  };
 
   const galleryItems = useMemo(() => [
     { image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || 'travel')},landscape/all?random=1`, text: 'Paisagem' },
@@ -102,7 +156,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   };
 
   return (
-    <div className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto">
+    <div className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto relative">
       {/* Header */}
       <div className="text-center space-y-1">
         <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">Pote Sagrado</h2>
@@ -112,6 +166,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         <p className="font-serif italic text-cookbook-text/70 text-sm">
           de {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(goalAmount)}
         </p>
+      </div>
+
+      {/* Daily Motivational Quote */}
+      <div className="text-center bg-cookbook-mural/50 border border-cookbook-border/50 rounded-xl px-5 py-3 -mt-4">
+        <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>
+        <span className="font-serif italic text-xs text-cookbook-text/60">{dailyQuote.text}</span>
       </div>
 
       {/* Progress Bar */}
@@ -325,6 +385,64 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
                 Sim, Remover
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== FAB Quick Deposit ========== */}
+      <button
+        onClick={() => setShowQuickDeposit(true)}
+        className={`fixed bottom-24 right-5 z-40 w-14 h-14 rounded-full bg-cookbook-primary text-white shadow-lg flex items-center justify-center transition-all hover:shadow-xl hover:scale-105 active:scale-95 ${
+          showQuickDeposit ? 'rotate-45 bg-cookbook-text' : ''
+        }`}
+        aria-label="Depósito rápido"
+      >
+        <Plus size={24} strokeWidth={2.5} />
+      </button>
+
+      {/* Quick Deposit Modal */}
+      {showQuickDeposit && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center animate-modal-backdrop"
+          style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setShowQuickDeposit(false)}
+        >
+          <div 
+            className="bg-white border-t border-cookbook-border rounded-t-2xl w-full max-w-md p-6 shadow-2xl animate-modal-enter"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-cookbook-border rounded-full mx-auto mb-5" />
+            
+            <h3 className="font-serif text-lg text-cookbook-text mb-4 text-center">Depósito Rápido</h3>
+            
+            <div className="space-y-3 mb-5">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
+                <input
+                  type="number"
+                  value={quickAmount}
+                  onChange={(e) => setQuickAmount(e.target.value)}
+                  placeholder="0,00"
+                  className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl py-4 pl-12 pr-4 font-serif text-2xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  autoFocus
+                />
+              </div>
+              <input
+                type="text"
+                value={quickDesc}
+                onChange={(e) => setQuickDesc(e.target.value)}
+                placeholder="Descrição (opcional)"
+                className="w-full bg-white border border-cookbook-border rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+              />
+            </div>
+            
+            <button
+              onClick={handleQuickDeposit}
+              disabled={!quickAmount || isQuickSubmitting || Number(quickAmount) <= 0}
+              className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98]"
+            >
+              {isQuickSubmitting ? 'Guardando...' : 'Guardar no Pote'}
+            </button>
           </div>
         </div>
       )}

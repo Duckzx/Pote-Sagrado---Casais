@@ -223,6 +223,9 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         colors: ['#8E7F6D', '#2C2A26', '#E8E4D9', '#C5A059']
       });
 
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+
       addToast(
         selectedMission.category === 'desafio' ? '⚔️ Desafio Concluído!' : '💚 Economia Registrada!',
         `+R$ ${finalAmount.toFixed(2)} para o pote!`,
