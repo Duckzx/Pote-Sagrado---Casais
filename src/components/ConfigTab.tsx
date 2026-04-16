@@ -152,7 +152,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
         }, { merge: true });
       }
 
-      alert('Configurações salvas com sucesso!');
+      addToast('Salvo!', 'Configurações salvas com sucesso!', 'success');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
     } finally {

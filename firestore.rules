@@ -18,6 +18,11 @@ service cloud.firestore {
     //   - goalAmount: number (required) - Financial goal
     //   - lat: number (optional) - Latitude
     //   - lng: number (optional) - Longitude
+    //   - customChallenges: list (optional) - Bingo custom challenges
+    //   - battleChallenges: list (optional) - Battle/Disputa challenges
+    //   - targetDate: string (optional) - Target trip date
+    //   - monthlyPrize: string (optional) - Monthly battle prize
+    //   - origin: string (optional) - Departure city
     //   - updatedAt: timestamp (optional) - Last update
     //
     // Collection: deposits
@@ -27,6 +32,7 @@ service cloud.firestore {
     //   - action: string (optional) - Action description
     //   - who: string (required) - User UID
     //   - whoName: string (optional) - User display name
+    //   - type: string (optional) - 'income' or 'expense'
     //   - createdAt: timestamp (required) - Entry creation time
     //
     // ===============================================================
@@ -58,6 +64,7 @@ service cloud.firestore {
              (!('origin' in data) || (data.origin is string && data.origin.size() < 100)) &&
              (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
              (!('customChallenges' in data) || data.customChallenges is list) &&
+             (!('battleChallenges' in data) || data.battleChallenges is list) &&
              (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150));
     }
 
@@ -67,6 +74,11 @@ service cloud.firestore {
              data.who == request.auth.uid &&
              data.createdAt == request.time &&
              (!('type' in data) || data.type in ['income', 'expense']);
+    }
+
+    function isValidDepositUpdate(data) {
+      return data.amount is number && data.amount > 0 &&
+             (!('action' in data) || (data.action is string && data.action.size() < 300));
     }
 
     // ===============================================================
@@ -87,7 +99,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
       allow delete: if isAuthenticated() && resource.data.who == request.auth.uid;
-      allow update: if false; // Deposits are immutable for history integrity
+      // Allow owner to update amount and action only (for corrections)
+      allow update: if isAuthenticated() 
+                    && resource.data.who == request.auth.uid
+                    && isValidDepositUpdate(request.resource.data)
+                    // Prevent changing ownership or timestamp
+                    && request.resource.data.who == resource.data.who
+                    && request.resource.data.createdAt == resource.data.createdAt;
     }
   }
 }

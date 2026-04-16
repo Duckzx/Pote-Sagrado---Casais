@@ -82,8 +82,8 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({ addToast }) => {
 
       {/* Modal */}
       {selectedCategory && (
-        <div className="fixed inset-0 z-50 flex items-start pt-20 justify-center p-4 bg-cookbook-bg/80 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white border border-cookbook-border rounded w-full max-w-sm p-6 shadow-2xl relative mb-20">
+        <div className="fixed inset-0 z-50 flex items-start pt-20 justify-center p-4 overflow-y-auto animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative mb-20 animate-modal-enter">
             <button 
               onClick={() => setSelectedCategory(null)}
               className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text"
