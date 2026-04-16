@@ -1,19 +1,10 @@
 {
-  json
-
-"projectId": "potesagrado-34c79", "appId": "1:64529832333: web: 6ffdcbcfced2
-
-dfa77a05c4",
-
-"apiKey":
-
-"AIzaSyAJVzr1SRZu9kTZRsJlib1M-0qMPIzSX68", "authDomain":
-
-"potesagrado-34c79.firebaseapp.com",
-
-"firestoreDatabaseId": "(default)",
-
-"storageBucket":
-
-"potesagrado-34c79.firebasestorage.app", "messagingSenderId": "64529832333", "measurementId": "G-9423E7N82P"
+  "projectId": "potesagrado-34c79",
+  "appId": "1:64529832333:web:6ffdcbcfced2dfa77a05c4",
+  "apiKey": "AIzaSyAJVzr1SRZu9kTZRsJlib1M-0qMPIzSX68",
+  "authDomain": "potesagrado-34c79.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "potesagrado-34c79.firebasestorage.app",
+  "messagingSenderId": "64529832333",
+  "measurementId": "G-9423E7N82P"
 }
