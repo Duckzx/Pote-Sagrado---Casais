@@ -8,6 +8,7 @@ import { formatDistanceToNow, differenceInMonths, differenceInWeeks, differenceI
 import { ptBR } from 'date-fns/locale';
 import { AIAssistantModal } from './AIAssistantModal';
 import CircularGallery from './CircularGallery';
+import { UserBadges } from './UserBadges';
 
 interface HomeTabProps {
   currentUser: any;
@@ -103,7 +104,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </div>
       </div>
 
-      {/* Passport Card */}
+      {/* AI Assistant Trigger */}
       <div className="space-y-3">
         <a 
           href={flightsUrl}
@@ -125,7 +126,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           <p className="font-sans text-xs text-cookbook-text/50 uppercase tracking-wider relative z-10">Monitorar Passagens</p>
         </a>
 
-        {/* AI Assistant Trigger */}
         <button 
           onClick={() => setShowAIModal(true)}
           className="w-full bg-cookbook-mural border border-cookbook-gold/30 rounded p-4 flex items-center justify-between shadow-sm transition-transform active:scale-[0.98]"
@@ -142,6 +142,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           <ArrowRight size={16} className="text-cookbook-text/30" />
         </button>
       </div>
+
+      {/* Badges / Conquistas */}
+      <UserBadges 
+        deposits={deposits} 
+        currentUser={currentUser} 
+        goalAmount={goalAmount} 
+      />
 
       {/* Inspirações (Circular Gallery) */}
       <div className="space-y-4">

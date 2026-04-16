@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 
 interface DisputaTabProps {
   deposits: any[];
+  prize?: string;
 }
 
 const CHALLENGES = [
@@ -16,7 +17,7 @@ const CHALLENGES = [
   { id: 'c4', title: 'Desafio do Café', desc: 'Fazer café em casa a semana toda.', reward: 35, icon: '☕' },
 ];
 
-export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits }) => {
+export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const stats = useMemo(() => {
@@ -113,7 +114,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits }) => {
         </div>
         
         <div className="mt-4 font-serif italic text-[13px] text-cookbook-primary flex items-center gap-2">
-          <span className="text-cookbook-gold">◈</span> Recompensa: Vencedor escolhe o próximo Jantar em Casa.
+          <span className="text-cookbook-gold">◈</span> Recompensa: {prize || 'Quem juntar menos paga um jantar!'}
         </div>
       </div>
 
@@ -127,8 +128,11 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits }) => {
           </div>
           
           <h3 className="font-serif italic text-lg text-cookbook-text mb-2">Liderança Atual</h3>
-          <p className="font-sans text-xs uppercase tracking-widest text-cookbook-primary font-bold">
+          <p className="font-sans text-xs uppercase tracking-widest text-cookbook-primary font-bold mb-1">
             {users[0].name} está na frente!
+          </p>
+          <p className="font-sans text-[10px] text-cookbook-text/60">
+            Se o mês acabasse hoje, {users[1].name} pagaria a recompensa.
           </p>
         </div>
       )}

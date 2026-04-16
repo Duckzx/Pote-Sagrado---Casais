@@ -12,6 +12,7 @@ interface ConfigTabProps {
   currentTheme: string;
   customChallenges: any[];
   currentTargetDate: string;
+  currentPrize?: string;
   addToast: (title: string, message: string, type: 'info' | 'success' | 'milestone') => void;
 }
 
@@ -22,13 +23,14 @@ const THEMES = [
   { id: 'tropical', label: 'Tropical Breeze', colors: ['#F2FAF5', '#2A9D8F'] },
 ];
 
-export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, addToast }) => {
+export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, addToast }) => {
   const [destination, setDestination] = useState(currentDestination || '');
   const [origin, setOrigin] = useState(currentOrigin || '');
   const [goalAmount, setGoalAmount] = useState((currentGoalAmount || 0).toString());
   const [theme, setTheme] = useState(currentTheme || 'cookbook');
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
   const [targetDate, setTargetDate] = useState(currentTargetDate || '');
+  const [prize, setPrize] = useState(currentPrize || '');
   
   const [newChallengeLabel, setNewChallengeLabel] = useState('');
   const [newChallengeIcon, setNewChallengeIcon] = useState('⭐');
@@ -43,7 +45,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     setTheme(currentTheme || 'cookbook');
     setChallenges(customChallenges || []);
     setTargetDate(currentTargetDate || '');
-  }, [currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate]);
+    setPrize(currentPrize || '');
+  }, [currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize]);
 
   const handleAddChallenge = () => {
     if (!newChallengeLabel.trim()) return;
@@ -138,6 +141,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
         lng,
         customChallenges: challenges,
         targetDate,
+        monthlyPrize: prize,
         updatedAt: serverTimestamp()
       }, { merge: true });
 
@@ -231,6 +235,19 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
+            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
+            Recompensa da Batalha (Opcional)
+          </label>
+          <input
+            type="text"
+            value={prize}
+            onChange={(e) => setPrize(e.target.value)}
+            placeholder="Ex: Perdedor paga o lanche"
             className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>

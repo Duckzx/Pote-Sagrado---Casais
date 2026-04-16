@@ -57,7 +57,8 @@ service cloud.firestore {
              (!('lng' in data) || data.lng is number) &&
              (!('origin' in data) || (data.origin is string && data.origin.size() < 100)) &&
              (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
-             (!('customChallenges' in data) || data.customChallenges is list);
+             (!('customChallenges' in data) || data.customChallenges is list) &&
+             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150));
     }
 
     function isValidDeposit(data) {
