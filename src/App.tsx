@@ -57,11 +57,17 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showOnboarding, setShowOnboarding] = useState(false);
   
-  const [tripConfig, setTripConfig] = useState({ destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [] as any[], targetDate: '', monthlyPrize: '', battleChallenges: [] as any[] });
+  const [tripConfig, setTripConfig] = useState(() => {
+    const saved = localStorage.getItem('pote_tripConfig');
+    return saved ? JSON.parse(saved) : { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [] as any[], targetDate: '', monthlyPrize: '', battleChallenges: [] as any[] };
+  });
   const [deposits, setDeposits] = useState<any[]>([]);
-  const [totalSaved, setTotalSaved] = useState(0);
+  const [totalSaved, setTotalSaved] = useState(() => {
+    const saved = localStorage.getItem('pote_totalSaved');
+    return saved ? Number(saved) : 0;
+  });
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
-  const [theme, setTheme] = useState('cookbook');
+  const [theme, setTheme] = useState(() => localStorage.getItem('pote_theme') || 'cookbook');
   
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
@@ -108,6 +114,7 @@ export default function App() {
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
       if (docSnap.exists() && docSnap.data().theme) {
         setTheme(docSnap.data().theme);
+        localStorage.setItem('pote_theme', docSnap.data().theme);
       }
     }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
 
@@ -115,7 +122,11 @@ export default function App() {
     const unsubConfig = onSnapshot(doc(db, 'trip_config', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as any;
-        setTripConfig(prev => ({ ...prev, ...data }));
+        setTripConfig(prev => {
+          const newConfig = { ...prev, ...data };
+          localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
+          return newConfig;
+        });
       }
     }, (error) => handleFirestoreError(error, OperationType.GET, 'trip_config/main'));
 
@@ -143,6 +154,7 @@ export default function App() {
 
       setDeposits(deps);
       setTotalSaved(total);
+      localStorage.setItem('pote_totalSaved', total.toString());
       setBingoStats(stats);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
 
