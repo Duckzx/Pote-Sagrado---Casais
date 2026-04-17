@@ -4,6 +4,7 @@ import { db, auth, logout } from '../firebase';
 import { LogOut, Save, Palette, MapPin, Share2, Sparkles, Plus, Trash2 } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { AIAkinatorModal } from './AIAkinatorModal';
+import { InstallPrompt } from './InstallPrompt';
 
 interface ConfigTabProps {
   currentDestination: string;
@@ -169,6 +170,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
           Configure a Viagem
         </p>
       </div>
+
+      <InstallPrompt />
 
       <div className="space-y-6">
         <div className="space-y-2">

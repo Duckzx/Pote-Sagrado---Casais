@@ -4,6 +4,7 @@ import { addDoc, collection, serverTimestamp, doc, setDoc } from 'firebase/fires
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import confetti from 'canvas-confetti';
+import { playCoinSound, playSuccessSound, vibrate } from '../lib/audio';
 
 // ========================================
 // Types
@@ -228,8 +229,13 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         colors: ['#8E7F6D', '#2C2A26', '#E8E4D9', '#C5A059']
       });
 
-      // Haptic feedback
-      if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+      // Audio and Haptic feedback
+      if (selectedMission.category === 'desafio') {
+        playSuccessSound();
+      } else {
+        playCoinSound();
+      }
+      vibrate([50, 30, 50]);
 
       addToast(
         selectedMission.category === 'desafio' ? '⚔️ Desafio Concluído!' : '💚 Economia Registrada!',

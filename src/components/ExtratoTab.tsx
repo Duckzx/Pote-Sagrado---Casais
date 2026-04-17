@@ -3,6 +3,7 @@ import { ArrowUpCircle, ArrowDownCircle, Filter, Pencil, Trash2, X, Calendar, Us
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
+import { playSuccessSound, vibrate } from '../lib/audio';
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -109,6 +110,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
         amount: parsedAmount,
         action: editAction
       });
+      playSuccessSound();
+      vibrate([30, 30]);
       addToast('Atualizado', 'Transação editada com sucesso.', 'success');
       setEditing(null);
     } catch (error) {

@@ -48,6 +48,11 @@ interface AppContextValue {
   // Onboarding
   showOnboarding: boolean;
   handleCompleteOnboarding: () => void;
+
+  // PWA Install
+  canInstall: boolean;
+  installPrompt: any | null;
+  clearInstallPrompt: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -230,6 +235,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // ---- PWA Install ----
+  const [installPrompt, setInstallPrompt] = useState<any | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setCanInstall(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const clearInstallPrompt = useCallback(() => {
+    setInstallPrompt(null);
+    setCanInstall(false);
+  }, []);
+
   const value: AppContextValue = {
     user,
     isAuthReady,
@@ -246,6 +274,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeToast,
     showOnboarding,
     handleCompleteOnboarding,
+    canInstall,
+    installPrompt,
+    clearInstallPrompt,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

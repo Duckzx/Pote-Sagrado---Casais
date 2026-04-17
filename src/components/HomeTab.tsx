@@ -14,6 +14,7 @@ import CircularGallery from './CircularGallery';
 import { UserBadges } from './UserBadges';
 import { CountdownWidget } from './CountdownWidget';
 import { SavingsChart } from './SavingsChart';
+import { playCoinSound, vibrate } from '../lib/audio';
 
 interface HomeTabProps {
   currentUser: any;
@@ -75,9 +76,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
         createdAt: serverTimestamp()
       });
-      // Haptic feedback
-      if (navigator.vibrate) navigator.vibrate(50);
+      // Haptic and audio feedback
+      vibrate([30, 50, 30]);
       if (quickType === 'income') {
+        playCoinSound();
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
         addToast('Guardado!', `+R$ ${parsedAmount.toFixed(2)} no pote!`, 'success');
       } else {
