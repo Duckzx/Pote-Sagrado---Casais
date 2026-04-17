@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#FDFBF7"/>
+  <circle cx="256" cy="256" r="240" fill="#F4F1EA" stroke="#E8E4D9" stroke-width="2"/>
+  
+  <!-- Pot body -->
+  <path d="M160 240 C160 240 145 360 155 380 C165 400 200 420 256 420 C312 420 347 400 357 380 C367 360 352 240 352 240" 
+        fill="#C5A059" stroke="#8E7F6D" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Pot rim -->
+  <ellipse cx="256" cy="240" rx="100" ry="20" fill="#D4AF6A" stroke="#8E7F6D" stroke-width="5"/>
+  
+  <!-- Pot lid -->
+  <path d="M170 240 C170 220 200 200 256 200 C312 200 342 220 342 240" 
+        fill="none" stroke="#8E7F6D" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Lid handle -->
+  <circle cx="256" cy="195" r="12" fill="#C5A059" stroke="#8E7F6D" stroke-width="4"/>
+  
+  <!-- Heart -->
+  <path d="M236 300 C236 285 220 275 220 290 C220 305 236 318 236 318 C236 318 252 305 252 290 C252 275 236 285 236 300Z" 
+        fill="#E07A5F" opacity="0.8"/>
+  <path d="M268 295 C268 280 252 270 252 285 C252 300 268 313 268 313 C268 313 284 300 284 285 C284 270 268 280 268 295Z" 
+        fill="#E07A5F" opacity="0.6"/>
+  
+  <!-- Sparkles -->
+  <circle cx="190" cy="170" r="4" fill="#C5A059" opacity="0.6"/>
+  <circle cx="320" cy="180" r="3" fill="#C5A059" opacity="0.5"/>
+  <circle cx="210" cy="150" r="2.5" fill="#E9C46A" opacity="0.7"/>
+  <circle cx="300" cy="155" r="3.5" fill="#E9C46A" opacity="0.5"/>
+  
+  <!-- Text arc "POTE SAGRADO" -->
+  <text x="256" y="460" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#8E7F6D" letter-spacing="6">
+    POTE SAGRADO
+  </text>
+</svg>

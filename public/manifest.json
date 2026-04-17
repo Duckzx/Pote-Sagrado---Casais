@@ -1,20 +1,17 @@
 {
   "name": "Pote Sagrado",
   "short_name": "Pote Sagrado",
+  "description": "O diário financeiro do casal — economize juntos para a próxima viagem.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FDFBF7",
   "theme_color": "#8E7F6D",
   "icons": [
     {
-      "src": "https://api.iconify.design/lucide:piggy-bank.svg?color=%238E7F6D",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "https://api.iconify.design/lucide:piggy-bank.svg?color=%238E7F6D",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
