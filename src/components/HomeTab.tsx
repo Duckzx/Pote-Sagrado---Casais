@@ -12,6 +12,8 @@ import { ptBR } from 'date-fns/locale';
 import { AIAssistantModal } from './AIAssistantModal';
 import CircularGallery from './CircularGallery';
 import { UserBadges } from './UserBadges';
+import { CountdownWidget } from './CountdownWidget';
+import { SavingsChart } from './SavingsChart';
 
 interface HomeTabProps {
   currentUser: any;
@@ -203,6 +205,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </div>
       </div>
 
+      {/* Countdown Widget */}
+      {targetDate && (
+        <CountdownWidget targetDate={targetDate} />
+      )}
+
       {/* AI Assistant Trigger */}
       <div className="space-y-3">
         <a 
@@ -248,6 +255,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         currentUser={currentUser} 
         goalAmount={goalAmount} 
       />
+
+      {/* Savings Evolution Chart */}
+      <SavingsChart deposits={deposits} goalAmount={goalAmount} />
 
       {/* Inspirações (Circular Gallery) */}
       <div className="space-y-4">

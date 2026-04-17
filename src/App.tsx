@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { auth, db, loginWithGoogle } from './firebase';
@@ -55,7 +56,16 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [tabDirection, setTabDirection] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const TAB_ORDER = ['home', 'missoes', 'extrato', 'disputa', 'config'];
+  const handleTabChange = useCallback((newTab: string) => {
+    const oldIndex = TAB_ORDER.indexOf(activeTab);
+    const newIndex = TAB_ORDER.indexOf(newTab);
+    setTabDirection(newIndex > oldIndex ? 1 : -1);
+    setActiveTab(newTab);
+  }, [activeTab]);
   
   const [tripConfig, setTripConfig] = useState(() => {
     const saved = localStorage.getItem('pote_tripConfig');
@@ -254,46 +264,56 @@ export default function App() {
         <ToastContainer toasts={toasts} removeToast={removeToast} />
         <ColorBends color="var(--theme-border)" speed={0.1} intensity={0.5} className="opacity-30" />
         
-        <div className="relative z-10">
-          {activeTab === 'home' && (
-            <HomeTab 
-              currentUser={user}
-              destination={tripConfig.destination} 
-              origin={tripConfig.origin}
-              goalAmount={tripConfig.goalAmount} 
-              totalSaved={totalSaved}
-              deposits={deposits}
-              targetDate={tripConfig.targetDate}
-              addToast={addToast}
-            />
-          )}
-          {activeTab === 'missoes' && (
-            <MissoesTab 
-              stats={bingoStats} 
-              customChallenges={tripConfig.customChallenges}
-              battleChallenges={tripConfig.battleChallenges}
-              deposits={deposits}
-              currentUser={user}
-              addToast={addToast}
-            />
-          )}
-          {activeTab === 'extrato' && <ExtratoTab deposits={deposits} addToast={addToast} />}
-          {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
-          {activeTab === 'config' && (
-            <ConfigTab 
-              currentDestination={tripConfig.destination} 
-              currentOrigin={tripConfig.origin}
-              currentGoalAmount={tripConfig.goalAmount} 
-              currentTheme={theme}
-              customChallenges={tripConfig.customChallenges}
-              currentTargetDate={tripConfig.targetDate}
-              currentPrize={tripConfig.monthlyPrize}
-              addToast={addToast}
-            />
-          )}
+        <div className="relative z-10 overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: tabDirection * 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: tabDirection * -40 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              {activeTab === 'home' && (
+                <HomeTab 
+                  currentUser={user}
+                  destination={tripConfig.destination} 
+                  origin={tripConfig.origin}
+                  goalAmount={tripConfig.goalAmount} 
+                  totalSaved={totalSaved}
+                  deposits={deposits}
+                  targetDate={tripConfig.targetDate}
+                  addToast={addToast}
+                />
+              )}
+              {activeTab === 'missoes' && (
+                <MissoesTab 
+                  stats={bingoStats} 
+                  customChallenges={tripConfig.customChallenges}
+                  battleChallenges={tripConfig.battleChallenges}
+                  deposits={deposits}
+                  currentUser={user}
+                  addToast={addToast}
+                />
+              )}
+              {activeTab === 'extrato' && <ExtratoTab deposits={deposits} addToast={addToast} />}
+              {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
+              {activeTab === 'config' && (
+                <ConfigTab 
+                  currentDestination={tripConfig.destination} 
+                  currentOrigin={tripConfig.origin}
+                  currentGoalAmount={tripConfig.goalAmount} 
+                  currentTheme={theme}
+                  customChallenges={tripConfig.customChallenges}
+                  currentTargetDate={tripConfig.targetDate}
+                  currentPrize={tripConfig.monthlyPrize}
+                  addToast={addToast}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
         
         {showOnboarding && <OnboardingModal onComplete={handleCompleteOnboarding} />}
       </div>

@@ -21,6 +21,7 @@ const THEMES = [
   { id: 'mediterranean', label: 'Mediterranean Sunset', colors: ['#FFF5EE', '#E07A5F'] },
   { id: 'nordic', label: 'Nordic Twilight', colors: ['#F0F4F8', '#5C7C8A'] },
   { id: 'tropical', label: 'Tropical Breeze', colors: ['#F2FAF5', '#2A9D8F'] },
+  { id: 'midnight', label: '🌙 Midnight', colors: ['#1A1A2E', '#C5A059'] },
 ];
 
 export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, addToast }) => {

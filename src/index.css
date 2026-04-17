@@ -46,6 +46,47 @@
   --theme-mural: #FAFDFA;
 }
 
+[data-theme="midnight"] {
+  --theme-bg: #1A1A2E;
+  --theme-text: #E8E4D9;
+  --theme-border: #2D2D44;
+  --theme-primary: #C5A059;
+  --theme-primary-hover: #D4AF6A;
+  --theme-gold: #E9C46A;
+  --theme-battle: #232340;
+  --theme-mural: #252540;
+}
+
+/* Dark theme overrides for specific elements */
+[data-theme="midnight"] input,
+[data-theme="midnight"] select,
+[data-theme="midnight"] textarea {
+  background-color: #232340;
+  border-color: #3D3D5C;
+  color: #E8E4D9;
+}
+
+[data-theme="midnight"] input::placeholder,
+[data-theme="midnight"] textarea::placeholder {
+  color: #7A7A9C;
+}
+
+[data-theme="midnight"] input[type="date"] {
+  color-scheme: dark;
+}
+
+[data-theme="midnight"] .bg-white {
+  background-color: #232340;
+}
+
+[data-theme="midnight"] .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+[data-theme="midnight"] .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
 @theme {
   --color-cookbook-bg: var(--theme-bg);
   --color-cookbook-text: var(--theme-text);
