@@ -388,7 +388,7 @@ export const UserBadges: React.FC<UserBadgesProps> = ({ deposits, currentUser, g
                 newlyUnlocked.bg,
                 newlyUnlocked.color
               )}>
-                {React.cloneElement(newlyUnlocked.icon as React.ReactElement, { size: 52, className: newlyUnlocked.color })}
+                {React.cloneElement(newlyUnlocked.icon as React.ReactElement<any>, { size: 52, className: newlyUnlocked.color })}
               </div>
             </div>
             

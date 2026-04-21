@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil, Plus, X } from 'lucide-react';
+import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil, Plus, X, Heart } from 'lucide-react';
 import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import confetti from 'canvas-confetti';
@@ -14,6 +14,7 @@ import CircularGallery from './CircularGallery';
 import { UserBadges } from './UserBadges';
 import { CountdownWidget } from './CountdownWidget';
 import { SavingsChart } from './SavingsChart';
+import { CheapDateModal } from './CheapDateModal';
 import { playCoinSound, vibrate } from '../lib/audio';
 
 interface HomeTabProps {
@@ -42,6 +43,7 @@ const MOTIVATIONAL_QUOTES = [
 
 export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, origin, goalAmount, totalSaved, deposits, targetDate, addToast }) => {
   const [showAIModal, setShowAIModal] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
   const [depositToEdit, setDepositToEdit] = useState<any>(null);
   const [editAmount, setEditAmount] = useState('');
@@ -249,6 +251,22 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           </div>
           <ArrowRight size={16} className="text-cookbook-text/30" />
         </button>
+
+        <button 
+          onClick={() => setShowDateModal(true)}
+          className="w-full bg-rose-50 border border-rose-200 rounded p-4 flex items-center justify-between shadow-sm transition-transform active:scale-[0.98]"
+        >
+          <div className="flex items-center space-x-3 text-cookbook-text">
+            <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center">
+              <Heart size={16} className="text-rose-500" />
+            </div>
+            <div className="text-left">
+              <p className="font-serif italic text-sm text-rose-900">Gerador de Encontros</p>
+              <p className="font-sans text-[9px] uppercase tracking-widest text-rose-700/60 font-bold">Ideias grátis/baratas</p>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-rose-300" />
+        </button>
       </div>
 
       {/* Badges / Conquistas */}
@@ -336,6 +354,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           origin={origin}
           onClose={() => setShowAIModal(false)} 
         />
+      )}
+
+      {showDateModal && (
+        <CheapDateModal onClose={() => setShowDateModal(false)} currentUser={currentUser} />
       )}
 
       {/* Edit Confirmation Modal */}

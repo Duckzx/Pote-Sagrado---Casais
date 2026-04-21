@@ -23,6 +23,11 @@ function CarouselItem({ item, index, itemWidth, round, trackItemOffset, x, trans
   const outputRange = [90, 0, -90];
   const rotateY = useTransform(x, range, outputRange, { clamp: false });
 
+  // Parallax transforms
+  const iconParallax = useTransform(x, range, [40, 0, -40], { clamp: false });
+  const textParallax = useTransform(x, range, [20, 0, -20], { clamp: false });
+  const bgParallax = useTransform(x, range, [-30, 0, 30], { clamp: false });
+
   return (
     <motion.div
       key={`${item?.id ?? index}-${index}`}
@@ -35,17 +40,29 @@ function CarouselItem({ item, index, itemWidth, round, trackItemOffset, x, trans
       }}
       transition={transition}
     >
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-tr from-black/[0.03] to-transparent pointer-events-none z-0"
+        style={{ x: bgParallax }}
+      />
+
       {item.actionNode && (
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 z-20">
           {item.actionNode}
         </div>
       )}
-      <div className={`carousel-item-header ${round ? 'round' : ''}`}>
-        <span className="carousel-icon-container">{item.icon}</span>
+      <div className={`carousel-item-header z-10 w-full ${round ? 'round' : ''}`}>
+        <motion.span 
+          className="carousel-icon-container inline-flex shadow-sm"
+          style={{ x: iconParallax }}
+        >
+          {item.icon}
+        </motion.span>
       </div>
-      <div className="carousel-item-content">
-        <div className="carousel-item-title">{item.title}</div>
-        <p className="carousel-item-description">{item.description}</p>
+      <div className="carousel-item-content z-10 w-full overflow-hidden">
+        <motion.div style={{ x: textParallax }}>
+          <div className="carousel-item-title">{item.title}</div>
+          <p className="carousel-item-description">{item.description}</p>
+        </motion.div>
       </div>
     </motion.div>
   );
