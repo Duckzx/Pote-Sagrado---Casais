@@ -31,8 +31,7 @@ export interface TripConfig {
   battleChallenges: Challenge[];
   targetDate: string;
   monthlyPrize: string;
-  wppPhone?: string;
-  wppApiKey?: string;
+  fcmTokens?: string[];
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
@@ -45,8 +44,7 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   battleChallenges: [],
   targetDate: '',
   monthlyPrize: '',
-  wppPhone: '',
-  wppApiKey: '',
+  fcmTokens: [],
 };
 
 // ========================================

@@ -5,7 +5,6 @@ import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import confetti from 'canvas-confetti';
 import { playCoinSound, playSuccessSound, vibrate } from '../lib/audio';
-import { sendWhatsAppNotification } from '../lib/notifications';
 
 // ========================================
 // Types
@@ -222,12 +221,6 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
         createdAt: serverTimestamp()
       });
-
-      // Notificação
-      const userFirstName = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Seu amor';
-      const actionText = selectedMission.category === 'desafio' ? `concluiu o desafio: ${selectedMission.title}` : `cumpriu a missão de economia: ${selectedMission.title}`;
-      const notifMessage = `🎯 ${userFirstName} ${actionText} e depositou R$ ${finalAmount.toFixed(2)} no Pote Sagrado!`;
-      sendWhatsAppNotification(notifMessage);
 
       confetti({
         particleCount: 100,

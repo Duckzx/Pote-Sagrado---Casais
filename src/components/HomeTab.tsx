@@ -16,7 +16,6 @@ import { CountdownWidget } from './CountdownWidget';
 import { SavingsChart } from './SavingsChart';
 import { CheapDateModal } from './CheapDateModal';
 import { playCoinSound, vibrate } from '../lib/audio';
-import { sendWhatsAppNotification } from '../lib/notifications';
 
 interface HomeTabProps {
   currentUser: any;
@@ -80,13 +79,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         createdAt: serverTimestamp()
       });
       
-      // Notificação
-      const userFirstName = user.displayName?.split(' ')[0] || user.email?.split('@')[0] || 'Seu amor';
-      const msgType = quickType === 'income' ? 'depositou' : 'gastou';
-      const msgEfeito = quickType === 'income' ? '💸' : '📉';
-      const notifMessage = `${msgEfeito} ${userFirstName} ${msgType} R$ ${parsedAmount.toFixed(2)} no Pote Sagrado!\nMotivo: ${quickDesc || 'Depósito Rápido'}`;
-      sendWhatsAppNotification(notifMessage);
-
       // Haptic and audio feedback
       vibrate([30, 50, 30]);
       if (quickType === 'income') {

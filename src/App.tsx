@@ -169,8 +169,6 @@ function AppContent() {
                   customChallenges={tripConfig.customChallenges}
                   currentTargetDate={tripConfig.targetDate}
                   currentPrize={tripConfig.monthlyPrize}
-                  currentWppPhone={tripConfig.wppPhone}
-                  currentWppApiKey={tripConfig.wppApiKey}
                   addToast={addToast}
                 />
               )}

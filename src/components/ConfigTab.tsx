@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth, logout } from '../firebase';
-import { LogOut, Save, Palette, MapPin, Share2, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
+import { db, auth, logout, messaging } from '../firebase';
+import { LogOut, Save, Palette, MapPin, Share2, Sparkles, Plus, Trash2, Bell } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { AIAkinatorModal } from './AIAkinatorModal';
 import { InstallPrompt } from './InstallPrompt';
@@ -14,8 +15,6 @@ interface ConfigTabProps {
   customChallenges: any[];
   currentTargetDate: string;
   currentPrize?: string;
-  currentWppPhone?: string;
-  currentWppApiKey?: string;
   addToast: (title: string, message: string, type: 'info' | 'success' | 'milestone') => void;
 }
 
@@ -27,7 +26,7 @@ const THEMES = [
   { id: 'midnight', label: '🌙 Midnight', colors: ['#1A1A2E', '#C5A059'] },
 ];
 
-export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, currentWppPhone, currentWppApiKey, addToast }) => {
+export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, addToast }) => {
   const [destination, setDestination] = useState(currentDestination || '');
   const [origin, setOrigin] = useState(currentOrigin || '');
   const [goalAmount, setGoalAmount] = useState((currentGoalAmount || 0).toString());
@@ -35,14 +34,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
   const [targetDate, setTargetDate] = useState(currentTargetDate || '');
   const [prize, setPrize] = useState(currentPrize || '');
-  const [wppPhone, setWppPhone] = useState(currentWppPhone || '');
-  const [wppApiKey, setWppApiKey] = useState(currentWppApiKey || '');
   
   const [newChallengeLabel, setNewChallengeLabel] = useState('');
   const [newChallengeIcon, setNewChallengeIcon] = useState('⭐');
 
   const [isSaving, setIsSaving] = useState(false);
   const [showAkinator, setShowAkinator] = useState(false);
+  const [isRequestingPush, setIsRequestingPush] = useState(false);
 
   useEffect(() => {
     setDestination(currentDestination || '');
@@ -52,9 +50,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     setChallenges(customChallenges || []);
     setTargetDate(currentTargetDate || '');
     setPrize(currentPrize || '');
-    setWppPhone(currentWppPhone || '');
-    setWppApiKey(currentWppApiKey || '');
-  }, [currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, currentWppPhone, currentWppApiKey]);
+  }, [currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize]);
 
   const handleAddChallenge = () => {
     if (!newChallengeLabel.trim()) return;
@@ -122,6 +118,50 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     }
   };
 
+  const handleEnablePush = async () => {
+    if (!messaging) {
+      addToast('Erro', 'Seu navegador não suporta notificações Push ou você bloqueou.', 'info');
+      return;
+    }
+    
+    setIsRequestingPush(true);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const token = await getToken(messaging, { 
+          // ATENÇÃO: É fortemente recomendado colocar seu vapidKey aqui para Web Push no futuro:
+          // vapidKey: 'SEU_VAPID_KEY_AQUI'
+        });
+        
+        if (token) {
+          const tripRef = doc(db, 'trip_config', 'main');
+          const tDoc = await getDoc(tripRef);
+          
+          let fcmTokens: string[] = [];
+          if (tDoc.exists()) {
+            fcmTokens = tDoc.data().fcmTokens || [];
+          }
+          
+          if (!fcmTokens.includes(token)) {
+            fcmTokens.push(token);
+            await setDoc(tripRef, { fcmTokens }, { merge: true });
+          }
+          
+          addToast('Sucesso', 'Notificações Push nativas ativadas neste dispositivo!', 'success');
+        } else {
+          addToast('Erro', 'Não foi possível obter o token do aparelho.', 'info');
+        }
+      } else {
+        addToast('Aviso', 'Você recusou a permissão de notificações.', 'info');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Erro', 'Houve um erro ao configurar o Push.', 'info');
+    } finally {
+      setIsRequestingPush(false);
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -150,8 +190,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
         customChallenges: challenges,
         targetDate,
         monthlyPrize: prize,
-        wppPhone,
-        wppApiKey,
         updatedAt: serverTimestamp()
       }, { merge: true });
 
@@ -266,40 +304,26 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
 
         <div className="pt-4 border-t border-cookbook-border space-y-4">
           <div className="text-center mb-4">
-            <h3 className="font-serif text-lg text-cookbook-text mb-1">Notificação (WhatsApp)</h3>
+            <h3 className="font-serif text-lg text-cookbook-text mb-1">Notificações Nativas</h3>
             <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-              Via CallMeBot API (Gratuito)
+              Web Push Notification
             </p>
           </div>
-          <div className="space-y-2">
-            <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-              Telefone do Parceiro (com DDI e DDD)
-            </label>
-            <input
-              type="text"
-              value={wppPhone}
-              onChange={(e) => setWppPhone(e.target.value)}
-              placeholder="+5511999999999"
-              className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-              API Key do CallMeBot
-            </label>
-            <input
-              type="text"
-              value={wppApiKey}
-              onChange={(e) => setWppApiKey(e.target.value)}
-              placeholder="Ex: 857392"
-              className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-            />
-          </div>
-          <p className="font-serif italic text-[10px] text-cookbook-text/50 px-2 text-center">
-            Adicione o número "+34 624 54 22 28" aos contatos, mande "I allow callmebot to send me messages" no WhatsApp e cole a chave (API Key) acima.
+          
+          <button
+            onClick={handleEnablePush}
+            disabled={isRequestingPush}
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-sans text-sm font-bold text-cookbook-text/80 focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm flex items-center gap-2 justify-center hover:bg-cookbook-primary/10 hover:text-cookbook-primary disabled:opacity-50"
+          >
+            <Bell size={16} />
+            {isRequestingPush ? 'Requisitando...' : 'Ativar Notificações neste Dispositivo'}
+          </button>
+          
+          <p className="font-serif italic text-[10px] text-cookbook-text/50 px-2 text-center mt-2">
+            Permite que você receba um "Push" do Pote Sagrado, mesmo minimizado. Se for iPhone, é necessário adicionar o site à Tela de Início primeiro.
           </p>
         </div>
-
+        
         <div className="space-y-3 pt-4 border-t border-cookbook-border">
           <label className="flex items-center space-x-2 font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
             <Palette size={14} />
