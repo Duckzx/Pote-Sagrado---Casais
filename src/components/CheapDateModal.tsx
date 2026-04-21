@@ -78,7 +78,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
           title: c.title,
           idea: c.idea,
           cost: c.cost,
-          icon: React.cloneElement(iconMatch as React.ReactElement, { size: 24 })
+          icon: React.cloneElement(iconMatch as React.ReactElement<any>, { size: 24 })
         };
       });
 
