@@ -220,7 +220,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           href={flightsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="block bg-white border border-cookbook-border border-b-4 border-b-cookbook-primary rounded p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-transform active:scale-[0.98] relative overflow-hidden"
+          className="block bg-cookbook-bg border border-cookbook-border border-b-4 border-b-cookbook-primary rounded p-6 shadow-sm transition-transform active:scale-[0.98] relative overflow-hidden"
         >
           <div className="absolute -top-5 -right-5 w-20 h-20 rounded-full border-2 border-dashed border-cookbook-primary flex items-center justify-center font-serif italic text-[10px] text-cookbook-primary rotate-[15deg] bg-cookbook-bg">
             VISTO OK
@@ -254,18 +254,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
         <button 
           onClick={() => setShowDateModal(true)}
-          className="w-full bg-rose-50 border border-rose-200 rounded p-4 flex items-center justify-between shadow-sm transition-transform active:scale-[0.98]"
+          className="w-full bg-cookbook-mural border border-cookbook-border rounded p-4 flex items-center justify-between shadow-sm transition-transform active:scale-[0.98]"
         >
           <div className="flex items-center space-x-3 text-cookbook-text">
-            <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center">
-              <Heart size={16} className="text-rose-500" />
+            <div className="w-8 h-8 rounded-full bg-cookbook-primary/20 flex items-center justify-center">
+              <Heart size={16} className="text-cookbook-primary" />
             </div>
             <div className="text-left">
-              <p className="font-serif italic text-sm text-rose-900">Gerador de Encontros</p>
-              <p className="font-sans text-[9px] uppercase tracking-widest text-rose-700/60 font-bold">Ideias grátis/baratas</p>
+              <p className="font-serif italic text-sm text-cookbook-text">Gerador de Encontros</p>
+              <p className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/60 font-bold">Ideias grátis/baratas</p>
             </div>
           </div>
-          <ArrowRight size={16} className="text-rose-300" />
+          <ArrowRight size={16} className="text-cookbook-text/30" />
         </button>
       </div>
 
@@ -296,7 +296,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </h3>
         <div className="w-full flex justify-center">
           {deposits.length === 0 ? (
-            <div className="text-center py-8 px-4 bg-white border border-cookbook-border border-dashed rounded w-full">
+            <div className="text-center py-8 px-4 bg-cookbook-bg border border-cookbook-border border-dashed rounded w-full">
               <div className="w-12 h-12 bg-cookbook-bg rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl">☕</span>
               </div>
@@ -327,14 +327,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
                     <div className="flex space-x-1">
                       <button 
                         onClick={() => handleEditClick(deposit)}
-                        className="text-cookbook-text/30 hover:text-cookbook-primary transition-colors p-2 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
+                        className="text-cookbook-text/40 hover:text-cookbook-primary transition-colors p-2 bg-cookbook-bg/80 rounded-full backdrop-blur-sm shadow-sm"
                         title="Editar registro"
                       >
                         <Pencil size={16} />
                       </button>
                       <button 
                         onClick={() => setDepositToDelete(deposit.id)}
-                        className="text-cookbook-text/30 hover:text-red-500 transition-colors p-2 bg-white/80 rounded-full backdrop-blur-sm shadow-sm"
+                        className="text-cookbook-text/40 hover:text-red-500 transition-colors p-2 bg-cookbook-bg/80 rounded-full backdrop-blur-sm shadow-sm"
                         title="Remover registro"
                       >
                         <Trash2 size={16} />
@@ -362,8 +362,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
       {/* Edit Confirmation Modal */}
       {depositToEdit && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
             <div className="space-y-4 mb-6">
               <div className="relative">
@@ -381,7 +381,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 placeholder="Descrição"
-                className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-red-300 transition-colors shadow-sm"
+                className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
               />
             </div>
             <div className="flex space-x-3">
@@ -405,8 +405,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
       {/* Delete Confirmation Modal */}
       {depositToDelete && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div className="w-12 h-12 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
               <AlertCircle size={24} className="text-red-500" />
             </div>
@@ -447,11 +447,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       {showQuickDeposit && createPortal(
         <div
           className="fixed inset-0 z-[60] flex items-end justify-center animate-modal-backdrop"
-          style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
+          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}
           onClick={() => setShowQuickDeposit(false)}
         >
           <div 
-            className="bg-white border-t border-cookbook-border rounded-t-2xl w-full max-w-md p-6 shadow-2xl animate-modal-enter"
+            className="bg-cookbook-bg border-t border-cookbook-border rounded-t-2xl w-full max-w-md p-6 shadow-2xl animate-modal-enter"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-cookbook-border rounded-full mx-auto mb-5" />
@@ -494,7 +494,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
                 value={quickDesc}
                 onChange={(e) => setQuickDesc(e.target.value)}
                 placeholder="Descrição (opcional)"
-                className="w-full bg-white border border-cookbook-border rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
               />
             </div>
             

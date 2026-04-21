@@ -21,7 +21,7 @@
   justify-content: space-between;
   border: 1px solid var(--color-cookbook-border);
   border-radius: calc(var(--outer-r) - var(--p-distance));
-  background-color: #fff;
+  background-color: var(--color-cookbook-bg);
   overflow: hidden;
   cursor: grab;
 }
@@ -35,7 +35,7 @@
 }
 
 .carousel-item.round {
-  background-color: #fff;
+  background-color: var(--color-cookbook-bg);
   position: relative;
   bottom: 0.1em;
   border: 1px solid var(--color-cookbook-border);

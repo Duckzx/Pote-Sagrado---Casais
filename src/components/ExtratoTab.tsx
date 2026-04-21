@@ -152,7 +152,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       </div>
 
       {/* Month selector */}
-      <div className="flex items-center justify-between bg-white border border-cookbook-border rounded-xl px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 shadow-sm">
         <button
           onClick={() => goMonth(-1)}
           className="text-cookbook-text/40 hover:text-cookbook-text transition-colors p-1"
@@ -185,7 +185,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
           <div className="font-serif text-sm text-red-700">{formatCurrency(totals.gastos)}</div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-red-500/70 font-bold mt-0.5">Saídas</div>
         </div>
-        <div className="bg-white border border-cookbook-border rounded-xl p-3 text-center">
+        <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-3 text-center">
           <div className={`font-serif text-sm ${totals.saldo >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
             {formatCurrency(totals.saldo)}
           </div>
@@ -221,7 +221,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
           <select
             value={filterUser}
             onChange={(e) => setFilterUser(e.target.value)}
-            className="bg-white border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
+            className="bg-cookbook-bg border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
           >
             <option value="todos">👥 Ambos</option>
             {users.map(([uid, name]) => (
@@ -234,7 +234,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       {/* Timeline */}
       <div className="space-y-5">
         {Object.keys(groupedByDate).length === 0 ? (
-          <div className="text-center py-12 px-4 bg-white border border-dashed border-cookbook-border rounded-xl">
+          <div className="text-center py-12 px-4 bg-cookbook-bg border border-dashed border-cookbook-border rounded-xl">
             <span className="text-3xl block mb-3">📭</span>
             <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
               Nada por aqui ainda
@@ -264,7 +264,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
                   return (
                     <div
                       key={deposit.id}
-                      className="flex items-center gap-3 bg-white border border-cookbook-border/60 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow group"
+                      className="flex items-center gap-3 bg-cookbook-bg border border-cookbook-border/60 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow group"
                     >
                       {/* Icon */}
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
@@ -341,7 +341,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
           onClick={() => setEditing(null)}
         >
-          <div className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter" onClick={e => e.stopPropagation()}>
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter" onClick={e => e.stopPropagation()}>
             <button onClick={() => setEditing(null)} className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text">
               <X size={20} />
             </button>
@@ -388,7 +388,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
           onClick={() => setDeleting(null)}
         >
-          <div className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter text-center" onClick={e => e.stopPropagation()}>
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter text-center" onClick={e => e.stopPropagation()}>
             <span className="text-4xl block mb-4">🗑️</span>
             <h3 className="font-serif text-xl text-cookbook-text mb-2">Excluir Transação?</h3>
             <p className="font-sans text-xs text-cookbook-text/60 mb-6">
