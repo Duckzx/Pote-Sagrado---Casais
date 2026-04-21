@@ -68,7 +68,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({ addToast }) => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat)}
-            className="bg-white border border-cookbook-border rounded p-4 flex flex-col items-center justify-center text-center shadow-sm transition-transform active:scale-95 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-cookbook-text group"
+            className="bg-cookbook-bg border border-cookbook-border rounded p-4 flex flex-col items-center justify-center text-center shadow-sm transition-transform active:scale-95 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-cookbook-text group"
           >
             <div className="mb-2 text-cookbook-text/70 group-hover:text-red-500 transition-colors">
               {cat.icon}
@@ -82,8 +82,8 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({ addToast }) => {
 
       {/* Modal */}
       {selectedCategory && (
-        <div className="fixed inset-0 z-50 flex items-start pt-20 justify-center p-4 overflow-y-auto animate-modal-backdrop" style={{ background: 'rgba(253,251,247,0.8)', backdropFilter: 'blur(4px)' }}>
-          <div className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative mb-20 animate-modal-enter">
+        <div className="fixed inset-0 z-50 flex items-start pt-20 justify-center p-4 overflow-y-auto animate-modal-backdrop bg-cookbook-bg/90 backdrop-blur-[4px]">
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative mb-20 animate-modal-enter">
             <button 
               onClick={() => setSelectedCategory(null)}
               className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text"
@@ -119,7 +119,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({ addToast }) => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descrição (opcional)"
-                className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-red-300 transition-colors shadow-sm"
+                className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-red-300 transition-colors shadow-sm"
               />
               
               <button

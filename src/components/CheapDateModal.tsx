@@ -147,7 +147,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
                     onClick={() => setSelectedTier(tier.id)}
                     className={`px-3 py-1.5 rounded-full font-sans text-[9px] uppercase tracking-widest font-bold transition-colors border ${
                       selectedTier === tier.id 
-                        ? 'bg-cookbook-primary text-white border-cookbook-primary shadow-sm' 
+                        ? 'bg-cookbook-primary text-cookbook-bg border-cookbook-primary shadow-sm' 
                         : 'bg-cookbook-bg text-cookbook-text/60 border-cookbook-border'
                     }`}
                   >
@@ -226,7 +226,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
             <button
               onClick={handleSaveCustom}
               disabled={isLoadingCustom || !newTitle || !newIdea || !currentUser}
-              className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-cookbook-bg font-sans text-[10px] uppercase tracking-widest py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoadingCustom ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               <span>Salvar Ideia</span>
@@ -259,7 +259,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
         <div className="mt-2 text-center">
           <div className="w-14 h-14 bg-cookbook-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-cookbook-primary/20 shadow-sm relative group cursor-pointer" onClick={() => setIsAdding(true)}>
             <Heart size={24} className="text-cookbook-primary" />
-            <div className="absolute inset-0 bg-cookbook-primary rounded-full text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity shadow-lg">
+            <div className="absolute inset-0 bg-cookbook-primary rounded-full text-cookbook-bg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity shadow-lg">
               <Plus size={20} />
             </div>
           </div>
@@ -279,7 +279,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
                     onClick={() => setSelectedTier(tier.id)}
                     className={`px-3 py-1.5 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold transition-colors border ${
                       selectedTier === tier.id 
-                        ? 'bg-cookbook-primary text-white border-cookbook-primary shadow-md' 
+                        ? 'bg-cookbook-primary text-cookbook-bg border-cookbook-primary shadow-md' 
                         : 'bg-cookbook-bg text-cookbook-text/60 border-cookbook-border hover:border-cookbook-primary/50'
                     }`}
                   >
@@ -291,7 +291,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({ onClose, current
               <div className="flex flex-col gap-2 pt-2">
                 <button
                   onClick={handleGenerate}
-                  className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-cookbook-bg font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Dice5 size={16} />
                   <span>Sortear Ideia</span>

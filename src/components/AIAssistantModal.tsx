@@ -17,36 +17,36 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
       title: "Buscar Voos Baratos",
       desc: "Google Flights",
       url: `https://www.google.com/travel/flights?q=Voos+de+${originEncoded}+para+${destEncoded}`,
-      icon: <Plane size={18} className="text-sky-500" />,
-      color: "border-sky-200 bg-sky-50"
+      icon: <Plane size={18} className="text-cookbook-primary" />,
+      color: "border-cookbook-border bg-cookbook-bg/40 hover:bg-cookbook-primary/5"
     },
     {
       title: "Buscar Hospedagem",
       desc: "Booking.com",
       url: `https://www.booking.com/searchresults.pt-br.html?ss=${destEncoded}`,
-      icon: <BedDouble size={18} className="text-indigo-500" />,
-      color: "border-indigo-200 bg-indigo-50"
+      icon: <BedDouble size={18} className="text-cookbook-primary" />,
+      color: "border-cookbook-border bg-cookbook-bg/40 hover:bg-cookbook-primary/5"
     },
     {
       title: "O Que Fazer / Dicas",
       desc: "TripAdvisor",
       url: `https://www.tripadvisor.com.br/Search?q=${destEncoded}`,
-      icon: <Compass size={18} className="text-emerald-500" />,
-      color: "border-emerald-200 bg-emerald-50"
+      icon: <Compass size={18} className="text-cookbook-primary" />,
+      color: "border-cookbook-border bg-cookbook-bg/40 hover:bg-cookbook-primary/5"
     },
     {
       title: "Custo de Vida Diário",
       desc: "Budget Your Trip",
       url: `https://www.google.com/search?q=cost+of+travel+budget+your+trip+${destEncoded}`,
-      icon: <Search size={18} className="text-amber-500" />,
-      color: "border-amber-200 bg-amber-50"
+      icon: <Search size={18} className="text-cookbook-primary" />,
+      color: "border-cookbook-border bg-cookbook-bg/40 hover:bg-cookbook-primary/5"
     }
   ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-sm animate-modal-backdrop" onClick={onClose}>
       <div 
-        className="bg-white border border-cookbook-border rounded-xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden animate-modal-enter max-h-[85vh]"
+        className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden animate-modal-enter max-h-[85vh]"
         onClick={e => e.stopPropagation()}
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />
@@ -73,7 +73,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
               </p>
               <button
                 onClick={onClose}
-                className="mt-4 bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest py-3 px-6 rounded-lg font-bold"
+                className="mt-4 bg-cookbook-primary text-cookbook-bg font-sans text-[9px] uppercase tracking-widest py-3 px-6 rounded-lg font-bold"
               >
                 Certo, vou definir
               </button>
@@ -103,7 +103,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
                     className={`block border rounded-xl p-4 transition-all hover:scale-[1.02] active:scale-[0.98] ${link.color}`}
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-sm">
                         {link.icon}
                       </div>
                       <ExternalLink size={14} className="text-cookbook-text/30" />

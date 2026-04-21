@@ -129,8 +129,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         const token = await getToken(messaging, { 
-          // ATENÇÃO: É fortemente recomendado colocar seu vapidKey aqui para Web Push no futuro:
-          // vapidKey: 'SEU_VAPID_KEY_AQUI'
+          vapidKey: 'BEtSr1urWC2nzx3esnYP0M01r0Rc56z5Ti17-eCQNlHa5acWcLKahBVgPr_s6-_qP7S519h0iy_zA5uvtOaB1vs'
         });
         
         if (token) {
@@ -238,7 +237,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
             placeholder="Ex: São Paulo, SP"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -260,7 +259,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Ex: Mochilão Europa"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -273,7 +272,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={goalAmount}
             onChange={(e) => setGoalAmount(e.target.value)}
             placeholder="15000"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -285,7 +284,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -336,7 +335,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
                 onClick={() => setTheme(t.id)}
                 className={`flex items-center space-x-3 p-3 rounded border transition-all ${
                   theme === t.id 
-                    ? 'border-cookbook-primary bg-white shadow-md' 
+                    ? 'border-cookbook-primary bg-cookbook-bg shadow-md' 
                     : 'border-cookbook-border bg-cookbook-bg/50 opacity-70 hover:opacity-100'
                 }`}
               >
