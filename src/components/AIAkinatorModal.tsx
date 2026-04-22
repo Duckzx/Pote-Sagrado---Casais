@@ -159,7 +159,7 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-sm animate-modal-backdrop" onClick={onClose}>
       <div 
-        className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden animate-modal-enter"
+        className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden animate-modal-enter"
         onClick={e => e.stopPropagation()}
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />
