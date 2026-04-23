@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Share2, TrendingUp, Heart, Sparkles, AlertCircle, Download } from 'lucide-react';
 import { WaterSpill } from './WaterSpill';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -65,12 +65,12 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
       const element = document.getElementById('widget-card');
       if (!element) return;
 
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher quality
-        backgroundColor: null,
+      const blob = await toBlob(element, { 
+        cacheBust: true,
+        pixelRatio: 2, 
+        backgroundColor: 'transparent'
       });
 
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Falha ao gerar a imagem');
 
       const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
