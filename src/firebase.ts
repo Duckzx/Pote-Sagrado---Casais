@@ -35,21 +35,20 @@ export const loginWithGoogle = async () => {
   try {
     await signInWithPopup(auth, provider);
   } catch (error: any) {
-    // Popup blocked or closed — fallback to redirect
-    if (
-      error?.code === 'auth/popup-blocked' ||
-      error?.code === 'auth/popup-closed-by-user' ||
-      error?.code === 'auth/cancelled-popup-request' ||
-      error?.code === 'auth/internal-error'
-    ) {
-      console.warn('Popup blocked, falling back to redirect login...');
-      try {
-        await signInWithRedirect(auth, provider);
-      } catch (redirectError) {
-        console.error('Error signing in with redirect:', redirectError);
-      }
-    } else {
-      console.error("Error signing in with Google:", error);
+    console.warn('Popup login failed, attempting redirect...', error.code, error.message);
+    
+    // If it's an unauthorized domain, alert the user explicitly
+    if (error?.code === 'auth/unauthorized-domain') {
+      alert(`Domínio não autorizado pelo Firebase. Por favor, adicione este domínio (${window.location.hostname}) na lista de domínios autorizados do Firebase Console (Authentication > Settings > Authorized domains).`);
+      return;
+    }
+
+    // Fallback to redirect for any other popup issue
+    try {
+      await signInWithRedirect(auth, provider);
+    } catch (redirectError: any) {
+      console.error('Error signing in with redirect:', redirectError);
+      alert('Erro ao tentar login com Google: ' + (redirectError.message || 'Erro desconhecido'));
     }
   }
 };
