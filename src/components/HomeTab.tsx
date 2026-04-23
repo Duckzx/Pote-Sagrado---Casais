@@ -246,7 +246,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
     
     // Start breaking animation
     setIsPotBreaking(true);
-    if (vibrate) vibrate();
+    if (vibrate) vibrate([30, 50, 30]);
     
     // Crack the pot after short delay
     setTimeout(() => {

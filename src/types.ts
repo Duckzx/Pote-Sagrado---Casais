@@ -55,9 +55,9 @@ export type ToastType = 'info' | 'success' | 'milestone';
 
 export type AddToastFn = (title: string, message: string, type: ToastType) => void;
 
-export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'config';
+export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'config';
 
-export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'config'];
+export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'config'];
 
 export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight';
 

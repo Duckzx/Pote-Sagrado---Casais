@@ -145,6 +145,8 @@ const ThreeDScene: React.FC = () => {
     <AbsoluteFill>
       <ThreeCanvas
         linear
+        width={400}
+        height={500}
         camera={{ position: [0, cameraY, cameraZ], fov: 40 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ antialias: true, alpha: true }}

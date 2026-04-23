@@ -3,7 +3,7 @@ import { Pin, Plus, ExternalLink } from 'lucide-react';
 import FlowingMenu from './FlowingMenu';
 
 interface PinboardTabProps {
-  addToast: (title: string, message: string, type: 'info' | 'success' | 'warning') => void;
+  addToast: (title: string, message: string, type: 'info' | 'success' | 'milestone') => void;
 }
 
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
