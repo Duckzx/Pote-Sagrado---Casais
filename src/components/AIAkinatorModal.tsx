@@ -19,10 +19,12 @@ const LOCAL_DESTINATIONS = [
   { dest: "Machu Picchu, Peru", tags: ["montanha", "natureza", "america"], reason: "Aventuras inesquecíveis nas alturas dos Andes. Ideal para fortalecer a parceria encarando trilhas marcantes." }
 ];
 
+import { getDestinationRecommendation } from '../services/aiRecommendations';
+
 export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSelectDestination }) => {
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<typeof LOCAL_DESTINATIONS[0] | null>(null);
+  const [result, setResult] = useState<any>(null); // any
   
   // Quiz state
   const [answers, setAnswers] = useState<string[]>([]);
@@ -39,32 +41,25 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
     }
   };
 
-  const processResult = (finalAnswers: string[]) => {
+  const processResult = async (finalAnswers: string[]) => {
     setIsLoading(true);
     setStep(2); // Result view
     
-    setTimeout(() => {
-      // Basic scoring algorithm
-      let maxScore = -1;
-      let matchedDest = LOCAL_DESTINATIONS[Math.floor(Math.random() * LOCAL_DESTINATIONS.length)]; // fallback
-
-      LOCAL_DESTINATIONS.forEach(d => {
-        let score = 0;
-        finalAnswers.forEach(ans => {
-          if (d.tags.includes(ans)) score++;
-        });
-        // Introduce slight randomness for ties
-        score += Math.random() * 0.5;
-        
-        if (score > maxScore) {
-          maxScore = score;
-          matchedDest = d;
-        }
-      });
-
-      setResult(matchedDest);
+    try {
+      const aiResult = await getDestinationRecommendation(finalAnswers);
+      if (aiResult) {
+        setResult(aiResult);
+      } else {
+        // Fallback if AI fails for any reason
+        const matchedDest = LOCAL_DESTINATIONS[Math.floor(Math.random() * LOCAL_DESTINATIONS.length)];
+        setResult({ ...matchedDest, image: `https://loremflickr.com/400/300/${encodeURIComponent(matchedDest.dest)}/all?random=1` });
+      }
+    } catch (e) {
+      const matchedDest = LOCAL_DESTINATIONS[0];
+      setResult({ ...matchedDest, image: `https://loremflickr.com/400/300/${encodeURIComponent(matchedDest.dest)}/all?random=1` });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const renderStep = () => {
@@ -131,6 +126,14 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
             <div className="inline-block bg-cookbook-gold/10 text-cookbook-gold border border-cookbook-gold/20 px-4 py-1 rounded-full mb-2">
               <span className="font-sans text-[9px] uppercase tracking-widest font-bold">Match Perfeito</span>
             </div>
+            
+            {result.image && (
+              <div className="w-full h-32 rounded-xl overflow-hidden shadow-sm border border-cookbook-border relative mb-4">
+                <img src={result.image} alt={result.dest} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              </div>
+            )}
+            
             <h3 className="font-serif italic text-3xl text-cookbook-text text-balance leading-tight">
               {result.dest}
             </h3>

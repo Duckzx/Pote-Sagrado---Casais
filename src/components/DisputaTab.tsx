@@ -23,7 +23,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       if (!userTotals[d.who]) {
         userTotals[d.who] = { name: d.whoName, total: 0 };
       }
-      userTotals[d.who].total += d.amount;
+      const val = d.type === 'expense' ? -d.amount : d.amount;
+      userTotals[d.who].total += val;
     });
 
     const users = Object.values(userTotals).sort((a, b) => b.total - a.total);
@@ -35,9 +36,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       users.push({ name: 'Jogador 2', total: 0 });
     }
 
-    const total = users[0].total + users[1].total;
-    const p1Percentage = total > 0 ? (users[0].total / total) * 100 : 50;
-    const p2Percentage = total > 0 ? (users[1].total / total) * 100 : 50;
+    const total = Math.max(0, users[0].total) + Math.max(0, users[1].total);
+    const p1Percentage = total > 0 ? (Math.max(0, users[0].total) / total) * 100 : 50;
+    const p2Percentage = total > 0 ? (Math.max(0, users[1].total) / total) * 100 : 50;
 
     return { users, total, p1Percentage, p2Percentage };
   }, [deposits]);
@@ -63,19 +64,20 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         const date = d.createdAt.toDate();
         if (date >= weekStart && date < weekEnd && date.getMonth() === currentMonth) {
           if (users.length >= 2) {
+            const val = d.type === 'expense' ? -(d.amount || 0) : (d.amount || 0);
             if (d.who === Object.keys(deposits.reduce((acc: any, dep: any) => {
               if (!acc[dep.who]) acc[dep.who] = dep.whoName;
               return acc;
             }, {}))[0]) {
-              p1Total += d.amount || 0;
+              p1Total += val;
             } else {
-              p2Total += d.amount || 0;
+              p2Total += val;
             }
           }
         }
       });
       
-      weeks.push({ label: `Sem ${w + 1}`, p1: p1Total, p2: p2Total });
+      weeks.push({ label: `Sem ${w + 1}`, p1: Math.max(0, p1Total), p2: Math.max(0, p2Total) });
     }
     
     return weeks;

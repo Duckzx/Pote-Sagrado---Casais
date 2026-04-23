@@ -48,6 +48,9 @@ interface AppContextValue {
   // Onboarding
   showOnboarding: boolean;
   handleCompleteOnboarding: () => void;
+  
+  // Achievements (completed pots)
+  achievements: any[];
 
   // PWA Install
   canInstall: boolean;
@@ -87,6 +90,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
   const [totalSaved, setTotalSaved] = useState(() => {
     const saved = localStorage.getItem('pote_totalSaved');
     return saved ? Number(saved) : 0;
@@ -195,10 +199,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setBingoStats(stats);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
 
+    // Listen to achievements
+    const qArchived = query(collection(db, 'achievements'), orderBy('createdAt', 'desc'));
+    const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
+      const arch: any[] = [];
+      querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
+      setAchievements(arch);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'achievements'));
+
     return () => {
       unsubUser();
       unsubConfig();
       unsubDeposits();
+      unsubAchievements();
     };
   }, [isAuthReady, user]);
 
@@ -266,6 +279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     handleTabChange,
     tripConfig,
     deposits,
+    achievements,
     totalSaved,
     bingoStats,
     theme,

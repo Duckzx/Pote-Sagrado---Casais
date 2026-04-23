@@ -81,6 +81,14 @@ service cloud.firestore {
              (!('action' in data) || (data.action is string && data.action.size() < 300));
     }
 
+    function isValidAchievement(data) {
+      return data.keys().hasAll(['destination', 'amount', 'goalAmount', 'createdAt']) &&
+             data.destination is string && data.destination.size() < 200 &&
+             data.amount is number &&
+             data.goalAmount is number &&
+             data.createdAt == request.time;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -88,6 +96,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+
+      match /customDates/{dateId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     match /trip_config/main {
@@ -98,7 +110,8 @@ service cloud.firestore {
     match /deposits/{depositId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
-      allow delete: if isAuthenticated() && resource.data.who == request.auth.uid;
+      // Allow any authenticated user to delete deposits (necessary for "Quebrar o Pote" logic which deletes all couple deposits)
+      allow delete: if isAuthenticated();
       // Allow owner to update amount and action only (for corrections)
       allow update: if isAuthenticated() 
                     && resource.data.who == request.auth.uid
@@ -106,6 +119,12 @@ service cloud.firestore {
                     // Prevent changing ownership or timestamp
                     && request.resource.data.who == resource.data.who
                     && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /achievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidAchievement(request.resource.data);
+      allow delete: if false; // Achievements shouldn't be deleted generally, or if needed: if isAuthenticated()
     }
   }
 }

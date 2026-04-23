@@ -45,6 +45,13 @@ function CarouselItem({ item, index, itemWidth, round, trackItemOffset, x, trans
         style={{ x: bgParallax }}
       />
 
+      {item.image && (
+        <div className="absolute inset-0 z-0 opacity-40">
+          <img src={item.image} alt="deposit" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cookbook-bg via-cookbook-bg/60 to-transparent"></div>
+        </div>
+      )}
+
       {item.actionNode && (
         <div className="absolute top-2 right-2 z-20">
           {item.actionNode}

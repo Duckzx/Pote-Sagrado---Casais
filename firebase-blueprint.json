@@ -45,6 +45,18 @@
         "count": { "type": "number" }
       },
       "required": ["action", "count"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Completed pot achievements",
+      "type": "object",
+      "properties": {
+        "destination": { "type": "string" },
+        "amount": { "type": "number" },
+        "goalAmount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["destination", "amount", "goalAmount", "createdAt"]
     }
   },
   "firestore": {
@@ -59,6 +71,10 @@
     "/deposits/{depositId}": {
       "schema": { "$ref": "#/entities/Deposit" },
       "description": "All deposits made towards the trip"
+    },
+    "/achievements/{achievementId}": {
+      "schema": { "$ref": "#/entities/Achievement" },
+      "description": "Historical records of completed pots"
     },
     "/bingo_stats/{actionId}": {
       "schema": { "$ref": "#/entities/BingoStat" },

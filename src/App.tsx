@@ -12,9 +12,12 @@ import { AppProvider, useAppContext } from './context/AppContext';
 // ========================================
 const HomeTab = lazy(() => import('./components/HomeTab').then(m => ({ default: m.HomeTab })));
 const MissoesTab = lazy(() => import('./components/MissoesTab').then(m => ({ default: m.MissoesTab })));
+const PinboardTab = lazy(() => import('./components/PinboardTab').then(m => ({ default: m.PinboardTab })));
 const ExtratoTab = lazy(() => import('./components/ExtratoTab').then(m => ({ default: m.ExtratoTab })));
 const DisputaTab = lazy(() => import('./components/DisputaTab').then(m => ({ default: m.DisputaTab })));
 const ConfigTab = lazy(() => import('./components/ConfigTab').then(m => ({ default: m.ConfigTab })));
+
+import { RemotionIntro } from './components/RemotionIntro';
 
 // ========================================
 // Error Boundary
@@ -71,6 +74,15 @@ function TabSkeleton() {
 // Inner App (uses context)
 // ========================================
 function AppContent() {
+  const [hasSeenIntro, setHasSeenIntro] = React.useState(() => {
+    return localStorage.getItem('pote_hasSeenIntro') === 'true';
+  });
+
+  const handleIntroComplete = () => {
+    setHasSeenIntro(true);
+    localStorage.setItem('pote_hasSeenIntro', 'true');
+  };
+
   const {
     user,
     isAuthReady,
@@ -79,6 +91,7 @@ function AppContent() {
     handleTabChange,
     tripConfig,
     deposits,
+    achievements,
     totalSaved,
     bingoStats,
     theme,
@@ -126,14 +139,14 @@ function AppContent() {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <ColorBends color="var(--theme-border)" speed={0.1} intensity={0.5} className="opacity-30" />
       
-      <div className="relative z-10 overflow-hidden">
+      <div className="relative z-10 overflow-hidden pb-28">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, x: tabDirection * 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: tabDirection * -40 }}
-            transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            initial={{ opacity: 0, x: tabDirection * 15, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: tabDirection * -15, scale: 0.98 }}
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
           >
             <Suspense fallback={<TabSkeleton />}>
               {activeTab === 'home' && (
@@ -144,6 +157,7 @@ function AppContent() {
                   goalAmount={tripConfig.goalAmount} 
                   totalSaved={totalSaved}
                   deposits={deposits}
+                  achievements={achievements}
                   targetDate={tripConfig.targetDate}
                   addToast={addToast}
                 />
@@ -158,6 +172,7 @@ function AppContent() {
                   addToast={addToast}
                 />
               )}
+              {activeTab === 'mural' && <PinboardTab addToast={addToast} />}
               {activeTab === 'extrato' && <ExtratoTab deposits={deposits} addToast={addToast} />}
               {activeTab === 'disputa' && <DisputaTab deposits={deposits} prize={tripConfig.monthlyPrize} />}
               {activeTab === 'config' && (
@@ -180,6 +195,7 @@ function AppContent() {
       <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
       
       {showOnboarding && <OnboardingModal onComplete={handleCompleteOnboarding} />}
+      {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
     </div>
   );
 }

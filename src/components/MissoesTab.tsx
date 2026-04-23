@@ -65,10 +65,14 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
 // Component
 // ========================================
 
+import { compressImage } from '../lib/imageUtils';
+import { Camera } from 'lucide-react';
+
 export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges = [], battleChallenges = [], deposits, currentUser, addToast }) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>('todas');
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [amount, setAmount] = useState('');
+  const [missionImage, setMissionImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Edit state
@@ -193,6 +197,19 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
   // ========================================
   // Complete a mission
   // ========================================
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const base64 = await compressImage(file);
+      setMissionImage(base64);
+    } catch (err) {
+      console.error("Error compressing image:", err);
+      addToast('Erro', 'Não foi possível carregar a imagem.', 'info');
+    }
+  };
+
   const handleComplete = async () => {
     if (!selectedMission) return;
     
@@ -212,7 +229,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
       const user = auth.currentUser;
       if (!user) throw new Error("Not authenticated");
 
-      await addDoc(collection(db, 'deposits'), {
+      const depositData: any = {
         amount: finalAmount,
         action: selectedMission.category === 'desafio' 
           ? `Desafio Concluído: ${selectedMission.title}` 
@@ -220,7 +237,13 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         who: user.uid,
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
         createdAt: serverTimestamp()
-      });
+      };
+
+      if (missionImage) {
+        depositData.imageUrl = missionImage;
+      }
+
+      await addDoc(collection(db, 'deposits'), depositData);
 
       confetti({
         particleCount: 100,
@@ -245,6 +268,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
 
       setSelectedMission(null);
       setAmount('');
+      setMissionImage(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'deposits');
     } finally {
@@ -437,7 +461,27 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
 
       {/* Mission Cards */}
       <div className="space-y-3">
-        {filteredMissions.map(mission => {
+        {filteredMissions.length === 0 ? (
+          <div className="text-center py-10 px-6 bg-cookbook-bg border border-cookbook-border border-dashed rounded-xl w-full flex flex-col items-center">
+            <div className="w-12 h-12 bg-cookbook-gold/10 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🎯</span>
+            </div>
+            <p className="font-serif italic text-cookbook-text/70 text-sm mb-2">
+              Nenhuma missão aqui
+            </p>
+            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-6">
+              Crie desafios personalizados ou use a IA para gerar novas aventuras!
+            </p>
+            <button 
+              onClick={() => setShowAddForm(true)}
+              className="bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest px-5 py-2.5 rounded-full font-bold transition-transform hover:bg-cookbook-primary-hover active:scale-95 flex items-center gap-2 shadow-md"
+            >
+              <Plus size={12} strokeWidth={2.5} />
+              Criar Primeira Missão
+            </button>
+          </div>
+        ) : (
+          filteredMissions.map(mission => {
           const badge = getCategoryBadge(mission.category);
           const missionStats = streaks[mission.id] || { count: 0, streak: 0 };
           
@@ -536,7 +580,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* Add Mission Button */}
@@ -634,7 +678,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         <div 
           className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" 
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
-          onClick={() => setSelectedMission(null)}
+          onClick={() => {
+            setSelectedMission(null);
+            setMissionImage(null);
+          }}
         >
           <div 
             className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter"
@@ -648,7 +695,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
             }`} />
             
             <button 
-              onClick={() => setSelectedMission(null)}
+              onClick={() => {
+                setSelectedMission(null);
+                setMissionImage(null);
+              }}
               className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text transition-colors"
             >
               <X size={20} />
@@ -681,6 +731,29 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
                   />
                 </div>
               )}
+
+              {/* Image Upload for Proof of Save */}
+              <div className="mt-2 text-center">
+                {missionImage ? (
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden border border-cookbook-border">
+                    <img src={missionImage} alt="Proof" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => setMissionImage(null)}
+                      className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-cookbook-border rounded-xl cursor-pointer bg-cookbook-bg hover:bg-cookbook-primary/5 transition-colors">
+                    <div className="flex items-center gap-2">
+                       <Camera size={16} className="text-cookbook-text/50" />
+                       <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/60">Anexar Foto de Comprovação</span>
+                    </div>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
               
               <button
                 onClick={handleComplete}

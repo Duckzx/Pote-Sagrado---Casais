@@ -1,0 +1,154 @@
+.sacred-pot-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.sacred-pot {
+  position: relative;
+  width: 220px;
+  height: 250px;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.08));
+}
+
+.pot-lid {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 24px;
+  background: var(--theme-text);
+  border-radius: 12px;
+  z-index: 10;
+}
+
+.pot-lid::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 8px;
+  background: color-mix(in srgb, var(--theme-text), white 20%);
+  border-radius: 4px 4px 0 0;
+}
+
+.pot-lid::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 6px;
+  background: color-mix(in srgb, var(--theme-text), black 30%);
+  border-radius: 6px;
+}
+
+.pot-glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border: 6px solid var(--theme-border);
+  border-top: none;
+  border-radius: 10px 10px 80px 80px;
+  overflow: hidden;
+  box-shadow: 
+    inset 20px 0 30px rgba(255,255,255,0.6), 
+    inset -10px 0 20px rgba(0,0,0,0.02),
+    inset 0 -20px 30px rgba(0,0,0,0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass Highlights */
+.pot-glass::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 12%;
+  width: 16px;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
+  border-radius: 8px;
+  transform: rotate(4deg);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pot-glass::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  right: 15%;
+  width: 6px;
+  height: 30%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+  border-radius: 4px;
+  transform: rotate(-3deg);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pot-liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--theme-gold);
+  transition: height 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 1;
+}
+
+.pot-liquid::before,
+.pot-liquid::after {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 40px;
+  top: -20px;
+  left: 0;
+  background-size: 50% 100%;
+}
+
+.pot-liquid::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23C5A059'/%3E%3C/svg%3E");
+  animation: waveFill 4s linear infinite;
+  z-index: 2;
+}
+
+.pot-liquid::after {
+  top: -28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%238E7F6D' opacity='0.4'/%3E%3C/svg%3E");
+  animation: waveFill 6s linear infinite reverse;
+  z-index: 1;
+}
+
+@keyframes waveFill {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.pot-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 14px 20px;
+  border-radius: 16px;
+  text-align: center;
+  z-index: 10;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+  min-width: 140px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
