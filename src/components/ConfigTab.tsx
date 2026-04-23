@@ -238,7 +238,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
             placeholder="Ex: São Paulo, SP"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -260,7 +260,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Ex: Mochilão Europa"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -273,7 +273,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={goalAmount}
             onChange={(e) => setGoalAmount(e.target.value)}
             placeholder="15000"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -285,7 +285,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 

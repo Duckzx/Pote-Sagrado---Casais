@@ -344,7 +344,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       {/* Daily Motivational Quote */}
       <div className="text-center bg-cookbook-mural/50 border border-cookbook-border/50 rounded-xl px-5 py-3 -mt-4">
         <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>
-        <span className="font-serif italic text-xs text-cookbook-text/60">{dailyQuote.text}</span>
+        <span className="font-serif italic text-xs text-cookbook-text/80">{dailyQuote.text}</span>
       </div>
 
       {/* Countdown Widget */}

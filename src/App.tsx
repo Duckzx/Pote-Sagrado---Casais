@@ -146,7 +146,7 @@ function AppContent() {
             initial={{ opacity: 0, x: tabDirection * 15, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: tabDirection * -15, scale: 0.98 }}
-            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
           >
             <Suspense fallback={<TabSkeleton />}>
               {activeTab === 'home' && (

@@ -34,7 +34,7 @@ export const ColorBends: React.FC<ColorBendsProps> = ({
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full blur-[100px]"
+        className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full blur-[60px]"
         style={{ backgroundColor: color }}
       />
       <motion.div
@@ -48,7 +48,7 @@ export const ColorBends: React.FC<ColorBendsProps> = ({
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full blur-[120px]"
+        className="absolute top-[40%] -right-[20%] w-[80%] h-[80%] rounded-full blur-[80px]"
         style={{ backgroundColor: color }}
       />
     </div>

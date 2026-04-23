@@ -1,9 +1,14 @@
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 export async function getDestinationRecommendation(answers: string[]) {
   try {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      console.warn("VITE_GEMINI_API_KEY is missing. Please define it in your .env file.");
+      return null;
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
     const prompt = `Como um consultor de viagens de luxo para casais, o casal respondeu às seguintes preferências sobre o estilo de viagem deles:
 ${answers.join(', ')}.
 

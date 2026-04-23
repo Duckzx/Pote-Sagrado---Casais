@@ -26,7 +26,7 @@ const RealWater = () => {
   return (
     <group position={[0, positionY, 0]}>
       <mesh>
-        <cylinderGeometry args={[0.93, 0.93, fillHeight, 64, 16]} />
+        <cylinderGeometry args={[0.93, 0.93, fillHeight, 32, 8]} />
         <MeshTransmissionMaterial
           transmission={1}
           thickness={0.8}
@@ -38,12 +38,14 @@ const RealWater = () => {
           distortion={agitation}
           distortionScale={0.5}
           temporalDistortion={agitation > 0 ? 0.2 : 0}
+          samples={4}
+          resolution={256}
         />
       </mesh>
       {/* Surface ripples/highlight */}
       {fillHeight > 0.1 && (
         <mesh position={[0, fillHeight / 2 + 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.93, 64]} />
+          <circleGeometry args={[0.93, 32]} />
           <meshPhysicalMaterial 
             color="#ffffff" 
             transmission={0.5} 
@@ -72,7 +74,7 @@ const PouringStream = () => {
   return (
     <group position={[0, streamY, 0]}>
       <mesh scale={[streamScale, 1, streamScale]}>
-        <cylinderGeometry args={[0.1, 0.08, 6, 16]} />
+        <cylinderGeometry args={[0.1, 0.08, 6, 8]} />
         <MeshTransmissionMaterial
           transmission={1}
           thickness={0.5}
@@ -97,7 +99,7 @@ const GlassPot = () => {
     <group>
       {/* Main Glass Cylinder (open top) */}
       <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[1, 1, 3, 64, 1, true]} />
+        <cylinderGeometry args={[1, 1, 3, 32, 1, true]} />
         <meshPhysicalMaterial
           color="#ffffff"
           transmission={1}
@@ -112,7 +114,7 @@ const GlassPot = () => {
       </mesh>
       {/* Glass Bottom */}
       <mesh position={[0, -1.5, 0]}>
-        <cylinderGeometry args={[1, 1, 0.1, 64]} />
+        <cylinderGeometry args={[1, 1, 0.1, 32]} />
         <meshPhysicalMaterial
           color="#ffffff"
           transmission={1}
@@ -123,7 +125,7 @@ const GlassPot = () => {
       </mesh>
       {/* Glass Lip */}
       <mesh position={[0, 1.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1, 0.06, 32, 64]} />
+        <torusGeometry args={[1, 0.06, 16, 32]} />
         <meshPhysicalMaterial
           color="#ffffff"
           transmission={1}
@@ -163,7 +165,7 @@ const ThreeDScene: React.FC = () => {
           <RealWater />
           <PouringStream />
           {/* Bubbles in the water */}
-          <Sparkles count={40} scale={1.8} size={2} speed={0.8} opacity={0.4} color="#ffffff" position={[0, -0.2, 0]} />
+          <Sparkles count={20} scale={1.8} size={2} speed={0.8} opacity={0.4} color="#ffffff" position={[0, -0.2, 0]} />
         </group>
       </ThreeCanvas>
     </AbsoluteFill>
