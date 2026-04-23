@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Share2, TrendingUp, Heart, Sparkles, AlertCircle, Download } from 'lucide-react';
 import { WaterSpill } from './WaterSpill';
-import { toBlob } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -65,12 +65,12 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
       const element = document.getElementById('widget-card');
       if (!element) return;
 
-      const blob = await toBlob(element, { 
-        cacheBust: true,
-        pixelRatio: 1, 
-        backgroundColor: 'transparent'
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher quality
+        backgroundColor: null,
       });
 
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Falha ao gerar a imagem');
 
       const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
@@ -123,7 +123,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
             
             <h2 className="font-serif italic text-2xl text-white mb-2">Destino: {destination || "Nossa Viagem"}</h2>
             
-            <div className="rounded-2xl p-4 mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="backdrop-blur-md rounded-2xl p-4 mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-sans text-[9px] uppercase tracking-widest font-bold" style={{ color: '#E8E4D9' }}>Progresso Guardado</span>
                 <span className="font-sans text-xs font-bold" style={{ color: '#C5A059' }}>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSaved)}</span>
