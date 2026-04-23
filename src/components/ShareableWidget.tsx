@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Share2, TrendingUp, Heart, Sparkles, AlertCircle, Download } from 'lucide-react';
-
-import { toBlob } from 'html-to-image';
+import { WaterSpill } from './WaterSpill';
+import html2canvas from 'html2canvas';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -22,7 +22,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
 
   return (
     <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
+      <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
         <defs>
           <clipPath id="potClip">
             {/* This path perfectly traces the inside/border of the pot glass below */}
@@ -58,18 +58,27 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
   );
 };
 
+export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, totalSaved, destination, onClose }) => {
+  const [isExporting, setIsExporting] = useState(false);
+  const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
+
   const handleShare = async () => {
     try {
       setIsExporting(true);
+      // Give React a frame to render the "Exportando..." state before blocking the main thread
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const element = document.getElementById('widget-card');
       if (!element) return;
 
-      const blob = await toBlob(element, { 
-        cacheBust: true,
-        pixelRatio: 1, 
-        backgroundColor: 'transparent'
+      const canvas = await html2canvas(element, {
+        scale: 1, // Reduced quality to prevent mobile OOM crashes
+        backgroundColor: null,
+        logging: false,
+        useCORS: true,
       });
 
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Falha ao gerar a imagem');
 
       const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
