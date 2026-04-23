@@ -67,7 +67,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
 
       const blob = await toBlob(element, { 
         cacheBust: true,
-        pixelRatio: 2, 
+        pixelRatio: 1, 
         backgroundColor: 'transparent'
       });
 
@@ -123,7 +123,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
             
             <h2 className="font-serif italic text-2xl text-white mb-2">Destino: {destination || "Nossa Viagem"}</h2>
             
-            <div className="backdrop-blur-md rounded-2xl p-4 mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="rounded-2xl p-4 mt-6" style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-sans text-[9px] uppercase tracking-widest font-bold" style={{ color: '#E8E4D9' }}>Progresso Guardado</span>
                 <span className="font-sans text-xs font-bold" style={{ color: '#C5A059' }}>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSaved)}</span>
