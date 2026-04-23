@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Share2, TrendingUp, Heart, Sparkles, AlertCircle, Download } from 'lucide-react';
-import { WaterSpill } from './WaterSpill';
+
 import { toBlob } from 'html-to-image';
 
 interface ShareableWidgetProps {
@@ -14,50 +14,49 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
   const [isExporting, setIsExporting] = useState(false);
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   
-  // Custom Pot SVG static representation
-  const PotDrawing = () => {
-    // Determine how high the liquid rectangle goes.
-    // The bottle bottom is around Y=105, top is around Y=25. Max height is 80.
-    const fillHeightValue = (percentage / 100) * 80;
-    const yPos = 105 - fillHeightValue;
+const PotDrawing = ({ percentage }: { percentage: number }) => {
+  // Determine how high the liquid rectangle goes.
+  // The bottle bottom is around Y=105, top is around Y=25. Max height is 80.
+  const fillHeightValue = (percentage / 100) * 80;
+  const yPos = 105 - fillHeightValue;
 
-    return (
-      <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
-        <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
-          <defs>
-            <clipPath id="potClip">
-              {/* This path perfectly traces the inside/border of the pot glass below */}
-              <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
-            </clipPath>
-          </defs>
-          
-          <path d="M35 15h30" stroke="#E8E4D9" strokeWidth="8" strokeOpacity="0.4" strokeLinecap="round" />
-          <path d="M30 25h40" stroke="#E8E4D9" strokeWidth="6" strokeOpacity="0.6" strokeLinecap="round" />
-          
-          {/* Back/Glass Pot Body */}
-          <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
-          
-          {/* Liquid dynamically clipped */}
-          <g clipPath="url(#potClip)">
-            <rect 
-              x="0" 
-              y={yPos} 
-              width="100" 
-              height={fillHeightValue + 20} // +20 just to guarantee it fills to bottom
-              fill="rgba(197, 160, 89, 0.6)" 
-            />
-          </g>
+  return (
+    <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
+        <defs>
+          <clipPath id="potClip">
+            {/* This path perfectly traces the inside/border of the pot glass below */}
+            <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
+          </clipPath>
+        </defs>
+        
+        <path d="M35 15h30" stroke="#E8E4D9" strokeWidth="8" strokeOpacity="0.4" strokeLinecap="round" />
+        <path d="M30 25h40" stroke="#E8E4D9" strokeWidth="6" strokeOpacity="0.6" strokeLinecap="round" />
+        
+        {/* Back/Glass Pot Body */}
+        <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
+        
+        {/* Liquid dynamically clipped */}
+        <g clipPath="url(#potClip)">
+          <rect 
+            x="0" 
+            y={yPos} 
+            width="100" 
+            height={fillHeightValue + 20} // +20 just to guarantee it fills to bottom
+            fill="rgba(197, 160, 89, 0.6)" 
+          />
+        </g>
 
-          {/* Shine Highlight over the top */}
-          <path d="M45 40v30" stroke="#fff" strokeWidth="3" strokeOpacity="0.9" strokeLinecap="round" />
-        </svg>
-        {/* Overlay text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
-          <span className="font-serif text-3xl font-bold text-white drop-shadow-md">{percentage.toFixed(0)}%</span>
-        </div>
+        {/* Shine Highlight over the top */}
+        <path d="M45 40v30" stroke="#fff" strokeWidth="3" strokeOpacity="0.9" strokeLinecap="round" />
+      </svg>
+      {/* Overlay text */}
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
+        <span className="font-serif text-3xl font-bold text-white drop-shadow-md">{percentage.toFixed(0)}%</span>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   const handleShare = async () => {
     try {
@@ -119,7 +118,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
           <div className="relative z-10 text-center">
             <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold mb-4" style={{ color: '#C5A059' }}>Pote Sagrado</h3>
             
-            <PotDrawing />
+            <PotDrawing percentage={percentage} />
             
             <h2 className="font-serif italic text-2xl text-white mb-2">Destino: {destination || "Nossa Viagem"}</h2>
             
