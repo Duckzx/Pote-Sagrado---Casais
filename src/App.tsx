@@ -121,6 +121,8 @@ function AppContent() {
     handleCompleteOnboarding,
   } = useAppContext();
 
+  const [loginError, setLoginError] = React.useState<string | null>(null);
+
   if (!isAuthReady) {
     return (
       <div className="min-h-[100dvh] bg-cookbook-bg flex items-center justify-center">
@@ -128,8 +130,6 @@ function AppContent() {
       </div>
     );
   }
-
-  const [loginError, setLoginError] = React.useState<string | null>(null);
 
   const handleLoginClick = async () => {
     setLoginError(null);
