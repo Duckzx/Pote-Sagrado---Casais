@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
@@ -39,13 +41,44 @@ export const loginWithGoogle = async () => {
       throw error;
     }
     
+    // Catch popup blocked errors and fallback to redirect
     if (error?.code === 'auth/popup-blocked' || 
         error?.code === 'auth/popup-closed-by-user' ||
         error.message?.toLowerCase().includes('popup')) {
-      throw new Error('O login por pop-up foi bloqueado ou fechado. Se você estiver usando o navegador do Instagram, WhatsApp ou Safari, tente abrir o link em um navegador como Chrome ou Safari diretamente, ou desative o bloqueador de pop-ups.');
+      console.log('Popup blocked or closed, falling back to redirect...');
+      await signInWithRedirect(auth, provider);
+      return; // Stop execution here since we're redirecting
+    }
+
+    // Try redirect anyway as a last resort if it's some other weird auth error related to domains/iframes
+    if (error?.code?.startsWith('auth/') && error?.code !== 'auth/cancelled-popup-request') {
+      console.log('Unknown error, attempting redirect fallback...', error.code);
+      try {
+        await signInWithRedirect(auth, provider);
+        return;
+      } catch (redirectError: any) {
+        if (redirectError?.code === 'auth/unauthorized-domain') {
+          throw redirectError;
+        }
+      }
     }
 
     throw new Error('Erro ao tentar login com Google: ' + (error.message || 'Erro desconhecido'));
+  }
+};
+
+/**
+ * Handles the redirect result when the page loads after a redirect sign-in.
+ * Should be called once on app initialization.
+ */
+export const handleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      console.log('Redirect sign-in successful');
+    }
+  } catch (error) {
+    console.error('Error handling redirect result:', error);
   }
 };
 

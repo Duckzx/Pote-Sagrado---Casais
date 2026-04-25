@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
 import { TAB_ORDER } from '../types';
@@ -125,6 +125,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ---- Auth ----
   useEffect(() => {
+    // Check if the user is logging in from a redirect (e.g. from mobile Instagram browser bypassing popup)
+    handleRedirectResult();
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthReady(true);
