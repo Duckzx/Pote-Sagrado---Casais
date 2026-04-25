@@ -67,38 +67,24 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
     try {
       setIsExporting(true);
       
-      const originalNode = widgetRef.current;
-      if (!originalNode) throw new Error('Elemento não encontrado');
+      const node = widgetRef.current;
+      if (!node) throw new Error('Elemento não encontrado');
 
-      // 1. Criar um clone do nó
-      const clone = originalNode.cloneNode(true) as HTMLElement;
-      
-      // 2. Garantir que o clone tenha as dimensões corretas
-      const rect = originalNode.getBoundingClientRect();
-      clone.style.width = `${rect.width}px`;
-      clone.style.height = `${rect.height}px`;
-      clone.style.transform = 'none';
-      clone.style.animation = 'none';
-      clone.style.transition = 'none';
+      // Pequeno delay para garantir que qualquer animação de entrada terminou
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-      // 3. Adicionar ao contêiner temporário (fora da árvore do React)
-      const container = document.getElementById('capture-temp');
-      if (!container) throw new Error('Contêiner de captura não encontrado');
-      container.innerHTML = ''; // Limpar qualquer resíduo
-      container.appendChild(clone);
-
-      // Pequeno delay para garantir que o DOM renderizou o clone
-      await new Promise(resolve => requestAnimationFrame(resolve));
-
-      // 4. Capturar o clone
-      const dataUrl = await toPng(clone, {
+      // Capturar o nó original diretamente (já que não estamos mais usando Portals, é seguro)
+      const dataUrl = await toPng(node, {
         cacheBust: true,
         backgroundColor: '#1C1A17',
         pixelRatio: 2,
+        style: {
+          transform: 'scale(1)',
+          opacity: '1',
+          visibility: 'visible',
+        },
+        fontEmbedCSS: '', // Opcional: forçar inclusão de fontes se necessário
       });
-
-      // 5. Limpar o clone imediatamente
-      container.innerHTML = '';
 
       if (!dataUrl) throw new Error('Falha ao gerar a imagem');
 
