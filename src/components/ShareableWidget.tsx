@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { Sparkles, AlertCircle, Download } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -10,6 +10,7 @@ interface ShareableWidgetProps {
 }
 
 const PotDrawing = ({ percentage }: { percentage: number }) => {
+  const clipId = useId();
   const fillHeightValue = (percentage / 100) * 80;
   const yPos = 105 - fillHeightValue;
 
@@ -17,7 +18,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
     <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
       <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="potClipWidget">
+          <clipPath id={clipId}>
             <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
           </clipPath>
         </defs>
@@ -27,7 +28,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
         
         <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
         
-        <g clipPath="url(#potClipWidget)">
+        <g clipPath={`url(#${clipId})`}>
           <rect 
             x="0" 
             y={yPos} 
@@ -50,52 +51,70 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
   const [isExporting, setIsExporting] = useState(false);
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   const widgetRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleShare = useCallback(async () => {
+    if (!widgetRef.current || isExporting) return;
+
     try {
       setIsExporting(true);
-      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Pequeno delay para garantir que o estado de "isExporting" reflita na UI antes da captura
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (!widgetRef.current) return;
-
-      const canvas = await html2canvas(widgetRef.current, {
-        scale: 2,
-        backgroundColor: null, 
-        logging: false,
-        useCORS: true,
+      const blob = await toBlob(widgetRef.current, {
+        cacheBust: true,
+        backgroundColor: null,
+        style: {
+          transform: 'scale(1)', // Garantir escala normal durante captura
+        }
       });
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) throw new Error('Falha ao gerar a imagem');
+      if (!blob) throw new Error('Falha ao gerar a imagem');
 
-        const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
+      if (!isMounted.current) return;
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-            });
-          } catch (shareErr) {
-             console.error("Erro no popup de share:", shareErr);
+      const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+          });
+        } catch (shareErr: any) {
+          if (shareErr.name !== 'AbortError') {
+            console.error("Erro no popup de share:", shareErr);
           }
-        } else {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.download = 'pote-sagrado-status.png';
-          link.href = url;
-          link.click();
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
-        setIsExporting(false);
-      }, 'image/png');
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'pote-sagrado-status.png';
+        link.href = url;
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 2000);
+      }
 
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error("Erro ao compartilhar:", err);
       }
-      setIsExporting(false);
+    } finally {
+      if (isMounted.current) {
+        setIsExporting(false);
+      }
     }
-  }, [destination]);
+  }, [isExporting]);
 
   return (
     <div 
@@ -172,3 +191,4 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
     </div>
   );
 };
+
