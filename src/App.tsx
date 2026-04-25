@@ -33,16 +33,35 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   render() {
     if (this.state.hasError) {
       let message = "Ocorreu um erro inesperado.";
+      let stack = "";
       try {
-        const errInfo = JSON.parse(this.state.error?.message || '');
-        if (errInfo.error.includes('Missing or insufficient permissions')) {
-          message = "Você não tem permissão para realizar esta ação ou acessar estes dados.";
+        if (this.state.error) {
+          message = this.state.error.message || String(this.state.error);
+          stack = this.state.error.stack || "";
+          
+          try {
+            const errInfo = JSON.parse(this.state.error.message);
+            if (errInfo.error?.includes('Missing or insufficient permissions')) {
+              message = "Você não tem permissão para realizar esta ação ou acessar estes dados.";
+            } else {
+              message = errInfo.error || message;
+            }
+          } catch {}
         }
       } catch { /* fallback message */ }
       return (
-        <div className="min-h-[100dvh] bg-cookbook-bg flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="font-serif text-2xl text-cookbook-text mb-4">Ops! Algo deu errado.</h2>
-          <p className="font-sans text-sm text-cookbook-text/60 mb-8">{message}</p>
+        <div className="min-h-[100dvh] bg-cookbook-bg flex flex-col items-center justify-center p-6 text-center overflow-auto">
+          <h2 className="font-serif text-2xl text-red-500 mb-4">Ops! Algo deu errado.</h2>
+          <p className="font-sans text-sm text-cookbook-text/80 font-bold mb-2">Error:</p>
+          <p className="font-mono text-xs text-cookbook-text/60 mb-4 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-32 w-full">{message}</p>
+          {stack && (
+            <>
+              <p className="font-sans text-sm text-cookbook-text/80 font-bold mb-2">Stack:</p>
+              <pre className="font-mono text-[10px] text-cookbook-text/50 mb-8 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-64 w-full">
+                {stack}
+              </pre>
+            </>
+          )}
           <button 
             onClick={() => window.location.reload()}
             className="bg-cookbook-primary text-white px-6 py-3 rounded font-bold text-xs uppercase tracking-widest"

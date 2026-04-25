@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Share2, TrendingUp, Heart, Sparkles, AlertCircle, Download } from 'lucide-react';
-import { WaterSpill } from './WaterSpill';
-import html2canvas from 'html2canvas';
+import React, { useState, useCallback } from 'react';
+import { Sparkles, AlertCircle, Download } from 'lucide-react';
+import { toBlob } from 'html-to-image';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -20,8 +19,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
     <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
       <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
         <defs>
-          <clipPath id="potClip">
-            {/* This path perfectly traces the inside/border of the pot glass below */}
+          <clipPath id="potClipWidget">
             <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
           </clipPath>
         </defs>
@@ -33,12 +31,12 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
         <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
         
         {/* Liquid dynamically clipped */}
-        <g clipPath="url(#potClip)">
+        <g clipPath="url(#potClipWidget)">
           <rect 
             x="0" 
             y={yPos} 
             width="100" 
-            height={fillHeightValue + 20} // +20 just to guarantee it fills to bottom
+            height={fillHeightValue + 20} 
             fill="rgba(197, 160, 89, 0.6)" 
           />
         </g>
@@ -58,42 +56,44 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
   const [isExporting, setIsExporting] = useState(false);
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     try {
       setIsExporting(true);
-      // Give React a frame to render the "Exportando..." state before blocking the main thread
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Let React render the "Exportando..." state
+      await new Promise(resolve => setTimeout(resolve, 50));
 
       const element = document.getElementById('widget-card');
       if (!element) return;
 
-      const canvas = await html2canvas(element, {
-        scale: 1, // Reduced quality to prevent mobile OOM crashes
-        backgroundColor: null,
-        logging: false,
-        useCORS: true,
+      const blob = await toBlob(element, {
+        pixelRatio: 2, 
+        backgroundColor: 'rgba(0,0,0,0)', // Transparente 
+        cacheBust: true,
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+          margin: '0',
+          position: 'static'
+        }
       });
-
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('Falha ao gerar a imagem');
+      
+      if (!blob) throw new Error('Falha ao gerar a imagem do Widget');
 
       const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
 
-      // Check if navigator.canShare supports files
+      // Navigator share on mobile
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'Nosso Pote Sagrado',
-          text: `Já guardamos ${percentage.toFixed(0)}% para ${destination}!`,
         });
       } else {
-        // Fallback: trigger download
+        // Fallback to download
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = 'pote-sagrado-status.png';
         link.href = url;
         link.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
@@ -102,7 +102,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [destination]);
 
   return (
     <div 
