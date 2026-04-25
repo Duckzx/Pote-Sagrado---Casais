@@ -37,10 +37,9 @@ export const loginWithGoogle = async () => {
   } catch (error: any) {
     console.warn('Popup login failed, attempting redirect...', error.code, error.message);
     
-    // If it's an unauthorized domain, alert the user explicitly
+    // If it's an unauthorized domain, throw it to the UI to handle it gracefully
     if (error?.code === 'auth/unauthorized-domain') {
-      alert(`Domínio não autorizado pelo Firebase. Por favor, adicione este domínio (${window.location.hostname}) na lista de domínios autorizados do Firebase Console (Authentication > Settings > Authorized domains).`);
-      return;
+      throw error;
     }
 
     // Fallback to redirect for any other popup issue
@@ -48,7 +47,10 @@ export const loginWithGoogle = async () => {
       await signInWithRedirect(auth, provider);
     } catch (redirectError: any) {
       console.error('Error signing in with redirect:', redirectError);
-      alert('Erro ao tentar login com Google: ' + (redirectError.message || 'Erro desconhecido'));
+      if (redirectError?.code === 'auth/unauthorized-domain') {
+        throw redirectError;
+      }
+      throw new Error('Erro ao tentar login com Google: ' + (redirectError.message || 'Erro desconhecido'));
     }
   }
 };

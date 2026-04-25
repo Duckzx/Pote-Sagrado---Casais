@@ -110,6 +110,23 @@ function AppContent() {
     );
   }
 
+  const handleLoginClick = async () => {
+    try {
+      await loginWithGoogle();
+    } catch (e: any) {
+      if (e?.code === 'auth/unauthorized-domain') {
+        addToast(
+          'Domínio Não Autorizado', 
+          `Poxa! O Firebase não reconheceu este link (${window.location.hostname}). Lembre-se de adicioná-lo: 1. No Firebase (Auth > Settings > Authorized domains) e 2. No Google Cloud Console (OAuth 2.0 Web Client). Importante: digite apenas o domínio, sem o "https://"!`, 
+          'info',
+          15000 // give them more time to read
+        );
+      } else {
+        addToast('Ops!', e.message || 'Erro ao tentar entrar. Tente novamente!', 'info');
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-[100dvh] bg-cookbook-bg flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -124,7 +141,7 @@ function AppContent() {
           </div>
           
           <button
-            onClick={loginWithGoogle}
+            onClick={handleLoginClick}
             className="w-full bg-cookbook-text text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg transition-transform active:scale-95"
           >
             Entrar com Google

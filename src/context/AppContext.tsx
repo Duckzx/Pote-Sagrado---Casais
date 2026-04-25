@@ -103,12 +103,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const isInitialLoad = useRef<boolean>(true);
 
   // ---- Toasts ----
-  const addToast: AddToastFn = useCallback((title, message, type = 'info') => {
+  const addToast: AddToastFn = useCallback((title, message, type = 'info', duration = 5000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, title, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 5000);
+    }, duration);
   }, []);
 
   const removeToast = useCallback((id: string) => {

@@ -53,7 +53,7 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
 
 export type ToastType = 'info' | 'success' | 'milestone';
 
-export type AddToastFn = (title: string, message: string, type: ToastType) => void;
+export type AddToastFn = (title: string, message: string, type?: ToastType, duration?: number) => void;
 
 export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'config';
 

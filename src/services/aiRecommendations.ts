@@ -2,9 +2,9 @@ import { GoogleGenAI } from '@google/genai';
 
 export async function getDestinationRecommendation(answers: string[]) {
   try {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.warn("VITE_GEMINI_API_KEY is missing. Please define it in your .env file.");
+      console.warn("GEMINI_API_KEY is missing.");
       return null;
     }
     const ai = new GoogleGenAI({ apiKey });

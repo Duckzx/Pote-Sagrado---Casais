@@ -32,7 +32,10 @@ const THEMES = [
 export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, addToast }) => {
   const [destination, setDestination] = useState(currentDestination || '');
   const [origin, setOrigin] = useState(currentOrigin || '');
-  const [goalAmount, setGoalAmount] = useState((currentGoalAmount || 0).toString());
+  const [goalAmount, setGoalAmount] = useState(() => {
+    if (!currentGoalAmount) return '';
+    return (currentGoalAmount * 100).toFixed(0);
+  });
   const [theme, setTheme] = useState(currentTheme || 'cookbook');
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
   const [targetDate, setTargetDate] = useState(currentTargetDate || '');
@@ -48,7 +51,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
   useEffect(() => {
     setDestination(currentDestination || '');
     setOrigin(currentOrigin || '');
-    setGoalAmount((currentGoalAmount || 0).toString());
+    if (currentGoalAmount) {
+      setGoalAmount((currentGoalAmount * 100).toFixed(0));
+    } else {
+      setGoalAmount('');
+    }
     setTheme(currentTheme || 'cookbook');
     setChallenges(customChallenges || []);
     setTargetDate(currentTargetDate || '');
@@ -270,6 +277,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             type="text"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
+            onBlur={() => {
+              if (destination !== currentDestination) {
+                performSave(destination, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
+              }
+            }}
             placeholder="Ex: Mochilão Europa"
             className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
@@ -284,6 +296,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             inputMode="numeric"
             value={maskCurrency(goalAmount)}
             onChange={(e) => setGoalAmount(maskCurrency(e.target.value))}
+            onBlur={() => {
+              if (parseCurrencyString(goalAmount) !== currentGoalAmount) {
+                performSave(destination, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
+              }
+            }}
             placeholder="R$ 15.000,00"
             className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
