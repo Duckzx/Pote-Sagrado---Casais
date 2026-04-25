@@ -18,6 +18,8 @@ const DisputaTab = lazy(() => import('./components/DisputaTab').then(m => ({ def
 const ConfigTab = lazy(() => import('./components/ConfigTab').then(m => ({ default: m.ConfigTab })));
 
 import { RemotionIntro } from './components/RemotionIntro';
+import { ShareableWidget } from './components/ShareableWidget';
+import { createPortal } from 'react-dom';
 
 // ========================================
 // Error Boundary
@@ -119,6 +121,8 @@ function AppContent() {
     removeToast,
     showOnboarding,
     handleCompleteOnboarding,
+    showShareWidget,
+    setShowShareWidget,
   } = useAppContext();
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
@@ -280,6 +284,16 @@ function AppContent() {
       
       {showOnboarding && <OnboardingModal onComplete={handleCompleteOnboarding} />}
       {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
+
+      {showShareWidget && createPortal(
+        <ShareableWidget 
+          goalAmount={tripConfig.goalAmount} 
+          totalSaved={totalSaved} 
+          destination={tripConfig.destination} 
+          onClose={() => setShowShareWidget(false)} 
+        />,
+        document.body
+      )}
     </div>
   );
 }

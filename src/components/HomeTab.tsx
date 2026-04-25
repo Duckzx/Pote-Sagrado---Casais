@@ -47,6 +47,7 @@ const MOTIVATIONAL_QUOTES = [
 
 import { WaterSpill } from './WaterSpill';
 import { compressImage } from '../lib/imageUtils';
+import { useAppContext } from '../context/AppContext';
 
 import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
 
@@ -99,7 +100,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   const [isPotBreaking, setIsPotBreaking] = useState(false);
   const [isPotBroken, setIsPotBroken] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
-  const [showShareWidget, setShowShareWidget] = useState(false);
+  
+  const { 
+    handleCompleteOnboarding, 
+    setShowShareWidget 
+  } = useAppContext();
   
   // FAB quick deposit
   const [showQuickDeposit, setShowQuickDeposit] = useState(false);
@@ -759,15 +764,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         document.body
       )}
 
-      {showShareWidget && createPortal(
-        <ShareableWidget 
-          goalAmount={goalAmount} 
-          totalSaved={totalSaved} 
-          destination={destination} 
-          onClose={() => setShowShareWidget(false)} 
-        />,
-        document.body
-      )}
+      {/* ShareableWidget removed from here, moved to App.tsx root */}
     </div>
   );
 };

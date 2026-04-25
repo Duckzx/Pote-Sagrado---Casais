@@ -56,6 +56,10 @@ interface AppContextValue {
   canInstall: boolean;
   installPrompt: any | null;
   clearInstallPrompt: () => void;
+  
+  // Sharing
+  showShareWidget: boolean;
+  setShowShareWidget: (show: boolean) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -97,6 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
   const [theme, setTheme] = useState<ThemeId>(() => (localStorage.getItem('pote_theme') as ThemeId) || 'cookbook');
+  const [showShareWidget, setShowShareWidget] = useState(false);
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
@@ -294,6 +299,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     canInstall,
     installPrompt,
     clearInstallPrompt,
+    showShareWidget,
+    setShowShareWidget,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

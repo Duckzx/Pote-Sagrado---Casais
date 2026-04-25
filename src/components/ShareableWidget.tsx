@@ -10,7 +10,8 @@ interface ShareableWidgetProps {
 }
 
 const PotDrawing = ({ percentage }: { percentage: number }) => {
-  const clipId = useId();
+  const rawId = useId();
+  const clipId = `pot-clip-${rawId.replace(/:/g, '')}`;
   const fillHeightValue = (percentage / 100) * 80;
   const yPos = 105 - fillHeightValue;
 
