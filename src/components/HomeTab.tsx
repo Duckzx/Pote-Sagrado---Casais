@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+
 import { Plane, ArrowRight, Sparkles, Trash2, AlertCircle, Pencil, Plus, X, Heart, Trophy, Camera, Star, Share2 } from 'lucide-react';
 import { addDoc, collection, deleteDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
@@ -520,22 +520,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </div>
       </div>
 
-      {showAIModal && createPortal(
+      {showAIModal && (
         <AIAssistantModal 
           destination={destination} 
           origin={origin}
           onClose={() => setShowAIModal(false)} 
-        />,
-        document.getElementById('portal-root')!
+        />
       )}
 
-      {showDateModal && createPortal(
-        <CheapDateModal onClose={() => setShowDateModal(false)} currentUser={currentUser} />,
-        document.getElementById('portal-root')!
+      {showDateModal && (
+        <CheapDateModal onClose={() => setShowDateModal(false)} currentUser={currentUser} />
       )}
 
       {/* Edit Confirmation Modal */}
-      {depositToEdit && createPortal(
+      {depositToEdit && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
@@ -574,12 +572,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               </button>
             </div>
           </div>
-        </div>,
-        document.getElementById('portal-root')!
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
-      {depositToDelete && createPortal(
+      {depositToDelete && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div className="w-12 h-12 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
@@ -604,12 +601,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               </button>
             </div>
           </div>
-        </div>,
-        document.getElementById('portal-root')!
+        </div>
       )}
 
       {/* Modals placed inside HomeTab directly instead of via absolute inside container, or safely using portal */}
-      {showBreakConfirm && createPortal(
+      {showBreakConfirm && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-modal-backdrop"
           style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
@@ -639,8 +635,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               </button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {/* ========== FAB Quick Deposit ========== */}
@@ -655,7 +650,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       </button>
 
       {/* Quick Deposit Modal */}
-      {showQuickDeposit && createPortal(
+      {showQuickDeposit && (
         <div
           className="fixed inset-0 z-[60] flex items-end justify-center animate-modal-backdrop"
           style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}
@@ -754,18 +749,16 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               {isQuickSubmitting ? 'Guardando...' : (quickType === 'income' ? 'Guardar no Pote' : 'Registrar Gasto')}
             </button>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
-      {showWrapped && createPortal(
+      {showWrapped && (
         <WrappedModal 
           onClose={() => setShowWrapped(false)} 
           deposits={deposits}
           goalAmount={goalAmount}
           totalSaved={totalSaved}
-        />,
-        document.body
+        />
       )}
 
       {/* ShareableWidget removed from here, moved to App.tsx root */}

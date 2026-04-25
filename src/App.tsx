@@ -19,7 +19,7 @@ const ConfigTab = lazy(() => import('./components/ConfigTab').then(m => ({ defau
 
 import { RemotionIntro } from './components/RemotionIntro';
 import { ShareableWidget } from './components/ShareableWidget';
-import { createPortal } from 'react-dom';
+
 
 // ========================================
 // Error Boundary
@@ -285,14 +285,13 @@ function AppContent() {
       {showOnboarding && <OnboardingModal onComplete={handleCompleteOnboarding} />}
       {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
 
-      {showShareWidget && createPortal(
+      {showShareWidget && (
         <ShareableWidget 
           goalAmount={tripConfig.goalAmount} 
           totalSaved={totalSaved} 
           destination={tripConfig.destination} 
           onClose={() => setShowShareWidget(false)} 
-        />,
-        document.getElementById('portal-root')!
+        />
       )}
     </div>
   );
