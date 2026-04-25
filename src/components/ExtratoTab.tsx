@@ -112,7 +112,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       });
       playSuccessSound();
       vibrate([30, 30]);
-      addToast('Atualizado', 'Transação editada com sucesso.', 'success');
+      addToast('Tudo Certo!', 'Transação editada com sucesso. Fica o registro!', 'success');
       setEditing(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'deposits');
@@ -124,7 +124,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
     if (!deleting) return;
     try {
       await deleteDoc(doc(db, 'deposits', deleting.id));
-      addToast('Removido', 'Transação excluída.', 'info');
+      addToast('Apagado!', 'Transação excluída. Foi pro buraco negro.', 'info');
       setDeleting(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'deposits');

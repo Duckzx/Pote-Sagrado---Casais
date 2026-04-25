@@ -48,6 +48,8 @@ const MOTIVATIONAL_QUOTES = [
 import { WaterSpill } from './WaterSpill';
 import { compressImage } from '../lib/imageUtils';
 
+import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
+
 const MilestoneTracker = ({ totalSaved, goalAmount, onRewardClick }: { totalSaved: number, goalAmount: number, onRewardClick: () => void }) => {
   if (goalAmount <= 0) return null;
   const pct = (totalSaved / goalAmount) * 100;
@@ -126,7 +128,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   };
 
   const handleQuickDeposit = async () => {
-    const parsedAmount = Number(quickAmount.replace(',', '.'));
+    const parsedAmount = parseCurrencyString(quickAmount);
     if (!quickAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     setIsQuickSubmitting(true);
     try {
@@ -153,9 +155,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       if (quickType === 'income') {
         playCoinSound();
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 }, colors: ['#8E7F6D', '#C5A059', '#E8E4D9'] });
-        addToast('Guardado!', `+R$ ${parsedAmount.toFixed(2)} no pote!`, 'success');
+        addToast('Booooooooa!', `+R$ ${parsedAmount.toFixed(2)} no pote. Um passo mais perto da viagem!`, 'success');
       } else {
-        addToast('Gasto Registrado', `-R$ ${parsedAmount.toFixed(2)}`, 'info');
+        addToast('Tudo bem, acontece...', `-R$ ${parsedAmount.toFixed(2)}. Da próxima a gente pensa duas vezes!`, 'info');
       }
       setShowQuickDeposit(false);
       setQuickAmount('');
@@ -217,17 +219,18 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
 
   const handleEditClick = (deposit: any) => {
     setDepositToEdit(deposit);
-    setEditAmount(deposit.amount.toString());
+    setEditAmount(maskCurrency(deposit.amount.toFixed(2).replace('.', '')));
     setEditDescription(deposit.action || '');
   };
 
   const confirmEdit = async () => {
-    if (!depositToEdit || !editAmount || isNaN(Number(editAmount)) || Number(editAmount) <= 0) return;
+    const parsedAmount = parseCurrencyString(editAmount);
+    if (!depositToEdit || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     
     setIsEditing(true);
     try {
       await setDoc(doc(db, 'deposits', depositToEdit.id), {
-        amount: Number(editAmount),
+        amount: parsedAmount,
         action: editDescription
       }, { merge: true });
       
@@ -531,13 +534,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
             <div className="space-y-4 mb-6">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                  placeholder="0,00"
-                  className="w-full bg-cookbook-bg border border-cookbook-border rounded py-3 pl-12 pr-4 font-serif text-2xl text-cookbook-text focus:outline-none focus:border-red-300 transition-colors"
+                  onChange={(e) => setEditAmount(maskCurrency(e.target.value))}
+                  placeholder="R$ 0,00"
+                  className="w-full bg-cookbook-bg border border-cookbook-border rounded py-3 pr-4 font-serif text-2xl text-center text-cookbook-text focus:outline-none focus:border-red-300 transition-colors"
                 />
               </div>
               <input
@@ -681,13 +684,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             
             <div className="space-y-3 mb-5">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={quickAmount}
-                  onChange={(e) => setQuickAmount(e.target.value)}
-                  placeholder="0,00"
-                  className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl py-4 pl-12 pr-4 font-serif text-2xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  onChange={(e) => setQuickAmount(maskCurrency(e.target.value))}
+                  placeholder="R$ 0,00"
+                  className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl py-4 pr-4 font-serif text-3xl text-cookbook-text text-center focus:outline-none focus:border-cookbook-primary transition-colors"
                   autoFocus
                 />
               </div>
@@ -734,7 +737,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
             
             <button
               onClick={handleQuickDeposit}
-              disabled={!quickAmount || isQuickSubmitting || isNaN(Number(quickAmount.replace(',', '.'))) || Number(quickAmount.replace(',', '.')) <= 0}
+              disabled={!quickAmount || isQuickSubmitting || isNaN(parseCurrencyString(quickAmount)) || parseCurrencyString(quickAmount) <= 0}
               className={`w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98] ${
                 quickType === 'expense' ? 'bg-red-500 hover:bg-red-600' : 'bg-cookbook-primary hover:bg-cookbook-primary-hover'
               }`}

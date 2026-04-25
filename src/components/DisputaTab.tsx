@@ -152,9 +152,22 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           <p className="font-sans text-xs uppercase tracking-widest text-cookbook-primary font-bold mb-1">
             {users[0].name} está na frente!
           </p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed">
+          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-4">
             Se o mês acabasse hoje, {users[1].name} pagaria a recompensa.
           </p>
+
+          <button 
+            onClick={() => {
+              // Trigger a funny buzz/vibrate if available
+              if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate([200, 100, 200]);
+              }
+              alert(`Você apertou o botão do orgulho! Lembre ${users[1].name} de que você está na liderança e mande ele(a) ir aquecendo pra pagar o castigo!`);
+            }}
+            className="w-full bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-lg font-bold"
+          >
+            Notificar Vantagem (Físico)
+          </button>
           
           <div className="mt-4 pt-4 border-t border-cookbook-border">
             <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">

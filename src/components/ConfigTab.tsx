@@ -7,6 +7,9 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { AIAkinatorModal } from './AIAkinatorModal';
 import { InstallPrompt } from './InstallPrompt';
 
+import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
+import { ORGANIC_PUNISHMENTS } from '../data/punishments';
+
 interface ConfigTabProps {
   currentDestination: string;
   currentOrigin: string;
@@ -162,51 +165,59 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     }
   };
 
-  const handleSave = async () => {
+  const performSave = async (destToSave: string, amountToSave: string, originToSave: string, challengesToSave: any[], targetDateToSave: string, prizeToSave: string, themeToSave: string) => {
     setIsSaving(true);
     try {
-      // Geocode destination
-      let lat = 0;
-      let lng = 0;
-      if (destination) {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destination)}`);
-          const data = await res.json();
-          if (data && data.length > 0) {
-            lat = parseFloat(data[0].lat);
-            lng = parseFloat(data[0].lon);
-          }
-        } catch (e) {
-          console.error("Geocoding failed", e);
-        }
-      }
+      // Clean amount
+      let parsedAmount = parseCurrencyString(amountToSave);
+      if (isNaN(parsedAmount)) parsedAmount = 0;
 
+      // Optimistic save without waiting for geocoding
       await setDoc(doc(db, 'trip_config', 'main'), {
-        destination,
-        origin,
-        goalAmount: Number(goalAmount),
-        lat,
-        lng,
-        customChallenges: challenges,
-        targetDate,
-        monthlyPrize: prize,
+        destination: destToSave,
+        origin: originToSave,
+        goalAmount: parsedAmount,
+        customChallenges: challengesToSave,
+        targetDate: targetDateToSave,
+        monthlyPrize: prizeToSave,
         updatedAt: serverTimestamp()
       }, { merge: true });
 
       if (auth.currentUser) {
         await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          theme,
+          theme: themeToSave,
           displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0]
         }, { merge: true });
       }
 
       addToast('Salvo!', 'Configurações salvas com sucesso!', 'success');
+
+      // Do geocoding in background
+      if (destToSave) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destToSave)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              setDoc(doc(db, 'trip_config', 'main'), {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+              }, { merge: true });
+            }
+          })
+          .catch(e => console.error("Geocoding failed", e));
+      }
+
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
     } finally {
       setIsSaving(false);
     }
   };
+
+  const handleSave = () => {
+    performSave(destination, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
+  };
+
 
   return (
     <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-8">
@@ -252,7 +263,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
               className="flex items-center space-x-1 text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-gold hover:text-cookbook-primary transition-colors"
             >
               <Sparkles size={10} />
-              <span>Oráculo IA</span>
+              <span>Bússola Prática</span>
             </button>
           </div>
           <input
@@ -269,10 +280,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             Meta Financeira (R$)
           </label>
           <input
-            type="number"
-            value={goalAmount}
-            onChange={(e) => setGoalAmount(e.target.value)}
-            placeholder="15000"
+            type="text"
+            inputMode="numeric"
+            value={maskCurrency(goalAmount)}
+            onChange={(e) => setGoalAmount(maskCurrency(e.target.value))}
+            placeholder="R$ 15.000,00"
             className="w-full bg-cookbook-mural border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
@@ -290,14 +302,26 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
         </div>
 
         <div className="space-y-2">
-          <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-            Recompensa da Batalha (Opcional)
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
+              Recompensa da Batalha (Opcional)
+            </label>
+            <button 
+              onClick={() => {
+                const randomPunishment = ORGANIC_PUNISHMENTS[Math.floor(Math.random() * ORGANIC_PUNISHMENTS.length)];
+                setPrize(randomPunishment);
+              }}
+              className="flex items-center space-x-1 text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-gold hover:text-cookbook-primary transition-colors"
+            >
+              <Sparkles size={10} />
+              <span>Sortear Castigo</span>
+            </button>
+          </div>
           <input
             type="text"
             value={prize}
             onChange={(e) => setPrize(e.target.value)}
-            placeholder="Ex: Perdedor paga o lanche"
+            placeholder="Ex: Perdedor lava a louça da semana"
             className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
@@ -394,8 +418,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
           onClose={() => setShowAkinator(false)}
           onSelectDestination={(dest) => {
             setDestination(dest);
+            performSave(dest, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
             setShowAkinator(false);
-            addToast('Destino Escolhido', 'Não esqueça de salvar as configurações!', 'success');
           }}
         />
       )}

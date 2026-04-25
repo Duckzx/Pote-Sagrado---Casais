@@ -233,10 +233,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const milestones = [25, 50, 75, 90, 100];
       for (const milestone of milestones) {
         if (prevPercentage < milestone && currentPercentage >= milestone) {
-          const mTitle = milestone === 100 ? '🎉 META ATINGIDA! 🎉' : 'Marco Alcançado!';
+          const mTitle = milestone === 100 ? '🎉 META ATINGIDA! 🎉' : 'Uhuuul! Um passo mais perto!';
           const mBody = milestone === 100
-            ? 'Vocês conseguiram! O Pote Sagrado está cheio!'
-            : `Vocês chegaram a ${milestone}% da meta! Continuem assim!`;
+            ? 'Aêê! O pote tá cheio! Bora quebrar e fazer as malas?'
+            : `Vocês bateram ${milestone}% da meta! Orgulho define.`;
           addToast(mTitle, mBody, 'milestone');
           break;
         }

@@ -10,10 +10,6 @@ interface ShareableWidgetProps {
   onClose: () => void;
 }
 
-export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, totalSaved, destination, onClose }) => {
-  const [isExporting, setIsExporting] = useState(false);
-  const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
-  
 const PotDrawing = ({ percentage }: { percentage: number }) => {
   // Determine how high the liquid rectangle goes.
   // The bottle bottom is around Y=105, top is around Y=25. Max height is 80.

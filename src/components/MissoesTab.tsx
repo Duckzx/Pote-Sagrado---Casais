@@ -311,7 +311,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: updatedCustom }, { merge: true });
       }
       
-      addToast('Atualizado', 'Missão editada com sucesso!', 'success');
+      addToast('Tudo Certo!', 'Missão editada com sucesso, mestre.', 'success');
       setEditingMission(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
@@ -333,7 +333,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         const updated = customChallenges.filter(c => c.id !== mission.id);
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: updated }, { merge: true });
       }
-      addToast('Removido', 'Missão removida.', 'info');
+      addToast('Missão Abortada =(', 'Sumiu do mapa!', 'info');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
     }
@@ -366,7 +366,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: [...customChallenges, newCustom] }, { merge: true });
       }
 
-      addToast('Criado', 'Nova missão adicionada!', 'success');
+      addToast('Boa Missão!', 'Nova tarefa adicionada ao painel. Bora fazer!', 'success');
       setNewTitle('');
       setNewDesc('');
       setNewReward('');
