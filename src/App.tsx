@@ -130,7 +130,9 @@ function AppContent() {
   if (!user) {
     return (
       <div className="min-h-[100dvh] bg-cookbook-bg flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
         <ColorBends color="#8E7F6D" speed={0.2} frequency={1.0} noise={0.15} bandWidth={0.14} rotation={90} fadeTop={0.75} iterations={1} intensity={1.3} />
+
         
         <div className="relative z-10 text-center space-y-8 max-w-sm">
           <div className="space-y-2">
