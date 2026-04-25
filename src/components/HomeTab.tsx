@@ -520,20 +520,22 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </div>
       </div>
 
-      {showAIModal && (
+      {showAIModal && createPortal(
         <AIAssistantModal 
           destination={destination} 
           origin={origin}
           onClose={() => setShowAIModal(false)} 
-        />
+        />,
+        document.getElementById('portal-root')!
       )}
 
-      {showDateModal && (
-        <CheapDateModal onClose={() => setShowDateModal(false)} currentUser={currentUser} />
+      {showDateModal && createPortal(
+        <CheapDateModal onClose={() => setShowDateModal(false)} currentUser={currentUser} />,
+        document.getElementById('portal-root')!
       )}
 
       {/* Edit Confirmation Modal */}
-      {depositToEdit && (
+      {depositToEdit && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <h3 className="font-serif text-xl text-cookbook-text mb-4">Editar {depositToEdit.type === 'expense' ? 'Gasto' : 'Economia'}</h3>
@@ -572,11 +574,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('portal-root')!
       )}
 
       {/* Delete Confirmation Modal */}
-      {depositToDelete && (
+      {depositToDelete && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="bg-cookbook-bg border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div className="w-12 h-12 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
@@ -601,7 +604,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.getElementById('portal-root')!
       )}
 
       {/* Modals placed inside HomeTab directly instead of via absolute inside container, or safely using portal */}

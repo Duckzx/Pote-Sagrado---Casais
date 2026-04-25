@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, useId } from 'react';
 import { Sparkles, AlertCircle, Download } from 'lucide-react';
-import { toBlob } from 'html-to-image';
+import { toPng } from 'html-to-image';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -69,17 +69,21 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
       
       // Pequeno delay para garantir que o estado de "isExporting" reflita na UI antes da captura
       await new Promise(resolve => requestAnimationFrame(resolve));
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const blob = await toBlob(widgetRef.current, {
+      const dataUrl = await toPng(widgetRef.current, {
         cacheBust: true,
-        backgroundColor: null,
+        backgroundColor: '#1C1A17',
+        pixelRatio: 2,
         style: {
-          transform: 'scale(1)', // Garantir escala normal durante captura
+          transform: 'scale(1)',
         }
       });
 
-      if (!blob) throw new Error('Falha ao gerar a imagem');
+      if (!dataUrl) throw new Error('Falha ao gerar a imagem');
+
+      if (!isMounted.current) return;
+
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
 
       if (!isMounted.current) return;
 
@@ -119,15 +123,15 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-modal-backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-6"
       style={{ background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-sm relative"
+        className="relative bg-[#1C1A17] rounded-[2rem] border border-[#C5A059]/20 shadow-2xl overflow-hidden max-w-sm w-full"
         onClick={e => e.stopPropagation()}
       >
-        <div ref={widgetRef} className="rounded-3xl p-8 shadow-2xl overflow-hidden relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
+        <div ref={widgetRef} className="p-8 relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
           <div className="absolute top-0 right-0 p-3 opacity-20">
             <Sparkles size={100} color="#C5A059" />
           </div>

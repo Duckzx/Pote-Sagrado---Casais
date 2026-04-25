@@ -292,7 +292,7 @@ function AppContent() {
           destination={tripConfig.destination} 
           onClose={() => setShowShareWidget(false)} 
         />,
-        document.body
+        document.getElementById('portal-root')!
       )}
     </div>
   );
