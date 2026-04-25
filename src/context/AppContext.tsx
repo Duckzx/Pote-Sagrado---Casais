@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { auth, db, handleRedirectResult } from '../firebase';
+import { auth, db } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
 import { TAB_ORDER } from '../types';
@@ -125,9 +125,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ---- Auth ----
   useEffect(() => {
-    // Handle redirect result (if user was redirected back from Google sign-in)
-    handleRedirectResult();
-
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthReady(true);

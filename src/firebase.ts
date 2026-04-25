@@ -3,8 +3,6 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   signOut
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
@@ -35,40 +33,22 @@ export const loginWithGoogle = async () => {
   try {
     await signInWithPopup(auth, provider);
   } catch (error: any) {
-    console.warn('Popup login failed, attempting redirect...', error.code, error.message);
+    console.warn('Popup login failed.', error.code, error.message);
     
-    // If it's an unauthorized domain, throw it to the UI to handle it gracefully
     if (error?.code === 'auth/unauthorized-domain') {
       throw error;
     }
-
-    // Fallback to redirect for any other popup issue
-    try {
-      await signInWithRedirect(auth, provider);
-    } catch (redirectError: any) {
-      console.error('Error signing in with redirect:', redirectError);
-      if (redirectError?.code === 'auth/unauthorized-domain') {
-        throw redirectError;
-      }
-      throw new Error('Erro ao tentar login com Google: ' + (redirectError.message || 'Erro desconhecido'));
+    
+    if (error?.code === 'auth/popup-blocked' || 
+        error?.code === 'auth/popup-closed-by-user' ||
+        error.message?.toLowerCase().includes('popup')) {
+      throw new Error('O login por pop-up foi bloqueado ou fechado. Se você estiver usando o navegador do Instagram, WhatsApp ou Safari, tente abrir o link em um navegador como Chrome ou Safari diretamente, ou desative o bloqueador de pop-ups.');
     }
+
+    throw new Error('Erro ao tentar login com Google: ' + (error.message || 'Erro desconhecido'));
   }
 };
 
-/**
- * Handles the redirect result when the page loads after a redirect sign-in.
- * Should be called once on app initialization.
- */
-export const handleRedirectResult = async () => {
-  try {
-    const result = await getRedirectResult(auth);
-    if (result) {
-      console.log('Redirect sign-in successful');
-    }
-  } catch (error) {
-    console.error('Error handling redirect result:', error);
-  }
-};
 
 export const logout = async () => {
   try {
