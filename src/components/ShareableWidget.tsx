@@ -67,16 +67,38 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
     try {
       setIsExporting(true);
       
-      // Pequeno delay para garantir que o estado de "isExporting" reflita na UI antes da captura
+      const originalNode = widgetRef.current;
+      if (!originalNode) throw new Error('Elemento não encontrado');
+
+      // 1. Criar um clone do nó
+      const clone = originalNode.cloneNode(true) as HTMLElement;
+      
+      // 2. Garantir que o clone tenha as dimensões corretas
+      const rect = originalNode.getBoundingClientRect();
+      clone.style.width = `${rect.width}px`;
+      clone.style.height = `${rect.height}px`;
+      clone.style.transform = 'none';
+      clone.style.animation = 'none';
+      clone.style.transition = 'none';
+
+      // 3. Adicionar ao contêiner temporário (fora da árvore do React)
+      const container = document.getElementById('capture-temp');
+      if (!container) throw new Error('Contêiner de captura não encontrado');
+      container.innerHTML = ''; // Limpar qualquer resíduo
+      container.appendChild(clone);
+
+      // Pequeno delay para garantir que o DOM renderizou o clone
       await new Promise(resolve => requestAnimationFrame(resolve));
-      const dataUrl = await toPng(widgetRef.current, {
+
+      // 4. Capturar o clone
+      const dataUrl = await toPng(clone, {
         cacheBust: true,
         backgroundColor: '#1C1A17',
         pixelRatio: 2,
-        style: {
-          transform: 'scale(1)',
-        }
       });
+
+      // 5. Limpar o clone imediatamente
+      container.innerHTML = '';
 
       if (!dataUrl) throw new Error('Falha ao gerar a imagem');
 
