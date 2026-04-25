@@ -1,8 +1,5 @@
 # 🏺 Pote Sagrado — Finanças para Casais
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" alt="Banner Pote Sagrado" width="100%">
-  
   <p align="center">
     <strong>Transformando sonhos em realidade, um centavo de cada vez.</strong>
   </p>
