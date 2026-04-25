@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Sparkles, AlertCircle, Download } from 'lucide-react';
-import { toBlob } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -10,14 +10,12 @@ interface ShareableWidgetProps {
 }
 
 const PotDrawing = ({ percentage }: { percentage: number }) => {
-  // Determine how high the liquid rectangle goes.
-  // The bottle bottom is around Y=105, top is around Y=25. Max height is 80.
   const fillHeightValue = (percentage / 100) * 80;
   const yPos = 105 - fillHeightValue;
 
   return (
     <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
-      <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible">
+      <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="potClipWidget">
             <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
@@ -27,10 +25,8 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
         <path d="M35 15h30" stroke="#E8E4D9" strokeWidth="8" strokeOpacity="0.4" strokeLinecap="round" />
         <path d="M30 25h40" stroke="#E8E4D9" strokeWidth="6" strokeOpacity="0.6" strokeLinecap="round" />
         
-        {/* Back/Glass Pot Body */}
         <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
         
-        {/* Liquid dynamically clipped */}
         <g clipPath="url(#potClipWidget)">
           <rect 
             x="0" 
@@ -41,10 +37,8 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
           />
         </g>
 
-        {/* Shine Highlight over the top */}
         <path d="M45 40v30" stroke="#fff" strokeWidth="3" strokeOpacity="0.9" strokeLinecap="round" />
       </svg>
-      {/* Overlay text */}
       <div className="absolute inset-0 flex flex-col items-center justify-end pb-8">
         <span className="font-serif text-3xl font-bold text-white drop-shadow-md">{percentage.toFixed(0)}%</span>
       </div>
@@ -55,51 +49,50 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
 export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, totalSaved, destination, onClose }) => {
   const [isExporting, setIsExporting] = useState(false);
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
+  const widgetRef = useRef<HTMLDivElement>(null);
 
   const handleShare = useCallback(async () => {
     try {
       setIsExporting(true);
-      // Let React render the "Exportando..." state
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      const element = document.getElementById('widget-card');
-      if (!element) return;
+      if (!widgetRef.current) return;
 
-      const blob = await toBlob(element, {
-        pixelRatio: 2, 
-        backgroundColor: 'rgba(0,0,0,0)', // Transparente 
-        cacheBust: true,
-        style: {
-          transform: 'scale(1)',
-          transformOrigin: 'top left',
-          margin: '0',
-          position: 'static'
-        }
+      const canvas = await html2canvas(widgetRef.current, {
+        scale: 2,
+        backgroundColor: null, 
+        logging: false,
+        useCORS: true,
       });
-      
-      if (!blob) throw new Error('Falha ao gerar a imagem do Widget');
 
-      const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error('Falha ao gerar a imagem');
 
-      // Navigator share on mobile
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-        });
-      } else {
-        // Fallback to download
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = 'pote-sagrado-status.png';
-        link.href = url;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
+        const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+            });
+          } catch (shareErr) {
+             console.error("Erro no popup de share:", shareErr);
+          }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = 'pote-sagrado-status.png';
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        setIsExporting(false);
+      }, 'image/png');
+
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error("Erro ao compartilhar:", err);
       }
-    } finally {
       setIsExporting(false);
     }
   }, [destination]);
@@ -114,8 +107,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
         className="w-full max-w-sm relative"
         onClick={e => e.stopPropagation()}
       >
-        {/* Card for Sharing / "Widget View" */}
-        <div id="widget-card" className="rounded-3xl p-8 shadow-2xl overflow-hidden relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
+        <div ref={widgetRef} className="rounded-3xl p-8 shadow-2xl overflow-hidden relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
           <div className="absolute top-0 right-0 p-3 opacity-20">
             <Sparkles size={100} color="#C5A059" />
           </div>
