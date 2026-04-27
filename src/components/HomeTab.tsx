@@ -107,6 +107,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   ], [destination]);
 
   const progress = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
+  const isGoalReached = progress >= 100;
+  const [showBreakPotModal, setShowBreakPotModal] = useState(false);
+  const [potPhoto, setPotPhoto] = useState<string | null>(null);
+  
   const flightsUrl = `https://www.google.com/travel/flights?q=Voos+de+${encodeURIComponent(origin || 'Brasil')}+para+${encodeURIComponent(destination)}`;
 
   let paceMessage = '';
@@ -191,10 +195,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="h-1.5 w-full bg-cookbook-border rounded-full overflow-hidden">
+      <div className="space-y-3">
+        <div className="h-2 w-full bg-cookbook-border rounded-full overflow-hidden shadow-inner">
           <div 
-            className="h-full bg-cookbook-primary transition-all duration-1000 ease-out"
+            className={`h-full transition-all duration-1000 ease-out ${isGoalReached ? 'bg-gradient-to-r from-cookbook-primary to-cookbook-gold animate-pulse' : 'bg-cookbook-primary'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -202,7 +206,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
             {progress.toFixed(1)}% concluído
           </div>
-          {paceMessage && (
+          {isGoalReached ? (
+            <button 
+              onClick={() => setShowBreakPotModal(true)}
+              className="font-sans text-[9px] uppercase tracking-widest text-white font-bold bg-cookbook-primary px-3 py-1 rounded-full shadow-lg animate-bounce hover:bg-cookbook-gold transition-colors"
+            >
+              🔨 QUEBRAR O POTE!
+            </button>
+          ) : paceMessage && (
             <div className="font-sans text-[9px] uppercase tracking-widest text-cookbook-primary font-bold bg-cookbook-primary/10 px-2 py-0.5 rounded">
               {paceMessage}
             </div>
@@ -278,7 +289,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       />
 
       {/* Savings Evolution Chart */}
-      <SavingsChart deposits={deposits} goalAmount={goalAmount} />
+      <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-4 shadow-sm">
+        <SavingsChart deposits={deposits} goalAmount={goalAmount} />
+      </div>
 
       {/* Inspirações (Circular Gallery) */}
       <div className="space-y-4">
@@ -297,7 +310,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
         </h3>
         <div className="w-full flex justify-center">
           {deposits.length === 0 ? (
-            <div className="text-center py-8 px-4 bg-cookbook-bg border border-cookbook-border border-dashed rounded w-full">
+            <div className="text-center py-8 px-4 bg-cookbook-bg border border-cookbook-border border-dashed rounded-xl w-full">
               <div className="w-12 h-12 bg-cookbook-bg rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl">☕</span>
               </div>
@@ -443,6 +456,66 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
       >
         <Plus size={24} strokeWidth={2.5} />
       </button>
+
+      {/* Break Pot Modal */}
+      {showBreakPotModal && createPortal(
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 animate-modal-backdrop" style={{ background: 'rgba(44,42,38,0.9)', backdropFilter: 'blur(10px)' }}>
+          <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full max-w-sm p-8 shadow-2xl relative text-center animate-modal-enter overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary" />
+            
+            <button onClick={() => setShowBreakPotModal(false)} className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text">
+              <X size={20} />
+            </button>
+
+            <div className="mb-6">
+              <div className="w-20 h-20 mx-auto bg-cookbook-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Trophy size={40} className="text-cookbook-primary" />
+              </div>
+              <h3 className="font-serif text-2xl text-cookbook-text mb-2">Meta Alcançada!</h3>
+              <p className="font-sans text-xs text-cookbook-text/60 uppercase tracking-widest font-bold">Hora de realizar o sonho</p>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              <div className="aspect-video bg-cookbook-bg border-2 border-dashed border-cookbook-border rounded-xl flex flex-col items-center justify-center relative overflow-hidden group">
+                {potPhoto ? (
+                  <img src={potPhoto} alt="Momento da conquista" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setPotPhoto(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    />
+                    <Plus size={24} className="text-cookbook-text/30 mb-2 group-hover:text-cookbook-primary transition-colors" />
+                    <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">Adicionar Foto do Momento</span>
+                  </>
+                )}
+              </div>
+              <p className="font-serif italic text-sm text-cookbook-text/70">"O que o Pote Sagrado uniu, a viagem eternizará."</p>
+            </div>
+
+            <button 
+              onClick={() => {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                addToast('PARABÉNS!', 'Vocês conseguiram! Aproveitem a viagem!', 'milestone');
+                setShowBreakPotModal(false);
+              }}
+              className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-xl hover:bg-cookbook-primary-hover transition-all active:scale-95"
+            >
+              ✨ FINALIZAR E CELEBRAR
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Quick Deposit Modal */}
       {showQuickDeposit && createPortal(

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #FDFBF7;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 80px;
+        color: #2C2A26;
+        font-family: 'Inter', sans-serif;
+        position: relative;
+      }
+      .slide-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #8E7F6D;
+        margin-bottom: 10px;
+      }
+      .slide-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: #2C2A26;
+        margin-bottom: 60px;
+      }
+      .tech-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        width: 100%;
+        max-width: 1100px;
+      }
+      .tech-item {
+        border-top: 1px solid #C5A059;
+        padding-top: 20px;
+      }
+      .tech-category {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #C5A059;
+        margin-bottom: 10px;
+      }
+      .tech-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #2C2A26;
+        margin-bottom: 10px;
+      }
+      .tech-desc {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #2C2A26;
+        opacity: 0.8;
+      }
+      .vertical-line {
+        position: absolute;
+        top: 0;
+        right: 40px;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent, #8E7F6D, transparent);
+        opacity: 0.2;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <h2 class="slide-title">Tecnologia e Arquitetura</h2>
+        <p class="slide-subtitle">Base Sólida, Escalável e de Alta Performance</p>
+        
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="tech-category">Frontend & UX</div>
+                <div class="tech-name">React + Vite + TS</div>
+                <p class="tech-desc">Interface ultra-rápida e tipagem forte para manutenção sustentável. Estilização com TailwindCSS e animações fluidas via Framer Motion.</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-category">Backend & Real-time</div>
+                <div class="tech-name">Firebase Ecosystem</div>
+                <p class="tech-desc">Firestore para sincronização de dados em tempo real entre parceiros e Firebase Auth para segurança de nível bancário.</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-category">Inteligência Artificial</div>
+                <div class="tech-name">Gemini AI Integration</div>
+                <p class="tech-desc">Consultoria de viagem inteligente e análise de dados para fornecer insights personalizados de economia e destinos.</p>
+            </div>
+            <div class="tech-item">
+                <div class="tech-category">Infraestrutura</div>
+                <div class="tech-name">Vercel Edge Network</div>
+                <p class="tech-desc">Deploy contínuo e entrega global de baixa latência, garantindo que o app esteja sempre disponível e performático.</p>
+            </div>
+        </div>
+        
+        <div class="vertical-line"></div>
+    </div>
+</body>
+</html>

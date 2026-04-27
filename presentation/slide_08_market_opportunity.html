@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #FDFBF7;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 80px;
+        color: #2C2A26;
+        font-family: 'Inter', sans-serif;
+        position: relative;
+        overflow: hidden;
+      }
+      .slide-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #8E7F6D;
+        margin-bottom: 10px;
+        max-width: 900px;
+      }
+      .slide-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1.4;
+        color: #2C2A26;
+        margin-bottom: 60px;
+        max-width: 800px;
+      }
+      .market-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 60px;
+        width: 100%;
+        position: relative;
+      }
+      .market-section {
+        display: flex;
+        flex-direction: column;
+      }
+      .section-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        tracking: 0.2em;
+        color: #C5A059;
+        margin-bottom: 20px;
+      }
+      .section-content {
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #2C2A26;
+      }
+      .section-content p {
+        margin-bottom: 20px;
+      }
+      .highlight-box {
+        border-top: 1px solid #8E7F6D;
+        padding-top: 20px;
+        margin-top: 10px;
+      }
+      .vertical-divider {
+        position: absolute;
+        left: 40%;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background: #8E7F6D;
+        opacity: 0.2;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <h2 class="slide-title">Mercado e Oportunidade</h2>
+        <p class="slide-subtitle">O Potencial Inexplorado do Planejamento Financeiro a Dois</p>
+        
+        <div class="market-grid">
+            <div class="market-section">
+                <div class="section-label">Público-Alvo</div>
+                <div class="section-content">
+                    <p><strong>Casais Millennial e Gen Z:</strong> Indivíduos entre 25 e 45 anos que priorizam experiências e planejamento de vida compartilhado.</p>
+                    <p><strong>Foco em Objetivos:</strong> Casais que buscam realizar grandes marcos, como viagens internacionais, compra de imóveis ou celebrações.</p>
+                </div>
+            </div>
+            
+            <div class="market-section">
+                <div class="section-label">Vantagem Competitiva</div>
+                <div class="section-content">
+                    <p><strong>Especialização vs. Generalismo:</strong> Enquanto apps tradicionais focam no indivíduo, o Pote Sagrado resolve a fricção da comunicação financeira entre parceiros.</p>
+                    <div class="highlight-box">
+                        <p><strong>Oportunidade de Nicho:</strong> O setor de Fintech pessoal cresce 15% ao ano, mas soluções focadas em dinâmicas de relacionamento ainda são escassas e subdesenvolvidas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="vertical-divider"></div>
+        </div>
+    </div>
+</body>
+</html>

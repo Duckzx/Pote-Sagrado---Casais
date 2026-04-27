@@ -23,7 +23,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       if (!userTotals[d.who]) {
         userTotals[d.who] = { name: d.whoName, total: 0 };
       }
-      userTotals[d.who].total += d.amount;
+      // Only income counts for the battle score
+      if (d.type !== 'expense') {
+        userTotals[d.who].total += d.amount;
+      }
     });
 
     const users = Object.values(userTotals).sort((a, b) => b.total - a.total);
@@ -93,39 +96,51 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       </div>
 
       {/* Battle Box */}
-      <div className="bg-cookbook-battle border border-cookbook-border rounded-xl p-5">
-        <div className="flex justify-between font-sans text-[10px] uppercase tracking-widest font-bold mb-4">
-          <span className="text-cookbook-primary">{users[0].name}</span>
-          <span className="text-cookbook-text/30">VS</span>
-          <span className="text-cookbook-text">{users[1].name}</span>
-        </div>
+      <div className="bg-cookbook-battle border border-cookbook-border rounded-2xl p-6 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
         
-        {/* Scores */}
-        <div className="flex justify-between items-baseline mb-4">
-          <span className="font-serif text-2xl text-cookbook-primary">
-            {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].total)}
-          </span>
-          <span className="font-serif text-2xl text-cookbook-text">
-            {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].total)}
-          </span>
+        <div className="flex justify-between items-center font-sans text-[10px] uppercase tracking-[0.2em] font-bold mb-6">
+          <div className="flex flex-col items-start">
+            <span className="text-cookbook-primary mb-1">{users[0].name}</span>
+            <span className="font-serif text-xl text-cookbook-primary">
+              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].total)}
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner z-10">
+            <span className="text-cookbook-text/30 italic text-xs">vs</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-cookbook-text/60 mb-1">{users[1].name}</span>
+            <span className="font-serif text-xl text-cookbook-text">
+              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].total)}
+            </span>
+          </div>
         </div>
         
         {/* Progress bar */}
-        <div className="relative h-3 bg-cookbook-border rounded-full overflow-hidden flex">
+        <div className="relative h-4 bg-cookbook-bg border border-cookbook-border rounded-full overflow-hidden flex shadow-inner">
           <div 
-            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
+            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/60 transition-all duration-1000 ease-out relative"
             style={{ width: `${p1Percentage}%` }}
-          />
+          >
+            {p1Percentage > 15 && (
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-white font-bold">{p1Percentage.toFixed(0)}%</span>
+            )}
+          </div>
           <div 
-            className="h-full bg-gradient-to-l from-cookbook-text to-cookbook-text/70 transition-all duration-1000 ease-out rounded-r-full"
+            className="h-full bg-gradient-to-l from-cookbook-text/40 to-cookbook-text/20 transition-all duration-1000 ease-out relative"
             style={{ width: `${p2Percentage}%` }}
-          />
+          >
+            {p2Percentage > 15 && (
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-cookbook-text/60 font-bold">{p2Percentage.toFixed(0)}%</span>
+            )}
+          </div>
         </div>
         
-        {/* Percentage labels */}
-        <div className="flex justify-between mt-2">
-          <span className="font-sans text-[9px] text-cookbook-primary font-bold">{p1Percentage.toFixed(0)}%</span>
-          <span className="font-sans text-[9px] text-cookbook-text/60 font-bold">{p2Percentage.toFixed(0)}%</span>
+        <div className="mt-4 text-center">
+          <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+            {users[0].total === users[1].total ? 'Empate técnico!' : `${users[0].name} está dominando!`}
+          </p>
         </div>
       </div>
 
@@ -139,7 +154,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
 
       {/* Leader Banner */}
       {users[0].total > users[1].total && (
-        <div className="bg-white border border-cookbook-border rounded-xl p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative overflow-hidden">
+        <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />
           
           <div className="w-14 h-14 mx-auto bg-cookbook-bg rounded-full flex items-center justify-center mb-4 border border-cookbook-border">
@@ -163,7 +178,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       )}
 
       {/* Weekly breakdown */}
-      <div className="bg-white border border-cookbook-border rounded-xl p-5 space-y-4">
+      <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-5 space-y-4">
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold text-center">
           Desempenho Semanal
         </h3>
@@ -195,7 +210,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
 
       {/* Motivational note */}
       {users[0].total === 0 && users[1].total === 0 && (
-        <div className="text-center py-6 px-4 bg-white border border-dashed border-cookbook-border rounded-xl">
+        <div className="text-center py-6 px-4 bg-cookbook-bg border border-dashed border-cookbook-border rounded-xl">
           <span className="text-3xl block mb-3">⚔️</span>
           <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
             A batalha ainda não começou!

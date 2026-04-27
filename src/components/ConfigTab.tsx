@@ -238,7 +238,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
             placeholder="Ex: São Paulo, SP"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -260,7 +260,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="Ex: Mochilão Europa"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -273,7 +273,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             value={goalAmount}
             onChange={(e) => setGoalAmount(e.target.value)}
             placeholder="15000"
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -285,7 +285,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="w-full bg-white border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
+            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
           />
         </div>
 
@@ -334,17 +334,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
-                className={`flex items-center space-x-3 p-3 rounded border transition-all ${
+                className={`flex items-center space-x-2 p-2.5 rounded-xl border transition-all ${
                   theme === t.id 
-                    ? 'border-cookbook-primary bg-white shadow-md' 
-                    : 'border-cookbook-border bg-cookbook-bg/50 opacity-70 hover:opacity-100'
+                    ? 'border-cookbook-primary bg-cookbook-bg shadow-md ring-1 ring-cookbook-primary/20' 
+                    : 'border-cookbook-border bg-cookbook-bg/30 opacity-70 hover:opacity-100'
                 }`}
               >
-                <div className="flex space-x-[-8px]">
-                  <div className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: t.colors[0] }} />
-                  <div className="w-5 h-5 rounded-full border border-black/10" style={{ backgroundColor: t.colors[1] }} />
+                <div className="flex shrink-0">
+                  <div className="w-4 h-4 rounded-full border border-black/5 shadow-sm" style={{ backgroundColor: t.colors[0] }} />
+                  <div className="w-4 h-4 rounded-full border border-black/5 shadow-sm -ml-2" style={{ backgroundColor: t.colors[1] }} />
                 </div>
-                <span className="font-serif text-[11px] text-cookbook-text text-left leading-tight">{t.label}</span>
+                <span className="font-serif text-[10px] text-cookbook-text text-left leading-tight truncate">{t.label}</span>
               </button>
             ))}
           </div>

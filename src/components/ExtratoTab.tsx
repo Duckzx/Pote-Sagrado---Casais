@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUpCircle, ArrowDownCircle, Filter, Pencil, Trash2, X, Calendar, User } from 'lucide-react';
-import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { playSuccessSound, vibrate } from '../lib/audio';
@@ -103,12 +103,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
   };
 
   const confirmEdit = async () => {
-    const parsedAmount = Number(editAmount.replace(',', '.'));
+    const parsedAmount = Number(editAmount.toString().replace(',', '.'));
     if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     try {
       await updateDoc(doc(db, 'deposits', editing.id), {
         amount: parsedAmount,
-        action: editAction
+        action: editAction,
+        updatedAt: serverTimestamp()
       });
       playSuccessSound();
       vibrate([30, 30]);

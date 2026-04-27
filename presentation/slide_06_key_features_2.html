@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #FDFBF7;
+        color: #2C2A26;
+        font-family: 'Inter', sans-serif;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding-left: 80px;
+        padding-right: 80px;
+      }
+      .header-section {
+        padding-top: 80px;
+        margin-bottom: 60px;
+        border-left: 4px solid #8E7F6D;
+        padding-left: 30px;
+      }
+      .main-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #8E7F6D;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+      }
+      .sub-title {
+        font-size: 20px;
+        color: #C5A059;
+        font-weight: 400;
+      }
+      .features-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        max-width: 900px;
+      }
+      .feature-item {
+        border-top: 1px solid rgba(142, 127, 109, 0.2);
+        padding-top: 20px;
+      }
+      .feature-label {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #2C2A26;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+      }
+      .feature-label::before {
+        content: "";
+        width: 40px;
+        height: 1px;
+        background: #C5A059;
+        margin-right: 15px;
+      }
+      .feature-desc {
+        font-size: 16px;
+        line-height: 1.6;
+        color: rgba(44, 42, 38, 0.8);
+        padding-left: 55px;
+      }
+      .accent-line {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent, #8E7F6D, transparent);
+        opacity: 0.3;
+      }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header-section">
+            <h1 class="main-title">Transparência e Segurança</h1>
+            <p class="sub-title">Fortalecendo a Confiança Financeira do Casal</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-item">
+                <h2 class="feature-label">Controle Compartilhado</h2>
+                <p class="feature-desc">Ambos os parceiros possuem acesso total e simultâneo. A plataforma permite acompanhar depósitos e gastos em tempo real, promovendo transparência absoluta e responsabilidade mútua na gestão do pote.</p>
+            </div>
+
+            <div class="feature-item">
+                <h2 class="feature-label">Notificações Push Inteligentes</h2>
+                <p class="feature-desc">Lembretes estratégicos e atualizações de progresso enviadas diretamente aos dispositivos. Mantém o casal conectado aos seus objetivos diários sem a necessidade de abrir o app constantemente.</p>
+            </div>
+
+            <div class="feature-item">
+                <h2 class="feature-label">Segurança de Dados Robusta</h2>
+                <p class="feature-desc">Autenticação via Firebase e criptografia de ponta. Garantimos que as informações financeiras e os planos de viagem do casal permaneçam privados, íntegros e protegidos contra acessos não autorizados.</p>
+            </div>
+        </div>
+
+        <div class="accent-line"></div>
+    </div>
+</body>
+</html>

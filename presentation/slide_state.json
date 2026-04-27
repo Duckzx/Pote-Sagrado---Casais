@@ -1,0 +1,156 @@
+{
+  "project_info": {
+    "title": "Pote Sagrado: Transformando Sonhos em Realidade",
+    "created": 1777216724.152502,
+    "last_updated": 1777216873.3968832,
+    "total_slides": 12
+  },
+  "slides": [
+    {
+      "id": "slide_01_title",
+      "state": "edited",
+      "pageNum": 1
+    },
+    {
+      "id": "slide_02_challenge",
+      "state": "edited",
+      "pageNum": 2
+    },
+    {
+      "id": "slide_03_solution",
+      "state": "edited",
+      "pageNum": 3
+    },
+    {
+      "id": "slide_04_how_it_works",
+      "state": "edited",
+      "pageNum": 4
+    },
+    {
+      "id": "slide_05_key_features_1",
+      "state": "edited",
+      "pageNum": 5
+    },
+    {
+      "id": "slide_06_key_features_2",
+      "state": "edited",
+      "pageNum": 6
+    },
+    {
+      "id": "slide_07_tech_architecture",
+      "state": "edited",
+      "pageNum": 7
+    },
+    {
+      "id": "slide_08_market_opportunity",
+      "state": "edited",
+      "pageNum": 8
+    },
+    {
+      "id": "slide_09_roadmap_future_1",
+      "state": "edited",
+      "pageNum": 9
+    },
+    {
+      "id": "slide_10_roadmap_future_2",
+      "state": "edited",
+      "pageNum": 10
+    },
+    {
+      "id": "slide_11_team_vision",
+      "state": "edited",
+      "pageNum": 11
+    },
+    {
+      "id": "slide_12_contact",
+      "state": "edited",
+      "pageNum": 12
+    }
+  ],
+  "outline": [
+    {
+      "id": "slide_01_title",
+      "title": "Pote Sagrado: Transformando Sonhos em Realidade",
+      "summary": "Apresentação do Pote Sagrado como uma plataforma inovadora para planejamento financeiro de casais.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_02_challenge",
+      "title": "O Desafio dos Casais Modernos",
+      "summary": "Discussão sobre as dificuldades no planejamento financeiro conjunto e a lacuna no mercado.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_03_solution",
+      "title": "Pote Sagrado: A Solução Colaborativa",
+      "summary": "Apresentação do Pote Sagrado como um aplicativo gamificado e colaborativo para casais.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_04_how_it_works",
+      "title": "Como Funciona: Simplicidade e Engajamento",
+      "summary": "Explicação do funcionamento do aplicativo em três passos: definir meta, economizar juntos e acompanhar progresso.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_05_key_features_1",
+      "title": "Funcionalidades Chave: Construindo o Futuro a Dois",
+      "summary": "Destaque para gamificação, consultor de viagem IA e gerador de encontros.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_06_key_features_2",
+      "title": "Funcionalidades Chave: Transparência e Segurança",
+      "summary": "Foco no controle compartilhado, notificações push e segurança de dados.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_07_tech_architecture",
+      "title": "Tecnologia e Arquitetura: Base Sólida e Escalável",
+      "summary": "Detalhes sobre o frontend, animações, backend, IA e hospedagem.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_08_market_opportunity",
+      "title": "Mercado e Oportunidade: Um Nicho em Crescimento",
+      "summary": "Análise do público-alvo, tamanho do mercado e vantagem competitiva.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_09_roadmap_future_1",
+      "title": "Roadmap Futuro: Melhorias e Inovação",
+      "summary": "Próximos passos como integração bancária, orçamento compartilhado e novos desafios.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_10_roadmap_future_2",
+      "title": "Roadmap Futuro: Expansão e Monetização",
+      "summary": "Estratégias de monetização, internacionalização e desenvolvimento de plataformas nativas.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_11_team_vision",
+      "title": "Equipe e Visão",
+      "summary": "Apresentação da visão e missão do projeto, com um convite para construir o futuro juntos.",
+      "image_plan": "",
+      "slide_template_key": ""
+    },
+    {
+      "id": "slide_12_contact",
+      "title": "Contato e Próximos Passos",
+      "summary": "Informações de contato e chamada para ação para parceiros estratégicos.",
+      "image_plan": "/home/ubuntu/upload/Screenshot_20260422_152137_Chrome.png - The image shows the website address 'pote-sagrado-casais.vercel.app', which is directly referenced in the slide content. This provides a visual confirmation of the website.",
+      "slide_template_key": ""
+    }
+  ]
+}
