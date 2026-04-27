@@ -4,6 +4,7 @@ import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { playSuccessSound, vibrate } from '../lib/audio';
+import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -98,12 +99,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
   // Edit handler
   const handleEdit = (deposit: any) => {
     setEditing(deposit);
-    setEditAmount(deposit.amount.toString());
+    setEditAmount(maskCurrency(deposit.amount.toFixed(2).replace('.', '')));
     setEditAction(deposit.action || '');
   };
 
   const confirmEdit = async () => {
-    const parsedAmount = Number(editAmount.replace(',', '.'));
+    const parsedAmount = parseCurrencyString(editAmount);
     if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     try {
       await updateDoc(doc(db, 'deposits', editing.id), {
@@ -175,18 +176,18 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-emerald-50 border border-emerald-200/50 rounded-xl p-3 text-center">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 text-center backdrop-blur-sm">
           <ArrowUpCircle size={16} className="text-emerald-500 mx-auto mb-1" />
-          <div className="font-serif text-sm text-emerald-700">{formatCurrency(totals.depositos)}</div>
+          <div className="font-serif text-sm text-emerald-600 dark:text-emerald-400">{formatCurrency(totals.depositos)}</div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-emerald-500/70 font-bold mt-0.5">Entradas</div>
         </div>
-        <div className="bg-red-50 border border-red-200/50 rounded-xl p-3 text-center">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-3 text-center backdrop-blur-sm">
           <ArrowDownCircle size={16} className="text-red-500 mx-auto mb-1" />
-          <div className="font-serif text-sm text-red-700">{formatCurrency(totals.gastos)}</div>
+          <div className="font-serif text-sm text-red-600 dark:text-red-400">{formatCurrency(totals.gastos)}</div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-red-500/70 font-bold mt-0.5">Saídas</div>
         </div>
         <div className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl p-3 text-center shadow-sm">
-          <div className={`font-serif text-sm ${totals.saldo >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+          <div className={`font-serif text-sm ${totals.saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
             {formatCurrency(totals.saldo)}
           </div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-0.5">Saldo</div>
@@ -354,12 +355,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
                 className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
               />
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                  className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl py-3 pl-12 pr-4 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  onChange={(e) => setEditAmount(maskCurrency(e.target.value))}
+                  placeholder="R$ 0,00"
+                  className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl py-4 pr-4 font-serif text-3xl text-center text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
                   autoFocus
                 />
               </div>

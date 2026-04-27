@@ -23,8 +23,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       if (!userTotals[d.who]) {
         userTotals[d.who] = { name: d.whoName, total: 0 };
       }
-      const val = d.type === 'expense' ? -d.amount : d.amount;
-      userTotals[d.who].total += val;
+      // Only income counts for the battle points
+      if (d.type !== 'expense') {
+        userTotals[d.who].total += d.amount;
+      }
     });
 
     const users = Object.values(userTotals).sort((a, b) => b.total - a.total);
@@ -113,26 +115,33 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         </div>
         
         {/* Progress bar */}
-        <div className="relative h-3 bg-white/50 dark:bg-black/20 rounded-full overflow-hidden flex shadow-inner">
+        <div className="relative h-6 bg-white/50 dark:bg-black/20 rounded-full overflow-hidden flex shadow-inner border border-white/20">
           <div 
-            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
+            className="h-full bg-gradient-to-r from-cookbook-primary via-cookbook-primary/80 to-cookbook-primary/60 transition-all duration-1000 ease-out flex items-center justify-end pr-2"
             style={{ width: `${p1Percentage}%` }}
-          />
+          >
+            {p1Percentage > 15 && <span className="text-[8px] text-white font-bold">{p1Percentage.toFixed(0)}%</span>}
+          </div>
           <div 
-            className="h-full bg-gradient-to-l from-cookbook-text to-cookbook-text/70 transition-all duration-1000 ease-out rounded-r-full"
+            className="h-full bg-gradient-to-l from-cookbook-gold via-cookbook-gold/80 to-cookbook-gold/60 transition-all duration-1000 ease-out flex items-center justify-start pl-2"
             style={{ width: `${p2Percentage}%` }}
-          />
+          >
+            {p2Percentage > 15 && <span className="text-[8px] text-white font-bold">{p2Percentage.toFixed(0)}%</span>}
+          </div>
+          
+          {/* Center Divider */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/30 z-10" />
         </div>
         
         {/* Percentage labels */}
         <div className="flex justify-between mt-3">
-          <span className="font-sans text-[9px] text-cookbook-primary font-bold">{p1Percentage.toFixed(0)}%</span>
-          <span className="font-sans text-[9px] text-cookbook-text/60 font-bold">{p2Percentage.toFixed(0)}%</span>
+          <span className="font-sans text-[9px] text-cookbook-primary font-bold">PONTOS: {users[0].total.toFixed(0)}</span>
+          <span className="font-sans text-[9px] text-cookbook-gold font-bold">PONTOS: {users[1].total.toFixed(0)}</span>
         </div>
       </div>
 
       {/* Prize */}
-      <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
+      <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-5 text-center shadow-sm">
         <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-gold font-bold">◈ Recompensa do Mês</span>
         <p className="font-serif italic text-sm text-cookbook-text mt-1">
           {prize || 'Quem juntar menos paga um jantar!'}

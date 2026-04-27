@@ -392,7 +392,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
             <h3 className="font-serif text-xl font-medium">Tema Visual</h3>
           </div>
 
-          <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar px-6 -mx-6">
+          <div className="flex gap-4 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar px-2 -mx-2">
             {THEMES.map((t) => (
               <div 
                 key={t.id} 
@@ -402,10 +402,10 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
                 }} 
                 className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
               >
-                <div className={`w-20 h-28 rounded-2xl p-0 shadow-sm relative transition-all duration-300 ${
+                <div className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 ${
                   theme === t.id 
-                    ? 'border-2 border-cookbook-primary -translate-y-2 scale-105' 
-                    : 'border border-cookbook-border/40 hover:border-cookbook-primary/50 hover:-translate-y-1'
+                    ? 'ring-2 ring-cookbook-primary ring-offset-2 ring-offset-transparent -translate-y-2 scale-105' 
+                    : 'border border-white/20 hover:border-cookbook-primary/50 hover:-translate-y-1'
                 }`}>
                   <div className="w-full h-full rounded-xl overflow-hidden flex flex-col" style={{ background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)` }}>
                     <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
@@ -415,12 +415,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
                     </div>
                   </div>
                   {theme === t.id && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
-                      <Sparkles size={12} />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in z-10">
+                      <Sparkles size={10} />
                     </div>
                   )}
                 </div>
-                <span className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? 'text-cookbook-primary font-medium' : 'text-cookbook-text/40 group-hover:text-cookbook-text'}`}>
+                <span className={`font-sans text-[9px] uppercase tracking-widest transition-colors text-center max-w-[80px] ${theme === t.id ? 'text-cookbook-primary font-bold' : 'text-cookbook-text/40 group-hover:text-cookbook-text'}`}>
                   {t.label}
                 </span>
               </div>

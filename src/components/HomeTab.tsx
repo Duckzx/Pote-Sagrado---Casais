@@ -101,6 +101,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
   const [isPotBroken, setIsPotBroken] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
   const [showShareWidget, setShowShareWidget] = useState(false);
+  const [achievementImage, setAchievementImage] = useState<string | null>(null);
   
   // FAB quick deposit
   const [showQuickDeposit, setShowQuickDeposit] = useState(false);
@@ -265,6 +266,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           destination: destination || 'Nossa Viagem',
           amount: Number(totalSaved),
           goalAmount: Number(goalAmount),
+          imageUrl: achievementImage,
           createdAt: serverTimestamp(),
         });
         
@@ -547,8 +549,42 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           >
             <h3 className="font-serif text-2xl text-white font-medium">Prontos para quebrar o pote?</h3>
             <p className="font-sans text-xs uppercase tracking-widest text-white/70">
-              Isso guardará esta conquista no histórico e zerará o pote. Deseja continuar?
+              Isso guardará esta conquista no histórico e zerará o pote.
             </p>
+            
+            <div className="mt-4">
+              {achievementImage ? (
+                <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-white/20">
+                  <img src={achievementImage} alt="Conquista" className="w-full h-full object-cover" />
+                  <button 
+                    onClick={() => setAchievementImage(null)}
+                    className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-sm"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
+                  <Camera size={24} className="text-white/40 mb-2" />
+                  <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-white/60">
+                    Foto da Celebração (Opcional)
+                  </p>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const base64 = await compressImage(file);
+                        setAchievementImage(base64);
+                      }
+                    }} 
+                    className="hidden" 
+                  />
+                </label>
+              )}
+            </div>
+
             <div className="flex space-x-3 pt-4">
               <button 
                 onClick={() => setShowBreakConfirm(false)}
