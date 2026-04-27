@@ -67,7 +67,7 @@ export const CountdownWidget: React.FC<CountdownWidgetProps> = ({ targetDate }) 
   ].filter(u => u.show && u.value >= 0);
 
   return (
-    <div className="bg-white border border-cookbook-border rounded-xl p-4 shadow-sm space-y-3">
+    <div className="bg-cookbook-mural border border-cookbook-border rounded-xl p-4 shadow-sm space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

@@ -65,10 +65,14 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
 // Component
 // ========================================
 
+import { compressImage } from '../lib/imageUtils';
+import { Camera } from 'lucide-react';
+
 export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges = [], battleChallenges = [], deposits, currentUser, addToast }) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>('todas');
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [amount, setAmount] = useState('');
+  const [missionImage, setMissionImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Edit state
@@ -193,6 +197,19 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
   // ========================================
   // Complete a mission
   // ========================================
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const base64 = await compressImage(file);
+      setMissionImage(base64);
+    } catch (err) {
+      console.error("Error compressing image:", err);
+      addToast('Erro', 'Não foi possível carregar a imagem.', 'info');
+    }
+  };
+
   const handleComplete = async () => {
     if (!selectedMission) return;
     
@@ -212,7 +229,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
       const user = auth.currentUser;
       if (!user) throw new Error("Not authenticated");
 
-      await addDoc(collection(db, 'deposits'), {
+      const depositData: any = {
         amount: finalAmount,
         action: selectedMission.category === 'desafio' 
           ? `Desafio Concluído: ${selectedMission.title}` 
@@ -220,7 +237,13 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         who: user.uid,
         whoName: user.displayName || user.email?.split('@')[0] || 'Alguém',
         createdAt: serverTimestamp()
-      });
+      };
+
+      if (missionImage) {
+        depositData.imageUrl = missionImage;
+      }
+
+      await addDoc(collection(db, 'deposits'), depositData);
 
       confetti({
         particleCount: 100,
@@ -245,6 +268,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
 
       setSelectedMission(null);
       setAmount('');
+      setMissionImage(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'deposits');
     } finally {
@@ -287,7 +311,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: updatedCustom }, { merge: true });
       }
       
-      addToast('Atualizado', 'Missão editada com sucesso!', 'success');
+      addToast('Tudo Certo!', 'Missão editada com sucesso, mestre.', 'success');
       setEditingMission(null);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
@@ -309,7 +333,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         const updated = customChallenges.filter(c => c.id !== mission.id);
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: updated }, { merge: true });
       }
-      addToast('Removido', 'Missão removida.', 'info');
+      addToast('Missão Abortada =(', 'Sumiu do mapa!', 'info');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
     }
@@ -342,7 +366,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         await setDoc(doc(db, 'trip_config', 'main'), { customChallenges: [...customChallenges, newCustom] }, { merge: true });
       }
 
-      addToast('Criado', 'Nova missão adicionada!', 'success');
+      addToast('Boa Missão!', 'Nova tarefa adicionada ao painel. Bora fazer!', 'success');
       setNewTitle('');
       setNewDesc('');
       setNewReward('');
@@ -383,45 +407,45 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
       </div>
 
       {/* Stats bar */}
-      <div className="flex justify-around bg-white border border-cookbook-border rounded-xl p-4 shadow-sm">
+      <div className="flex justify-around bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div className="text-center">
           <div className="font-serif text-2xl text-cookbook-primary">
             {Object.values(streaks).reduce((acc, s) => acc + s.count, 0)}
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-1">
+          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
             Completadas
           </div>
         </div>
-        <div className="w-px bg-cookbook-border" />
+        <div className="w-px bg-cookbook-border/50" />
         <div className="text-center">
           <div className="font-serif text-2xl text-amber-500">
             {Math.max(...Object.values(streaks).map(s => s.streak), 0)}
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-1">
+          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
             Melhor Streak
           </div>
         </div>
-        <div className="w-px bg-cookbook-border" />
+        <div className="w-px bg-cookbook-border/50" />
         <div className="text-center">
           <div className="font-serif text-2xl text-cookbook-text">
             {allMissions.length}
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-1">
+          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
             Missões
           </div>
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar -mx-1 px-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar -mx-1 px-1 mt-6 mb-2">
         {FILTERS.map(filter => (
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full font-sans text-[10px] uppercase tracking-widest font-medium whitespace-nowrap transition-all ${
               activeFilter === filter.id
                 ? 'bg-cookbook-primary text-white shadow-md'
-                : 'bg-white border border-cookbook-border text-cookbook-text/60 hover:border-cookbook-primary/40'
+                : 'bg-white/40 border border-cookbook-border/30 text-cookbook-text/60 hover:border-cookbook-primary/40 hover:bg-white/60'
             }`}
           >
             <span>{filter.emoji}</span>
@@ -437,17 +461,37 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
 
       {/* Mission Cards */}
       <div className="space-y-3">
-        {filteredMissions.map(mission => {
+        {filteredMissions.length === 0 ? (
+          <div className="text-center py-10 px-6 bg-cookbook-bg border border-cookbook-border border-dashed rounded-xl w-full flex flex-col items-center">
+            <div className="w-12 h-12 bg-cookbook-gold/10 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🎯</span>
+            </div>
+            <p className="font-serif italic text-cookbook-text/70 text-sm mb-2">
+              Nenhuma missão aqui
+            </p>
+            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-6">
+              Crie desafios personalizados ou use a IA para gerar novas aventuras!
+            </p>
+            <button 
+              onClick={() => setShowAddForm(true)}
+              className="bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest px-5 py-2.5 rounded-full font-bold transition-transform hover:bg-cookbook-primary-hover active:scale-95 flex items-center gap-2 shadow-md"
+            >
+              <Plus size={12} strokeWidth={2.5} />
+              Criar Primeira Missão
+            </button>
+          </div>
+        ) : (
+          filteredMissions.map(mission => {
           const badge = getCategoryBadge(mission.category);
           const missionStats = streaks[mission.id] || { count: 0, streak: 0 };
           
           return (
             <div 
               key={mission.id} 
-              className="bg-white border border-cookbook-border rounded-xl p-4 shadow-sm transition-all hover:shadow-md group relative overflow-hidden"
+              className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_10px_40px_rgb(0,0,0,0.08)] group relative overflow-hidden"
             >
               {/* Top accent line based on category */}
-              <div className={`absolute top-0 left-0 w-full h-0.5 ${
+              <div className={`absolute top-0 left-0 w-full h-1 ${
                 mission.category === 'economia' ? 'bg-emerald-400' : 
                 mission.category === 'desafio' ? 'bg-amber-400' : 'bg-violet-400'
               }`} />
@@ -536,24 +580,24 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* Add Mission Button */}
       {!showAddForm ? (
         <button
           onClick={() => setShowAddForm(true)}
-          className="w-full flex items-center justify-center gap-2 bg-cookbook-bg border border-dashed border-cookbook-border text-cookbook-text/60 font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold hover:bg-white hover:border-cookbook-primary hover:text-cookbook-primary transition-all active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-dashed border-white/40 dark:border-white/5 text-cookbook-text/60 font-sans text-[10px] uppercase tracking-widest py-4 rounded-full font-bold hover:bg-white/60 hover:text-cookbook-primary transition-all active:scale-[0.98] shadow-sm"
         >
           <Plus size={16} />
           <span>Nova Missão</span>
         </button>
       ) : (
-        <div className="bg-white border border-cookbook-primary/30 rounded-xl p-5 shadow-md space-y-4 animate-modal-enter">
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-4 animate-modal-enter">
           <div className="flex items-center justify-between">
-            <h4 className="font-serif italic text-sm text-cookbook-text">Criar Missão</h4>
-            <button onClick={() => setShowAddForm(false)} className="text-cookbook-text/40 hover:text-cookbook-text">
-              <X size={16} />
+            <h4 className="font-serif text-lg text-cookbook-text font-medium">Criar Missão</h4>
+            <button onClick={() => setShowAddForm(false)} className="text-cookbook-text/40 hover:text-cookbook-text transition-colors">
+              <X size={18} />
             </button>
           </div>
           
@@ -561,16 +605,16 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
           <div className="flex gap-2">
             <button
               onClick={() => setNewCategory('desafio')}
-              className={`flex-1 py-2 rounded-lg font-sans text-[9px] uppercase tracking-widest font-bold border transition-all ${
-                newCategory === 'desafio' ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-cookbook-bg border-cookbook-border text-cookbook-text/50'
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${
+                newCategory === 'desafio' ? 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-400' : 'bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/5 text-cookbook-text/50 hover:bg-white/60 dark:hover:bg-white/10'
               }`}
             >
               ⚔️ Desafio
             </button>
             <button
               onClick={() => setNewCategory('economia')}
-              className={`flex-1 py-2 rounded-lg font-sans text-[9px] uppercase tracking-widest font-bold border transition-all ${
-                newCategory === 'economia' ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-cookbook-bg border-cookbook-border text-cookbook-text/50'
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${
+                newCategory === 'economia' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-400' : 'bg-white/40 dark:bg-white/5 border-white/20 dark:border-white/5 text-cookbook-text/50 hover:bg-white/60 dark:hover:bg-white/10'
               }`}
             >
               💚 Economia
@@ -583,7 +627,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
               value={newIcon}
               onChange={(e) => setNewIcon(e.target.value)}
               placeholder="⭐"
-              className="w-14 bg-cookbook-bg border border-cookbook-border rounded-lg px-2 py-2.5 font-serif text-center text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+              className="w-14 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-xl px-2 py-3 font-serif text-center text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
               maxLength={2}
             />
             <input
@@ -591,7 +635,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Nome da missão"
-              className="flex-1 bg-cookbook-bg border border-cookbook-border rounded-lg px-4 py-2.5 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+              className="flex-1 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
             />
           </div>
           
@@ -602,7 +646,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
                 placeholder="Descrição (opcional)"
-                className="w-full bg-cookbook-bg border border-cookbook-border rounded-lg px-4 py-2.5 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-xl px-4 py-3 font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
               />
               <div className="flex gap-2 items-center">
                 <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold whitespace-nowrap">R$</span>
@@ -611,7 +655,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
                   value={newReward}
                   onChange={(e) => setNewReward(e.target.value)}
                   placeholder="Recompensa (ex: 100)"
-                  className="flex-1 bg-cookbook-bg border border-cookbook-border rounded-lg px-4 py-2.5 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  className="flex-1 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
                 />
               </div>
             </>
@@ -620,7 +664,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
           <button
             onClick={handleAddMission}
             disabled={!newTitle.trim() || isSavingEdit}
-            className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-lg font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+            className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 border border-cookbook-primary rounded-xl font-bold hover:bg-cookbook-primary-hover shadow-sm transition-transform active:scale-[0.98] disabled:opacity-50"
           >
             {isSavingEdit ? 'Criando...' : 'Criar Missão'}
           </button>
@@ -634,7 +678,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
         <div 
           className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" 
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
-          onClick={() => setSelectedMission(null)}
+          onClick={() => {
+            setSelectedMission(null);
+            setMissionImage(null);
+          }}
         >
           <div 
             className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter"
@@ -648,7 +695,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
             }`} />
             
             <button 
-              onClick={() => setSelectedMission(null)}
+              onClick={() => {
+                setSelectedMission(null);
+                setMissionImage(null);
+              }}
               className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text transition-colors"
             >
               <X size={20} />
@@ -681,6 +731,29 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
                   />
                 </div>
               )}
+
+              {/* Image Upload for Proof of Save */}
+              <div className="mt-2 text-center">
+                {missionImage ? (
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden border border-cookbook-border">
+                    <img src={missionImage} alt="Proof" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => setMissionImage(null)}
+                      className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-cookbook-border rounded-xl cursor-pointer bg-cookbook-bg hover:bg-cookbook-primary/5 transition-colors">
+                    <div className="flex items-center gap-2">
+                       <Camera size={16} className="text-cookbook-text/50" />
+                       <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/60">Anexar Foto de Comprovação</span>
+                    </div>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
               
               <button
                 onClick={handleComplete}

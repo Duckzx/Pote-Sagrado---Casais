@@ -44,14 +44,14 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-sm animate-modal-backdrop" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/40 dark:bg-black/40 backdrop-blur-md animate-modal-backdrop" onClick={onClose}>
       <div 
-        className="bg-white border border-cookbook-border rounded-xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden animate-modal-enter max-h-[85vh]"
+        className="bg-white/60 dark:bg-black/20 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl w-full max-w-md flex flex-col shadow-2xl relative overflow-hidden animate-modal-enter max-h-[85vh]"
         onClick={e => e.stopPropagation()}
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />
         
-        <div className="flex items-center justify-between p-4 border-b border-cookbook-border bg-cookbook-mural/50">
+        <div className="flex items-center justify-between p-4 border-b border-white/40 dark:border-white/5 bg-white/40 dark:bg-black/10">
           <div className="flex items-center space-x-2 text-cookbook-primary">
             <Compass size={18} />
             <span className="font-sans text-[10px] uppercase tracking-widest font-bold">Portal do Destino</span>
@@ -64,7 +64,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
         <div className="flex-1 overflow-y-auto p-6">
           {!destination ? (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-8">
-              <div className="w-16 h-16 bg-cookbook-bg rounded-full border border-cookbook-border flex items-center justify-center">
+              <div className="w-16 h-16 bg-white/10 dark:bg-black/10 rounded-full border border-white/40 dark:border-white/5 flex items-center justify-center shadow-inner">
                 <Info size={24} className="text-cookbook-gold" />
               </div>
               <h3 className="font-serif italic text-xl text-cookbook-text mb-2">Destino não definido</h3>
@@ -73,7 +73,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
               </p>
               <button
                 onClick={onClose}
-                className="mt-4 bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest py-3 px-6 rounded-lg font-bold"
+                className="mt-4 bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest py-3 px-6 rounded-2xl font-bold shadow-md hover:bg-cookbook-primary-hover active:scale-95 transition-all"
               >
                 Certo, vou definir
               </button>
@@ -87,7 +87,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
                 </p>
               </div>
 
-              <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-4 mb-6">
+              <div className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl p-6 mb-6 shadow-sm">
                 <p className="font-sans text-xs text-cookbook-text/70 leading-relaxed text-center">
                   Use os atalhos rápidos abaixo para monitorar passagens em tempo real, explorar as melhores hospedagens e montar seu roteiro sem depender de agências. Tudo 100% grátis e no seu tempo!
                 </p>
@@ -100,15 +100,15 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ destination,
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`block border rounded-xl p-4 transition-all hover:scale-[1.02] active:scale-[0.98] ${link.color}`}
+                    className={`block border-2 rounded-3xl p-5 transition-all hover:scale-[1.02] active:scale-[0.98] ${link.color}`}
                   >
                     <div className="flex justify-between items-start mb-3">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-white/60 dark:bg-black/10 backdrop-blur-sm border border-white/40 dark:border-white/5 flex items-center justify-center shadow-sm">
                         {link.icon}
                       </div>
                       <ExternalLink size={14} className="text-cookbook-text/30" />
                     </div>
-                    <h4 className="font-serif text-sm text-cookbook-text mb-1 leading-tight">{link.title}</h4>
+                    <h4 className="font-serif text-[15px] font-medium text-cookbook-text mb-1 leading-tight">{link.title}</h4>
                     <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold block">
                       {link.desc}
                     </span>

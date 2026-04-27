@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
 import { TAB_ORDER } from '../types';
@@ -48,6 +48,9 @@ interface AppContextValue {
   // Onboarding
   showOnboarding: boolean;
   handleCompleteOnboarding: () => void;
+  
+  // Achievements (completed pots)
+  achievements: any[];
 
   // PWA Install
   canInstall: boolean;
@@ -87,6 +90,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
   const [totalSaved, setTotalSaved] = useState(() => {
     const saved = localStorage.getItem('pote_totalSaved');
     return saved ? Number(saved) : 0;
@@ -99,12 +103,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const isInitialLoad = useRef<boolean>(true);
 
   // ---- Toasts ----
-  const addToast: AddToastFn = useCallback((title, message, type = 'info') => {
+  const addToast: AddToastFn = useCallback((title, message, type = 'info', duration = 5000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, title, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 5000);
+    }, duration);
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -121,6 +125,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ---- Auth ----
   useEffect(() => {
+    // Check if the user is logging in from a redirect (e.g. from mobile Instagram browser bypassing popup)
+    handleRedirectResult();
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthReady(true);
@@ -195,10 +202,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setBingoStats(stats);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
 
+    // Listen to achievements
+    const qArchived = query(collection(db, 'achievements'), orderBy('createdAt', 'desc'));
+    const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
+      const arch: any[] = [];
+      querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
+      setAchievements(arch);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'achievements'));
+
     return () => {
       unsubUser();
       unsubConfig();
       unsubDeposits();
+      unsubAchievements();
     };
   }, [isAuthReady, user]);
 
@@ -217,10 +233,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const milestones = [25, 50, 75, 90, 100];
       for (const milestone of milestones) {
         if (prevPercentage < milestone && currentPercentage >= milestone) {
-          const mTitle = milestone === 100 ? '🎉 META ATINGIDA! 🎉' : 'Marco Alcançado!';
+          const mTitle = milestone === 100 ? '🎉 META ATINGIDA! 🎉' : 'Uhuuul! Um passo mais perto!';
           const mBody = milestone === 100
-            ? 'Vocês conseguiram! O Pote Sagrado está cheio!'
-            : `Vocês chegaram a ${milestone}% da meta! Continuem assim!`;
+            ? 'Aêê! O pote tá cheio! Bora quebrar e fazer as malas?'
+            : `Vocês bateram ${milestone}% da meta! Orgulho define.`;
           addToast(mTitle, mBody, 'milestone');
           break;
         }
@@ -266,6 +282,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     handleTabChange,
     tripConfig,
     deposits,
+    achievements,
     totalSaved,
     bingoStats,
     theme,

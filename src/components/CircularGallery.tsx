@@ -303,7 +303,7 @@ class App {
     this.renderer = new Renderer({
       alpha: true,
       antialias: true,
-      dpr: Math.min(window.devicePixelRatio || 1, 2)
+      dpr: Math.min(window.devicePixelRatio || 1, /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 1.5 : 2)
     });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
@@ -319,8 +319,8 @@ class App {
   }
   createGeometry() {
     this.planeGeometry = new Plane(this.gl, {
-      heightSegments: 50,
-      widthSegments: 100
+      heightSegments: 16,
+      widthSegments: 32
     });
   }
   createMedias(items: any, bend = 1, textColor: string, borderRadius: number, font: string) {

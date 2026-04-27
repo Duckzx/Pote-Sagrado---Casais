@@ -7,6 +7,9 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { AIAkinatorModal } from './AIAkinatorModal';
 import { InstallPrompt } from './InstallPrompt';
 
+import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
+import { ORGANIC_PUNISHMENTS } from '../data/punishments';
+
 interface ConfigTabProps {
   currentDestination: string;
   currentOrigin: string;
@@ -29,7 +32,10 @@ const THEMES = [
 export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize, addToast }) => {
   const [destination, setDestination] = useState(currentDestination || '');
   const [origin, setOrigin] = useState(currentOrigin || '');
-  const [goalAmount, setGoalAmount] = useState((currentGoalAmount || 0).toString());
+  const [goalAmount, setGoalAmount] = useState(() => {
+    if (!currentGoalAmount) return '';
+    return (currentGoalAmount * 100).toFixed(0);
+  });
   const [theme, setTheme] = useState(currentTheme || 'cookbook');
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
   const [targetDate, setTargetDate] = useState(currentTargetDate || '');
@@ -42,15 +48,32 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
   const [showAkinator, setShowAkinator] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
 
+  const [saveTrigger, setSaveTrigger] = useState(0);
+
   useEffect(() => {
     setDestination(currentDestination || '');
     setOrigin(currentOrigin || '');
-    setGoalAmount((currentGoalAmount || 0).toString());
+    if (currentGoalAmount) {
+      setGoalAmount((currentGoalAmount * 100).toFixed(0));
+    } else {
+      setGoalAmount('');
+    }
     setTheme(currentTheme || 'cookbook');
     setChallenges(customChallenges || []);
     setTargetDate(currentTargetDate || '');
     setPrize(currentPrize || '');
   }, [currentDestination, currentOrigin, currentGoalAmount, currentTheme, customChallenges, currentTargetDate, currentPrize]);
+
+  // Handle auto-save on blur
+  const handleSaveLocal = () => {
+    performSave(destination, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
+  };
+
+  useEffect(() => {
+    if (saveTrigger > 0) {
+      handleSaveLocal();
+    }
+  }, [saveTrigger]);
 
   const handleAddChallenge = () => {
     if (!newChallengeLabel.trim()) return;
@@ -162,45 +185,48 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     }
   };
 
-  const handleSave = async () => {
+  const performSave = async (destToSave: string, amountToSave: string, originToSave: string, challengesToSave: any[], targetDateToSave: string, prizeToSave: string, themeToSave: string) => {
     setIsSaving(true);
     try {
-      // Geocode destination
-      let lat = 0;
-      let lng = 0;
-      if (destination) {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destination)}`);
-          const data = await res.json();
-          if (data && data.length > 0) {
-            lat = parseFloat(data[0].lat);
-            lng = parseFloat(data[0].lon);
-          }
-        } catch (e) {
-          console.error("Geocoding failed", e);
-        }
-      }
+      // Clean amount
+      let parsedAmount = parseCurrencyString(amountToSave);
+      if (isNaN(parsedAmount)) parsedAmount = 0;
 
+      // Optimistic save without waiting for geocoding
       await setDoc(doc(db, 'trip_config', 'main'), {
-        destination,
-        origin,
-        goalAmount: Number(goalAmount),
-        lat,
-        lng,
-        customChallenges: challenges,
-        targetDate,
-        monthlyPrize: prize,
+        destination: destToSave,
+        origin: originToSave,
+        goalAmount: parsedAmount,
+        customChallenges: challengesToSave,
+        targetDate: targetDateToSave,
+        monthlyPrize: prizeToSave,
         updatedAt: serverTimestamp()
       }, { merge: true });
 
       if (auth.currentUser) {
         await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          theme,
+          theme: themeToSave,
           displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0]
         }, { merge: true });
       }
 
       addToast('Salvo!', 'Configurações salvas com sucesso!', 'success');
+
+      // Do geocoding in background
+      if (destToSave) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destToSave)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              setDoc(doc(db, 'trip_config', 'main'), {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+              }, { merge: true });
+            }
+          })
+          .catch(e => console.error("Geocoding failed", e));
+      }
+
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'trip_config');
     } finally {
@@ -208,194 +234,219 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({ currentDestination, curren
     }
   };
 
+  const handleSave = () => {
+    performSave(destination, goalAmount.toString(), origin, challenges, targetDate, prize, theme);
+  };
+
+
   return (
-    <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="font-serif text-2xl text-cookbook-text mb-2">Ajustes</h2>
-        <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-          Configure a Viagem
-        </p>
-      </div>
+    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-10 animate-fade-in">
+      
+      {/* Profile Header Section */}
+      <section className="flex flex-col items-center text-center gap-3 mt-0 mb-6 relative">
+        <div className="relative group cursor-pointer">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
+            <img 
+              src={auth.currentUser?.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+            />
+          </div>
+        </div>
+        <div>
+          <h2 className="font-serif text-xl font-medium text-cookbook-text">{auth.currentUser?.displayName || 'Casal Sonhador'}</h2>
+          <p className="font-sans text-[10px] text-cookbook-text/40 mt-1 uppercase tracking-widest">{auth.currentUser?.email}</p>
+        </div>
+      </section>
 
       <InstallPrompt />
 
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-              Local de Partida
-            </label>
-            <button 
-              onClick={handleGetLocation}
-              className="flex items-center space-x-1 text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-primary hover:text-cookbook-gold transition-colors"
-            >
-              <MapPin size={10} />
-              <span>Usar Atual</span>
-            </button>
-          </div>
-          <input
-            type="text"
-            value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
-            placeholder="Ex: São Paulo, SP"
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-              Destino
-            </label>
-            <button 
-              onClick={() => setShowAkinator(true)}
-              className="flex items-center space-x-1 text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-gold hover:text-cookbook-primary transition-colors"
-            >
-              <Sparkles size={10} />
-              <span>Oráculo IA</span>
-            </button>
-          </div>
-          <input
-            type="text"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="Ex: Mochilão Europa"
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-            Meta Financeira (R$)
-          </label>
-          <input
-            type="number"
-            value={goalAmount}
-            onChange={(e) => setGoalAmount(e.target.value)}
-            placeholder="15000"
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-            Data da Viagem (Opcional)
-          </label>
-          <input
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-            Recompensa da Batalha (Opcional)
-          </label>
-          <input
-            type="text"
-            value={prize}
-            onChange={(e) => setPrize(e.target.value)}
-            placeholder="Ex: Perdedor paga o lanche"
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-          />
-        </div>
-
-        <div className="pt-4 border-t border-cookbook-border space-y-4">
-          <div className="text-center mb-4">
-            <h3 className="font-serif text-lg text-cookbook-text mb-1">Notificações Nativas</h3>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-              Web Push Notification
-            </p>
-          </div>
-          
-          <button
-            onClick={handleEnablePush}
-            disabled={isRequestingPush}
-            className="w-full bg-cookbook-bg border border-cookbook-border rounded px-4 py-3 font-sans text-sm font-bold text-cookbook-text/80 focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm flex items-center gap-2 justify-center hover:bg-cookbook-primary/10 hover:text-cookbook-primary disabled:opacity-50"
-          >
-            <Bell size={16} />
-            {isRequestingPush ? 'Requisitando...' : 'Ativar Notificações neste Dispositivo'}
-          </button>
-          
-          <p className="font-serif italic text-[10px] text-cookbook-text/50 px-2 text-center mt-2">
-            Permite que você receba um "Push" do Pote Sagrado, mesmo minimizado. Se for iPhone, é necessário adicionar o site à Tela de Início primeiro.
-          </p>
-        </div>
+      {/* Bento Grid */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
         
-        <div className="space-y-3 pt-4 border-t border-cookbook-border">
-          <label className="flex items-center space-x-2 font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 ml-1 font-bold">
-            <Palette size={14} />
-            <span>Tema do App</span>
-          </label>
-          <div className="grid grid-cols-2 gap-3">
+        {/* Card 1: Destino e Meta */}
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+          <div className="flex items-center gap-2 text-cookbook-text mb-6">
+            <MapPin size={18} className="text-cookbook-primary opacity-80" />
+            <h3 className="font-serif text-xl font-medium">A Aventura</h3>
+          </div>
+
+          <div className="space-y-6 relative z-10 flex-1">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">Destino</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  onBlur={handleSaveLocal}
+                  placeholder="Paris, Praia, Disney..."
+                  className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                />
+                <button title="Ajuda com I.A." onClick={() => setShowAkinator(true)} className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100">
+                  <Sparkles size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">Meta Financeira (R$)</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={maskCurrency(goalAmount)}
+                onChange={(e) => setGoalAmount(maskCurrency(e.target.value))}
+                onBlur={handleSaveLocal}
+                placeholder="0,00"
+                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-2xl font-medium text-cookbook-primary focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-primary/20"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Detalhes da Aventura */}
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+          <div className="flex items-center gap-2 text-cookbook-text mb-6">
+            <Sparkles size={18} className="text-cookbook-primary opacity-80" />
+            <h3 className="font-serif text-xl font-medium">Detalhes Estendidos</h3>
+          </div>
+
+          <div className="space-y-6 flex-1">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">Partida</label>
+                <button onClick={handleGetLocation} className="text-[9px] uppercase tracking-widest text-cookbook-primary hover:text-cookbook-gold font-medium">Usar GPS</button>
+              </div>
+              <input
+                type="text"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                onBlur={handleSaveLocal}
+                placeholder="Ex: São Paulo, SP"
+                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">Data Prometida (Opcional)</label>
+              <input
+                type="date"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                onBlur={handleSaveLocal}
+                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">Aposta da Batalha</label>
+                <button onClick={() => { setPrize(ORGANIC_PUNISHMENTS[Math.floor(Math.random() * ORGANIC_PUNISHMENTS.length)]); setSaveTrigger(prev => prev + 1); }} className="text-[9px] uppercase tracking-widest text-cookbook-gold hover:text-cookbook-primary font-medium">Sortear</button>
+              </div>
+              <input
+                type="text"
+                value={prize}
+                onChange={(e) => setPrize(e.target.value)}
+                onBlur={handleSaveLocal}
+                placeholder="O perdedor paga a conta..."
+                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Permissões e Acessos */}
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all">
+          <div className="flex items-center gap-2 text-cookbook-text mb-4">
+            <Bell size={18} className="text-cookbook-primary opacity-80" />
+            <h3 className="font-serif text-xl font-medium">Notificações e Parceria</h3>
+          </div>
+          
+          <div className="flex flex-col gap-3 mt-2">
+            <button onClick={handleEnablePush} disabled={isRequestingPush} className="flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group">
+              <div className="pr-4">
+                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">Ativar Alertas Nativos</div>
+                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">Ser lembrado pelo navegador aumenta bastante a economia.</div>
+              </div>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                <Bell size={16} />
+              </div>
+            </button>
+
+            <button onClick={handleShare} className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group">
+              <div className="pr-4">
+                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">Convidar Parceiro(a)</div>
+                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">Envie o link para a pessoa acessar o app.</div>
+              </div>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                <Share2 size={16} />
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Card 4: Tema Visual */}
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
+          <div className="flex items-center gap-2 text-cookbook-text mb-6">
+            <Palette size={18} className="text-cookbook-primary opacity-80" />
+            <h3 className="font-serif text-xl font-medium">Tema Visual</h3>
+          </div>
+
+          <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar px-6 -mx-6">
             {THEMES.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTheme(t.id)}
-                className={`flex items-center space-x-2 p-2.5 rounded-xl border transition-all ${
-                  theme === t.id 
-                    ? 'border-cookbook-primary bg-cookbook-bg shadow-md ring-1 ring-cookbook-primary/20' 
-                    : 'border-cookbook-border bg-cookbook-bg/30 opacity-70 hover:opacity-100'
-                }`}
+              <div 
+                key={t.id} 
+                onClick={() => {
+                  setTheme(t.id);
+                  setSaveTrigger(prev => prev + 1);
+                }} 
+                className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
               >
-                <div className="flex shrink-0">
-                  <div className="w-4 h-4 rounded-full border border-black/5 shadow-sm" style={{ backgroundColor: t.colors[0] }} />
-                  <div className="w-4 h-4 rounded-full border border-black/5 shadow-sm -ml-2" style={{ backgroundColor: t.colors[1] }} />
+                <div className={`w-20 h-28 rounded-2xl p-0 shadow-sm relative transition-all duration-300 ${
+                  theme === t.id 
+                    ? 'border-2 border-cookbook-primary -translate-y-2 scale-105' 
+                    : 'border border-cookbook-border/40 hover:border-cookbook-primary/50 hover:-translate-y-1'
+                }`}>
+                  <div className="w-full h-full rounded-xl overflow-hidden flex flex-col" style={{ background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)` }}>
+                    <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
+                    <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
+                      <div className="w-3/4 h-1 rounded-full" style={{ backgroundColor: t.colors[1], opacity: 0.8 }}></div>
+                      <div className="w-1/2 h-1 rounded-full" style={{ backgroundColor: t.colors[1], opacity: 0.5 }}></div>
+                    </div>
+                  </div>
+                  {theme === t.id && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
+                      <Sparkles size={12} />
+                    </div>
+                  )}
                 </div>
-                <span className="font-serif text-[10px] text-cookbook-text text-left leading-tight truncate">{t.label}</span>
-              </button>
+                <span className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? 'text-cookbook-primary font-medium' : 'text-cookbook-text/40 group-hover:text-cookbook-text'}`}>
+                  {t.label}
+                </span>
+              </div>
             ))}
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="w-full flex items-center justify-center space-x-2 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold disabled:opacity-50 transition-opacity mt-4"
-        >
-          <Save size={16} />
-          <span>{isSaving ? 'Salvando...' : 'Salvar Tudo'}</span>
-        </button>
-      </div>
-
-      <div className="pt-8 border-t border-cookbook-border space-y-4">
-        <div className="text-center mb-4">
-          <h3 className="font-serif text-lg text-cookbook-text mb-1">Convidar seu Amor</h3>
-          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-            Divida o pote e a viagem
-          </p>
+        {/* Danger Zone */}
+        <div className="col-span-1 md:col-span-2 flex justify-center mt-6">
+          <button 
+            onClick={logout} 
+            className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest font-medium text-red-500/80 hover:text-red-500 px-6 py-3 transition-colors rounded-full hover:bg-red-500/10 active:scale-95"
+          >
+            <LogOut size={16} strokeWidth={1.5} /> Desconectar Conta
+          </button>
         </div>
-        <button
-          onClick={handleShare}
-          className="w-full flex items-center justify-center space-x-2 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold hover:bg-cookbook-primary hover:text-white hover:border-cookbook-primary transition-colors shadow-sm"
-        >
-          <Share2 size={16} />
-          <span>Compartilhar App</span>
-        </button>
-        <p className="text-center font-serif italic text-xs text-cookbook-text/50 px-4">
-          Qualquer pessoa que acessar este link e fizer login dividirá o mesmo Pote Sagrado com você.
-        </p>
-      </div>
 
-      <div className="pt-8 border-t border-cookbook-border">
-        <button
-          onClick={logout}
-          className="w-full flex items-center justify-center space-x-2 bg-transparent border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold hover:bg-cookbook-border/50 transition-colors"
-        >
-          <LogOut size={16} />
-          <span>Sair da Conta</span>
-        </button>
-      </div>
+      </section>
 
       {showAkinator && (
         <AIAkinatorModal
           onClose={() => setShowAkinator(false)}
           onSelectDestination={(dest) => {
             setDestination(dest);
+            setSaveTrigger(prev => prev + 1);
             setShowAkinator(false);
-            addToast('Destino Escolhido', 'Não esqueça de salvar as configurações!', 'success');
           }}
         />
       )}

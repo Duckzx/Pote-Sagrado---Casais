@@ -23,10 +23,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       if (!userTotals[d.who]) {
         userTotals[d.who] = { name: d.whoName, total: 0 };
       }
-      // Only income counts for the battle score
-      if (d.type !== 'expense') {
-        userTotals[d.who].total += d.amount;
-      }
+      const val = d.type === 'expense' ? -d.amount : d.amount;
+      userTotals[d.who].total += val;
     });
 
     const users = Object.values(userTotals).sort((a, b) => b.total - a.total);
@@ -38,9 +36,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       users.push({ name: 'Jogador 2', total: 0 });
     }
 
-    const total = users[0].total + users[1].total;
-    const p1Percentage = total > 0 ? (users[0].total / total) * 100 : 50;
-    const p2Percentage = total > 0 ? (users[1].total / total) * 100 : 50;
+    const total = Math.max(0, users[0].total) + Math.max(0, users[1].total);
+    const p1Percentage = total > 0 ? (Math.max(0, users[0].total) / total) * 100 : 50;
+    const p2Percentage = total > 0 ? (Math.max(0, users[1].total) / total) * 100 : 50;
 
     return { users, total, p1Percentage, p2Percentage };
   }, [deposits]);
@@ -66,19 +64,20 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         const date = d.createdAt.toDate();
         if (date >= weekStart && date < weekEnd && date.getMonth() === currentMonth) {
           if (users.length >= 2) {
+            const val = d.type === 'expense' ? -(d.amount || 0) : (d.amount || 0);
             if (d.who === Object.keys(deposits.reduce((acc: any, dep: any) => {
               if (!acc[dep.who]) acc[dep.who] = dep.whoName;
               return acc;
             }, {}))[0]) {
-              p1Total += d.amount || 0;
+              p1Total += val;
             } else {
-              p2Total += d.amount || 0;
+              p2Total += val;
             }
           }
         }
       });
       
-      weeks.push({ label: `Sem ${w + 1}`, p1: p1Total, p2: p2Total });
+      weeks.push({ label: `Sem ${w + 1}`, p1: Math.max(0, p1Total), p2: Math.max(0, p2Total) });
     }
     
     return weeks;
@@ -96,56 +95,44 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       </div>
 
       {/* Battle Box */}
-      <div className="bg-cookbook-battle border border-cookbook-border rounded-2xl p-6 shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+      <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="flex justify-between font-sans text-[10px] uppercase tracking-widest font-bold mb-4">
+          <span className="text-cookbook-primary">{users[0].name}</span>
+          <span className="text-cookbook-text/30">VS</span>
+          <span className="text-cookbook-text">{users[1].name}</span>
+        </div>
         
-        <div className="flex justify-between items-center font-sans text-[10px] uppercase tracking-[0.2em] font-bold mb-6">
-          <div className="flex flex-col items-start">
-            <span className="text-cookbook-primary mb-1">{users[0].name}</span>
-            <span className="font-serif text-xl text-cookbook-primary">
-              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].total)}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner z-10">
-            <span className="text-cookbook-text/30 italic text-xs">vs</span>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-cookbook-text/60 mb-1">{users[1].name}</span>
-            <span className="font-serif text-xl text-cookbook-text">
-              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].total)}
-            </span>
-          </div>
+        {/* Scores */}
+        <div className="flex justify-between items-baseline mb-4">
+          <span className="font-serif text-2xl text-cookbook-primary">
+            {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].total)}
+          </span>
+          <span className="font-serif text-2xl text-cookbook-text">
+            {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].total)}
+          </span>
         </div>
         
         {/* Progress bar */}
-        <div className="relative h-4 bg-cookbook-bg border border-cookbook-border rounded-full overflow-hidden flex shadow-inner">
+        <div className="relative h-3 bg-white/50 dark:bg-black/20 rounded-full overflow-hidden flex shadow-inner">
           <div 
-            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/60 transition-all duration-1000 ease-out relative"
+            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
             style={{ width: `${p1Percentage}%` }}
-          >
-            {p1Percentage > 15 && (
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-white font-bold">{p1Percentage.toFixed(0)}%</span>
-            )}
-          </div>
+          />
           <div 
-            className="h-full bg-gradient-to-l from-cookbook-text/40 to-cookbook-text/20 transition-all duration-1000 ease-out relative"
+            className="h-full bg-gradient-to-l from-cookbook-text to-cookbook-text/70 transition-all duration-1000 ease-out rounded-r-full"
             style={{ width: `${p2Percentage}%` }}
-          >
-            {p2Percentage > 15 && (
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-cookbook-text/60 font-bold">{p2Percentage.toFixed(0)}%</span>
-            )}
-          </div>
+          />
         </div>
         
-        <div className="mt-4 text-center">
-          <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-            {users[0].total === users[1].total ? 'Empate técnico!' : `${users[0].name} está dominando!`}
-          </p>
+        {/* Percentage labels */}
+        <div className="flex justify-between mt-3">
+          <span className="font-sans text-[9px] text-cookbook-primary font-bold">{p1Percentage.toFixed(0)}%</span>
+          <span className="font-sans text-[9px] text-cookbook-text/60 font-bold">{p2Percentage.toFixed(0)}%</span>
         </div>
       </div>
 
       {/* Prize */}
-      <div className="bg-cookbook-mural border border-cookbook-gold/20 rounded-xl p-4 text-center">
+      <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
         <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-gold font-bold">◈ Recompensa do Mês</span>
         <p className="font-serif italic text-sm text-cookbook-text mt-1">
           {prize || 'Quem juntar menos paga um jantar!'}
@@ -154,23 +141,36 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
 
       {/* Leader Banner */}
       {users[0].total > users[1].total && (
-        <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative overflow-hidden">
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />
           
-          <div className="w-14 h-14 mx-auto bg-cookbook-bg rounded-full flex items-center justify-center mb-4 border border-cookbook-border">
+          <div className="w-14 h-14 mx-auto bg-white/50 dark:bg-black/20 rounded-full flex items-center justify-center mb-4 border border-white/40 shadow-sm transition-transform group-hover:scale-110">
             <Trophy size={22} className="text-cookbook-primary" />
           </div>
           
-          <h3 className="font-serif italic text-lg text-cookbook-text mb-2">Liderança Atual</h3>
-          <p className="font-sans text-xs uppercase tracking-widest text-cookbook-primary font-bold mb-1">
+          <h3 className="font-serif text-lg text-cookbook-text mb-2 font-medium">Liderança Atual</h3>
+          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-medium mb-1">
             {users[0].name} está na frente!
           </p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed">
+          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5">
             Se o mês acabasse hoje, {users[1].name} pagaria a recompensa.
           </p>
+
+          <button 
+            onClick={() => {
+              // Trigger a funny buzz/vibrate if available
+              if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate([200, 100, 200]);
+              }
+              alert(`Você apertou o botão do orgulho! Lembre ${users[1].name} de que você está na liderança e mande ele(a) ir aquecendo pra pagar o castigo!`);
+            }}
+            className="w-full bg-white/60 dark:bg-white/5 border border-white/40 text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 border-cookbook-border/30 rounded-full font-medium shadow-sm active:scale-95"
+          >
+            Notificar Vantagem (Físico)
+          </button>
           
-          <div className="mt-4 pt-4 border-t border-cookbook-border">
-            <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+          <div className="mt-5 pt-4 border-t border-cookbook-border/30">
+            <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
               Diferença: {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].total - users[1].total)}
             </span>
           </div>
@@ -178,30 +178,29 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       )}
 
       {/* Weekly breakdown */}
-      <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-5 space-y-4">
-        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold text-center">
+      <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
           Desempenho Semanal
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {weeklyData.map((week, i) => (
-            <div key={i} className="space-y-1">
-              <div className="flex justify-between font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold">
+            <div key={i} className="space-y-2">
+              <div className="flex justify-between font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
                 <span>{week.label}</span>
-                <span className="flex gap-3">
-                  <span className="text-cookbook-primary">R$ {week.p1.toFixed(0)}</span>
-                  <span>R$ {week.p2.toFixed(0)}</span>
+                <span className="flex gap-4">
+                  <span className="text-cookbook-primary">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(week.p1)}</span>
+                  <span>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(week.p2)}</span>
                 </span>
               </div>
-              <div className="flex h-2 gap-0.5 rounded-full overflow-hidden">
+              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-white/50 dark:bg-black/20">
                 <div 
-                  className="bg-cookbook-primary/60 rounded-l-full transition-all duration-500"
+                  className="bg-cookbook-primary/70 transition-all duration-500"
                   style={{ width: `${(week.p1 / maxWeeklyValue) * 50}%` }}
                 />
                 <div 
-                  className="bg-cookbook-text/40 rounded-r-full transition-all duration-500"
+                  className="bg-cookbook-text/50 transition-all duration-500"
                   style={{ width: `${(week.p2 / maxWeeklyValue) * 50}%` }}
                 />
-                <div className="flex-1 bg-cookbook-border/30" />
               </div>
             </div>
           ))}
@@ -210,13 +209,13 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
 
       {/* Motivational note */}
       {users[0].total === 0 && users[1].total === 0 && (
-        <div className="text-center py-6 px-4 bg-cookbook-bg border border-dashed border-cookbook-border rounded-xl">
-          <span className="text-3xl block mb-3">⚔️</span>
+        <div className="text-center py-8 px-4 bg-white/40 dark:bg-black/10 backdrop-blur-md border-2 border-dashed border-white/40 dark:border-white/5 rounded-3xl shadow-sm">
+          <span className="text-4xl block mb-3 opacity-50 text-cookbook-primary grayscale">⚔️</span>
           <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
             A batalha ainda não começou!
           </p>
-          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-            Vá em Missões e complete a primeira economia do mês.
+          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mt-2">
+            Complete a primeira economia do mês.
           </p>
         </div>
       )}

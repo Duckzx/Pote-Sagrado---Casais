@@ -19,10 +19,12 @@ const LOCAL_DESTINATIONS = [
   { dest: "Machu Picchu, Peru", tags: ["montanha", "natureza", "america"], reason: "Aventuras inesquecíveis nas alturas dos Andes. Ideal para fortalecer a parceria encarando trilhas marcantes." }
 ];
 
+import { getDestinationRecommendation } from '../services/aiRecommendations';
+
 export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSelectDestination }) => {
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<typeof LOCAL_DESTINATIONS[0] | null>(null);
+  const [result, setResult] = useState<any>(null); // any
   
   // Quiz state
   const [answers, setAnswers] = useState<string[]>([]);
@@ -39,32 +41,25 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
     }
   };
 
-  const processResult = (finalAnswers: string[]) => {
+  const processResult = async (finalAnswers: string[]) => {
     setIsLoading(true);
     setStep(2); // Result view
     
-    setTimeout(() => {
-      // Basic scoring algorithm
-      let maxScore = -1;
-      let matchedDest = LOCAL_DESTINATIONS[Math.floor(Math.random() * LOCAL_DESTINATIONS.length)]; // fallback
-
-      LOCAL_DESTINATIONS.forEach(d => {
-        let score = 0;
-        finalAnswers.forEach(ans => {
-          if (d.tags.includes(ans)) score++;
-        });
-        // Introduce slight randomness for ties
-        score += Math.random() * 0.5;
-        
-        if (score > maxScore) {
-          maxScore = score;
-          matchedDest = d;
-        }
-      });
-
-      setResult(matchedDest);
+    try {
+      const aiResult = await getDestinationRecommendation(finalAnswers);
+      if (aiResult) {
+        setResult(aiResult);
+      } else {
+        // Fallback if AI fails for any reason
+        const matchedDest = LOCAL_DESTINATIONS[Math.floor(Math.random() * LOCAL_DESTINATIONS.length)];
+        setResult({ ...matchedDest, image: `https://loremflickr.com/400/300/${encodeURIComponent(matchedDest.dest)}/all?random=1` });
+      }
+    } catch (e) {
+      const matchedDest = LOCAL_DESTINATIONS[0];
+      setResult({ ...matchedDest, image: `https://loremflickr.com/400/300/${encodeURIComponent(matchedDest.dest)}/all?random=1` });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const renderStep = () => {
@@ -80,13 +75,13 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => handleSelectTag('calor')} className="bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
-                <Sun size={24} />
-                <span className="font-sans font-bold text-[10px] uppercase tracking-widest">Calor & Sol</span>
+              <button onClick={() => handleSelectTag('calor')} className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-orange-600 hover:bg-orange-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm">
+                <Sun size={28} />
+                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-cookbook-text">Calor & Sol</span>
               </button>
-              <button onClick={() => handleSelectTag('frio')} className="bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
-                <Snowflake size={24} />
-                <span className="font-sans font-bold text-[10px] uppercase tracking-widest">Frio & Aconchego</span>
+              <button onClick={() => handleSelectTag('frio')} className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-sky-600 hover:bg-sky-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm">
+                <Snowflake size={28} />
+                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-cookbook-text">Frio & Aconchego</span>
               </button>
             </div>
           </div>
@@ -102,17 +97,17 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => handleSelectTag('praia')} className="bg-cyan-50 border border-cyan-200 text-cyan-700 hover:bg-cyan-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
-                <span className="text-2xl block">🌊</span>
-                <span className="font-sans font-bold text-[10px] uppercase tracking-widest">Praial</span>
+              <button onClick={() => handleSelectTag('praia')} className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-cyan-600 hover:bg-cyan-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm">
+                <span className="text-3xl block">🌊</span>
+                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-cookbook-text">Praial</span>
               </button>
-              <button onClick={() => handleSelectTag('cidade')} className="bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95">
-                <span className="text-2xl block">🗽</span>
-                <span className="font-sans font-bold text-[10px] uppercase tracking-widest">Cidade/Cultura</span>
+              <button onClick={() => handleSelectTag('cidade')} className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-gray-600 hover:bg-gray-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm">
+                <span className="text-3xl block">🗽</span>
+                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-cookbook-text">Cidade/Cultura</span>
               </button>
-              <button onClick={() => handleSelectTag('natureza')} className="bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 rounded-xl p-4 flex flex-col items-center gap-2 transition-all active:scale-95 col-span-2">
-                <span className="text-2xl block">🏕️</span>
-                <span className="font-sans font-bold text-[10px] uppercase tracking-widest">Natureza ou Montanhas</span>
+              <button onClick={() => handleSelectTag('natureza')} className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-emerald-600 hover:bg-emerald-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 col-span-2 shadow-sm">
+                <span className="text-3xl block">🏕️</span>
+                <span className="font-sans font-bold text-[10px] uppercase tracking-widest text-cookbook-text">Natureza ou Montanhas</span>
               </button>
             </div>
           </div>
@@ -131,6 +126,14 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
             <div className="inline-block bg-cookbook-gold/10 text-cookbook-gold border border-cookbook-gold/20 px-4 py-1 rounded-full mb-2">
               <span className="font-sans text-[9px] uppercase tracking-widest font-bold">Match Perfeito</span>
             </div>
+            
+            {result.image && (
+              <div className="w-full h-32 rounded-2xl overflow-hidden shadow-sm border border-white/40 dark:border-white/5 relative mb-4">
+                <img src={result.image} alt={result.dest} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              </div>
+            )}
+            
             <h3 className="font-serif italic text-3xl text-cookbook-text text-balance leading-tight">
               {result.dest}
             </h3>
@@ -140,13 +143,13 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
             <div className="pt-6">
               <button
                 onClick={() => onSelectDestination(result.dest)}
-                className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold shadow-md transition-all active:scale-95"
+                className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-2xl font-bold shadow-md transition-all active:scale-95"
               >
                 Definir como Meta!
               </button>
               <button
                 onClick={() => { setStep(0); setAnswers([]); }}
-                className="w-full mt-3 bg-transparent text-cookbook-text/60 font-sans text-[9px] uppercase tracking-widest py-3 rounded font-bold hover:text-cookbook-text transition-colors"
+                className="w-full mt-3 bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/5 text-cookbook-text font-sans text-[9px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-white/60 transition-colors"
               >
                 Tentar de Novo
               </button>
@@ -157,9 +160,9 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({ onClose, onSel
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-sm animate-modal-backdrop" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-white/40 dark:bg-black/40 backdrop-blur-md animate-modal-backdrop" onClick={onClose}>
       <div 
-        className="bg-white border border-cookbook-border rounded-xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden animate-modal-enter"
+        className="bg-white/60 dark:bg-black/20 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden animate-modal-enter"
         onClick={e => e.stopPropagation()}
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />

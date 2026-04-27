@@ -41,7 +41,7 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({ addToast }) => {
         createdAt: serverTimestamp()
       });
 
-      addToast('Gasto Registrado', 'O valor foi abatido do seu pote.', 'success');
+      addToast('Ouch...', 'O valor foi abatido do seu pote. Respira, vai dar certo!', 'success');
       
       setSelectedCategory(null);
       setAmount('');

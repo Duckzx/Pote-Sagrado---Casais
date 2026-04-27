@@ -255,10 +255,10 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({ deposits, goalAmount
 
   if (dataPoints.length < 2) {
     return (
-      <div className="bg-white border border-dashed border-cookbook-border rounded-xl p-6 text-center">
-        <span className="text-2xl block mb-2">📊</span>
+      <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border-2 border-dashed border-white/40 dark:border-white/5 rounded-3xl p-6 text-center">
+        <span className="text-3xl block mb-2 opacity-50">📊</span>
         <p className="font-serif italic text-sm text-cookbook-text/60">
-          O gráfico aparecerá após 2+ depósitos
+          O gráfico aparecerá após 2+ movimentações
         </p>
       </div>
     );
@@ -268,7 +268,7 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({ deposits, goalAmount
     Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
   return (
-    <div className="bg-white border border-cookbook-border rounded-xl p-4 shadow-sm space-y-2">
+    <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-cookbook-primary/10 flex items-center justify-center">
