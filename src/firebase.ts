@@ -8,6 +8,7 @@ import {
   signOut
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../firebase-applet-config.json';
 
 import { getMessaging, isSupported } from 'firebase/messaging';
@@ -17,6 +18,7 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 }, firebaseConfig.firestoreDatabaseId);
+export const storage = getStorage(app);
 
 export let messaging: any = null;
 isSupported().then((supported) => {

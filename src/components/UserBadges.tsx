@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import confetti from "canvas-confetti";
+import { useAppContext } from "../context/AppContext";
+
 interface UserBadgesProps {
   deposits: any[];
   currentUser: any;
@@ -104,6 +106,7 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
   currentUser,
   goalAmount,
 }) => {
+  const { level, totalXP } = useAppContext();
   const [newlyUnlocked, setNewlyUnlocked] = useState<
     (typeof ALL_BADGES)[0] | null
   >(null);
@@ -243,10 +246,22 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
         {" "}
         <div className="flex items-center justify-between px-2">
           {" "}
-          <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
-            {" "}
-            Medalhas{" "}
-          </h3>{" "}
+          <div className="flex flex-col">
+            <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
+              Medalhas
+            </h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="bg-cookbook-primary text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                Nível {level}
+              </span>
+              <div className="w-20 h-1.5 bg-cookbook-border/30 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-cookbook-primary" 
+                  style={{ width: `${((totalXP % 500) / 500) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
           <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
             {" "}
             {earnedBadges.size} / {ALL_BADGES.length}{" "}
@@ -262,8 +277,8 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
                 className={clsx(
                   "snap-start shrink-0 w-[140px] rounded p-4 flex flex-col items-center text-center border transition-all duration-500",
                   isEarned
-                    ? `bg-white ${badge.border} shadow-sm badge-newly-earned`
-                    : "bg-cookbook-bg/50 border-cookbook-border/50 opacity-60 grayscale",
+                    ? `bg-cookbook-surface ${badge.border} shadow-sm badge-newly-earned`
+                    : "bg-cookbook-surface/30 border-cookbook-border/50 opacity-60 grayscale",
                 )}
                 style={
                   isEarned
@@ -368,7 +383,7 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
                 style={{ borderColor: newlyUnlocked.glowColor }}
               />{" "}
             </div>{" "}
-            <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full p-8 shadow-2xl relative text-center overflow-hidden">
+            <div className="bg-cookbook-surface border border-cookbook-border rounded-2xl w-full p-8 shadow-2xl relative text-center overflow-hidden">
               {" "}
               {/* Top shine decoration */}{" "}
               <div

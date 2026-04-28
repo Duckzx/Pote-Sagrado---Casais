@@ -39,6 +39,8 @@ import { ptBR } from "date-fns/locale";
 import { AIAssistantModal } from "./AIAssistantModal";
 import CircularGallery from "./CircularGallery";
 import { UserBadges } from "./UserBadges";
+import { compressImage } from "../lib/imageUtils";
+import { uploadBase64ToStorage, generateStoragePath } from "../lib/storageUtils";
 import { CountdownWidget } from "./CountdownWidget";
 import { SavingsChart } from "./SavingsChart";
 import { CheapDateModal } from "./CheapDateModal";
@@ -98,7 +100,7 @@ const MilestoneTracker = ({
     .find((m) => pct >= m.threshold);
   if (!activeMilestone || pct >= 100) return null;
   return (
-    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
+    <div className="bg-cookbook-surface backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
       {" "}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />{" "}
       <div className="flex justify-center mb-3">
@@ -152,6 +154,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   ] = useState(false);
   const [isPotBroken, setIsPotBroken] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
+  const [breakPhoto, setBreakPhoto] = useState<string | null>(null);
   const [showShareWidget, setShowShareWidget] = useState(false);
   /* FAB quick deposit */ const [showQuickDeposit, setShowQuickDeposit] =
     useState(false);
@@ -194,7 +197,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         createdAt: serverTimestamp(),
       };
       if (quickImage) {
-        depositData.imageUrl = quickImage;
+        try {
+          const path = generateStoragePath("deposits", user.uid);
+          depositData.imageUrl = await uploadBase64ToStorage(quickImage, path);
+        } catch (storageError) {
+          console.error("Failed to upload deposit image to storage:", storageError);
+          // Fallback to base64 if needed, but preferably null if storage is mandatory
+          depositData.imageUrl = quickImage; 
+        }
       }
       await addDoc(collection(db, "deposits"), depositData);
       /* Haptic and audio feedback */ vibrate([30, 50, 30]);
@@ -329,10 +339,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }, 600);
     setTimeout(async () => {
       try {
+        let finalImageUrl = breakPhoto;
+        
+        // If we have a photo, upload it to Storage instead of storing base64
+        if (breakPhoto && user) {
+          try {
+            const path = generateStoragePath("achievements", user.uid);
+            finalImageUrl = await uploadBase64ToStorage(breakPhoto, path);
+          } catch (storageError) {
+            console.error("Failed to upload photo to storage:", storageError);
+            // Fallback to base64 if storage fails (optional, or just use null)
+          }
+        }
+
         await addDoc(collection(db, "achievements"), {
           destination: destination || "Nossa Viagem",
           amount: Number(totalSaved),
           goalAmount: Number(goalAmount),
+          imageUrl: finalImageUrl, // Use the Storage URL
           createdAt: serverTimestamp(),
         });
         for (const deposit of deposits) {
@@ -358,6 +382,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         setTimeout(() => {
           setIsPotBroken(false);
           setIsPotBreaking(false);
+          setBreakPhoto(null); // Reset photo
         }, 2000);
       }
     }, 1500);
@@ -438,10 +463,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           className="w-full bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary text-white border border-white/20 rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all active:scale-[0.98] hover:shadow-[0_10px_40px_rgb(0,0,0,0.12)] animate-pulse-slow relative overflow-hidden"
         >
           {" "}
-          <div className="absolute inset-0 bg-white/10 blur-xl rounded-full scale-150 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>{" "}
+          <div className="absolute inset-0 bg-cookbook-glass blur-xl rounded-full scale-150 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>{" "}
           <div className="flex items-center space-x-4 relative z-10">
             {" "}
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
+            <div className="w-10 h-10 rounded-full bg-cookbook-glass flex items-center justify-center backdrop-blur-sm border border-cookbook-glass-border">
               {" "}
               <Sparkles size={18} className="text-white" />{" "}
             </div>{" "}
@@ -471,7 +496,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           href={flightsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="block bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] relative overflow-hidden"
+          className="block bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] relative overflow-hidden"
         >
           {" "}
           <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full border border-dashed border-cookbook-primary/20 flex items-center justify-center font-serif text-[11px] text-cookbook-primary/40 rotate-[15deg]">
@@ -501,7 +526,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </a>{" "}
         <button
           onClick={() => setShowAIModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
+          className="w-full bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
         >
           {" "}
           <div className="flex items-center space-x-4 text-cookbook-text">
@@ -530,7 +555,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </button>{" "}
         <button
           onClick={() => setShowDateModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group"
+          className="w-full bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group"
         >
           {" "}
           <div className="flex items-center space-x-4 text-cookbook-text">
@@ -573,7 +598,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {" "}
           Moodboard{" "}
         </h3>{" "}
-        <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cookbook-border bg-black/40 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cookbook-border bg-cookbook-glass backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           {" "}
           <CircularGallery
             items={galleryItems}
@@ -710,7 +735,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           >
             {" "}
             <div
-              className="w-full max-w-sm bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-3xl shadow-2xl animate-modal-enter text-center space-y-6"
+              className="w-full max-w-sm bg-cookbook-surface backdrop-blur-xl border border-cookbook-glass-border p-6 rounded-3xl shadow-2xl animate-modal-enter text-center space-y-6"
               onClick={(e) => e.stopPropagation()}
             >
               {" "}
@@ -723,6 +748,51 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 Isso guardará esta conquista no histórico e zerará o pote.
                 Deseja continuar?{" "}
               </p>{" "}
+              {/* Photo Upload Section */}{" "}
+              <div className="space-y-3">
+                {" "}
+                {breakPhoto ? (
+                  <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-white/20">
+                    {" "}
+                    <img
+                      src={breakPhoto}
+                      alt="Selfie da Vitória"
+                      className="w-full h-full object-cover"
+                    />{" "}
+                    <button
+                      onClick={() => setBreakPhoto(null)}
+                      className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full backdrop-blur-sm"
+                    >
+                      {" "}
+                      <X size={16} />{" "}
+                    </button>{" "}
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
+                    {" "}
+                    <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                      {" "}
+                      <Camera size={24} className="text-white/60 mb-2" />{" "}
+                      <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-white/80">
+                        {" "}
+                        Selfie da Vitória!{" "}
+                      </p>{" "}
+                    </div>{" "}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const base64 = await compressImage(file);
+                          setBreakPhoto(base64);
+                        }
+                      }}
+                      className="hidden"
+                    />{" "}
+                  </label>
+                )}{" "}
+              </div>{" "}
               <div className="flex space-x-3 pt-4">
                 {" "}
                 <button
@@ -765,7 +835,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           >
             {" "}
             <div
-              className="bg-cookbook-bg shadow-xl border border-cookbook-border rounded-t-3xl w-full max-w-md p-6 shadow-2xl animate-modal-enter pb-8"
+              className="bg-cookbook-surface shadow-xl border border-cookbook-border rounded-t-3xl w-full max-w-md p-6 shadow-2xl animate-modal-enter pb-8"
               onClick={(e) => e.stopPropagation()}
             >
               {" "}
@@ -778,14 +848,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {" "}
                 <button
                   onClick={() => setQuickType("income")}
-                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
+                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
                 >
                   {" "}
                   ↑ Entrada{" "}
                 </button>{" "}
                 <button
                   onClick={() => setQuickType("expense")}
-                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "expense" ? "bg-red-500 text-white border-red-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
+                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "expense" ? "bg-red-500 text-white border-red-500 shadow-sm" : "bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
                 >
                   {" "}
                   ↓ Saída{" "}
@@ -803,7 +873,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                       setQuickAmount(maskCurrency(e.target.value))
                     }
                     placeholder="R$ 0,00"
-                    className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl py-4 pr-4 font-serif text-3xl text-cookbook-text text-center focus:outline-none focus:border-cookbook-primary transition-colors"
+                    className="w-full bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border rounded-2xl py-4 pr-4 font-serif text-3xl text-cookbook-text text-center focus:outline-none focus:border-cookbook-primary transition-colors"
                     autoFocus
                   />{" "}
                 </div>{" "}
@@ -812,7 +882,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   value={quickDesc}
                   onChange={(e) => setQuickDesc(e.target.value)}
                   placeholder="Descrição (opcional)"
-                  className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  className="w-full bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
                 />{" "}
                 {/* Image Upload Area */}{" "}
                 {quickType === "income" && (
@@ -835,7 +905,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                         </button>{" "}
                       </div>
                     ) : (
-                      <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-cookbook-border rounded-2xl cursor-pointer bg-cookbook-bg/90 backdrop-blur-md hover:bg-cookbook-primary/10 transition-colors">
+                      <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-cookbook-border rounded-2xl cursor-pointer bg-cookbook-surface/60 backdrop-blur-md hover:bg-cookbook-primary/10 transition-colors">
                         {" "}
                         <div className="flex flex-col items-center justify-center pt-2 pb-2">
                           {" "}

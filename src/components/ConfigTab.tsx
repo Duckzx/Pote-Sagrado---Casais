@@ -313,7 +313,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         {" "}
         <div className="relative group cursor-pointer">
           {" "}
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-cookbook-glass-border shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
             {" "}
             <img
               src={
@@ -342,7 +342,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
         {" "}
         {/* Card 1: Destino e Meta */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
           {" "}
           <div className="flex items-center gap-2 text-cookbook-text mb-6">
             {" "}
@@ -399,7 +399,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           </div>{" "}
         </div>{" "}
         {/* Card 2: Detalhes da Aventura */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
           {" "}
           <div className="flex items-center gap-2 text-cookbook-text mb-6">
             {" "}
@@ -488,7 +488,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           </div>{" "}
         </div>{" "}
         {/* Card 3: Permissões e Acessos */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all">
+        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all">
           {" "}
           <div className="flex items-center gap-2 text-cookbook-text mb-4">
             {" "}
@@ -546,7 +546,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           </div>{" "}
         </div>{" "}
         {/* Card 4: Tema Visual */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
+        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
           {" "}
           <div className="flex items-center gap-2 text-cookbook-text mb-6">
             {" "}
@@ -569,7 +569,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               >
                 {" "}
                 <div
-                  className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
+                  className={`w-20 h-28 rounded-2xl p-2 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-4 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-2 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
                 >
                   {" "}
                   <div
