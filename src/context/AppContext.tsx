@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
+import { playSuccessSound, vibrate } from '../lib/audio';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
@@ -25,6 +26,7 @@ interface AppContextValue {
   // Auth
   user: AppUser | null;
   isAuthReady: boolean;
+  isDataReady: boolean;
 
   // Navigation
   activeTab: TabId;
@@ -77,6 +79,7 @@ export function useAppContext(): AppContextValue {
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [tabDirection, setTabDirection] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -106,6 +109,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addToast: AddToastFn = useCallback((title, message, type = 'info', duration = 5000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, title, message, type }]);
+    
+    if (type === 'success' || type === 'milestone') {
+      vibrate([30, 50, 30]);
+      playSuccessSound();
+    }
+    
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, duration);
@@ -200,6 +209,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTotalSaved(total);
       localStorage.setItem('pote_totalSaved', total.toString());
       setBingoStats(stats);
+      
+      // Delay slightly for smooth transition
+      setTimeout(() => setIsDataReady(true), 200);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
 
     // Listen to achievements
@@ -277,6 +289,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value: AppContextValue = {
     user,
     isAuthReady,
+    isDataReady,
     activeTab,
     tabDirection,
     handleTabChange,
