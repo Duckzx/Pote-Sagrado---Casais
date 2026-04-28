@@ -684,7 +684,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
           }}
         >
           <div 
-            className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter"
+            className="bg-white/90 dark:bg-black/80 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter"
             onClick={e => e.stopPropagation()}
           >
             {/* Colored accent */}
@@ -781,7 +781,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({ stats, customChallenges 
           className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop" 
           style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
         >
-          <div className="bg-white border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter">
+          <div className="bg-white/90 dark:bg-black/80 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter">
             <button 
               onClick={() => setEditingMission(null)}
               className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text transition-colors"

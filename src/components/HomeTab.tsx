@@ -66,7 +66,7 @@ const MilestoneTracker = ({ totalSaved, goalAmount, onRewardClick }: { totalSave
   if (!activeMilestone || pct >= 100) return null;
 
   return (
-    <div className="bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
+    <div className="bg-white/20 dark:bg-black/20 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />
       <div className="flex justify-center mb-3">
         <Star size={28} className="text-amber-500 fill-amber-500 drop-shadow-md" />
@@ -626,7 +626,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ currentUser, destination, orig
           }}
         >
           <div 
-            className="bg-white/60 dark:bg-black/20 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-t-3xl w-full max-w-md p-6 shadow-2xl animate-modal-enter pb-8"
+            className="bg-white/90 dark:bg-black/80 backdrop-blur-2xl border border-white/20 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-cookbook-border/30 rounded-full mx-auto mb-5" />

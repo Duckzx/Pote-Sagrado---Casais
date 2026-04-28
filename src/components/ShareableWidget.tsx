@@ -59,10 +59,12 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
       if (!widgetRef.current) return;
 
       const canvas = await html2canvas(widgetRef.current, {
-        scale: 2,
+        scale: 3, // Higher quality
         backgroundColor: null, 
         logging: false,
         useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true, // Better for SVG/CSS effects
       });
 
       canvas.toBlob(async (blob) => {
@@ -100,7 +102,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
   return (
     <div 
       className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-modal-backdrop"
-      style={{ background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)' }}
+      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}
       onClick={onClose}
     >
       <div 
