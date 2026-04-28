@@ -28,6 +28,7 @@ const ConfigTab = lazy(() =>
 
 import { RemotionIntro } from "./components/RemotionIntro";
 import { SacredJarIcon } from "./components/SacredJarIcon";
+import { requestNotificationPermission, onMessageListener } from "./lib/notifications";
 
 // ========================================
 // Error Boundary
@@ -147,6 +148,27 @@ function AppContent() {
     showOnboarding,
     handleCompleteOnboarding,
   } = useAppContext();
+
+  // Setup notifications when user is authenticated
+  React.useEffect(() => {
+    if (user) {
+      requestNotificationPermission(user.uid).then(token => {
+        if (token) {
+          console.log("Notificações configuradas com sucesso.");
+        }
+      });
+
+      // Listen for foreground messages
+      onMessageListener().then(payload => {
+        const p = payload as any;
+        addToast(
+          p.notification?.title || "Nova Notificação",
+          p.notification?.body || "",
+          "info"
+        );
+      });
+    }
+  }, [user]);
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
 

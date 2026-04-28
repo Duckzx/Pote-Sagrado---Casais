@@ -1,10 +1,12 @@
 import React, { useMemo } from "react";
 import { Trophy } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
+  const { addToast } = useAppContext();
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -201,14 +203,14 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           </p>{" "}
           <button
             onClick={() => {
-              /* Trigger a funny buzz/vibrate if available */ if (
-                window.navigator &&
-                window.navigator.vibrate
-              ) {
-                window.navigator.vibrate([200, 100, 200]);
+              /* Trigger a funny buzz/vibrate if available */ 
+              if (window.navigator?.vibrate) {
+                window.navigator.vibrate([100, 50, 100]);
               }
-              alert(
-                `Você apertou o botão do orgulho! Lembre ${users[1].name} de que você está na liderança e mande ele(a) ir aquecendo pra pagar o castigo!`,
+              addToast(
+                "Botão do Orgulho! 🔥",
+                `Lembre ${users[1].name} de que você está na liderança! Mande ele(a) ir aquecendo pra pagar o castigo!`,
+                "info"
               );
             }}
             className="w-full bg-cookbook-glass border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 border-cookbook-border/30 rounded-full font-medium shadow-sm active:scale-95"

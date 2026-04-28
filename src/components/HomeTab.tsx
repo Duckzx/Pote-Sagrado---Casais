@@ -210,12 +210,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       /* Haptic and audio feedback */ vibrate([30, 50, 30]);
       if (quickType === "income") {
         playCoinSound();
-        confetti({
-          particleCount: 80,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: ["#8E7F6D", "#C5A059", "#E8E4D9"],
-        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ["#8E7F6D", "#C5A059", "#E8E4D9"],
+          });
+        }, 100);
         addToast(
           "Booooooooa!",
           `+R$ ${parsedAmount.toFixed(2)} no pote. Um passo mais perto da viagem!`,
