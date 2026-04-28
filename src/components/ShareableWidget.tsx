@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef, useEffect, useId } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Sparkles, AlertCircle, Download } from 'lucide-react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -10,8 +10,6 @@ interface ShareableWidgetProps {
 }
 
 const PotDrawing = ({ percentage }: { percentage: number }) => {
-  const rawId = useId();
-  const clipId = `pot-clip-${rawId.replace(/:/g, '')}`;
   const fillHeightValue = (percentage / 100) * 80;
   const yPos = 105 - fillHeightValue;
 
@@ -19,7 +17,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
     <div className="relative w-32 h-44 mx-auto mb-4 drop-shadow-xl animate-fade-in">
       <svg viewBox="0 0 100 120" className="w-full h-full" overflow="visible" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id={clipId}>
+          <clipPath id="potClipWidget">
             <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
           </clipPath>
         </defs>
@@ -29,7 +27,7 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
         
         <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" fill="rgba(255,255,255,0.15)" stroke="#E8E4D9" strokeWidth="4" />
         
-        <g clipPath={`url(#${clipId})`}>
+        <g clipPath="url(#potClipWidget)">
           <rect 
             x="0" 
             y={yPos} 
@@ -52,94 +50,66 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
   const [isExporting, setIsExporting] = useState(false);
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   const widgetRef = useRef<HTMLDivElement>(null);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   const handleShare = useCallback(async () => {
-    if (!widgetRef.current || isExporting) return;
-
     try {
       setIsExporting(true);
-      
-      const node = widgetRef.current;
-      if (!node) throw new Error('Elemento não encontrado');
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Pequeno delay para garantir que qualquer animação de entrada terminou
-      await new Promise(resolve => setTimeout(resolve, 300));
+      if (!widgetRef.current) return;
 
-      // Capturar o nó original diretamente (já que não estamos mais usando Portals, é seguro)
-      const dataUrl = await toPng(node, {
-        cacheBust: true,
-        backgroundColor: '#1C1A17',
-        pixelRatio: 2,
-        style: {
-          transform: 'scale(1)',
-          opacity: '1',
-          visibility: 'visible',
-        },
-        fontEmbedCSS: '', // Opcional: forçar inclusão de fontes se necessário
+      const canvas = await html2canvas(widgetRef.current, {
+        scale: 3, // Higher quality
+        backgroundColor: null, 
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true, // Better for SVG/CSS effects
       });
 
-      if (!dataUrl) throw new Error('Falha ao gerar a imagem');
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error('Falha ao gerar a imagem');
 
-      if (!isMounted.current) return;
+        const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
 
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-
-      if (!isMounted.current) return;
-
-      const file = new File([blob], 'pote-sagrado-status.png', { type: 'image/png' });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            files: [file],
-          });
-        } catch (shareErr: any) {
-          if (shareErr.name !== 'AbortError') {
-            console.error("Erro no popup de share:", shareErr);
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+            });
+          } catch (shareErr) {
+             console.error("Erro no popup de share:", shareErr);
           }
+        } else {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = 'pote-sagrado-status.png';
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
-      } else {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = 'pote-sagrado-status.png';
-        link.href = url;
-        link.click();
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 2000);
-      }
+        setIsExporting(false);
+      }, 'image/png');
 
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error("Erro ao compartilhar:", err);
       }
-    } finally {
-      if (isMounted.current) {
-        setIsExporting(false);
-      }
+      setIsExporting(false);
     }
-  }, [isExporting]);
+  }, [destination]);
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-      style={{ background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-modal-backdrop"
+      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}
       onClick={onClose}
     >
       <div 
-        className="relative bg-[#1C1A17] rounded-[2rem] border border-[#C5A059]/20 shadow-2xl overflow-hidden max-w-sm w-full"
+        className="w-full max-w-sm relative"
         onClick={e => e.stopPropagation()}
       >
-        <div ref={widgetRef} className="p-8 relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
+        <div ref={widgetRef} className="rounded-3xl p-8 shadow-2xl overflow-hidden relative" style={{ background: 'linear-gradient(to bottom right, #1C1A17, #2C2A26)', color: '#C5A059' }}>
           <div className="absolute top-0 right-0 p-3 opacity-20">
             <Sparkles size={100} color="#C5A059" />
           </div>
@@ -204,4 +174,3 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({ goalAmount, to
     </div>
   );
 };
-

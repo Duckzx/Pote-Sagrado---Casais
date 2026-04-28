@@ -4,6 +4,7 @@ import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { playSuccessSound, vibrate } from '../lib/audio';
+import { maskCurrency, parseCurrencyString } from '../lib/maskUtils';
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -98,12 +99,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
   // Edit handler
   const handleEdit = (deposit: any) => {
     setEditing(deposit);
-    setEditAmount(deposit.amount.toString());
+    setEditAmount(maskCurrency(deposit.amount.toFixed(2).replace('.', '')));
     setEditAction(deposit.action || '');
   };
 
   const confirmEdit = async () => {
-    const parsedAmount = Number(editAmount.replace(',', '.'));
+    const parsedAmount = parseCurrencyString(editAmount);
     if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
     try {
       await updateDoc(doc(db, 'deposits', editing.id), {
@@ -152,7 +153,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       </div>
 
       {/* Month selector */}
-      <div className="flex items-center justify-between bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between bg-white/40 dark:bg-black/10 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-2xl px-4 py-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
         <button
           onClick={() => goMonth(-1)}
           className="text-cookbook-text/40 hover:text-cookbook-text transition-colors p-1"
@@ -175,18 +176,18 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-emerald-50 border border-emerald-200/50 rounded-xl p-3 text-center">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 text-center backdrop-blur-sm">
           <ArrowUpCircle size={16} className="text-emerald-500 mx-auto mb-1" />
-          <div className="font-serif text-sm text-emerald-700">{formatCurrency(totals.depositos)}</div>
+          <div className="font-serif text-sm text-emerald-600 dark:text-emerald-400">{formatCurrency(totals.depositos)}</div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-emerald-500/70 font-bold mt-0.5">Entradas</div>
         </div>
-        <div className="bg-red-50 border border-red-200/50 rounded-xl p-3 text-center">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-3 text-center backdrop-blur-sm">
           <ArrowDownCircle size={16} className="text-red-500 mx-auto mb-1" />
-          <div className="font-serif text-sm text-red-700">{formatCurrency(totals.gastos)}</div>
+          <div className="font-serif text-sm text-red-600 dark:text-red-400">{formatCurrency(totals.gastos)}</div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-red-500/70 font-bold mt-0.5">Saídas</div>
         </div>
-        <div className="bg-cookbook-bg border border-cookbook-border rounded-xl p-3 text-center">
-          <div className={`font-serif text-sm ${totals.saldo >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+        <div className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl p-3 text-center shadow-sm">
+          <div className={`font-serif text-sm ${totals.saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
             {formatCurrency(totals.saldo)}
           </div>
           <div className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-0.5">Saldo</div>
@@ -208,7 +209,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
               className={`flex-1 py-2 rounded-lg font-sans text-[8px] uppercase tracking-widest font-bold transition-all ${
                 filter === f.id
                   ? 'bg-cookbook-primary text-white'
-                  : 'bg-cookbook-bg border border-cookbook-border text-cookbook-text/50 hover:border-cookbook-primary/30'
+                  : 'bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-cookbook-text/50 hover:border-cookbook-primary/30'
               }`}
             >
               {f.label}
@@ -221,7 +222,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
           <select
             value={filterUser}
             onChange={(e) => setFilterUser(e.target.value)}
-            className="bg-cookbook-bg border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
+            className="bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
           >
             <option value="todos">👥 Ambos</option>
             {users.map(([uid, name]) => (
@@ -234,7 +235,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       {/* Timeline */}
       <div className="space-y-5">
         {Object.keys(groupedByDate).length === 0 ? (
-          <div className="text-center py-12 px-4 bg-cookbook-bg border border-dashed border-cookbook-border rounded-xl">
+          <div className="text-center py-12 px-4 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-dashed border-white/40 dark:border-white/5 rounded-3xl">
             <span className="text-3xl block mb-3">📭</span>
             <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
               Nada por aqui ainda
@@ -264,11 +265,11 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
                   return (
                     <div
                       key={deposit.id}
-                      className="flex items-center gap-3 bg-cookbook-bg border border-cookbook-border/60 rounded-xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow group"
+                      className="flex items-center gap-3 bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl px-4 py-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:shadow-[0_4px_20px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 group"
                     >
                       {/* Icon */}
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                        isExpense ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500'
+                        isExpense ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'
                       }`}>
                         {isExpense ? <ArrowDownCircle size={16} /> : <ArrowUpCircle size={16} />}
                       </div>
@@ -337,42 +338,45 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       {/* ========== Edit Modal ========== */}
       {editing && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop"
-          style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-white/40 dark:bg-black/40 backdrop-blur-md animate-modal-backdrop"
           onClick={() => setEditing(null)}
         >
-          <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setEditing(null)} className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text">
+          <div className="bg-white/60 dark:bg-black/20 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setEditing(null)} className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-primary transition-colors">
               <X size={20} />
             </button>
-            <h3 className="font-serif text-xl text-cookbook-text mb-5">Editar Transação</h3>
+            <h3 className="font-serif text-xl text-cookbook-text mb-5 font-medium">Editar Transação</h3>
             <div className="space-y-3 mb-6">
               <input
                 type="text"
                 value={editAction}
                 onChange={(e) => setEditAction(e.target.value)}
                 placeholder="Descrição"
-                className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
               />
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">R$</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                  className="w-full bg-cookbook-bg border border-cookbook-border rounded-xl py-3 pl-12 pr-4 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                  onChange={(e) => setEditAmount(maskCurrency(e.target.value))}
+                  placeholder="R$ 0,00"
+                  className="w-full bg-white/40 dark:bg-black/10 backdrop-blur-md border border-white/40 dark:border-white/5 rounded-2xl py-4 pr-4 font-serif text-3xl text-center text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
                   autoFocus
                 />
               </div>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setEditing(null)} className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold hover:bg-cookbook-border/50 transition-colors">
+              <button 
+                onClick={() => setEditing(null)} 
+                className="flex-1 bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/5 text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-white/60 transition-colors"
+              >
                 Cancelar
               </button>
               <button 
                 onClick={confirmEdit} 
                 disabled={!editAmount || isNaN(Number(editAmount.replace(',', '.'))) || Number(editAmount.replace(',', '.')) <= 0}
-                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
               >
                 Salvar
               </button>
@@ -384,18 +388,20 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({ deposits, addToast }) =>
       {/* ========== Delete Modal ========== */}
       {deleting && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-modal-backdrop"
-          style={{ background: 'rgba(253,251,247,0.85)', backdropFilter: 'blur(6px)' }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-white/40 dark:bg-black/40 backdrop-blur-md animate-modal-backdrop"
           onClick={() => setDeleting(null)}
         >
-          <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter text-center" onClick={e => e.stopPropagation()}>
+          <div className="bg-white/60 dark:bg-black/20 backdrop-blur-2xl border border-white/40 dark:border-white/5 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative animate-modal-enter text-center" onClick={e => e.stopPropagation()}>
             <span className="text-4xl block mb-4">🗑️</span>
-            <h3 className="font-serif text-xl text-cookbook-text mb-2">Excluir Transação?</h3>
+            <h3 className="font-serif text-xl text-cookbook-text mb-2 font-medium">Excluir Transação?</h3>
             <p className="font-sans text-xs text-cookbook-text/60 mb-6">
               <strong>{formatCurrency(deleting.amount)}</strong> — {deleting.action || 'Sem descrição'}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleting(null)} className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold">
+              <button 
+                onClick={() => setDeleting(null)} 
+                className="flex-1 bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/5 text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-white/60 transition-colors"
+              >
                 Cancelar
               </button>
               <button onClick={confirmDelete} className="flex-1 bg-red-500 text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold">

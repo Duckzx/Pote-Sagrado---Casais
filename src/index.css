@@ -107,9 +107,28 @@
     @apply bg-cookbook-bg text-cookbook-text font-sans transition-colors duration-500;
   }
   
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--theme-primary) 10%, transparent) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+    transition: background 0.5s ease-in-out;
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
   }
+}
+
+/* Custom Scrollbar for Themes */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .bg-dotted {
