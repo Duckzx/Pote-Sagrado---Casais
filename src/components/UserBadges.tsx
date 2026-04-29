@@ -198,7 +198,21 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
   useEffect(() => {
     if (isInitialLoad.current) {
       if (deposits.length > 0) {
-        /* Wait until we actually loaded some data to drop initial load guard prevEarnedRef.current = new Set(earnedBadges); isInitialLoad.current = false; } return; } const newBadgesList = Array.from(earnedBadges).filter(id => !prevEarnedRef.current.has(id)); if (newBadgesList.length > 0) { const badgeData = ALL_BADGES.find(b => b.id === newBadgesList[0]); if (badgeData) { setNewlyUnlocked(badgeData); setShowCelebration(true); /* Staggered confetti bursts for more drama */ setTimeout(
+        // Wait until we actually loaded some data to drop initial load guard
+        prevEarnedRef.current = new Set(earnedBadges);
+        isInitialLoad.current = false;
+      }
+      return;
+    }
+
+    const newBadgesList = Array.from(earnedBadges).filter(id => !prevEarnedRef.current.has(id));
+    if (newBadgesList.length > 0) {
+      const badgeData = ALL_BADGES.find(b => b.id === newBadgesList[0]);
+      if (badgeData) {
+        setNewlyUnlocked(badgeData);
+        setShowCelebration(true);
+        // Staggered confetti bursts for more drama
+        setTimeout(
           () => {
             confetti({
               particleCount: 80,

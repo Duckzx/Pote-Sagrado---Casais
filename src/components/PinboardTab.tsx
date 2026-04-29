@@ -184,7 +184,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           </h3>{" "}
           <button
             onClick={() => setIsAddingLink(!isAddingLink)}
-            className="text-cookbook-primary p-2 hover:bg-cookbook-bg :bg-white/5 rounded-full backdrop-blur-md border border-cookbook-border transition-colors shadow-sm"
+            className="text-cookbook-primary p-2 hover:bg-cookbook-bg rounded-full backdrop-blur-md border border-cookbook-border transition-colors shadow-sm"
           >
             {" "}
             <Plus size={20} />{" "}
@@ -402,7 +402,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                   return (
                     <div
                       key={d.id}
-                      className="group flex flex-col md:flex-row items-start md:items-center justify-between py-2 border-b border-white/20 last:border-0 hover:bg-cookbook-bg :bg-white/5 px-2 -mx-2 rounded-xl transition-colors cursor-default gap-2"
+                      className="group flex flex-col md:flex-row items-start md:items-center justify-between py-2 border-b border-white/20 last:border-0 hover:bg-cookbook-bg px-2 -mx-2 rounded-xl transition-colors cursor-default gap-2"
                     >
                       {" "}
                       <div className="flex items-center gap-3">

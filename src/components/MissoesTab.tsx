@@ -757,14 +757,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             <button
               onClick={() => setNewCategory("desafio")}
-              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "desafio" ? "bg-amber-500/20 border-amber-500/30 text-amber-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30 :bg-white/10"}`}
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "desafio" ? "bg-amber-500/20 border-amber-500/30 text-amber-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30"}`}
             >
               {" "}
               ⚔️ Desafio{" "}
             </button>{" "}
             <button
               onClick={() => setNewCategory("economia")}
-              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "economia" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30 :bg-white/10"}`}
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "economia" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30"}`}
             >
               {" "}
               💚 Economia{" "}

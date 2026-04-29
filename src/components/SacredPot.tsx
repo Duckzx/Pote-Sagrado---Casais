@@ -32,31 +32,32 @@ export const SacredPot: React.FC<SacredPotProps> = ({
     }, 150);
     return () => clearTimeout(timer);
   }, [targetProgress, isBroken]);
-  /* Trigger continuous light confetti if goal reached */ useEffect(() => {
-    if (isGoalReached && !isBreaking && !isBroken && canvasRef.current) {
+  const [hasCelebrated, setHasCelebrated] = useState(false);
+
+  /* Trigger light confetti if goal reached (transition only) */ 
+  useEffect(() => {
+    if (isGoalReached && !isBreaking && !isBroken && canvasRef.current && !hasCelebrated) {
+      setHasCelebrated(true);
       const customConfetti = confetti.create(canvasRef.current, {
         resize: false,
         useWorker: false,
       });
-      const interval = setInterval(() => {
-        customConfetti({
-          particleCount: 8,
-          spread: 40,
-          origin: { x: 0.5, y: 0.4 },
-          colors: ["#FFD700", "#FDB931", "#FF8C00", "#FFF8DC"],
-          disableForReducedMotion: true,
-          ticks: 100,
-          gravity: 0.8,
-          scalar: 0.6,
-          zIndex: 10,
-        });
-      }, 1500);
-      return () => {
-        clearInterval(interval);
-        customConfetti.reset();
-      };
+      
+      customConfetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { x: 0.5, y: 0.4 },
+        colors: ["#FFD700", "#FDB931", "#FF8C00", "#FFF8DC"],
+        disableForReducedMotion: true,
+        ticks: 200,
+        gravity: 0.8,
+        scalar: 0.8,
+        zIndex: 10,
+      });
+      
+      setTimeout(() => customConfetti.reset(), 5000);
     }
-  }, [isGoalReached, isBreaking, isBroken]);
+  }, [isGoalReached, isBreaking, isBroken, hasCelebrated]);
   return (
     <div className="sacred-pot-container relative">
       {" "}
