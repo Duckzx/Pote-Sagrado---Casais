@@ -1,10 +1,14 @@
-import React, { useMemo } from "react";
-import { Trophy } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
+import { Trophy, Share2 } from "lucide-react";
+import domtoimage from "dom-to-image-more";
+
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
+  const leaderBannerRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -147,6 +151,54 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
        return { label, u1, u2, winner };
     }).sort((a,b) => b.label.localeCompare(a.label)); // simple string sort for now
   }, [deposits]);
+
+  const handleExportShare = async () => {
+    if (!leaderBannerRef.current) return;
+    try {
+      setIsExporting(true);
+      if (window.navigator?.vibrate) window.navigator.vibrate([20, 20]);
+      await new Promise((resolve) => setTimeout(resolve, 100)); // allow states to settle
+
+      // Filter out elements with data-html2canvas-ignore
+      const filter = (node: HTMLElement) => {
+        return !node.hasAttribute || !node.hasAttribute('data-html2canvas-ignore');
+      };
+      
+      const blob = await domtoimage.toBlob(leaderBannerRef.current, {
+        bgcolor: 'transparent',
+        scale: 2,
+        filter: filter,
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+        }
+      });
+      if (!blob) {
+        setIsExporting(false);
+        return;
+      }
+      const file = new File([blob], "batalha_pote.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: "A Grande Batalha",
+          text: "Olha quem tá ganhando a disputa deste mês no Pote Sagrado!",
+          files: [file],
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "lideranca_pote.png";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
       {" "}
@@ -227,7 +279,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       </div>{" "}
       {/* Leader Banner */}
       {users[0].total > 0 && users[0].total > users[1].total && (
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+        <div ref={leaderBannerRef} className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           {" "}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />{" "}
           <div className="w-14 h-14 mx-auto bg-cookbook-bg rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
@@ -248,23 +300,28 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
               ? `Que surra! Se o mês acabasse hoje, ${users[1].name} pagaria a recompensa fácil.`
               : `Disputa acirrada! Mas se o mês acabasse hoje, ${users[1].name} pagaria a recompensa.`}
           </p>{" "}
-          <button
-            onClick={() => {
-              /* Trigger a funny buzz/vibrate if available */ if (
-                window.navigator &&
-                window.navigator.vibrate
-              ) {
-                window.navigator.vibrate([200, 100, 200]);
-              }
-              alert(
-                `Aviso enviado (mentalmente)! Lembre ${users[1].name} que você está liderando com segurança.`,
-              );
-            }}
-            className="w-full bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-medium shadow-sm active:scale-95"
-          >
-            {" "}
-            Notificar Vantagem{" "}
-          </button>{" "}
+          
+          {/* Prevent buttons from being exported when we make the screenshot */}
+          <div data-html2canvas-ignore className="flex gap-2">
+            <button
+              onClick={() => {
+                if (window.navigator?.vibrate) window.navigator.vibrate([200, 100, 200]);
+                alert(`Aviso enviado (mentalmente)! Lembre ${users[1].name} que você está liderando com segurança.`);
+              }}
+              className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-medium shadow-sm active:scale-95 text-center"
+            >
+              Provocar
+            </button>
+            <button
+              onClick={handleExportShare}
+              disabled={isExporting}
+              className="px-4 bg-cookbook-primary/10 border border-cookbook-primary/20 text-cookbook-primary hover:bg-cookbook-primary/20 transition-colors rounded-full flex items-center justify-center shadow-sm active:scale-95 disabled:opacity-50"
+              title="Compartilhar"
+            >
+              <Share2 size={16} />
+            </button>
+          </div>
+          
           <div className="mt-5 pt-4 border-t border-cookbook-border/30">
             {" "}
             <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">

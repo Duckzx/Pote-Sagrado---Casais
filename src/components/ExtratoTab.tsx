@@ -12,7 +12,8 @@ import {
   Car,
   ShoppingCart,
   Smartphone,
-  Plus
+  Plus,
+  Download
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -137,6 +138,18 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     setSelectedMonth(m);
     setSelectedYear(y);
   };
+
+  /* Insights */
+  const insights = useMemo(() => {
+    if (deposits.length === 0) return null;
+    const dp = filteredDeposits.filter(d => d.type !== 'expense');
+    const ex = filteredDeposits.filter(d => d.type === 'expense');
+
+    const biggestDeposit = dp.length > 0 ? dp.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
+    const biggestExpense = ex.length > 0 ? ex.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
+    
+    return { biggestDeposit, biggestExpense };
+  }, [filteredDeposits]);
   /* Edit handler */ const handleEdit = (deposit: any) => {
     setEditing(deposit);
     setEditAmount(deposit.amount.toString());
@@ -199,6 +212,36 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       .toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   };
   const currentUser = auth.currentUser;
+
+  const handleExportCSV = () => {
+    if (filteredDeposits.length === 0) {
+      addToast("Atenção", "Nenhuma transação para exportar neste mês.", "info");
+      return;
+    }
+    const headers = ["Data", "Hora", "Tipo", "Valor", "Usuário", "Descrição"];
+    const rows = filteredDeposits.map(d => {
+      const dateObj = d.createdAt?.toDate?.() || new Date();
+      const date = dateObj.toLocaleDateString('pt-BR');
+      const time = dateObj.toLocaleTimeString('pt-BR');
+      const type = d.type === 'expense' ? "Saída" : "Entrada";
+      const value = d.amount.toString().replace('.', ',');
+      const person = d.whoName || "Desconhecido";
+      const desc = `"${(d.action || "").replace(/"/g, '""')}"`;
+      return [date, time, type, value, person, desc].join(";");
+    });
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n"); // BOM for excel
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `extrato_${MONTHS_PT[selectedMonth]}_${selectedYear}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast("Sucesso", "Extrato exportado para CSV com sucesso!", "success");
+  };
+
   return (
     <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-5">
       {" "}
@@ -339,6 +382,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             className="flex-1 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 font-serif text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
           />
           <button 
+            onClick={handleExportCSV}
+            title="Exportar CSV"
+            className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors flex items-center justify-center shrink-0 shadow-sm"
+          >
+             <Download size={14} />
+          </button>
+          <button 
             onClick={() => setSortAsc(!sortAsc)}
             title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
             className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 text-cookbook-text/60 hover:text-cookbook-primary transition-colors flex items-center justify-center shrink-0"
@@ -347,6 +397,41 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           </button>
         </div>
       </div>{" "}
+
+      {/* Insights */}
+      {insights && (insights.biggestDeposit || insights.biggestExpense) && (
+        <div className="flex gap-2">
+          {insights.biggestDeposit && (
+            <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
+               <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
+                 <ArrowUpCircle size={10} /> Maior Entrada
+               </div>
+               <div className="font-serif text-sm text-cookbook-text font-medium">
+                 {formatCurrency(insights.biggestDeposit.amount)}
+               </div>
+               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
+                 {insights.biggestDeposit.whoName}
+               </div>
+            </div>
+          )}
+          {insights.biggestExpense && (
+            <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
+               <div className="font-sans text-[8px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
+                 <ArrowDownCircle size={10} /> Maior Saída
+               </div>
+               <div className="font-serif text-sm text-cookbook-text font-medium">
+                 {formatCurrency(insights.biggestExpense.amount)}
+               </div>
+               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
+                 {insights.biggestExpense.action || "Sem descrição"}
+               </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Timeline */}{" "}
       <div className="space-y-5">
         {" "}
