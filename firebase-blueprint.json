@@ -46,6 +46,19 @@
       },
       "required": ["action", "count"]
     },
+    "PinboardLink": {
+      "title": "PinboardLink",
+      "description": "A link or inspiration pinned to the dream board",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "addedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["url", "title", "createdAt"]
+    },
     "Achievement": {
       "title": "Achievement",
       "description": "Completed pot achievements",
@@ -54,12 +67,17 @@
         "destination": { "type": "string" },
         "amount": { "type": "number" },
         "goalAmount": { "type": "number" },
+        "imageUrl": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["destination", "amount", "goalAmount", "createdAt"]
     }
   },
   "firestore": {
+    "/pinboard_links/{linkId}": {
+      "schema": { "$ref": "#/entities/PinboardLink" },
+      "description": "Links and inspirations added to the dream board"
+    },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "User profiles"

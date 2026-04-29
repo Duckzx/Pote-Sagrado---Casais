@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from "@react-three/drei";
 import * as THREE from "three";
-const RealWater = () => {
+const RealWater: React.FC<{ targetFill?: number }> = ({ targetFill = 1 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   /* Simulate pouring physics */ const progress = spring({
@@ -23,7 +23,7 @@ const RealWater = () => {
     config: { damping: 15, mass: 1, stiffness: 35 },
   });
   /* Calculate height and scale correctly so water scales up from the bottom */ const fillHeight =
-    interpolate(progress, [0, 1], [0.01, 2.7], { extrapolateRight: "clamp" });
+    interpolate(progress, [0, 1], [0.01, 2.7 * targetFill], { extrapolateRight: "clamp" });
   const positionY = -1.45 + fillHeight / 2;
   /* Surface agitation */ const agitation = interpolate(
     progress,
@@ -163,7 +163,7 @@ const GlassPot = () => {
     </group>
   );
 };
-const ThreeDScene: React.FC = () => {
+export const ThreeDScene: React.FC<{ fillPercentage?: number }> = ({ fillPercentage = 1 }) => {
   const frame = useCurrentFrame();
   /* Animate camera moving slightly closer and panning */ const cameraZ =
     interpolate(frame, [0, 180], [8, 5.5]);
@@ -190,7 +190,7 @@ const ThreeDScene: React.FC = () => {
         {/* Realism via environment lighting */} <Environment preset="city" />{" "}
         <group position={[0, -0.5, 0]} rotation={[0.1, frame * 0.005, 0]}>
           {" "}
-          <GlassPot /> <RealWater /> <PouringStream />{" "}
+          <GlassPot /> <RealWater targetFill={fillPercentage} /> <PouringStream />{" "}
           {/* Bubbles in the water */}{" "}
           <Sparkles
             count={20}

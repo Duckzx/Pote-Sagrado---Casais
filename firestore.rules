@@ -86,6 +86,17 @@ service cloud.firestore {
              data.destination is string && data.destination.size() < 200 &&
              data.amount is number &&
              data.goalAmount is number &&
+             (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
+             data.createdAt == request.time;
+    }
+
+    function isValidPinboardLink(data) {
+      return data.keys().hasAll(['url', 'title', 'createdAt']) &&
+             data.url is string && data.url.size() <= 1024 &&
+             data.title is string && data.title.size() <= 200 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
+             (!('addedBy' in data) || (data.addedBy is string)) &&
              data.createdAt == request.time;
     }
 
@@ -124,7 +135,13 @@ service cloud.firestore {
     match /achievements/{achievementId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidAchievement(request.resource.data);
-      allow delete: if false; // Achievements shouldn't be deleted generally, or if needed: if isAuthenticated()
+      allow delete: if isAuthenticated();
+    }
+
+    match /pinboard_links/{linkId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidPinboardLink(request.resource.data);
+      allow delete: if isAuthenticated();
     }
   }
 }

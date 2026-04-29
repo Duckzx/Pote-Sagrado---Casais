@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { X, Trophy, Heart, Map, Sparkles, Coins, Flame } from "lucide-react";
+import { Player } from "@remotion/player";
+import { ThreeDScene } from "./RemotionIntro";
 interface WrappedModalProps {
   onClose: () => void;
   deposits: any[];
@@ -212,23 +214,32 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
             key={`slide-4-${progressKey}`}
           >
             {" "}
-            <div className="w-20 h-20 bg-cookbook-bg/10 rounded-full flex items-center justify-center">
+            <div className="relative w-full aspect-square max-w-[280px] mx-auto pointer-events-none -mt-8">
+              <Player
+                component={ThreeDScene}
+                inputProps={{ fillPercentage: progress / 100 }}
+                durationInFrames={180}
+                compositionWidth={400}
+                compositionHeight={400}
+                fps={30}
+                style={{ width: "100%", height: "100%" }}
+                autoPlay
+                loop={false}
+              />
+            </div>
+            <div className="px-6 -mt-8">
               {" "}
-              <Heart size={36} className="text-red-400 fill-red-400/20" />{" "}
-            </div>{" "}
-            <div className="px-6">
-              {" "}
-              <h2 className="font-sans text-[12px] uppercase tracking-widest text-red-300 font-bold mb-4">
+              <h2 className="font-sans text-[12px] uppercase tracking-widest text-cookbook-gold font-bold mb-4">
                 {" "}
-                O Futuro{" "}
+                A Caminho do Sonho{" "}
               </h2>{" "}
-              <p className="font-serif text-5xl text-white mb-2">
+              <p className="font-serif text-5xl text-white mb-2 font-medium drop-shadow-md">
                 {" "}
-                {progress.toFixed(1)}%{" "}
+                {progress.toFixed(0)}%{" "}
               </p>{" "}
               <p className="font-sans text-xs text-white/80 max-w-[250px] mx-auto text-balance leading-relaxed">
                 {" "}
-                Já percorremos uma parte incrível da jornada. A meta está cada
+                O Pote Sagrado está ganhando vida. A meta está cada
                 vez mais perto. Continuem assim!{" "}
               </p>{" "}
             </div>{" "}
@@ -237,7 +248,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 e.stopPropagation();
                 onClose();
               }}
-              className="mt-8 bg-white/20 hover:bg-cookbook-border/30/30 backdrop-blur-md text-white font-sans text-[10px] uppercase tracking-widest py-3 px-8 rounded-full transition-all active:scale-95 border border-white/30 z-30 relative"
+              className="mt-4 bg-white/20 hover:bg-cookbook-border/30 backdrop-blur-md text-white font-sans text-[10px] uppercase tracking-widest py-3 px-8 rounded-full transition-all active:scale-95 border border-white/30 z-30 relative"
             >
               {" "}
               Voltaremos mais fortes{" "}

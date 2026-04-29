@@ -15,8 +15,9 @@ import {
   PlusCircle,
   Trophy,
 } from "lucide-react";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { doc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { db, auth, storage } from "../firebase";
 import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 interface PinboardTabProps {
@@ -27,74 +28,85 @@ interface PinboardTabProps {
   ) => void;
 }
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
-  const { deposits } = useAppContext();
-  /* Nossos Sonhos */ const [links, setLinks] = useState([
-    {
-      id: 1,
-      link: "https://airbnb.com",
-      text: "Chalé em Campos",
-      image:
-        "https://images.unsplash.com/photo-1542718610-a1d656d1884c?w=600&h=400&fit=crop",
-    },
-    {
-      id: 2,
-      link: "https://tiktok.com",
-      text: "Restaurante X",
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop",
-    },
-    {
-      id: 3,
-      link: "https://decolar.com",
-      text: "Passagens Promo",
-      image:
-        "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&h=400&fit=crop",
-    },
-  ]);
+  const { deposits, pinboardLinks, achievements } = useAppContext();
+  
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  /* Conquistas */ const [conquistas, setConquistas] = useState([
-    {
-      id: 1,
-      title: "Viagem Natal 2023",
-      image:
-        "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop",
-    },
-  ]);
-  const handleAddLink = () => {
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  const handleAddLink = async () => {
     if (!newTitle || !newUrl) return;
+    setIsSubmitting(true);
     /* Auto generated image */ const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(newTitle)}/600/400`;
-    setLinks([
-      { id: Date.now(), link: newUrl, text: newTitle, image: imageUrl },
-      ...links,
-    ]);
-    setNewTitle("");
-    setNewUrl("");
-    setIsAddingLink(false);
-    addToast("Adicionado", "Link salvo no mural!", "success");
-  };
-  const handleLinkDelete = (id: number) => {
-    setLinks(links.filter((l) => l.id !== id));
-  };
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (conquistas.length >= 3) {
-        addToast("Atenção", "Máximo de 3 fotos atingido.", "info");
-        return;
-      }
-      const imageUrl = URL.createObjectURL(file);
-      setConquistas([
-        ...conquistas,
-        { id: Date.now(), title: "Nova Conquista", image: imageUrl },
-      ]);
-      addToast("Sucesso", "Mural atualizado com nova foto.", "success");
+    
+    try {
+      await addDoc(collection(db, "pinboard_links"), {
+        url: newUrl,
+        title: newTitle,
+        imageUrl: imageUrl,
+        addedBy: auth.currentUser?.uid || "",
+        createdAt: serverTimestamp(),
+      });
+      setNewTitle("");
+      setNewUrl("");
+      setIsAddingLink(false);
+      addToast("Adicionado", "Link salvo no mural!", "success");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "pinboard_links");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  const handleRemoveConquista = (id: number) => {
-    setConquistas(conquistas.filter((c) => c.id !== id));
+
+  const handleLinkDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "pinboard_links", id));
+      addToast("Removido", "Link apagado do mural.", "info");
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, "pinboard_links");
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (achievements.length >= 6) {
+        addToast("Atenção", "Você já tem muitas conquistas salvas.", "info");
+        return;
+      }
+      setIsUploadingPhoto(true);
+
+      try {
+        const storageRef = ref(storage, `conquistas/${Date.now()}_${file.name}`);
+        const uploadTask = await uploadBytesResumable(storageRef, file);
+        const downloadUrl = await getDownloadURL(uploadTask.ref);
+
+        await addDoc(collection(db, "achievements"), {
+          destination: "Nossa Conquista",
+          amount: 0,
+          goalAmount: 0,
+          imageUrl: downloadUrl,
+          createdAt: serverTimestamp(),
+        });
+        
+        addToast("Sucesso", "Mural atualizado com nova foto.", "success");
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, "achievements");
+      } finally {
+        setIsUploadingPhoto(false);
+      }
+    }
+  };
+  const handleRemoveConquista = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "achievements", id));
+      addToast("Removido", "Conquista apagada.", "info");
+    } catch(error) {
+      handleFirestoreError(error, OperationType.DELETE, "achievements");
+    }
   };
   /* Histórico */ const filteredDeposits = [...deposits].sort((a, b) => {
     const aTime = a.createdAt?.toDate?.() || new Date(0);
@@ -231,7 +243,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         )}{" "}
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar -mx-4 px-4 overflow-y-hidden">
           {" "}
-          {links.map((item) => (
+          {pinboardLinks.map((item) => (
             <div
               key={item.id}
               className="snap-center shrink-0 w-[240px] group relative"
@@ -240,8 +252,8 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               <div className="h-40 rounded-3xl overflow-hidden relative shadow-sm border border-cookbook-border bg-white/10 backdrop-blur-sm">
                 {" "}
                 <img
-                  src={item.image}
-                  alt={item.text}
+                  src={item.imageUrl}
+                  alt={item.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />{" "}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>{" "}
@@ -253,15 +265,15 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                   <Trash2 size={14} />{" "}
                 </button>{" "}
                 <a
-                  href={item.link}
+                  href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-3 left-3 right-3 text-white flex items-center justify-between"
                 >
                   {" "}
-                  <span className="font-serif text-sm font-medium truncate pr-2">
+                  <span className="font-serif text-sm font-medium truncate pr-2" title={item.title}>
                     {" "}
-                    {item.text}{" "}
+                    {item.title}{" "}
                   </span>{" "}
                   <ExternalLink
                     size={14}
@@ -271,7 +283,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               </div>{" "}
             </div>
           ))}{" "}
-          {links.length === 0 && (
+          {pinboardLinks.length === 0 && (
             <div className="w-full h-40 rounded-3xl border-2 border-dashed border-cookbook-border bg-cookbook-bg/90 backdrop-blur-md flex items-center justify-center text-cookbook-text/40 font-serif italic text-sm text-center px-4 font-medium shrink-0 shadow-sm">
               {" "}
               Nenhum sonho adicionado.{" "}
@@ -294,20 +306,20 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           </div>{" "}
           <span className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
             {" "}
-            {conquistas.length} de 3{" "}
+            {achievements.filter(a => a.imageUrl).length + (isUploadingPhoto ? 1 : 0)} de 6{" "}
           </span>{" "}
         </div>{" "}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {" "}
-          {conquistas.map((item) => (
+          {achievements.filter(a => a.imageUrl).map((item) => (
             <div
               key={item.id}
               className="aspect-square rounded-3xl overflow-hidden relative group shadow-sm border border-cookbook-border bg-white/10 backdrop-blur-sm"
             >
               {" "}
               <img
-                src={item.image}
-                alt={item.title}
+                src={item.imageUrl}
+                alt={item.destination}
                 className="w-full h-full object-cover"
               />{" "}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
@@ -320,9 +332,25 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                   <Trash2 size={16} />{" "}
                 </button>{" "}
               </div>{" "}
+              {item.destination !== "Nossa Conquista" && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                  <p className="text-white font-serif text-sm truncate">{item.destination}</p>
+                  <p className="text-white/70 font-sans text-[9px] uppercase tracking-widest font-bold">
+                    {formatCurrency(item.amount || 0)}
+                  </p>
+                </div>
+              )}
             </div>
           ))}{" "}
-          {conquistas.length < 3 && (
+          {isUploadingPhoto && (
+            <div className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 bg-cookbook-bg/90 backdrop-blur-md animate-pulse">
+              <Camera size={24} className="mb-2 opacity-50" />
+              <span className="font-sans text-[9px] uppercase tracking-widest font-bold">
+                Enviando...
+              </span>
+            </div>
+          )}
+          {achievements.length < 6 && !isUploadingPhoto && (
             <button
               onClick={() => fileInputRef.current?.click()}
               className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors group bg-cookbook-bg/90 backdrop-blur-md"
@@ -348,7 +376,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         />{" "}
         <p className="font-sans text-[10px] text-cookbook-text/40 italic px-2 text-center">
           {" "}
-          Você pode fixar até 3 memórias dos potes que já quebrou juntos.{" "}
+          Você pode fixar até 6 memórias dos potes que já quebrou juntos.{" "}
         </p>{" "}
       </section>{" "}
       {/* 3. Histórico (Extrato simplificado) */}{" "}

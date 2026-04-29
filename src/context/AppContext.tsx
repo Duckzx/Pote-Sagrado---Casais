@@ -54,6 +54,9 @@ interface AppContextValue {
   // Achievements (completed pots)
   achievements: any[];
 
+  // Pinboard Links
+  pinboardLinks: any[];
+
   // PWA Install
   canInstall: boolean;
   installPrompt: any | null;
@@ -94,6 +97,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [deposits, setDeposits] = useState<Deposit[]>([]);
   const [achievements, setAchievements] = useState<any[]>([]);
+  const [pinboardLinks, setPinboardLinks] = useState<any[]>([]);
   const [totalSaved, setTotalSaved] = useState(() => {
     const saved = localStorage.getItem('pote_totalSaved');
     return saved ? Number(saved) : 0;
@@ -222,11 +226,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setAchievements(arch);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'achievements'));
 
+    // Listen to pinboard links
+    const qLinks = query(collection(db, 'pinboard_links'), orderBy('createdAt', 'desc'));
+    const unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
+      const linksData: any[] = [];
+      querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
+      setPinboardLinks(linksData);
+    }, (error) => handleFirestoreError(error, OperationType.LIST, 'pinboard_links'));
+
     return () => {
       unsubUser();
       unsubConfig();
       unsubDeposits();
       unsubAchievements();
+      unsubLinks();
     };
   }, [isAuthReady, user]);
 
@@ -296,6 +309,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     tripConfig,
     deposits,
     achievements,
+    pinboardLinks,
     totalSaved,
     bingoStats,
     theme,
