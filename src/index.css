@@ -12,9 +12,6 @@
   --theme-gold: #C5A059;
   --theme-battle: #F4F1EA;
   --theme-mural: #FFF9E6;
-  --theme-surface: rgba(255, 255, 255, 0.6);
-  --theme-glass: rgba(255, 255, 255, 0.1);
-  --theme-glass-border: rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="mediterranean"] {
@@ -26,9 +23,6 @@
   --theme-gold: #F2CC8F;
   --theme-battle: #FDF0EA;
   --theme-mural: #FFFDF9;
-  --theme-surface: rgba(255, 255, 255, 0.6);
-  --theme-glass: rgba(224, 122, 95, 0.05);
-  --theme-glass-border: rgba(224, 122, 95, 0.2);
 }
 
 [data-theme="nordic"] {
@@ -40,9 +34,6 @@
   --theme-gold: #829AB1;
   --theme-battle: #E1E8F0;
   --theme-mural: #F8FAFC;
-  --theme-surface: rgba(255, 255, 255, 0.6);
-  --theme-glass: rgba(92, 124, 138, 0.05);
-  --theme-glass-border: rgba(92, 124, 138, 0.2);
 }
 
 [data-theme="tropical"] {
@@ -54,9 +45,6 @@
   --theme-gold: #E9C46A;
   --theme-battle: #E6F5EC;
   --theme-mural: #FAFDFA;
-  --theme-surface: rgba(255, 255, 255, 0.6);
-  --theme-glass: rgba(42, 157, 143, 0.05);
-  --theme-glass-border: rgba(42, 157, 143, 0.2);
 }
 
 [data-theme="midnight"] {
@@ -68,9 +56,6 @@
   --theme-gold: #E9C46A;
   --theme-battle: #232340;
   --theme-mural: #252540;
-  --theme-surface: rgba(35, 35, 64, 0.6);
-  --theme-glass: rgba(255, 255, 255, 0.05);
-  --theme-glass-border: rgba(255, 255, 255, 0.1);
 }
 
 /* Dark theme overrides for specific elements */
@@ -91,8 +76,9 @@
   color-scheme: dark;
 }
 
-/* Remove hardcoded bg-white override as we will use variables */
-/* [data-theme="midnight"] .bg-white { background-color: #232340; } */
+[data-theme="midnight"] .bg-white {
+  background-color: #232340;
+}
 
 [data-theme="midnight"] .bg-emerald-50 {
   background-color: rgba(16, 185, 129, 0.1);
@@ -111,9 +97,6 @@
   --color-cookbook-gold: var(--theme-gold);
   --color-cookbook-battle: var(--theme-battle);
   --color-cookbook-mural: var(--theme-mural);
-  --color-cookbook-surface: var(--theme-surface);
-  --color-cookbook-glass: var(--theme-glass);
-  --color-cookbook-glass-border: var(--theme-glass-border);
   
   --font-serif: "Georgia", "Times New Roman", serif;
   --font-sans: "Helvetica Neue", Arial, sans-serif;

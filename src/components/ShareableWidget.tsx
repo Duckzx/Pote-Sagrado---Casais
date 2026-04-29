@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { Sparkles, AlertCircle, Download } from "lucide-react";
-import html2canvas from "html2canvas";
+import domtoimage from "dom-to-image-more";
 interface ShareableWidgetProps {
   goalAmount: number;
   totalSaved: number;
@@ -90,20 +90,25 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
       setIsExporting(true);
       await new Promise((resolve) => setTimeout(resolve, 50));
       if (!widgetRef.current) return;
-      const canvas = await html2canvas(widgetRef.current, {
+      const blob = await domtoimage.toBlob(widgetRef.current, {
+        bgcolor: 'transparent',
         scale: 2,
-        backgroundColor: null,
-        logging: false,
-        useCORS: true,
-      });
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setIsExporting(false);
-          return;
+        height: widgetRef.current.offsetHeight * 2,
+        width: widgetRef.current.offsetWidth * 2,
+        style: {
+          transform: 'scale(2)',
+          transformOrigin: 'top left',
+          width: widgetRef.current.offsetWidth + 'px',
+          height: widgetRef.current.offsetHeight + 'px',
         }
-        const file = new File([blob], "pote-sagrado-status.png", {
-          type: "image/png",
-        });
+      });
+      if (!blob) {
+        setIsExporting(false);
+        return;
+      }
+      const file = new File([blob], "pote-sagrado-status.png", {
+        type: "image/png",
+      });
         let shared = false;
         try {
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -128,7 +133,6 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
         setIsExporting(false);
-      }, "image/png");
     } catch (err: any) {
       if (err.name !== "AbortError") {
         console.error("Erro ao compartilhar:", err);

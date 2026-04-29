@@ -32,9 +32,30 @@ export const SacredPot: React.FC<SacredPotProps> = ({
     }, 150);
     return () => clearTimeout(timer);
   }, [targetProgress, isBroken]);
-  /* Confetti removed to avoid excessive noise on Home load */
-  useEffect(() => {
-    // We only want confetti on explicit break/victory events now
+  /* Trigger continuous light confetti if goal reached */ useEffect(() => {
+    if (isGoalReached && !isBreaking && !isBroken && canvasRef.current) {
+      const customConfetti = confetti.create(canvasRef.current, {
+        resize: false,
+        useWorker: false,
+      });
+      const interval = setInterval(() => {
+        customConfetti({
+          particleCount: 8,
+          spread: 40,
+          origin: { x: 0.5, y: 0.4 },
+          colors: ["#FFD700", "#FDB931", "#FF8C00", "#FFF8DC"],
+          disableForReducedMotion: true,
+          ticks: 100,
+          gravity: 0.8,
+          scalar: 0.6,
+          zIndex: 10,
+        });
+      }, 1500);
+      return () => {
+        clearInterval(interval);
+        customConfetti.reset();
+      };
+    }
   }, [isGoalReached, isBreaking, isBroken]);
   return (
     <div className="sacred-pot-container relative">

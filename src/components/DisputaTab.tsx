@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import { Trophy } from "lucide-react";
-import { useAppContext } from "../context/AppContext";
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
-  const { addToast } = useAppContext();
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -117,7 +115,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         </p>{" "}
       </div>{" "}
       {/* Battle Box */}{" "}
-      <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {" "}
         <div className="flex justify-between font-sans text-[10px] uppercase tracking-widest font-bold mb-4">
           {" "}
@@ -144,7 +142,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           </span>{" "}
         </div>{" "}
         {/* Progress bar */}{" "}
-        <div className="relative h-3 bg-cookbook-glass rounded-full overflow-hidden flex shadow-inner">
+        <div className="relative h-3 bg-white/50 rounded-full overflow-hidden flex shadow-inner">
           {" "}
           <div
             className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
@@ -182,10 +180,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       </div>{" "}
       {/* Leader Banner */}{" "}
       {users[0].total > users[1].total && (
-        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           {" "}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />{" "}
-          <div className="w-14 h-14 mx-auto bg-cookbook-glass rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
+          <div className="w-14 h-14 mx-auto bg-white/50 rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
             {" "}
             <Trophy size={22} className="text-cookbook-primary" />{" "}
           </div>{" "}
@@ -203,17 +201,17 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           </p>{" "}
           <button
             onClick={() => {
-              /* Trigger a funny buzz/vibrate if available */ 
-              if (window.navigator?.vibrate) {
-                window.navigator.vibrate([100, 50, 100]);
+              /* Trigger a funny buzz/vibrate if available */ if (
+                window.navigator &&
+                window.navigator.vibrate
+              ) {
+                window.navigator.vibrate([200, 100, 200]);
               }
-              addToast(
-                "Botão do Orgulho! 🔥",
-                `Lembre ${users[1].name} de que você está na liderança! Mande ele(a) ir aquecendo pra pagar o castigo!`,
-                "info"
+              alert(
+                `Você apertou o botão do orgulho! Lembre ${users[1].name} de que você está na liderança e mande ele(a) ir aquecendo pra pagar o castigo!`,
               );
             }}
-            className="w-full bg-cookbook-glass border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 border-cookbook-border/30 rounded-full font-medium shadow-sm active:scale-95"
+            className="w-full bg-white/60 border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 border-cookbook-border/30 rounded-full font-medium shadow-sm active:scale-95"
           >
             {" "}
             Notificar Vantagem (Físico){" "}
@@ -232,7 +230,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         </div>
       )}{" "}
       {/* Weekly breakdown */}{" "}
-      <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {" "}
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
           {" "}
@@ -264,7 +262,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
                   </span>{" "}
                 </span>{" "}
               </div>{" "}
-              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-cookbook-glass">
+              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-white/50">
                 {" "}
                 <div
                   className="bg-cookbook-primary/70 transition-all duration-500"
@@ -281,7 +279,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       </div>{" "}
       {/* Motivational note */}{" "}
       {users[0].total === 0 && users[1].total === 0 && (
-        <div className="text-center py-8 px-4 bg-cookbook-surface/80 backdrop-blur-md border-2 border-dashed border-cookbook-border rounded-3xl shadow-sm">
+        <div className="text-center py-8 px-4 bg-cookbook-bg/90 backdrop-blur-md border-2 border-dashed border-cookbook-border rounded-3xl shadow-sm">
           {" "}
           <span className="text-4xl block mb-3 opacity-50 text-cookbook-primary grayscale">
             {" "}

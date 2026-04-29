@@ -36,9 +36,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     }
   };
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-md animate-modal-backdrop">
       {" "}
-      <div className="bg-cookbook-bg border border-cookbook-border rounded w-full max-w-sm p-8 shadow-2xl relative overflow-hidden text-center">
+      <div className="bg-cookbook-bg border border-cookbook-border rounded-3xl w-full max-w-sm p-8 shadow-2xl relative overflow-hidden text-center animate-modal-enter">
         {" "}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />{" "}
         <div className="min-h-[220px] flex flex-col justify-center">

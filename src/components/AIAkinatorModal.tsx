@@ -205,7 +205,7 @@ export const AIAkinatorModal: React.FC<AIAkinatorModalProps> = ({
               </button>{" "}
               <button
                 onClick={() => handleSelectTag("cidade")}
-                className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-gray-600 hover:bg-gray-500/10 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm"
+                className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/60 hover:bg-cookbook-border/30 rounded-3xl p-6 flex flex-col items-center gap-3 transition-all active:scale-95 shadow-sm"
               >
                 {" "}
                 <span className="text-3xl block">🗽</span>{" "}

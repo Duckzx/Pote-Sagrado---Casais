@@ -1,11 +1,14 @@
-export const compressImage = (file: File, maxWidth = 800, maxQuality = 0.6): Promise<string> => {
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
+
+export const compressImage = (file: File, maxWidth = 600, maxQuality = 0.5): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
       const img = new Image();
       img.src = event.target?.result as string;
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
@@ -27,7 +30,20 @@ export const compressImage = (file: File, maxWidth = 800, maxQuality = 0.6): Pro
 
         // Compress image to base64 webp
         const compressedBase64 = canvas.toDataURL('image/webp', maxQuality);
-        resolve(compressedBase64);
+        
+        // Convert base64 to blob
+        try {
+          const res = await fetch(compressedBase64);
+          const blob = await res.blob();
+          const fileName = `images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+          const storageRef = ref(storage, fileName);
+          await uploadBytes(storageRef, blob);
+          const downloadUrl = await getDownloadURL(storageRef);
+          resolve(downloadUrl);
+        } catch (e) {
+          console.warn("Storage upload failed, falling back to base64", e);
+          resolve(compressedBase64);
+        }
       };
       img.onerror = (error) => reject(error);
     };

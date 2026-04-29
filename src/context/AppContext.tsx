@@ -58,14 +58,6 @@ interface AppContextValue {
   canInstall: boolean;
   installPrompt: any | null;
   clearInstallPrompt: () => void;
-  
-  // Sharing
-  showShareWidget: boolean;
-  setShowShareWidget: (show: boolean) => void;
-
-  // Gamification
-  totalXP: number;
-  level: number;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -108,9 +100,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
   const [theme, setTheme] = useState<ThemeId>(() => (localStorage.getItem('pote_theme') as ThemeId) || 'cookbook');
-  const [showShareWidget, setShowShareWidget] = useState(false);
-  const [totalXP, setTotalXP] = useState(0);
-  const [level, setLevel] = useState(1);
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
@@ -221,11 +210,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('pote_totalSaved', total.toString());
       setBingoStats(stats);
       
-      // XP Calculation: 10 XP per R$ 1.00 deposited
-      const xp = deps.reduce((acc, d) => d.type !== 'expense' ? acc + (d.amount * 10) : acc, 0);
-      setTotalXP(xp);
-      setLevel(Math.floor(xp / 500) + 1);
-      
       // Delay slightly for smooth transition
       setTimeout(() => setIsDataReady(true), 200);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
@@ -323,10 +307,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     canInstall,
     installPrompt,
     clearInstallPrompt,
-    showShareWidget,
-    setShowShareWidget,
-    totalXP,
-    level,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

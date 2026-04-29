@@ -19,9 +19,6 @@ import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { compressImage } from "../lib/imageUtils";
-import { uploadBase64ToStorage, generateStoragePath } from "../lib/storageUtils";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 interface PinboardTabProps {
   addToast: (
     title: string,
@@ -30,7 +27,7 @@ interface PinboardTabProps {
   ) => void;
 }
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
-  const { deposits, achievements, user } = useAppContext();
+  const { deposits } = useAppContext();
   /* Nossos Sonhos */ const [links, setLinks] = useState([
     {
       id: 1,
@@ -58,8 +55,14 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  /* Conquistas (now using achievements from context) */
-  // const [conquistas, setConquistas] = useState([]); // Removed local state
+  /* Conquistas */ const [conquistas, setConquistas] = useState([
+    {
+      id: 1,
+      title: "Viagem Natal 2023",
+      image:
+        "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=400&fit=crop",
+    },
+  ]);
   const handleAddLink = () => {
     if (!newTitle || !newUrl) return;
     /* Auto generated image */ const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(newTitle)}/600/400`;
@@ -75,36 +78,23 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
   const handleLinkDelete = (id: number) => {
     setLinks(links.filter((l) => l.id !== id));
   };
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && user) {
-      try {
-        const base64 = await compressImage(file);
-        const path = generateStoragePath("achievements", user.uid);
-        const imageUrl = await uploadBase64ToStorage(base64, path);
-        
-        await addDoc(collection(db, "achievements"), {
-          destination: "Nossa Memória",
-          amount: 0,
-          goalAmount: 0,
-          imageUrl: imageUrl,
-          createdAt: serverTimestamp(),
-        });
-
-        addToast("Sucesso", "Mural atualizado com nova foto.", "success");
-      } catch (error) {
-        console.error("Error uploading photo:", error);
-        addToast("Erro", "Não foi possível carregar a imagem.", "info");
+    if (file) {
+      if (conquistas.length >= 3) {
+        addToast("Atenção", "Máximo de 3 fotos atingido.", "info");
+        return;
       }
+      const imageUrl = URL.createObjectURL(file);
+      setConquistas([
+        ...conquistas,
+        { id: Date.now(), title: "Nova Conquista", image: imageUrl },
+      ]);
+      addToast("Sucesso", "Mural atualizado com nova foto.", "success");
     }
   };
-  const handleRemoveConquista = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "achievements", id));
-      addToast("Removido", "Conquista removida do mural.", "info");
-    } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, "achievements");
-    }
+  const handleRemoveConquista = (id: number) => {
+    setConquistas(conquistas.filter((c) => c.id !== id));
   };
   /* Histórico */ const filteredDeposits = [...deposits].sort((a, b) => {
     const aTime = a.createdAt?.toDate?.() || new Date(0);
@@ -194,14 +184,14 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           </h3>{" "}
           <button
             onClick={() => setIsAddingLink(!isAddingLink)}
-            className="text-cookbook-primary p-2 hover:bg-cookbook-surface/20 rounded-full backdrop-blur-md border border-cookbook-border transition-colors shadow-sm"
+            className="text-cookbook-primary p-2 hover:bg-cookbook-bg :bg-white/5 rounded-full backdrop-blur-md border border-cookbook-border transition-colors shadow-sm"
           >
             {" "}
             <Plus size={20} />{" "}
           </button>{" "}
         </div>{" "}
         {isAddingLink && (
-          <div className="bg-cookbook-surface backdrop-blur-xl border border-cookbook-border rounded-2xl p-4 shadow-sm animate-fade-in">
+          <div className="bg-cookbook-bg backdrop-blur-xl border border-cookbook-border rounded-2xl p-4 shadow-sm animate-fade-in">
             {" "}
             <div className="space-y-3">
               {" "}
@@ -210,14 +200,14 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                 placeholder="Ex: Chalé em Campos"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full bg-cookbook-surface/60 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-serif text-cookbook-text focus:outline-none focus:border-cookbook-primary text-sm placeholder:text-cookbook-text/30"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-serif text-cookbook-text focus:outline-none focus:border-cookbook-primary text-sm placeholder:text-cookbook-text/30"
               />{" "}
               <input
                 type="url"
                 placeholder="Link (https://...)"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
-                className="w-full bg-cookbook-surface/60 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
               />{" "}
               <div className="flex justify-end space-x-2 pt-2">
                 {" "}
@@ -247,7 +237,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               className="snap-center shrink-0 w-[240px] group relative"
             >
               {" "}
-              <div className="h-40 rounded-3xl overflow-hidden relative shadow-sm border border-cookbook-border bg-cookbook-glass backdrop-blur-sm">
+              <div className="h-40 rounded-3xl overflow-hidden relative shadow-sm border border-cookbook-border bg-white/10 backdrop-blur-sm">
                 {" "}
                 <img
                   src={item.image}
@@ -257,7 +247,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>{" "}
                 <button
                   onClick={() => handleLinkDelete(item.id)}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md border border-cookbook-glass-border hover:bg-red-500/80"
+                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md border border-white/20 hover:bg-red-500/80"
                 >
                   {" "}
                   <Trash2 size={14} />{" "}
@@ -282,7 +272,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
             </div>
           ))}{" "}
           {links.length === 0 && (
-            <div className="w-full h-40 rounded-3xl border-2 border-dashed border-cookbook-border bg-cookbook-surface/60 backdrop-blur-md flex items-center justify-center text-cookbook-text/40 font-serif italic text-sm text-center px-4 font-medium shrink-0 shadow-sm">
+            <div className="w-full h-40 rounded-3xl border-2 border-dashed border-cookbook-border bg-cookbook-bg/90 backdrop-blur-md flex items-center justify-center text-cookbook-text/40 font-serif italic text-sm text-center px-4 font-medium shrink-0 shadow-sm">
               {" "}
               Nenhum sonho adicionado.{" "}
             </div>
@@ -304,20 +294,20 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           </div>{" "}
           <span className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
             {" "}
-            {achievements.length} itens{" "}
+            {conquistas.length} de 3{" "}
           </span>{" "}
         </div>{" "}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {" "}
-          {achievements.map((item) => (
+          {conquistas.map((item) => (
             <div
               key={item.id}
-              className="aspect-square rounded-3xl overflow-hidden relative group shadow-sm border border-cookbook-border bg-cookbook-glass backdrop-blur-sm"
+              className="aspect-square rounded-3xl overflow-hidden relative group shadow-sm border border-cookbook-border bg-white/10 backdrop-blur-sm"
             >
               {" "}
               <img
-                src={item.imageUrl || item.image}
-                alt={item.destination || item.title}
+                src={item.image}
+                alt={item.title}
                 className="w-full h-full object-cover"
               />{" "}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
@@ -330,19 +320,12 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                   <Trash2 size={16} />{" "}
                 </button>{" "}
               </div>{" "}
-              {item.destination && (
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="text-[8px] uppercase tracking-tighter text-white font-bold bg-black/30 backdrop-blur-sm px-2 py-1 rounded-lg truncate">
-                    {item.destination}
-                  </p>
-                </div>
-              )}
             </div>
           ))}{" "}
-          {achievements.length < 12 && (
+          {conquistas.length < 3 && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors group bg-cookbook-surface/60 backdrop-blur-md"
+              className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors group bg-cookbook-bg/90 backdrop-blur-md"
             >
               {" "}
               <Camera
@@ -375,7 +358,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           {" "}
           Histórico do Pote{" "}
         </h3>{" "}
-        <div className="bg-cookbook-surface backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           {" "}
           <div className="flex justify-between items-center mb-6">
             {" "}
@@ -419,7 +402,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                   return (
                     <div
                       key={d.id}
-                      className="group flex flex-col md:flex-row items-start md:items-center justify-between py-2 border-b border-cookbook-glass-border last:border-0 hover:bg-cookbook-surface/10 px-2 -mx-2 rounded-xl transition-colors cursor-default gap-2"
+                      className="group flex flex-col md:flex-row items-start md:items-center justify-between py-2 border-b border-white/20 last:border-0 hover:bg-cookbook-bg :bg-white/5 px-2 -mx-2 rounded-xl transition-colors cursor-default gap-2"
                     >
                       {" "}
                       <div className="flex items-center gap-3">
@@ -493,12 +476,12 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       </section>{" "}
       {editing && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-surface/60 backdrop-blur-md animate-modal-backdrop"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-md animate-modal-backdrop"
           onClick={() => setEditing(null)}
         >
           {" "}
           <div
-            className="bg-cookbook-surface border border-cookbook-border rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter"
+            className="bg-cookbook-bg border border-cookbook-border rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {" "}
@@ -514,21 +497,21 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                 value={editAmount}
                 onChange={(e) => setEditAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border rounded-2xl py-3 pr-4 font-serif text-2xl text-center text-cookbook-text focus:outline-none focus:border-cookbook-primary"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl py-3 pr-4 font-serif text-2xl text-center text-cookbook-text focus:outline-none focus:border-cookbook-primary"
               />{" "}
               <input
                 type="text"
                 value={editAction}
                 onChange={(e) => setEditAction(e.target.value)}
                 placeholder="Descrição"
-                className="w-full bg-cookbook-surface/60 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary"
               />{" "}
             </div>{" "}
             <div className="flex space-x-3">
               {" "}
               <button
                 onClick={() => setEditing(null)}
-                className="flex-1 bg-cookbook-surface border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase py-3 rounded-2xl font-bold"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase py-3 rounded-2xl font-bold"
               >
                 {" "}
                 Cancelar{" "}
@@ -551,7 +534,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         >
           {" "}
           <div
-            className="bg-cookbook-surface border border-cookbook-border rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter"
+            className="bg-cookbook-bg border border-cookbook-border rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {" "}
@@ -571,7 +554,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               {" "}
               <button
                 onClick={() => setDeleting(null)}
-                className="flex-1 bg-cookbook-surface border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase py-3 rounded-2xl font-bold"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase py-3 rounded-2xl font-bold"
               >
                 {" "}
                 Cancelar{" "}
