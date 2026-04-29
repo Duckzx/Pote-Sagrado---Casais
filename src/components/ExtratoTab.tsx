@@ -318,68 +318,84 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           </div>
         </div>
       </div>
-      {/* Filter Row */}{" "}
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
-          {" "}
-          {/* Type filter */}{" "}
-          <div className="flex gap-1 flex-1">
-            {" "}
+      {/* Filter Row */}
+      <div className="flex flex-col gap-3">
+        {/* Search & Actions */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cookbook-text/40">
+              <span className="text-sm">🔎</span>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar histórico..."
+              className="w-full bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl pl-10 pr-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:ring-2 focus:ring-cookbook-primary/20 focus:border-cookbook-primary transition-all placeholder:text-cookbook-text/30 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+            />
+            {searchQuery && (
+               <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-cookbook-text/30 hover:text-cookbook-text">
+                 <X size={14} />
+               </button>
+            )}
+          </div>
+          
+          <button 
+            onClick={() => setSortAsc(!sortAsc)}
+            title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
+            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+          >
+             <ArrowUpCircle size={18} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
+          </button>
+          
+          <button 
+            onClick={handleExportCSV}
+            title="Exportar CSV"
+            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-primary hover:bg-cookbook-primary/10 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+          >
+             <Download size={18} />
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+          {/* Type filter */}
+          <div className="flex bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border p-1 rounded-xl shrink-0">
             {[
               { id: "todos" as FilterType, label: "Todos" },
-              { id: "depositos" as FilterType, label: "↑ Entradas" },
-              { id: "gastos" as FilterType, label: "↓ Saídas" },
+              { id: "depositos" as FilterType, label: "Entradas" },
+              { id: "gastos" as FilterType, label: "Saídas" },
             ].map((f) => (
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className={`flex-1 py-2 rounded-lg font-sans text-[8px] uppercase tracking-widest font-bold transition-all ${filter === f.id ? "bg-cookbook-primary text-white" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50 hover:border-cookbook-primary/30"}`}
+                className={`px-4 py-1.5 rounded-lg font-sans text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap ${filter === f.id ? "bg-cookbook-primary text-white shadow-sm" : "text-cookbook-text/50 hover:text-cookbook-text"}`}
               >
-                {" "}
-                {f.label}{" "}
+                {f.label}
               </button>
-            ))}{" "}
-          </div>{" "}
-          {/* User filter */}{" "}
+            ))}
+          </div>
+
+          {/* User filter */}
           {users.length > 1 && (
-            <select
-              value={filterUser}
-              onChange={(e) => setFilterUser(e.target.value)}
-              className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
-            >
-              {" "}
-              <option value="todos">👥 Ambos</option>{" "}
-              {users.map(([uid, name]) => (
-                <option key={uid} value={uid}>
-                  {" "}
-                  {name}{" "}
-                </option>
-              ))}{" "}
-            </select>
-          )}{" "}
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="🔎 Buscar..."
-            className="flex-1 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 font-serif text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
-          />
-          <button 
-            onClick={handleExportCSV}
-            title="Exportar CSV"
-            className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors flex items-center justify-center shrink-0 shadow-sm"
-          >
-             <Download size={14} />
-          </button>
-          <button 
-            onClick={() => setSortAsc(!sortAsc)}
-            title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
-            className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 text-cookbook-text/60 hover:text-cookbook-primary transition-colors flex items-center justify-center shrink-0"
-          >
-             <ArrowUpCircle size={14} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
-          </button>
+            <div className="relative shrink-0">
+              <select
+                value={filterUser}
+                onChange={(e) => setFilterUser(e.target.value)}
+                className="appearance-none bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl pl-4 pr-8 py-2 font-sans text-[10px] uppercase tracking-wider text-cookbook-text/70 font-bold focus:outline-none focus:border-cookbook-primary h-[34px]"
+              >
+                <option value="todos">👥 Ambos</option>
+                {users.map(([uid, name]) => (
+                  <option key={uid} value={uid}>
+                    👤 {name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cookbook-text/40">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+          )}
         </div>
       </div>{" "}
 
@@ -489,12 +505,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                         </span>
                         
                         {isOwner && (
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-                            <button onClick={() => handleEdit(deposit)} className="text-cookbook-text/30 hover:text-cookbook-primary transition-colors">
-                              <Pencil size={12} />
+                          <div className="flex justify-end gap-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                            <button onClick={() => handleEdit(deposit)} className="flex items-center justify-center w-6 h-6 bg-cookbook-text/5 hover:bg-cookbook-primary/10 rounded-full text-cookbook-text/50 hover:text-cookbook-primary transition-colors focus:outline-none focus:ring-1 focus:ring-cookbook-primary/50">
+                              <Pencil size={11} />
                             </button>
-                            <button onClick={() => setDeleting(deposit)} className="text-cookbook-text/30 hover:text-red-500 transition-colors">
-                              <Trash2 size={12} />
+                            <button onClick={() => setDeleting(deposit)} className="flex items-center justify-center w-6 h-6 bg-cookbook-text/5 hover:bg-red-500/10 rounded-full text-cookbook-text/50 hover:text-red-500 transition-colors focus:outline-none focus:ring-1 focus:ring-red-500/50">
+                              <Trash2 size={11} />
                             </button>
                           </div>
                         )}
