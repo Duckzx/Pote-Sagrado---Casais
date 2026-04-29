@@ -213,58 +213,73 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           Quem economiza mais este mês?{" "}
         </p>{" "}
       </div>{" "}
-      {/* Battle Box */}{" "}
-      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        {" "}
-        <div className="flex justify-between font-sans text-[10px] uppercase tracking-widest font-bold mb-4">
-          {" "}
-          <span className="text-cookbook-primary">{users[0].name}</span>{" "}
-          <span className="text-cookbook-text/30">VS</span>{" "}
-          <span className="text-cookbook-text">{users[1].name}</span>{" "}
-        </div>{" "}
-        {/* Scores */}{" "}
-        <div className="flex justify-between items-baseline mb-4">
-          {" "}
-          <span className="font-serif text-2xl text-cookbook-primary">
-            {" "}
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(users[0].total)}{" "}
-          </span>{" "}
-          <span className="font-serif text-2xl text-cookbook-text">
-            {" "}
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(users[1].total)}{" "}
-          </span>{" "}
-        </div>{" "}
-        {/* Progress bar */}{" "}
-        <div className="relative h-3 bg-cookbook-bg/50 rounded-full overflow-hidden flex shadow-inner">
-          {" "}
+      {/* Battle Box */}
+      <div className="bg-cookbook-bg/80 backdrop-blur-2xl border border-cookbook-border rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
+        {/* Decorative corner circles */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-cookbook-primary/5 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-cookbook-text/5 rounded-full blur-2xl transform -translate-x-1/2 translate-y-1/2"></div>
+        
+        {/* Versus Row */}
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cookbook-primary/20 to-cookbook-primary/5 border-2 border-cookbook-primary p-1 mb-2 flex items-center justify-center">
+               <div className="w-full h-full rounded-full bg-cookbook-primary/10 flex items-center justify-center text-cookbook-primary font-serif text-xl border border-cookbook-primary/20">
+                 {users[0].name.charAt(0)}
+               </div>
+            </div>
+            <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text">
+              {users[0].name}
+            </span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center px-4">
+             <div className="font-serif italic text-cookbook-text/30 text-2xl -mt-4">vs</div>
+          </div>
+          
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-2 border-cookbook-border p-1 mb-2 flex items-center justify-center">
+               <div className="w-full h-full rounded-full bg-cookbook-text/5 flex items-center justify-center text-cookbook-text/70 font-serif text-xl border border-cookbook-border/50">
+                 {users[1].name.charAt(0)}
+               </div>
+            </div>
+            <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/70">
+              {users[1].name}
+            </span>
+          </div>
+        </div>
+        
+        {/* Scores */}
+        <div className="flex justify-between items-end mb-4 relative z-10">
+          <span className="font-serif text-[28px] leading-none text-cookbook-primary">
+            {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[0].total)}
+          </span>
+          <span className="font-serif text-[24px] leading-none text-cookbook-text/60">
+            {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[1].total)}
+          </span>
+        </div>
+        
+        {/* Progress bar */}
+        <div className="relative h-4 bg-cookbook-bg rounded-full overflow-hidden flex shadow-inner border border-cookbook-border/50 z-10">
           <div
-            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
+            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary transition-all duration-1000 ease-out border-r-2 border-cookbook-bg"
             style={{ width: `${p1Percentage}%` }}
-          />{" "}
+          />
           <div
-            className="h-full bg-gradient-to-l from-cookbook-text to-cookbook-text/70 transition-all duration-1000 ease-out rounded-r-full"
+            className="h-full bg-cookbook-text/20 transition-all duration-1000 ease-out"
             style={{ width: `${p2Percentage}%` }}
-          />{" "}
-        </div>{" "}
-        {/* Percentage labels */}{" "}
-        <div className="flex justify-between mt-3">
-          {" "}
-          <span className="font-sans text-[9px] text-cookbook-primary font-bold">
-            {" "}
-            {p1Percentage.toFixed(0)}%{" "}
-          </span>{" "}
-          <span className="font-sans text-[9px] text-cookbook-text/60 font-bold">
-            {" "}
-            {p2Percentage.toFixed(0)}%{" "}
-          </span>{" "}
-        </div>{" "}
-      </div>{" "}
+          />
+        </div>
+        
+        {/* Percentage labels */}
+        <div className="flex justify-between mt-3 z-10 relative">
+          <span className="font-sans text-[10px] text-cookbook-primary font-bold tracking-wider">
+            {p1Percentage.toFixed(0)}%
+          </span>
+          <span className="font-sans text-[10px] text-cookbook-text/50 font-bold tracking-wider">
+            {p2Percentage.toFixed(0)}%
+          </span>
+        </div>
+      </div>
       {/* Prize */}{" "}
       <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
         {" "}
@@ -386,41 +401,43 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
       {/* Historical Battles */}
       {pastStats.length > 0 && (
         <div className="space-y-4">
-          <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
-            {" "}
-            Histórico de Batalhas{" "}
-          </h3>{" "}
-          <div className="grid gap-3">
+          <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/40 font-bold mb-6 flex items-center justify-center gap-2">
+            <Trophy size={12} className="text-cookbook-text/30" /> Histórico de Batalhas <Trophy size={12} className="text-cookbook-text/30" />
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
             {pastStats.map((stat, idx) => (
-              <div key={idx} className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-3xl p-4 flex items-center justify-between shadow-[0_4px_20px_rgb(0,0,0,0.02)] relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                 {stat.winner && <div className="absolute top-0 right-0 w-32 h-32 bg-cookbook-gold/10 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3 opacity-50 group-hover:opacity-100 transition-opacity"></div>}
+              <div key={idx} className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-[2rem] p-5 flex flex-col shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                 {/* Shiny gradient overlay */}
+                 {stat.winner && <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-cookbook-gold/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>}
                  
-                 <div className="flex-1">
-                   <div className="font-serif text-sm text-cookbook-text mb-1 flex items-center gap-2">
-                     {stat.label} 
-                   </div>
-                   <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-sans font-medium text-cookbook-text/60">
-                      {stat.u1.name} <span className="text-[8px] text-cookbook-text/30 mx-0.5">vs</span> {stat.u2.name}
+                 <div className="text-center relative z-10 mb-3">
+                   <div className="inline-block px-3 py-1 bg-cookbook-text/5 rounded-full font-sans text-[9px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-2">
+                     {stat.label}
                    </div>
                  </div>
 
-                 <div className="flex flex-col items-end justify-center relative z-10">
-                   {stat.winner ? (
-                     <>
-                        <div className="flex items-center gap-1.5 text-cookbook-primary font-bold text-[10px] uppercase tracking-widest mb-0.5">
-                          {stat.winner.name} 
-                          <Trophy size={11} className="text-cookbook-gold" /> 
-                        </div>
-                        <div className="font-serif text-xs text-cookbook-text/80">
-                           {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans ml-1">dif</span>
-                        </div>
-                     </>
-                   ) : (
-                     <div className="text-[10px] uppercase tracking-widest font-medium text-cookbook-text/50">
-                       EMPATE
-                     </div>
-                   )}
-                 </div>
+                 {stat.winner ? (
+                   <div className="flex flex-col items-center justify-center relative z-10 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-br from-cookbook-gold/20 to-cookbook-gold/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-gold/30 shadow-inner">
+                        <Trophy size={20} className="text-cookbook-gold drop-shadow-sm" />
+                      </div>
+                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold mb-1 text-center truncate w-full">
+                        {stat.winner.name} 
+                      </div>
+                      <div className="font-serif text-sm text-cookbook-text/80 tracking-tight">
+                         {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
+                      </div>
+                   </div>
+                 ) : (
+                   <div className="flex flex-col items-center justify-center relative z-10 flex-1 opacity-50">
+                      <div className="w-12 h-12 bg-cookbook-text/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-text/10">
+                        <span className="font-serif italic text-sm">--</span>
+                      </div>
+                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold">
+                        Empate
+                      </div>
+                   </div>
+                 )}
               </div>
             ))}
           </div>

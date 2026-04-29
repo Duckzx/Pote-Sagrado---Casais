@@ -286,53 +286,38 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           →{" "}
         </button>{" "}
       </div>{" "}
-      {/* Summary Cards */}{" "}
+      {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-2">
-        {" "}
-        <div className="bg-emerald-50 border border-emerald-200/50 rounded-xl p-3 text-center">
-          {" "}
-          <ArrowUpCircle
-            size={16}
-            className="text-emerald-500 mx-auto mb-1"
-          />{" "}
-          <div className="font-serif text-sm text-emerald-700">
-            {" "}
-            {formatCurrency(totals.depositos)}{" "}
-          </div>{" "}
-          <div className="font-sans text-[7px] uppercase tracking-widest text-emerald-500/70 font-bold mt-0.5">
-            {" "}
-            Entradas{" "}
-          </div>{" "}
-        </div>{" "}
-        <div className="bg-red-50 border border-red-200/50 rounded-xl p-3 text-center">
-          {" "}
-          <ArrowDownCircle
-            size={16}
-            className="text-red-500 mx-auto mb-1"
-          />{" "}
-          <div className="font-serif text-sm text-red-700">
-            {" "}
-            {formatCurrency(totals.gastos)}{" "}
-          </div>{" "}
-          <div className="font-sans text-[7px] uppercase tracking-widest text-red-500/70 font-bold mt-0.5">
-            {" "}
-            Saídas{" "}
-          </div>{" "}
-        </div>{" "}
-        <div className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl p-3 text-center shadow-sm">
-          {" "}
-          <div
-            className={`font-serif text-sm ${totals.saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}
-          >
-            {" "}
-            {formatCurrency(totals.saldo)}{" "}
-          </div>{" "}
-          <div className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-0.5">
-            {" "}
-            Saldo{" "}
-          </div>{" "}
-        </div>{" "}
-      </div>{" "}
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 text-center relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
+          <ArrowUpCircle size={18} className="text-emerald-500 mx-auto mb-2 opacity-80" />
+          <div className="font-serif text-sm text-emerald-700 font-medium">
+             {formatCurrency(totals.depositos)}
+          </div>
+          <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
+             Entradas
+          </div>
+        </div>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
+          <ArrowDownCircle size={18} className="text-red-500 mx-auto mb-2 opacity-80" />
+          <div className="font-serif text-sm text-red-700 font-medium">
+             {formatCurrency(totals.gastos)}
+          </div>
+          <div className="font-sans text-[8px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
+             Saídas
+          </div>
+        </div>
+        <div className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl p-4 text-center shadow-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-cookbook-primary/5 to-transparent"></div>
+          <div className={`font-serif text-base mb-1 ${totals.saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+             {formatCurrency(totals.saldo)}
+          </div>
+          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-2">
+             Saldo Atual
+          </div>
+        </div>
+      </div>
       {/* Filter Row */}{" "}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
@@ -432,43 +417,37 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         </div>
       )}
 
-      {/* Timeline */}{" "}
-      <div className="space-y-5">
-        {" "}
+      {/* Timeline */}
+      <div className="space-y-4">
         {Object.keys(groupedByDate).length === 0 ? (
           <div className="text-center py-12 px-4 bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border rounded-3xl">
-            {" "}
-            <span className="text-3xl block mb-3">📭</span>{" "}
+            <span className="text-3xl block mb-3 grayscale opacity-50">📭</span>
             <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
-              {" "}
-              Nada por aqui ainda{" "}
-            </p>{" "}
+              Nada por aqui ainda
+            </p>
             <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-              {" "}
-              As transações deste mês aparecerão aqui{" "}
-            </p>{" "}
+              As transações deste mês aparecerão aqui
+            </p>
           </div>
         ) : (
           Object.entries(groupedByDate).map(([dateLabel, items]) => (
-            <div key={dateLabel}>
-              {" "}
-              {/* Date header */}{" "}
-              <div className="flex items-center gap-2 mb-2.5">
-                {" "}
-                <Calendar size={10} className="text-cookbook-text/30" />{" "}
-                <h4 className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-                  {" "}
-                  {dateLabel}{" "}
-                </h4>{" "}
-                <div className="flex-1 h-px bg-cookbook-border/50" />{" "}
-              </div>{" "}
-              {/* Items */}{" "}
-              <div className="space-y-1.5">
-                {" "}
-                {items.map((deposit: any) => {
+            <div key={dateLabel} className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative">
+              {/* Receipt top notch decoration */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-2 bg-cookbook-bg rounded-full border border-cookbook-border/30 z-10" />
+              
+              {/* Date header */}
+              <div className="bg-cookbook-bg border-b border-dashed border-cookbook-border py-4 px-4 rounded-t-3xl text-center">
+                <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold flex items-center justify-center gap-2">
+                  <Calendar size={12} className="text-cookbook-text/40" />
+                  {dateLabel}
+                </span>
+              </div>
+              
+              {/* Items */}
+              <div className="space-y-0.5 bg-cookbook-bg rounded-b-3xl">
+                {items.map((deposit: any, idx: number) => {
                   const isExpense = deposit.type === "expense";
-                  const isOwner =
-                    currentUser && deposit.who === currentUser.uid;
+                  const isOwner = currentUser && deposit.who === currentUser.uid;
                   
                   // Pick dynamic icon based on action text
                   const act = (deposit.action || "").toLowerCase();
@@ -481,77 +460,52 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   return (
                     <div
                       key={deposit.id}
-                      className="flex items-center gap-3 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:shadow-[0_4px_20px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 group"
+                      className={`relative flex items-center justify-between gap-3 px-4 py-4 group hover:bg-cookbook-text/5 transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
                     >
-                      {" "}
-                      {/* Icon */}{" "}
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isExpense ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}`}
-                      >
-                        {" "}
-                        <Icon size={16} />
-                      </div>{" "}
-                      {/* Info */}{" "}
-                      <div className="flex-1 min-w-0">
-                        {" "}
-                        <div className="flex items-center gap-1.5">
-                          {" "}
-                          <span className="font-serif italic text-xs text-cookbook-text truncate">
-                            {" "}
-                            {deposit.action ||
-                              (isExpense ? "Gasto" : "Depósito")}{" "}
-                          </span>{" "}
-                        </div>{" "}
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {" "}
-                          <span className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-                            {" "}
-                            {deposit.whoName}{" "}
-                          </span>{" "}
-                          <span className="font-sans text-[8px] text-cookbook-text/30">
-                            {" "}
-                            {formatTime(deposit)}{" "}
-                          </span>{" "}
-                        </div>{" "}
-                      </div>{" "}
-                      {/* Amount */}{" "}
-                      <div className="text-right shrink-0">
-                        {" "}
-                        <span
-                          className={`font-serif text-sm font-medium ${isExpense ? "text-red-500" : "text-emerald-600"}`}
-                        >
-                          {" "}
-                          {isExpense ? "−" : "+"}{" "}
-                          {formatCurrency(deposit.amount)}{" "}
-                        </span>{" "}
-                      </div>{" "}
-                      {/* Actions */}{" "}
-                      {isOwner && (
-                        <div className="flex gap-0.5 opacity-100 shrink-0">
-                          {" "}
-                          <button
-                            onClick={() => handleEdit(deposit)}
-                            className="text-cookbook-text/30 hover:text-cookbook-primary p-2 transition-colors"
-                          >
-                            {" "}
-                            <Pencil size={14} />{" "}
-                          </button>{" "}
-                          <button
-                            onClick={() => setDeleting(deposit)}
-                            className="text-cookbook-text/30 hover:text-red-500 p-2 transition-colors"
-                          >
-                            {" "}
-                            <Trash2 size={14} />{" "}
-                          </button>{" "}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
+                          <Icon size={18} />
                         </div>
-                      )}{" "}
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="font-serif text-sm text-cookbook-text truncate font-medium">
+                            {deposit.action || (isExpense ? "Saída" : "Entrada")}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="font-sans text-[8px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[80px]">
+                              {deposit.whoName.split(' ')[0]}
+                            </span>
+                            <span className="font-sans text-[9px] text-cookbook-text/40">
+                              {formatTime(deposit)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0 flex flex-col items-end justify-center">
+                        <span className={`font-serif text-lg font-medium tracking-tight ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
+                          {isExpense ? "−" : "+"}
+                          {formatCurrency(deposit.amount).replace('R$', '').trim()}
+                        </span>
+                        
+                        {isOwner && (
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                            <button onClick={() => handleEdit(deposit)} className="text-cookbook-text/30 hover:text-cookbook-primary transition-colors">
+                              <Pencil size={12} />
+                            </button>
+                            <button onClick={() => setDeleting(deposit)} className="text-cookbook-text/30 hover:text-red-500 transition-colors">
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
-                })}{" "}
-              </div>{" "}
+                })}
+              </div>
             </div>
           ))
-        )}{" "}
+        )}
       </div>{" "}
       {/* Total count */}{" "}
       {filteredDeposits.length > 0 && (
