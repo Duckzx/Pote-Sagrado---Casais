@@ -100,6 +100,53 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
     ...weeklyData.map((w) => Math.max(w.p1, w.p2)),
     1,
   );
+  
+  const MONTHS_PT = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  ];
+
+  const pastStats = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const pastMonths: Record<string, { p1: { name: string, total: number }, p2: { name: string, total: number } }> = {};
+    
+    deposits.forEach((d) => {
+      if (!d.createdAt?.toDate || d.type === "expense") return;
+      const date = d.createdAt.toDate();
+      const m = date.getMonth();
+      const y = date.getFullYear();
+      
+      // Skip current month
+      if (m === currentMonth && y === currentYear) return;
+      
+      const key = `${MONTHS_PT[m]} ${y}`;
+      if (!pastMonths[key]) {
+        pastMonths[key] = { p1: { name: "", total: 0 }, p2: { name: "", total: 0 } };
+      }
+      
+      // We will map users based on who they are to keep consistent mapping 
+      // For simplicity, we just add totals to whoever is the first seen or second seen
+      if (!pastMonths[key].p1.name) {
+         pastMonths[key].p1.name = d.whoName;
+         pastMonths[key].p1.total += d.amount;
+      } else if (pastMonths[key].p1.name === d.whoName) {
+         pastMonths[key].p1.total += d.amount;
+      } else if (!pastMonths[key].p2.name) {
+         pastMonths[key].p2.name = d.whoName;
+         pastMonths[key].p2.total += d.amount;
+      } else if (pastMonths[key].p2.name === d.whoName) {
+         pastMonths[key].p2.total += d.amount;
+      }
+    });
+
+    return Object.entries(pastMonths).map(([label, data]) => {
+       const u1 = data.p1;
+       const u2 = data.p2 || { name: "Jogador 2", total: 0 };
+       const winner = u1.total > u2.total ? u1 : (u2.total > u1.total ? u2 : null);
+       return { label, u1, u2, winner };
+    }).sort((a,b) => b.label.localeCompare(a.label)); // simple string sort for now
+  }, [deposits]);
   return (
     <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
       {" "}
@@ -142,7 +189,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           </span>{" "}
         </div>{" "}
         {/* Progress bar */}{" "}
-        <div className="relative h-3 bg-white/50 rounded-full overflow-hidden flex shadow-inner">
+        <div className="relative h-3 bg-cookbook-bg/50 rounded-full overflow-hidden flex shadow-inner">
           {" "}
           <div
             className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary/70 transition-all duration-1000 ease-out rounded-l-full"
@@ -178,12 +225,12 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           {prize || "Quem juntar menos paga um jantar!"}{" "}
         </p>{" "}
       </div>{" "}
-      {/* Leader Banner */}{" "}
-      {users[0].total > users[1].total && (
+      {/* Leader Banner */}
+      {users[0].total > 0 && users[0].total > users[1].total && (
         <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           {" "}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />{" "}
-          <div className="w-14 h-14 mx-auto bg-white/50 rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
+          <div className="w-14 h-14 mx-auto bg-cookbook-bg rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
             {" "}
             <Trophy size={22} className="text-cookbook-primary" />{" "}
           </div>{" "}
@@ -197,7 +244,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           </p>{" "}
           <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5">
             {" "}
-            Se o mês acabasse hoje, {users[1].name} pagaria a recompensa.{" "}
+            {users[0].total - users[1].total > 100 
+              ? `Que surra! Se o mês acabasse hoje, ${users[1].name} pagaria a recompensa fácil.`
+              : `Disputa acirrada! Mas se o mês acabasse hoje, ${users[1].name} pagaria a recompensa.`}
           </p>{" "}
           <button
             onClick={() => {
@@ -208,13 +257,13 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
                 window.navigator.vibrate([200, 100, 200]);
               }
               alert(
-                `Você apertou o botão do orgulho! Lembre ${users[1].name} de que você está na liderança e mande ele(a) ir aquecendo pra pagar o castigo!`,
+                `Aviso enviado (mentalmente)! Lembre ${users[1].name} que você está liderando com segurança.`,
               );
             }}
-            className="w-full bg-white/60 border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 border-cookbook-border/30 rounded-full font-medium shadow-sm active:scale-95"
+            className="w-full bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-medium shadow-sm active:scale-95"
           >
             {" "}
-            Notificar Vantagem (Físico){" "}
+            Notificar Vantagem{" "}
           </button>{" "}
           <div className="mt-5 pt-4 border-t border-cookbook-border/30">
             {" "}
@@ -228,7 +277,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
             </span>{" "}
           </div>{" "}
         </div>
-      )}{" "}
+      )}
       {/* Weekly breakdown */}{" "}
       <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {" "}
@@ -262,7 +311,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
                   </span>{" "}
                 </span>{" "}
               </div>{" "}
-              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-white/50">
+              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-cookbook-bg/50 border border-cookbook-border/30">
                 {" "}
                 <div
                   className="bg-cookbook-primary/70 transition-all duration-500"
@@ -277,6 +326,50 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           ))}{" "}
         </div>{" "}
       </div>{" "}
+      {/* Historical Battles */}
+      {pastStats.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
+            {" "}
+            Histórico de Batalhas{" "}
+          </h3>{" "}
+          <div className="grid gap-3">
+            {pastStats.map((stat, idx) => (
+              <div key={idx} className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-3xl p-4 flex items-center justify-between shadow-[0_4px_20px_rgb(0,0,0,0.02)] relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                 {stat.winner && <div className="absolute top-0 right-0 w-32 h-32 bg-cookbook-gold/10 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3 opacity-50 group-hover:opacity-100 transition-opacity"></div>}
+                 
+                 <div className="flex-1">
+                   <div className="font-serif text-sm text-cookbook-text mb-1 flex items-center gap-2">
+                     {stat.label} 
+                   </div>
+                   <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-sans font-medium text-cookbook-text/60">
+                      {stat.u1.name} <span className="text-[8px] text-cookbook-text/30 mx-0.5">vs</span> {stat.u2.name}
+                   </div>
+                 </div>
+
+                 <div className="flex flex-col items-end justify-center relative z-10">
+                   {stat.winner ? (
+                     <>
+                        <div className="flex items-center gap-1.5 text-cookbook-primary font-bold text-[10px] uppercase tracking-widest mb-0.5">
+                          {stat.winner.name} 
+                          <Trophy size={11} className="text-cookbook-gold" /> 
+                        </div>
+                        <div className="font-serif text-xs text-cookbook-text/80">
+                           {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans ml-1">dif</span>
+                        </div>
+                     </>
+                   ) : (
+                     <div className="text-[10px] uppercase tracking-widest font-medium text-cookbook-text/50">
+                       EMPATE
+                     </div>
+                   )}
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Motivational note */}{" "}
       {users[0].total === 0 && users[1].total === 0 && (
         <div className="text-center py-8 px-4 bg-cookbook-bg/90 backdrop-blur-md border-2 border-dashed border-cookbook-border rounded-3xl shadow-sm">

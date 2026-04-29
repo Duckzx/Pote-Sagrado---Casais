@@ -8,6 +8,11 @@ import {
   X,
   Calendar,
   User,
+  Utensils,
+  Car,
+  ShoppingCart,
+  Smartphone,
+  Plus
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -42,6 +47,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
 }) => {
   const [filter, setFilter] = useState<FilterType>("todos");
   const [filterUser, setFilterUser] = useState<string>("todos");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortAsc, setSortAsc] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(() =>
     new Date().getMonth(),
   );
@@ -51,6 +58,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   /* Edit state */ const [editing, setEditing] = useState<any | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editAction, setEditAction] = useState("");
+  const [editDate, setEditDate] = useState("");
   /* Delete state */ const [deleting, setDeleting] = useState<any | null>(null);
   /* Get unique users */ const users = useMemo(() => {
     const map = new Map<string, string>();
@@ -77,14 +85,19 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         if (filter === "gastos" && d.type !== "expense") return false;
         /* User filter */ if (filterUser !== "todos" && d.who !== filterUser)
           return false;
+        /* Search Query Filter */ if (searchQuery.trim() !== "") {
+          const textMatches = (d.action || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             (d.whoName || "").toLowerCase().includes(searchQuery.toLowerCase());
+          if (!textMatches) return false;
+        }
         return true;
       })
       .sort((a, b) => {
         const aTime = a.createdAt?.toDate?.() || new Date(0);
         const bTime = b.createdAt?.toDate?.() || new Date(0);
-        return bTime.getTime() - aTime.getTime();
+        return sortAsc ? aTime.getTime() - bTime.getTime() : bTime.getTime() - aTime.getTime();
       });
-  }, [deposits, filter, filterUser, selectedMonth, selectedYear]);
+  }, [deposits, filter, filterUser, selectedMonth, selectedYear, searchQuery, sortAsc]);
   /* Totals */ const totals = useMemo(() => {
     let depositos = 0;
     let gastos = 0;
@@ -128,16 +141,31 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     setEditing(deposit);
     setEditAmount(deposit.amount.toString());
     setEditAction(deposit.action || "");
+    if (deposit.createdAt?.toDate) {
+      const dateStr = deposit.createdAt.toDate().toISOString().split('T')[0];
+      setEditDate(dateStr);
+    } else {
+      setEditDate("");
+    }
   };
   const confirmEdit = async () => {
     const parsedAmount = Number(editAmount.replace(",", "."));
     if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0)
       return;
     try {
-      await updateDoc(doc(db, "deposits", editing.id), {
+      const updateData: any = {
         amount: parsedAmount,
         action: editAction,
-      });
+      };
+      if (editDate && editing.createdAt?.toDate) {
+        const currentRef = editing.createdAt.toDate();
+        const newDate = new Date(editDate);
+        // keep the original time
+        newDate.setHours(currentRef.getHours(), currentRef.getMinutes(), currentRef.getSeconds());
+        updateData.createdAt = newDate;
+      }
+
+      await updateDoc(doc(db, "deposits", editing.id), updateData);
       playSuccessSound();
       vibrate([30, 30]);
       addToast(
@@ -263,43 +291,61 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         </div>{" "}
       </div>{" "}
       {/* Filter Row */}{" "}
-      <div className="flex gap-2">
-        {" "}
-        {/* Type filter */}{" "}
-        <div className="flex gap-1 flex-1">
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
           {" "}
-          {[
-            { id: "todos" as FilterType, label: "Todos" },
-            { id: "depositos" as FilterType, label: "↑ Entradas" },
-            { id: "gastos" as FilterType, label: "↓ Saídas" },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={`flex-1 py-2 rounded-lg font-sans text-[8px] uppercase tracking-widest font-bold transition-all ${filter === f.id ? "bg-cookbook-primary text-white" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50 hover:border-cookbook-primary/30"}`}
+          {/* Type filter */}{" "}
+          <div className="flex gap-1 flex-1">
+            {" "}
+            {[
+              { id: "todos" as FilterType, label: "Todos" },
+              { id: "depositos" as FilterType, label: "↑ Entradas" },
+              { id: "gastos" as FilterType, label: "↓ Saídas" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFilter(f.id)}
+                className={`flex-1 py-2 rounded-lg font-sans text-[8px] uppercase tracking-widest font-bold transition-all ${filter === f.id ? "bg-cookbook-primary text-white" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50 hover:border-cookbook-primary/30"}`}
+              >
+                {" "}
+                {f.label}{" "}
+              </button>
+            ))}{" "}
+          </div>{" "}
+          {/* User filter */}{" "}
+          {users.length > 1 && (
+            <select
+              value={filterUser}
+              onChange={(e) => setFilterUser(e.target.value)}
+              className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
             >
               {" "}
-              {f.label}{" "}
-            </button>
-          ))}{" "}
-        </div>{" "}
-        {/* User filter */}{" "}
-        {users.length > 1 && (
-          <select
-            value={filterUser}
-            onChange={(e) => setFilterUser(e.target.value)}
-            className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-2 py-1 font-sans text-[9px] uppercase tracking-widest text-cookbook-text focus:outline-none focus:border-cookbook-primary"
+              <option value="todos">👥 Ambos</option>{" "}
+              {users.map(([uid, name]) => (
+                <option key={uid} value={uid}>
+                  {" "}
+                  {name}{" "}
+                </option>
+              ))}{" "}
+            </select>
+          )}{" "}
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="🔎 Buscar..."
+            className="flex-1 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 font-serif text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
+          />
+          <button 
+            onClick={() => setSortAsc(!sortAsc)}
+            title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
+            className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-lg px-3 py-2 text-cookbook-text/60 hover:text-cookbook-primary transition-colors flex items-center justify-center shrink-0"
           >
-            {" "}
-            <option value="todos">👥 Ambos</option>{" "}
-            {users.map(([uid, name]) => (
-              <option key={uid} value={uid}>
-                {" "}
-                {name}{" "}
-              </option>
-            ))}{" "}
-          </select>
-        )}{" "}
+             <ArrowUpCircle size={14} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
+          </button>
+        </div>
       </div>{" "}
       {/* Timeline */}{" "}
       <div className="space-y-5">
@@ -338,6 +384,15 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   const isExpense = deposit.type === "expense";
                   const isOwner =
                     currentUser && deposit.who === currentUser.uid;
+                  
+                  // Pick dynamic icon based on action text
+                  const act = (deposit.action || "").toLowerCase();
+                  let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
+                  if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
+                  else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
+                  else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
+                  else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
+
                   return (
                     <div
                       key={deposit.id}
@@ -349,11 +404,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isExpense ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}`}
                       >
                         {" "}
-                        {isExpense ? (
-                          <ArrowDownCircle size={16} />
-                        ) : (
-                          <ArrowUpCircle size={16} />
-                        )}{" "}
+                        <Icon size={16} />
                       </div>{" "}
                       {/* Info */}{" "}
                       <div className="flex-1 min-w-0">
@@ -460,6 +511,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 placeholder="Descrição"
                 className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
               />{" "}
+              {editDate && (
+                <input
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                />
+              )}{" "}
               <div className="relative">
                 {" "}
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">
