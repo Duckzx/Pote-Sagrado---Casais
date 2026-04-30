@@ -1,12 +1,13 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Trophy, Share2 } from "lucide-react";
+import { Trophy, Share2, Zap, Target, Shield } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
+  addToast: (title: string, msg: string, t: "success"|"info"|"error") => void;
 }
-export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
+export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
   const leaderBannerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const stats = useMemo(() => {
@@ -19,26 +20,36 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
         date.getMonth() === currentMonth && date.getFullYear() === currentYear
       );
     });
-    const userTotals: Record<string, { name: string; total: number }> = {};
+    
+    const userTotals: Record<string, { name: string; total: number; count: number; maxHit: number; expenses: number }> = {};
+    
     monthlyDeposits.forEach((d) => {
-      // Ignore expenses as per roadmap instruction
-      if (d.type === "expense") return;
-      
       if (!userTotals[d.who]) {
-        userTotals[d.who] = { name: d.whoName, total: 0 };
+        userTotals[d.who] = { name: d.whoName, total: 0, count: 0, maxHit: 0, expenses: 0 };
       }
+      
+      if (d.type === "expense") {
+        userTotals[d.who].expenses += d.amount;
+        return;
+      }
+      
       userTotals[d.who].total += d.amount;
+      userTotals[d.who].count += 1;
+      if (d.amount > userTotals[d.who].maxHit) {
+        userTotals[d.who].maxHit = d.amount;
+      }
     });
+
     const users = Object.values(userTotals).sort((a, b) => b.total - a.total);
     /* Ensure we have at least two users for the UI, even if empty */ if (
       users.length === 0
     ) {
       users.push(
-        { name: "Jogador 1", total: 0 },
-        { name: "Jogador 2", total: 0 },
+        { name: "Jogador 1", total: 0, count: 0, maxHit: 0, expenses: 0 },
+        { name: "Jogador 2", total: 0, count: 0, maxHit: 0, expenses: 0 },
       );
     } else if (users.length === 1) {
-      users.push({ name: "Jogador 2", total: 0 });
+      users.push({ name: "Jogador 2", total: 0, count: 0, maxHit: 0, expenses: 0 });
     }
     const total = Math.max(0, users[0].total) + Math.max(0, users[1].total);
     const p1Percentage =
@@ -321,7 +332,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
             <button
               onClick={() => {
                 if (window.navigator?.vibrate) window.navigator.vibrate([200, 100, 200]);
-                alert(`Aviso enviado (mentalmente)! Lembre ${users[1].name} que você está liderando com segurança.`);
+                addToast("Mentalizado!", `Você enviou ondas neurais para lembrar ${users[1].name} de quem manda.`, "success");
               }}
               className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-medium shadow-sm active:scale-95 text-center"
             >
@@ -398,6 +409,93 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize }) => {
           ))}{" "}
         </div>{" "}
       </div>{" "}
+      {/* Advanced Stats */}
+      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center mb-5">
+          Estatísticas Avançadas
+        </h3>
+        
+        <div className="space-y-4">
+          {/* Golpe Crítico */}
+          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 group-hover:bg-amber-500/20 transition-colors">
+                <Zap size={14} />
+              </div>
+              <div>
+                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Golpe Crítico</p>
+                <p className="font-serif text-xs text-cookbook-text">Maior depósito único</p>
+              </div>
+            </div>
+            <div className="text-right">
+              {users[0].maxHit >= users[1].maxHit ? (
+                <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-serif text-sm text-cookbook-primary">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].maxHit)}</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-cookbook-text/70">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].maxHit)}</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Ataque Rápido */}
+          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
+                <Target size={14} />
+              </div>
+              <div>
+                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Ataque Rápido</p>
+                <p className="font-serif text-xs text-cookbook-text">Mais depósitos feitos</p>
+              </div>
+            </div>
+            <div className="text-right">
+              {users[0].count >= users[1].count ? (
+                 <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-serif text-sm text-cookbook-primary">{users[0].count}x</p>
+                 </>
+              ) : (
+                <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-cookbook-text/70">{users[1].count}x</p>
+                 </>
+              )}
+            </div>
+          </div>
+
+          {/* Escudo Forte */}
+          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-colors">
+                <Shield size={14} />
+              </div>
+              <div>
+                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Escudo Forte</p>
+                <p className="font-serif text-xs text-cookbook-text">Menos gastos no mês</p>
+              </div>
+            </div>
+            <div className="text-right">
+              {users[0].expenses <= users[1].expenses ? (
+                 <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-serif text-sm text-cookbook-primary">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].expenses)}</p>
+                 </>
+              ) : (
+                <>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-cookbook-text/70">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
+                 </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Historical Battles */}
       {pastStats.length > 0 && (
         <div className="space-y-4">

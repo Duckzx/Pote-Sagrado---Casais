@@ -372,6 +372,7 @@ function AppContent() {
                 <DisputaTab
                   deposits={deposits}
                   prize={tripConfig.monthlyPrize}
+                  addToast={addToast}
                 />
               )}
               {activeTab === "config" && (
