@@ -72,6 +72,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showAkinator, setShowAkinator] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<string>("default");
+
+  useEffect(() => {
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
   const [saveTrigger, setSaveTrigger] = useState(0);
   useEffect(() => {
     setDestination(currentDestination || "");
@@ -196,9 +203,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     setIsRequestingPush(true);
     try {
       const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
       if (permission === "granted") {
-        const token = await getToken(messaging);
-        /* ATENÇÃO: vapidKey */ if (token) {
+        const token = await getToken(messaging, {
+          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
+        });
+        if (token) {
           const tripRef = doc(db, "trip_config", "main");
           const tDoc = await getDoc(tripRef);
           let fcmTokens: string[] = [];
@@ -502,22 +512,22 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             {" "}
             <button
               onClick={handleEnablePush}
-              disabled={isRequestingPush}
-              className="flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group"
+              disabled={isRequestingPush || notificationPermission === "granted"}
+              className={`flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group ${notificationPermission === "granted" ? "opacity-60 cursor-default" : ""}`}
             >
               {" "}
               <div className="pr-4">
                 {" "}
-                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                <div className={`font-sans text-sm font-medium transition-colors ${notificationPermission === "granted" ? "text-emerald-500" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
                   {" "}
-                  Ativar Alertas Nativos{" "}
+                  {notificationPermission === "granted" ? "Alertas Nativos Ativados" : "Ativar Alertas Nativos"}
                 </div>{" "}
                 <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
                   {" "}
-                  Ser lembrado pelo navegador aumenta bastante a economia.{" "}
+                  {notificationPermission === "granted" ? "Você já está recebendo alertas deste dispositivo." : "Ser lembrado pelo navegador aumenta bastante a economia."}
                 </div>{" "}
               </div>{" "}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${notificationPermission === "granted" ? "text-emerald-500 bg-emerald-500/10" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
                 {" "}
                 <Bell size={16} />{" "}
               </div>{" "}
