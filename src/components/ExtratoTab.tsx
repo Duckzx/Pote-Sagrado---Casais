@@ -14,7 +14,8 @@ import {
   Smartphone,
   Plus,
   Download,
-  MoreVertical
+  MoreVertical,
+  Heart
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -110,6 +111,19 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     });
     return { depositos, gastos, saldo: depositos - gastos };
   }, [filteredDeposits]);
+  /* User Contributions */ const userContributions = useMemo(() => {
+    const contributionMap: Record<string, { name: string; amount: number }> = {};
+    filteredDeposits.forEach((d) => {
+      if (d.type !== "expense" && d.who && d.whoName) {
+        if (!contributionMap[d.who]) {
+          contributionMap[d.who] = { name: d.whoName.split(' ')[0], amount: 0 };
+        }
+        contributionMap[d.who].amount += d.amount;
+      }
+    });
+    return Object.values(contributionMap).sort((a, b) => b.amount - a.amount);
+  }, [filteredDeposits]);
+
   /* Group by date */ const groupedByDate = useMemo(() => {
     const groups: Record<string, any[]> = {};
     filteredDeposits.forEach((d) => {
@@ -320,6 +334,39 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* User Contributions "Versus with love" */}
+      {userContributions.length >= 2 && (
+        <div className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-2xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] relative overflow-hidden flex items-center justify-between mx-1">
+          <div className="text-center flex-1 z-10">
+            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
+              {userContributions[0].name}
+            </span>
+            <span className="font-serif text-sm text-cookbook-text font-medium">
+              {formatCurrency(userContributions[0].amount)}
+            </span>
+          </div>
+          
+          <div className="shrink-0 px-4 text-center z-10">
+            <div className="bg-red-500/10 text-red-500 rounded-full w-9 h-9 flex items-center justify-center relative mx-auto group">
+               <span className="font-sans text-[10px] font-bold italic absolute group-hover:opacity-0 transition-opacity">VS</span>
+               <Heart size={16} className="opacity-0 group-hover:opacity-100 transition-opacity absolute" fill="currentColor" />
+            </div>
+          </div>
+
+          <div className="text-center flex-1 z-10">
+            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
+              {userContributions[1].name}
+            </span>
+            <span className="font-serif text-sm text-cookbook-text font-medium">
+              {formatCurrency(userContributions[1].amount)}
+            </span>
+          </div>
+          
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-cookbook-border to-transparent -z-0"></div>
+        </div>
+      )}
+
       {/* Filter Row */}
       <div className="flex flex-col gap-3">
         {/* Search & Actions */}
@@ -448,110 +495,103 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             </p>
           </div>
         ) : (
-          Object.entries(groupedByDate).map(([dateLabel, items]) => (
-            <div key={dateLabel} className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative">
-              {/* Receipt top notch decoration */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-2 bg-cookbook-bg rounded-full border border-cookbook-border/30 z-10" />
-              
-              {/* Date header */}
-              <div className="bg-cookbook-bg border-b border-dashed border-cookbook-border py-4 px-4 rounded-t-3xl text-center">
-                <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold flex items-center justify-center gap-2">
-                  <Calendar size={12} className="text-cookbook-text/40" />
-                  {dateLabel}
-                </span>
-              </div>
-              
-              {/* Items */}
-              <div className="space-y-0.5 bg-cookbook-bg rounded-b-3xl">
-                {items.map((deposit: any, idx: number) => {
-                  const isExpense = deposit.type === "expense";
-                  const isOwner = currentUser && deposit.who === currentUser.uid;
-                  
-                  // Pick dynamic icon based on action text
-                  const act = (deposit.action || "").toLowerCase();
-                  let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
-                  if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
-                  else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
-                  else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
-                  else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
+          Object.entries(groupedByDate).map(([dateLabel, items]) => {
+            const dailyBalance = items.reduce((acc: number, d: any) => d.type === "expense" ? acc - d.amount : acc + d.amount, 0);
+            
+            return (
+              <div key={dateLabel} className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative">
+                {/* Receipt top notch decoration */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-2 bg-cookbook-bg rounded-full border border-cookbook-border/30 z-10" />
+                
+                {/* Date header */}
+                <div className="bg-cookbook-bg border-b border-dashed border-cookbook-border py-4 px-5 rounded-t-3xl flex items-center justify-between">
+                  <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold flex items-center gap-2">
+                    <Calendar size={12} className="text-cookbook-text/40" />
+                    {dateLabel}
+                  </span>
+                  <div className="text-right">
+                    <span className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/40 font-bold block leading-tight">
+                      Saldo do Dia
+                    </span>
+                    <span className={`font-serif text-xs font-medium ${dailyBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                      {dailyBalance >= 0 ? "+" : ""}{formatCurrency(dailyBalance)}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Items */}
+                <div className="space-y-0.5 bg-cookbook-bg rounded-b-3xl overflow-hidden">
+                  {items.map((deposit: any, idx: number) => {
+                    const isExpense = deposit.type === "expense";
+                    const isOwner = currentUser && deposit.who === currentUser.uid;
+                    
+                    // Pick dynamic icon based on action text
+                    const act = (deposit.action || "").toLowerCase();
+                    let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
+                    if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
+                    else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
+                    else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
+                    else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
 
-                  return (
-                    <div
-                      key={deposit.id}
-                      className={`relative flex items-center justify-between gap-3 px-4 py-4 group hover:bg-cookbook-text/5 transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
-                          <Icon size={18} />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="font-serif text-sm text-cookbook-text truncate font-medium">
-                            {deposit.action || (isExpense ? "Saída" : "Entrada")}
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={`relative flex flex-col group transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''} ${isExpense ? 'bg-red-500/[0.02] hover:bg-red-500/[0.05]' : 'bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}`}
+                      >
+                        <div className={`absolute top-0 bottom-0 left-0 w-1 ${isExpense ? 'bg-red-500/30' : 'bg-emerald-500/30'}`} />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-4">
+                          <div className="flex items-center gap-3 flex-1 min-w-0 pl-2">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
+                              <Icon size={18} />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="font-serif text-sm text-cookbook-text truncate font-medium">
+                                {deposit.action || (isExpense ? "Saída" : "Entrada")}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="font-sans text-[8px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[80px]">
+                                  {deposit.whoName.split(' ')[0]}
+                                </span>
+                                <span className="font-sans text-[9px] text-cookbook-text/40">
+                                  {formatTime(deposit)}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className="font-sans text-[8px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[80px]">
-                              {deposit.whoName.split(' ')[0]}
-                            </span>
-                            <span className="font-sans text-[9px] text-cookbook-text/40">
-                              {formatTime(deposit)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className="text-right shrink-0 flex items-center gap-2">
-                        <span className={`font-serif text-lg font-medium tracking-tight ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
-                          {isExpense ? "−" : "+"}
-                          {formatCurrency(deposit.amount).replace('R$', '').trim()}
-                        </span>
+                          <div className="text-right shrink-0 flex items-center gap-2">
+                            <span className={`font-serif text-lg font-medium tracking-tight whitespace-nowrap ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
+                              {isExpense ? "−" : "+"}
+                              {formatCurrency(deposit.amount).replace('R$', '').trim()}
+                            </span>
+                          </div>
+                        </div>
                         
                         {isOwner && (
-                          <div className="relative ml-1">
+                          <div className="flex border-t border-cookbook-border/10">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveMenuId(activeMenuId === deposit.id ? null : deposit.id);
-                              }}
-                              className={`p-2 rounded-full transition-colors flex items-center justify-center ${activeMenuId === deposit.id ? 'bg-cookbook-primary/10 text-cookbook-primary' : 'text-cookbook-text/30 hover:bg-cookbook-text/5 hover:text-cookbook-text'}`}
+                              onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
+                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors"
                             >
-                              <MoreVertical size={16} />
+                              <Pencil size={12} /> Editar
                             </button>
-
-                            {activeMenuId === deposit.id && (
-                              <>
-                                <div 
-                                  className="fixed inset-0 z-40" 
-                                  onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); }}
-                                />
-                                <div className="absolute right-0 top-full mt-1 w-36 bg-cookbook-bg/95 backdrop-blur-xl border border-cookbook-border/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] z-50 overflow-hidden py-1 transform origin-top-right animate-in fade-in zoom-in-95 duration-100">
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); handleEdit(deposit); }}
-                                    className="w-full flex items-center gap-2 px-4 py-3 font-sans text-[10px] uppercase tracking-widest text-cookbook-text hover:bg-cookbook-primary/5 hover:text-cookbook-primary font-bold transition-colors text-left"
-                                  >
-                                    <Pencil size={12} />
-                                    Editar
-                                  </button>
-                                  <div className="h-px bg-cookbook-border/30 w-full" />
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); setDeleting(deposit); }}
-                                    className="w-full flex items-center gap-2 px-4 py-3 font-sans text-[10px] uppercase tracking-widest text-red-500 hover:bg-red-500/5 font-bold transition-colors text-left"
-                                  >
-                                    <Trash2 size={12} />
-                                    Excluir
-                                  </button>
-                                </div>
-                              </>
-                            )}
+                            <div className="w-px bg-cookbook-border/10" />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
+                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-red-500 hover:bg-red-500/5 transition-colors"
+                            >
+                              <Trash2 size={12} /> Excluir
+                            </button>
                           </div>
                         )}
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+              })}
               </div>
             </div>
-          ))
+          );
+        })
         )}
       </div>{" "}
       {/* Total count */}{" "}
