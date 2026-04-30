@@ -238,6 +238,12 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
     useMemo(() => {
       if (!currentUser) return {};
       const result: Record<string, { count: number; streak: number }> = {};
+      
+      const toLocalYYYYMMDD = (d: Date) => {
+        const local = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
+        return local.toISOString().split("T")[0];
+      };
+
       allMissions.forEach((mission) => {
         const missionDeposits = deposits.filter(
           (d) =>
@@ -252,7 +258,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               missionDeposits
                 .map((d) =>
                   d.createdAt?.toDate
-                    ? d.createdAt.toDate().toISOString().split("T")[0]
+                    ? toLocalYYYYMMDD(d.createdAt.toDate())
                     : null,
                 )
                 .filter(Boolean) as string[],
@@ -260,26 +266,29 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           )
             .sort()
             .reverse();
+        
         let streak = 0;
-        const today = new Date().toISOString().split("T")[0];
-        for (let i = 0; i < dates.length; i++) {
-          const expected = new Date();
-          expected.setDate(expected.getDate() - i);
-          const expectedStr = expected.toISOString().split("T")[0];
-          if (dates[i] === expectedStr || (i === 0 && dates[i] === today)) {
-            streak++;
-          } else if (i === 0) {
-            /* Check if yesterday counts */ const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            if (dates[i] === yesterday.toISOString().split("T")[0]) {
-              streak++;
-            } else {
-              break;
+        if (dates.length > 0) {
+          const today = new Date();
+          const todayStr = toLocalYYYYMMDD(today);
+          const yesterday = new Date(today);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = toLocalYYYYMMDD(yesterday);
+
+          if (dates[0] === todayStr || dates[0] === yesterdayStr) {
+            streak = 1;
+            let currentDate = new Date(dates[0] + "T12:00:00");
+            for (let i = 1; i < dates.length; i++) {
+              currentDate.setDate(currentDate.getDate() - 1);
+              if (dates[i] === toLocalYYYYMMDD(currentDate)) {
+                streak++;
+              } else {
+                break;
+              }
             }
-          } else {
-            break;
           }
         }
+        
         result[mission.id] = { count, streak };
       });
       return result;
@@ -673,51 +682,58 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                     {/* Bottom row: badge + stats + action */}{" "}
                     <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
                       {" "}
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
                         {" "}
                         {/* Category badge */}{" "}
                         <span
-                          className={`px-2 py-0.5 rounded-full font-sans text-[7px] uppercase tracking-widest font-bold border ${badge.color}`}
+                          className={`px-2 py-0.5 rounded-md font-sans text-[8px] uppercase tracking-widest font-bold border ${badge.color}`}
                         >
                           {" "}
                           {badge.label}{" "}
                         </span>{" "}
                         {/* Reward */}{" "}
                         {mission.reward > 0 && (
-                          <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-primary font-bold">
+                          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
                             {" "}
                             R$ {mission.reward}{" "}
                           </span>
                         )}{" "}
-                        {/* Streak indicator */}{" "}
-                        {missionStats.streak > 0 && (
-                          <span className="flex items-center gap-0.5 font-sans text-[9px] text-amber-500 font-bold">
-                            {" "}
-                            <Flame size={10} /> {missionStats.streak}{" "}
-                          </span>
-                        )}{" "}
-                        {/* Count */}{" "}
-                        {missionStats.count > 0 && (
-                          <span className="font-sans text-[9px] text-cookbook-text/40">
-                            {" "}
-                            ×{missionStats.count}{" "}
-                          </span>
-                        )}{" "}
                       </div>{" "}
-                      {/* Complete button */}{" "}
-                      <button
-                        onClick={() => {
-                          setSelectedMission(mission);
-                          if (mission.reward > 0)
-                            setAmount(mission.reward.toString());
-                          else setAmount("");
-                        }}
-                        disabled={isSubmitting}
-                        className="flex items-center gap-1 bg-cookbook-bg border border-cookbook-border px-3 py-1.5 rounded-lg text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-text hover:bg-cookbook-primary hover:text-white hover:border-cookbook-primary transition-all disabled:opacity-50 active:scale-95"
-                      >
-                        {" "}
-                        <CheckCircle2 size={11} /> <span>Cumpri!</span>{" "}
-                      </button>{" "}
+                      
+                      {/* Interactive Section */}{" "}
+                      <div className="flex items-center gap-2 ml-auto">
+                        <div className="flex items-center gap-1.5">
+                          {/* Count */}{" "}
+                          {missionStats.count > 0 && (
+                            <span className="flex items-center justify-center font-sans text-[10px] bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-md font-bold" title="Vezes completadas">
+                              {" "}
+                              ×{missionStats.count}{" "}
+                            </span>
+                          )}{" "}
+                          {/* Streak indicator */}{" "}
+                          {missionStats.streak > 0 && (
+                            <span className="flex items-center gap-1 font-sans text-[10px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-bold" title="Dias seguidos">
+                              {" "}
+                              <Flame size={12} strokeWidth={2.5} className="text-amber-500" /> {missionStats.streak}{" "}
+                            </span>
+                          )}{" "}
+                        </div>
+                        
+                        {/* Complete button */}{" "}
+                        <button
+                          onClick={() => {
+                            setSelectedMission(mission);
+                            if (mission.reward > 0)
+                              setAmount(mission.reward.toString());
+                            else setAmount("");
+                          }}
+                          disabled={isSubmitting}
+                          className="flex items-center gap-1 bg-cookbook-bg border border-cookbook-border px-3 py-1.5 rounded-lg text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-text hover:bg-cookbook-primary hover:text-white hover:border-cookbook-primary transition-all disabled:opacity-50 active:scale-95"
+                        >
+                          {" "}
+                          <CheckCircle2 size={11} /> <span>Cumpri!</span>{" "}
+                        </button>{" "}
+                      </div>
                     </div>{" "}
                   </div>{" "}
                 </div>{" "}
