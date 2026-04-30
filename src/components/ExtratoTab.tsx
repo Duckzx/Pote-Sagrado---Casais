@@ -13,7 +13,8 @@ import {
   ShoppingCart,
   Smartphone,
   Plus,
-  Download
+  Download,
+  ChevronRight
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -476,7 +477,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   return (
                     <div
                       key={deposit.id}
-                      className={`relative flex items-center justify-between gap-3 px-4 py-4 group hover:bg-cookbook-text/5 transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
+                      onClick={() => { if (isOwner) handleEdit(deposit); }}
+                      className={`relative flex items-center justify-between gap-3 px-4 py-4 ${isOwner ? 'cursor-pointer hover:bg-cookbook-text/5 active:bg-cookbook-primary/5 group' : 'hover:bg-cookbook-text/5'} transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
@@ -498,20 +500,15 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                         </div>
                       </div>
 
-                      <div className="text-right shrink-0 flex flex-col items-end justify-center">
+                      <div className="text-right shrink-0 flex items-center gap-2">
                         <span className={`font-serif text-lg font-medium tracking-tight ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
                           {isExpense ? "−" : "+"}
                           {formatCurrency(deposit.amount).replace('R$', '').trim()}
                         </span>
                         
                         {isOwner && (
-                          <div className="flex justify-end gap-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2">
-                            <button onClick={() => handleEdit(deposit)} className="flex items-center justify-center w-6 h-6 bg-cookbook-text/5 hover:bg-cookbook-primary/10 rounded-full text-cookbook-text/50 hover:text-cookbook-primary transition-colors focus:outline-none focus:ring-1 focus:ring-cookbook-primary/50">
-                              <Pencil size={11} />
-                            </button>
-                            <button onClick={() => setDeleting(deposit)} className="flex items-center justify-center w-6 h-6 bg-cookbook-text/5 hover:bg-red-500/10 rounded-full text-cookbook-text/50 hover:text-red-500 transition-colors focus:outline-none focus:ring-1 focus:ring-red-500/50">
-                              <Trash2 size={11} />
-                            </button>
+                          <div className="text-cookbook-text/20 group-hover:text-cookbook-primary transition-colors ml-1">
+                            <ChevronRight size={14} />
                           </div>
                         )}
                       </div>
@@ -589,15 +586,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 />{" "}
               </div>{" "}
             </div>{" "}
-            <div className="flex gap-3">
-              {" "}
+            <div className="flex gap-2">
               <button
-                onClick={() => setEditing(null)}
-                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
+                onClick={() => { setDeleting(editing); setEditing(null); }}
+                className="flex items-center justify-center p-3 px-5 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500/20 transition-colors"
+                title="Apagar transação"
               >
-                {" "}
-                Cancelar{" "}
-              </button>{" "}
+                <Trash2 size={18} />
+              </button>
               <button
                 onClick={confirmEdit}
                 disabled={
@@ -607,9 +603,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 }
                 className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
               >
-                {" "}
-                Salvar{" "}
-              </button>{" "}
+                Salvar
+              </button>
             </div>{" "}
           </div>{" "}
         </div>
