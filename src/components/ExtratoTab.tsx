@@ -14,7 +14,7 @@ import {
   Smartphone,
   Plus,
   Download,
-  ChevronRight
+  MoreVertical
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -58,6 +58,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     new Date().getFullYear(),
   );
   /* Edit state */ const [editing, setEditing] = useState<any | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editAction, setEditAction] = useState("");
   const [editDate, setEditDate] = useState("");
@@ -477,8 +478,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   return (
                     <div
                       key={deposit.id}
-                      onClick={() => { if (isOwner) handleEdit(deposit); }}
-                      className={`relative flex items-center justify-between gap-3 px-4 py-4 ${isOwner ? 'cursor-pointer hover:bg-cookbook-text/5 active:bg-cookbook-primary/5 group' : 'hover:bg-cookbook-text/5'} transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
+                      className={`relative flex items-center justify-between gap-3 px-4 py-4 group hover:bg-cookbook-text/5 transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''}`}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
@@ -507,8 +507,42 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                         </span>
                         
                         {isOwner && (
-                          <div className="text-cookbook-text/20 group-hover:text-cookbook-primary transition-colors ml-1">
-                            <ChevronRight size={14} />
+                          <div className="relative ml-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(activeMenuId === deposit.id ? null : deposit.id);
+                              }}
+                              className={`p-2 rounded-full transition-colors flex items-center justify-center ${activeMenuId === deposit.id ? 'bg-cookbook-primary/10 text-cookbook-primary' : 'text-cookbook-text/30 hover:bg-cookbook-text/5 hover:text-cookbook-text'}`}
+                            >
+                              <MoreVertical size={16} />
+                            </button>
+
+                            {activeMenuId === deposit.id && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-40" 
+                                  onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); }}
+                                />
+                                <div className="absolute right-0 top-full mt-1 w-36 bg-cookbook-bg/95 backdrop-blur-xl border border-cookbook-border/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] z-50 overflow-hidden py-1 transform origin-top-right animate-in fade-in zoom-in-95 duration-100">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); handleEdit(deposit); }}
+                                    className="w-full flex items-center gap-2 px-4 py-3 font-sans text-[10px] uppercase tracking-widest text-cookbook-text hover:bg-cookbook-primary/5 hover:text-cookbook-primary font-bold transition-colors text-left"
+                                  >
+                                    <Pencil size={12} />
+                                    Editar
+                                  </button>
+                                  <div className="h-px bg-cookbook-border/30 w-full" />
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); setDeleting(deposit); }}
+                                    className="w-full flex items-center gap-2 px-4 py-3 font-sans text-[10px] uppercase tracking-widest text-red-500 hover:bg-red-500/5 font-bold transition-colors text-left"
+                                  >
+                                    <Trash2 size={12} />
+                                    Excluir
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
