@@ -259,7 +259,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   };
 
   return (
-    <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-5">
+    <div className="w-full max-w-md mx-auto space-y-5 mt-8">
       {" "}
       {/* Header */}{" "}
       <div className="text-center">
