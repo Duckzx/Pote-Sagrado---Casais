@@ -5,17 +5,25 @@ import domtoimage from "dom-to-image-more";
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
-  addToast: (title: string, msg: string, t: "success"|"info"|"error") => void;
+  addToast: (title: string, msg: string, type?: "info"|"success"|"milestone") => void;
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
   const leaderBannerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const getDateObj = (val: any) => {
+    if (!val) return null;
+    if (typeof val.toDate === "function") return val.toDate();
+    if (val instanceof Date) return val;
+    if (typeof val === "string" || typeof val === "number") return new Date(val);
+    return null;
+  };
+
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const monthlyDeposits = deposits.filter((d) => {
-      if (!d.createdAt?.toDate) return false;
-      const date = d.createdAt.toDate();
+      const date = getDateObj(d.createdAt);
+      if (!date) return false;
       return (
         date.getMonth() === currentMonth && date.getFullYear() === currentYear
       );
@@ -77,8 +85,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         let p1Total = 0;
         let p2Total = 0;
         deposits.forEach((d) => {
-          if (!d.createdAt?.toDate) return;
-          const date = d.createdAt.toDate();
+          const date = getDateObj(d.createdAt);
+          if (!date) return;
           if (
             date >= weekStart &&
             date < weekEnd &&
@@ -127,8 +135,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
     const pastMonths: Record<string, { p1: { name: string, total: number }, p2: { name: string, total: number } }> = {};
     
     deposits.forEach((d) => {
-      if (!d.createdAt?.toDate || d.type === "expense") return;
-      const date = d.createdAt.toDate();
+      if (d.type === "expense") return;
+      const date = getDateObj(d.createdAt);
+      if (!date) return;
       const m = date.getMonth();
       const y = date.getFullYear();
       

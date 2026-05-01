@@ -236,6 +236,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
     }, [allMissions, activeFilter]);
   /* ======================================== */ /* Streak calculation */ const streaks =
     useMemo(() => {
+      const getDateObj = (val: any) => {
+        if (!val) return null;
+        if (typeof val.toDate === "function") return val.toDate();
+        if (val instanceof Date) return val;
+        if (typeof val === "string" || typeof val === "number") return new Date(val);
+        return null;
+      };
+
       if (!currentUser) return {};
       const result: Record<string, { count: number; streak: number }> = {};
       
@@ -256,11 +264,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           Array.from(
             new Set(
               missionDeposits
-                .map((d) =>
-                  d.createdAt?.toDate
-                    ? toLocalYYYYMMDD(d.createdAt.toDate())
-                    : null,
-                )
+                .map((d) => {
+                  const date = getDateObj(d.createdAt);
+                  return date ? toLocalYYYYMMDD(date) : null;
+                })
                 .filter(Boolean) as string[],
             ),
           )

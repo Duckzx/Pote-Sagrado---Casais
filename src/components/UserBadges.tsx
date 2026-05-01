@@ -111,6 +111,14 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
   const prevEarnedRef = useRef<Set<string>>(new Set());
   const isInitialLoad = useRef(true);
   const earnedBadges: Set<string> = useMemo(() => {
+    const getDateObj = (val: any) => {
+      if (!val) return null;
+      if (typeof val.toDate === "function") return val.toDate();
+      if (val instanceof Date) return val;
+      if (typeof val === "string" || typeof val === "number") return new Date(val);
+      return null;
+    };
+
     if (!currentUser) return new Set<string>();
     const earned = new Set<string>();
     /* User's deposits (only income, not expenses) */ const userDeposits =
@@ -140,11 +148,10 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
       Array.from(
         new Set(
           userDeposits
-            .map((d) =>
-              d.createdAt?.toDate
-                ? d.createdAt.toDate().toISOString().split("T")[0]
-                : null,
-            )
+            .map((d) => {
+              const date = getDateObj(d.createdAt);
+              return date ? date.toISOString().split("T")[0] : null;
+            })
             .filter(Boolean) as string[],
         ),
       ).sort();

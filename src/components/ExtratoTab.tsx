@@ -21,6 +21,7 @@ import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
+import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 interface ExtratoTabProps {
   deposits: any[];
   addToast: (
@@ -52,9 +53,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   const [filterUser, setFilterUser] = useState<string>("todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortAsc, setSortAsc] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(() =>
-    new Date().getMonth(),
-  );
+  const [selectedMonth, setSelectedMonth] = useState(-1); // -1 = Todos os meses
   const [selectedYear, setSelectedYear] = useState(() =>
     new Date().getFullYear(),
   );
@@ -73,14 +72,22 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     });
     return Array.from(map.entries());
   }, [deposits]);
+  const getDateObj = (val: any) => {
+    if (!val) return null;
+    if (typeof val.toDate === "function") return val.toDate();
+    if (val instanceof Date) return val;
+    if (typeof val === "string" || typeof val === "number") return new Date(val);
+    return null;
+  };
+
   /* Filtered and sorted deposits */ const filteredDeposits = useMemo(() => {
     return deposits
       .filter((d) => {
-        /* Month filter */ if (d.createdAt?.toDate) {
-          const date = d.createdAt.toDate();
+        const dDate = getDateObj(d.createdAt);
+        /* Month filter */ if (selectedMonth !== -1 && dDate) {
           if (
-            date.getMonth() !== selectedMonth ||
-            date.getFullYear() !== selectedYear
+            dDate.getMonth() !== selectedMonth ||
+            dDate.getFullYear() !== selectedYear
           )
             return false;
         }
@@ -97,8 +104,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         return true;
       })
       .sort((a, b) => {
-        const aTime = a.createdAt?.toDate?.() || new Date(0);
-        const bTime = b.createdAt?.toDate?.() || new Date(0);
+        const aTime = getDateObj(a.createdAt) || new Date(0);
+        const bTime = getDateObj(b.createdAt) || new Date(0);
         return sortAsc ? aTime.getTime() - bTime.getTime() : bTime.getTime() - aTime.getTime();
       });
   }, [deposits, filter, filterUser, selectedMonth, selectedYear, searchQuery, sortAsc]);
@@ -127,7 +134,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   /* Group by date */ const groupedByDate = useMemo(() => {
     const groups: Record<string, any[]> = {};
     filteredDeposits.forEach((d) => {
-      const date = d.createdAt?.toDate?.();
+      const date = getDateObj(d.createdAt);
       const key = date
         ? date.toLocaleDateString("pt-BR", {
             weekday: "long",
@@ -141,16 +148,24 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     return groups;
   }, [filteredDeposits]);
   /* Navigate months */ const goMonth = (dir: number) => {
-    let m = selectedMonth + dir;
+    let m = selectedMonth;
     let y = selectedYear;
-    if (m < 0) {
-      m = 11;
-      y--;
+    
+    if (m === -1) {
+       const now = new Date();
+       if (dir < 0) {
+         m = now.getMonth();
+         y = now.getFullYear();
+       } else {
+         m = 0;
+         y = now.getFullYear();
+       }
+    } else {
+       m += dir;
+       if (m < -1) { m = 11; y--; }
+       else if (m > 11) { m = -1; y++; }
     }
-    if (m > 11) {
-      m = 0;
-      y++;
-    }
+    
     setSelectedMonth(m);
     setSelectedYear(y);
   };
@@ -166,12 +181,48 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     
     return { biggestDeposit, biggestExpense };
   }, [filteredDeposits]);
+  
+  /* Chart Data */
+  const chartData = useMemo(() => {
+    if (selectedMonth === -1) {
+      const monthlyStats: Record<string, { label: string; index: number; Entradas: number; Saídas: number }> = {};
+      deposits.forEach(d => {
+        const date = getDateObj(d.createdAt);
+        if (!date) return;
+        const m = date.getMonth();
+        const y = date.getFullYear();
+        const key = `${y}-${m}`;
+        if (!monthlyStats[key]) {
+           monthlyStats[key] = { label: `${MONTHS_PT[m].slice(0, 3)}/${y.toString().slice(-2)}`, index: y * 12 + m, Entradas: 0, Saídas: 0 };
+        }
+        if (d.type === 'expense') monthlyStats[key].Saídas += d.amount;
+        else monthlyStats[key].Entradas += d.amount;
+      });
+      return Object.values(monthlyStats).sort((a,b) => a.index - b.index);
+    } else {
+      const dailyStats: Record<string, { label: string; index: number; Entradas: number; Saídas: number }> = {};
+      filteredDeposits.forEach(d => {
+        const date = getDateObj(d.createdAt);
+        if (!date) return;
+        const dy = date.getDate();
+        const key = dy.toString();
+        if (!dailyStats[key]) {
+           dailyStats[key] = { label: `${dy}`, index: dy, Entradas: 0, Saídas: 0 };
+        }
+        if (d.type === 'expense') dailyStats[key].Saídas += d.amount;
+        else dailyStats[key].Entradas += d.amount;
+      });
+      return Object.values(dailyStats).sort((a,b) => a.index - b.index);
+    }
+  }, [selectedMonth, deposits, filteredDeposits]);
+  
   /* Edit handler */ const handleEdit = (deposit: any) => {
     setEditing(deposit);
     setEditAmount(deposit.amount.toString());
     setEditAction(deposit.action || "");
-    if (deposit.createdAt?.toDate) {
-      const dateStr = deposit.createdAt.toDate().toISOString().split('T')[0];
+    const dDate = getDateObj(deposit.createdAt);
+    if (dDate) {
+      const dateStr = dDate.toISOString().split('T')[0];
       setEditDate(dateStr);
     } else {
       setEditDate("");
@@ -186,8 +237,9 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         amount: parsedAmount,
         action: editAction,
       };
-      if (editDate && editing.createdAt?.toDate) {
-        const currentRef = editing.createdAt.toDate();
+      const dDate = getDateObj(editing.createdAt);
+      if (editDate && dDate) {
+        const currentRef = dDate;
         const newDate = new Date(editDate);
         // keep the original time
         newDate.setHours(currentRef.getHours(), currentRef.getMinutes(), currentRef.getSeconds());
@@ -222,10 +274,9 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       val,
     );
   const formatTime = (d: any) => {
-    if (!d?.createdAt?.toDate) return "";
-    return d.createdAt
-      .toDate()
-      .toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const dDate = getDateObj(d?.createdAt);
+    if (!dDate) return "";
+    return dDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   };
   const currentUser = auth.currentUser;
 
@@ -236,7 +287,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     }
     const headers = ["Data", "Hora", "Tipo", "Valor", "Usuário", "Descrição"];
     const rows = filteredDeposits.map(d => {
-      const dateObj = d.createdAt?.toDate?.() || new Date();
+      const dateObj = getDateObj(d.createdAt) || new Date();
       const date = dateObj.toLocaleDateString('pt-BR');
       const time = dateObj.toLocaleTimeString('pt-BR');
       const type = d.type === 'expense' ? "Saída" : "Entrada";
@@ -250,7 +301,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `extrato_${MONTHS_PT[selectedMonth]}_${selectedYear}.csv`);
+    link.setAttribute("download", `extrato_${selectedMonth === -1 ? 'todos' : MONTHS_PT[selectedMonth]}_${selectedYear}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -287,12 +338,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           {" "}
           <span className="font-serif text-sm text-cookbook-text">
             {" "}
-            {MONTHS_PT[selectedMonth]}{" "}
+            {selectedMonth === -1 ? "Todos os Meses" : MONTHS_PT[selectedMonth]}{" "}
           </span>{" "}
-          <span className="font-sans text-[9px] text-cookbook-text/40 ml-2">
-            {" "}
-            {selectedYear}{" "}
-          </span>{" "}
+          {selectedMonth !== -1 && (
+            <span className="font-sans text-[9px] text-cookbook-text/40 ml-2">
+              {" "}
+              {selectedYear}{" "}
+            </span>
+          )}
         </div>{" "}
         <button
           onClick={() => goMonth(1)}
@@ -364,6 +417,30 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           </div>
           
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-cookbook-border to-transparent -z-0"></div>
+        </div>
+      )}
+
+      {/* Chart */}
+      {chartData.length > 0 && (
+        <div className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-3xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] h-48 w-full">
+           <ResponsiveContainer width="100%" height="100%">
+             <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+               <defs>
+                 <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                 </linearGradient>
+                 <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                 </linearGradient>
+               </defs>
+               <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontFamily: 'Inter' }} dy={10} minTickGap={15} />
+               <RechartsTooltip cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontSize: '12px', fontFamily: 'Inter' }} />
+               <Area type="monotone" dataKey="Entradas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorEntradas)" />
+               <Area type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorSaidas)" />
+             </AreaChart>
+           </ResponsiveContainer>
         </div>
       )}
 

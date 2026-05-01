@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@types/three": "^0.184.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -39,9 +40,12 @@
     "react-icons": "^5.6.0",
     "react-leaflet": "^5.0.0",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.8.1",
     "remotion": "^4.0.451",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "three": "^0.184.0",
+    "vaul": "^1.1.2",
     "vite": "^6.2.0"
   },
   "devDependencies": {

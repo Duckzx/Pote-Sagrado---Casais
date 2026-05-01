@@ -18,18 +18,29 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   /* Build cumulative data points sorted by date */ const dataPoints =
     useMemo(() => {
+      const getDateObj = (val: any) => {
+        if (!val) return null;
+        if (typeof val.toDate === "function") return val.toDate();
+        if (val instanceof Date) return val;
+        if (typeof val === "string" || typeof val === "number") return new Date(val);
+        return null;
+      };
+
       if (deposits.length === 0) return [];
       /* Sort deposits by date ascending */ const sorted = [...deposits]
-        .filter((d) => d.createdAt?.toDate)
+        .filter((d) => getDateObj(d.createdAt))
         .sort(
-          (a, b) =>
-            a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime(),
+          (a, b) => {
+            const aTime = getDateObj(a.createdAt)!.getTime();
+            const bTime = getDateObj(b.createdAt)!.getTime();
+            return aTime - bTime;
+          }
         );
       if (sorted.length === 0) return [];
       let cumulative = 0;
       const points: { date: Date; value: number; label: string }[] = [];
       /* Add starting zero point 1 day before first deposit */ const firstDate =
-        sorted[0].createdAt.toDate();
+        getDateObj(sorted[0].createdAt)!;
       const startDate = new Date(firstDate);
       startDate.setDate(startDate.getDate() - 1);
       points.push({
@@ -46,7 +57,7 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({
         } else {
           cumulative += d.amount || 0;
         }
-        const date = d.createdAt.toDate();
+        const date = getDateObj(d.createdAt)!;
         points.push({
           date,
           value: cumulative,
