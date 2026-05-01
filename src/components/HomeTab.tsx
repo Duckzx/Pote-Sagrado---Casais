@@ -30,16 +30,12 @@ import { AnimatedNumber } from "./AnimatedNumber";
 import Carousel from "./Carousel";
 import {
   formatDistanceToNow,
-  differenceInMonths,
-  differenceInWeeks,
-  differenceInDays,
-  parseISO,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AIAssistantModal } from "./AIAssistantModal";
 import CircularGallery from "./CircularGallery";
 import { UserBadges } from "./UserBadges";
-import { CountdownWidget } from "./CountdownWidget";
+import { SharedAlbumWidget } from "./SharedAlbumWidget";
 import { SavingsChart } from "./SavingsChart";
 import { CheapDateModal } from "./CheapDateModal";
 import { playCoinSound, vibrate } from "../lib/audio";
@@ -54,7 +50,7 @@ interface HomeTabProps {
   totalSaved: number;
   deposits: any[];
   achievements?: any[];
-  targetDate?: string;
+  sharedAlbumUrl?: string;
   addToast: (
     title: string,
     message: string,
@@ -135,7 +131,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   totalSaved,
   deposits,
   achievements = [],
-  targetDate,
+  sharedAlbumUrl,
   addToast,
 }) => {
   const [showAIModal, setShowAIModal] = useState(false);
@@ -253,27 +249,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const progress =
     goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   const flightsUrl = `https://www.google.com/travel/flights?q=Voos+de+${encodeURIComponent(origin || "Brasil")}+para+${encodeURIComponent(destination)}`;
-  let paceMessage = "";
-  if (targetDate && goalAmount > 0 && totalSaved < goalAmount) {
-    const remaining = goalAmount - totalSaved;
-    const date = parseISO(targetDate);
-    const now = new Date();
-    const months = differenceInMonths(date, now);
-    const weeks = differenceInWeeks(date, now);
-    const days = differenceInDays(date, now);
-    if (months > 1) {
-      const perMonth = remaining / months;
-      paceMessage = `Ritmo ideal: ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(perMonth)} por mês`;
-    } else if (weeks > 0) {
-      const perWeek = remaining / weeks;
-      paceMessage = `Ritmo ideal: ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(perWeek)} por semana`;
-    } else if (days > 0) {
-      const perDay = remaining / days;
-      paceMessage = `Ritmo ideal: ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(perDay)} por dia`;
-    } else {
-      paceMessage = "A viagem é hoje ou já passou!";
-    }
-  }
   const confirmDelete = async () => {
     if (!depositToDelete) return;
     try {
@@ -397,15 +372,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         goalAmount={goalAmount}
         onRewardClick={() => setShowDateModal(true)}
       />{" "}
-      {paceMessage && (
-        <div className="flex justify-center -mt-6 relative z-20">
-          {" "}
-          <div className="font-sans text-[9px] uppercase tracking-widest text-cookbook-primary font-bold bg-cookbook-primary/10 px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm">
-            {" "}
-            {paceMessage}{" "}
-          </div>{" "}
-        </div>
-      )}{" "}
       {/* Break Pot Button if reached goal */}{" "}
       {totalSaved >= goalAmount && goalAmount > 0 && (
         <div className="animate-pulse-slow">
@@ -428,8 +394,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {dailyQuote.text}{" "}
         </span>{" "}
       </div>{" "}
-      {/* Countdown Widget */}{" "}
-      {targetDate && <CountdownWidget targetDate={targetDate} />}{" "}
+      {/* Shared Album Widget */}{" "}
+      {sharedAlbumUrl && <div className="mt-6 mb-2"><SharedAlbumWidget url={sharedAlbumUrl} /></div>}{" "}
       {/* Wrapped Button */}{" "}
       <div className="flex justify-center mt-6 mb-2">
         {" "}

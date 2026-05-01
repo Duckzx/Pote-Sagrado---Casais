@@ -29,8 +29,8 @@ export interface TripConfig {
   lng: number;
   customChallenges: Challenge[];
   battleChallenges: Challenge[];
-  targetDate: string;
   monthlyPrize: string;
+  sharedAlbumUrl?: string;
   fcmTokens?: string[];
 }
 
@@ -42,8 +42,8 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   lng: 0,
   customChallenges: [],
   battleChallenges: [],
-  targetDate: '',
   monthlyPrize: '',
+  sharedAlbumUrl: '',
   fcmTokens: [],
 };
 

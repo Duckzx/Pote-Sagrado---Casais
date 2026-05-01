@@ -92,7 +92,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       try { return JSON.parse(saved); } catch { /* fallback */ }
     }
-    return { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], targetDate: '', monthlyPrize: '' };
+    return { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
   });
 
   const [deposits, setDeposits] = useState<Deposit[]>([]);

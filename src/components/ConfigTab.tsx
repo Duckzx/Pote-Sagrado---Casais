@@ -24,7 +24,7 @@ interface ConfigTabProps {
   currentGoalAmount: number;
   currentTheme: string;
   customChallenges: any[];
-  currentTargetDate: string;
+  currentSharedAlbumUrl?: string;
   currentPrize?: string;
   addToast: (
     title: string,
@@ -53,7 +53,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   currentGoalAmount,
   currentTheme,
   customChallenges,
-  currentTargetDate,
+  currentSharedAlbumUrl,
   currentPrize,
   addToast,
 }) => {
@@ -65,7 +65,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   });
   const [theme, setTheme] = useState(currentTheme || "cookbook");
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
-  const [targetDate, setTargetDate] = useState(currentTargetDate || "");
+  const [sharedAlbumUrl, setSharedAlbumUrl] = useState(currentSharedAlbumUrl || "");
   const [prize, setPrize] = useState(currentPrize || "");
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
@@ -90,7 +90,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     }
     setTheme(currentTheme || "cookbook");
     setChallenges(customChallenges || []);
-    setTargetDate(currentTargetDate || "");
+    setSharedAlbumUrl(currentSharedAlbumUrl || "");
     setPrize(currentPrize || "");
   }, [
     currentDestination,
@@ -98,7 +98,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     currentGoalAmount,
     currentTheme,
     customChallenges,
-    currentTargetDate,
+    currentSharedAlbumUrl,
     currentPrize,
   ]);
   /* Handle auto-save on blur */ const handleSaveLocal = () => {
@@ -107,7 +107,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       goalAmount.toString(),
       origin,
       challenges,
-      targetDate,
+      sharedAlbumUrl,
       prize,
       theme,
     );
@@ -246,7 +246,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     amountToSave: string,
     originToSave: string,
     challengesToSave: any[],
-    targetDateToSave: string,
+    sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
   ) => {
@@ -261,7 +261,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           origin: originToSave,
           goalAmount: parsedAmount,
           customChallenges: challengesToSave,
-          targetDate: targetDateToSave,
+          sharedAlbumUrl: sharedAlbumUrlToSave,
           monthlyPrize: prizeToSave,
           theme: themeToSave,
           updatedAt: serverTimestamp(),
@@ -310,7 +310,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       goalAmount.toString(),
       origin,
       challenges,
-      targetDate,
+      sharedAlbumUrl,
       prize,
       theme,
     );
@@ -453,13 +453,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               {" "}
               <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
                 {" "}
-                Data Prometida (Opcional){" "}
+                Álbum Compartilhado de Fotos (Opcional){" "}
               </label>{" "}
               <input
-                type="date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
+                type="url"
+                value={sharedAlbumUrl}
+                onChange={(e) => setSharedAlbumUrl(e.target.value)}
                 onBlur={handleSaveLocal}
+                placeholder="Cole o link do Google Photos, iCloud..."
                 className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
               />{" "}
             </div>{" "}

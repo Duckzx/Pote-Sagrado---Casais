@@ -353,7 +353,7 @@ function AppContent() {
                   totalSaved={totalSaved}
                   deposits={deposits}
                   achievements={achievements}
-                  targetDate={tripConfig.targetDate}
+                  sharedAlbumUrl={tripConfig.sharedAlbumUrl}
                   addToast={addToast}
                 />
               )}
@@ -382,7 +382,7 @@ function AppContent() {
                   currentGoalAmount={tripConfig.goalAmount}
                   currentTheme={theme}
                   customChallenges={tripConfig.customChallenges}
-                  currentTargetDate={tripConfig.targetDate}
+                  currentSharedAlbumUrl={tripConfig.sharedAlbumUrl}
                   currentPrize={tripConfig.monthlyPrize}
                   addToast={addToast}
                 />
