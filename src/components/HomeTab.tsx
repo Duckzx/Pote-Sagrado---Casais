@@ -33,7 +33,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AIAssistantModal } from "./AIAssistantModal";
-import CircularGallery from "./CircularGallery";
+import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 import { UserBadges } from "./UserBadges";
 import { SharedAlbumWidget } from "./SharedAlbumWidget";
 import { SavingsChart } from "./SavingsChart";
@@ -225,27 +225,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       setIsQuickSubmitting(false);
     }
   };
-  const galleryItems = useMemo(
-    () => [
-      {
-        image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || "travel")},landscape/all?random=1`,
-        text: "Paisagem",
-      },
-      {
-        image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || "travel")},architecture/all?random=2`,
-        text: "Arquitetura",
-      },
-      {
-        image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || "travel")},food/all?random=3`,
-        text: "Gastronomia",
-      },
-      {
-        image: `https://loremflickr.com/400/600/${encodeURIComponent(destination || "travel")},nature/all?random=4`,
-        text: "Natureza",
-      },
-    ],
-    [destination],
-  );
   const progress =
     goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   const flightsUrl = `https://www.google.com/travel/flights?q=Voos+de+${encodeURIComponent(origin || "Brasil")}+para+${encodeURIComponent(destination)}`;
@@ -532,23 +511,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       />{" "}
       {/* Savings Evolution Chart */}{" "}
       <SavingsChart deposits={deposits} goalAmount={goalAmount} />{" "}
-      {/* Inspirações (Circular Gallery) */}{" "}
+      {/* Álbum de Fotos do Casal */}{" "}
       <div className="space-y-4">
         {" "}
-        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 text-center font-medium">
-          {" "}
-          Moodboard{" "}
-        </h3>{" "}
-        <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cookbook-border bg-black/40 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          {" "}
-          <CircularGallery
-            items={galleryItems}
-            bend={3}
-            textColor="#ffffff"
-            borderRadius={0.05}
-            scrollEase={0.02}
-          />{" "}
-        </div>{" "}
+        <CoupleGalleryWidget addToast={addToast} />{" "}
       </div>{" "}
       {showAIModal && (
         <AIAssistantModal

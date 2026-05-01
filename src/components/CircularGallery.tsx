@@ -433,6 +433,9 @@ class App {
     }
   }
   update() {
+    // Auto-scroll logic
+    this.scroll.target -= 0.5 * this.scrollSpeed;
+    
     this.scroll.current = lerp(
       this.scroll.current,
       this.scroll.target,

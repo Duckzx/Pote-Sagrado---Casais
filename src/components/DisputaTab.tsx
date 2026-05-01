@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp } from "lucide-react";
+import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
 
