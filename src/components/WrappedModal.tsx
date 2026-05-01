@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { X, Trophy, Heart, Map, Sparkles, Coins, Flame, Play, ArrowLeft } from "lucide-react";
+import { X, Trophy, Heart, Map, Sparkles, Coins, Flame, Play, ArrowLeft, Plane } from "lucide-react";
 import { Player, PlayerRef } from "@remotion/player";
-import { ThreeDScene } from "./RemotionIntro";
 import { WrappedRemotionVideo, WrappedData } from "./WrappedVideo";
 
 interface WrappedModalProps {
@@ -217,23 +216,34 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
       case 4:
         return (
           <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade"
+            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade relative"
             key={`slide-4-${progressKey}`}
           >
-            <div className="relative w-full aspect-square max-w-[280px] mx-auto pointer-events-none -mt-8">
-              <Player
-                component={ThreeDScene}
-                inputProps={{ fillPercentage: progress / 100 }}
-                durationInFrames={180}
-                compositionWidth={400}
-                compositionHeight={400}
-                fps={30}
-                style={{ width: "100%", height: "100%" }}
-                autoPlay
-                loop={false}
-              />
+            <div className="relative w-full aspect-square max-w-[280px] mx-auto -mt-8 flex items-center justify-center">
+              {/* Background Glow */}
+              <div className="absolute inset-0 bg-cookbook-gold/10 rounded-full blur-3xl animate-pulse" />
+              
+              <svg width="240" height="240" viewBox="0 0 240 240" className="relative z-10 pointer-events-none">
+                 <path d="M 30 200 Q 120 40 210 40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" strokeDasharray="6 6" />
+                 <path d="M 30 200 Q 120 40 210 40" fill="none" stroke="#C5A059" strokeWidth="4" strokeDasharray="6 6" className="animate-[dash_3s_ease-out_forwards]" strokeDashoffset="300" />
+                 <style dangerouslySetInnerHTML={{__html: `
+                    @keyframes dash {
+                      to { stroke-dashoffset: 0; }
+                    }
+                    @keyframes fly {
+                      0% { transform: translate(30px, 200px) rotate(45deg); opacity: 0; }
+                      100% { transform: translate(210px, 40px) rotate(45deg); opacity: 1; }
+                    }
+                 `}} />
+              </svg>
+
+              <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ animation: "fly 3s ease-out forwards" }}>
+                 <div className="absolute top-0 left-0 -ml-6 -mt-6">
+                    <Plane size={48} className="text-cookbook-gold drop-shadow-lg" fill="#C5A059" />
+                 </div>
+              </div>
             </div>
-            <div className="px-6 -mt-8">
+            <div className="px-6 -mt-12 relative z-20">
               <h2 className="font-sans text-[12px] uppercase tracking-widest text-cookbook-gold font-bold mb-4">
                 A Caminho do Sonho
               </h2>
@@ -241,7 +251,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 {progress.toFixed(0)}%
               </p>
               <p className="font-sans text-xs text-white/80 max-w-[250px] mx-auto text-balance leading-relaxed">
-                O Pote Sagrado está ganhando vida. A meta está cada vez mais perto. Continuem assim!
+                A meta está cada vez mais perto. Continuem assim!
               </p>
             </div>
             <button
@@ -249,7 +259,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 e.stopPropagation();
                 onClose();
               }}
-              className="mt-4 bg-white/20 hover:bg-cookbook-border/30 backdrop-blur-md text-white font-sans text-[10px] uppercase tracking-widest py-3 px-8 rounded-full transition-all active:scale-95 border border-white/30 z-30 relative"
+              className="mt-6 bg-white/20 hover:bg-cookbook-border/30 backdrop-blur-md text-white font-sans text-[10px] uppercase tracking-widest py-3 px-8 rounded-full transition-all active:scale-95 border border-white/30 z-30 relative"
             >
               Voltaremos mais fortes
             </button>

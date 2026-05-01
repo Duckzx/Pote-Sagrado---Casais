@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, spring, interpolate, Img } from 'remotion';
-import { ThreeDScene } from './RemotionIntro';
+import { Plane, Star, ArrowUpRight } from 'lucide-react';
 
 export interface WrappedData {
   numDeposits: number;
@@ -110,19 +110,38 @@ const FinaleScene: React.FC<{ progress: number }> = ({ progress }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const opacity = interpolate(frame, [0, 15, 165, 180], [0, 1, 1, 0], { extrapolateRight: 'clamp' });
+  
+  const planeX = interpolate(frame, [20, 120], [-100, 300], { extrapolateRight: 'clamp', extrapolateLeft: 'clamp' });
+  const planeY = interpolate(frame, [20, 120], [100, -100], { extrapolateRight: 'clamp', extrapolateLeft: 'clamp' });
+  
+  const progressAnim = spring({ fps, frame: frame - 40, from: 0, to: progress, config: { damping: 100 } });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#1A1A1A', opacity }}>
-      <ThreeDScene fillPercentage={progress / 100} />
+    <AbsoluteFill style={{ backgroundColor: '#1A1A1A', opacity, alignItems: 'center', justifyContent: 'center' }}>
+      
+      {/* Background Graphic */}
+      <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: 150, background: 'radial-gradient(circle, rgba(197, 160, 89, 0.15) 0%, rgba(26,26,26,0) 70%)', transform: 'scale(1.5)' }} />
+
+      <div style={{ position: 'relative', width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+         <svg width="200" height="200" viewBox="0 0 200 200" style={{ position: 'absolute' }}>
+           <path d="M 20 180 Q 100 20 180 20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" strokeDasharray="8 8" />
+           <path d="M 20 180 Q 100 20 180 20" fill="none" stroke="#C5A059" strokeWidth="4" strokeDasharray="8 8" strokeDashoffset={interpolate(frame, [20, 120], [300, 0], { extrapolateRight: 'clamp' })} />
+         </svg>
+         
+         <div style={{ position: 'absolute', left: planeX + 100, top: planeY + 100, transform: 'translate(-50%, -50%) rotate(45deg)' }}>
+            <Plane size={48} color="#C5A059" fill="#C5A059" />
+         </div>
+      </div>
+
       <div style={{ 
-        position: 'absolute', bottom: '40px', width: '100%', textAlign: 'center',
+        position: 'absolute', bottom: '80px', width: '100%', textAlign: 'center',
         opacity: interpolate(frame, [50, 80], [0, 1], { extrapolateRight: 'clamp' })
       }}>
         <h2 style={{ fontFamily: 'sans-serif', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '4px', color: '#C5A059', fontWeight: 'bold', marginBottom: '8px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
           A Caminho do Sonho
         </h2>
         <p style={{ fontFamily: 'serif', fontSize: '64px', color: 'white', textShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-          {progress.toFixed(0)}%
+          {progressAnim.toFixed(0)}%
         </p>
       </div>
     </AbsoluteFill>

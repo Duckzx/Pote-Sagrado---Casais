@@ -1,278 +1,259 @@
 import React, { useState, useEffect } from "react";
-import { Player } from "@remotion/player";
 import {
   AbsoluteFill,
+  Sequence,
   useCurrentFrame,
-  interpolate,
-  spring,
   useVideoConfig,
+  spring,
+  interpolate,
 } from "remotion";
-import { ThreeCanvas } from "@remotion/three";
-import {
-  Environment,
-  MeshTransmissionMaterial,
-  Sparkles,
-} from "@react-three/drei";
-import * as THREE from "three";
-const RealWater: React.FC<{ targetFill?: number }> = ({ targetFill = 1 }) => {
+import { Player } from "@remotion/player";
+import { MousePointer2, Plus, Sparkles, Plane, ShieldCheck, Heart } from "lucide-react";
+
+// --- Scene 1: Welcome ---
+const WelcomeScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  /* Simulate pouring physics */ const progress = spring({
-    fps,
-    frame: frame - 15,
-    config: { damping: 15, mass: 1, stiffness: 35 },
-  });
-  /* Calculate height and scale correctly so water scales up from the bottom */ const fillHeight =
-    interpolate(progress, [0, 1], [0.01, 2.7 * targetFill], { extrapolateRight: "clamp" });
-  const positionY = -1.45 + fillHeight / 2;
-  /* Surface agitation */ const agitation = interpolate(
-    progress,
-    [0, 0.5, 1],
-    [0.0, 0.1, 0.0],
-    { extrapolateRight: "clamp" },
-  );
-  return (
-    <group position={[0, positionY, 0]}>
-      {" "}
-      <mesh>
-        {" "}
-        <cylinderGeometry args={[0.93, 0.93, fillHeight, 32, 8]} />{" "}
-        <MeshTransmissionMaterial
-          transmission={1}
-          thickness={0.8}
-          roughness={0.0}
-          ior={1.33}
-          color="#66c2ff"
-          attenuationDistance={1.2}
-          attenuationColor="#0055ff"
-          distortion={agitation}
-          distortionScale={0.5}
-          temporalDistortion={agitation > 0 ? 0.2 : 0}
-          samples={4}
-          resolution={256}
-        />{" "}
-      </mesh>{" "}
-      {/* Surface ripples/highlight */}{" "}
-      {fillHeight > 0.1 && (
-        <mesh
-          position={[0, fillHeight / 2 + 0.005, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          {" "}
-          <circleGeometry args={[0.93, 32]} />{" "}
-          <meshPhysicalMaterial
-            color="#ffffff"
-            transmission={0.5}
-            opacity={0.3}
-            transparent
-            roughness={0.0}
-            ior={1.33}
-          />{" "}
-        </mesh>
-      )}{" "}
-    </group>
-  );
-};
-const PouringStream = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const progress = spring({ fps, frame: frame - 12, config: { damping: 10 } });
-  /* Stream starts full, then narrows and vanishes as progress finishes */ const streamScale =
-    interpolate(progress, [0, 0.1, 0.8, 1], [0, 1, 1, 0], {
-      extrapolateRight: "clamp",
-    });
-  const streamY = interpolate(progress, [0, 0.1, 0.8, 1], [4, 1.5, 1.5, 0], {
+  const opacity = interpolate(frame, [0, 15, 75, 90], [0, 1, 1, 0], {
     extrapolateRight: "clamp",
   });
-  if (streamScale === 0) return null;
+  const scale = spring({ fps, frame, config: { damping: 12 } });
+
   return (
-    <group position={[0, streamY, 0]}>
-      {" "}
-      <mesh scale={[streamScale, 1, streamScale]}>
-        {" "}
-        <cylinderGeometry args={[0.1, 0.08, 6, 8]} />{" "}
-        <MeshTransmissionMaterial
-          transmission={1}
-          thickness={0.5}
-          roughness={0.1}
-          ior={1.33}
-          color="#aaccff"
-          distortion={0.3}
-          distortionScale={1}
-          temporalDistortion={0.5}
-        />{" "}
-      </mesh>{" "}
-      {/* Active splashes around the hit point */}{" "}
-      {streamScale > 0.5 && (
-        <Sparkles
-          count={30}
-          scale={0.5}
-          size={4}
-          speed={2}
-          opacity={0.6}
-          color="#ffffff"
-          position={[0, -2.5, 0]}
-        />
-      )}{" "}
-    </group>
-  );
-};
-const GlassPot = () => {
-  return (
-    <group>
-      {" "}
-      {/* Main Glass Cylinder (open top) */}{" "}
-      <mesh position={[0, 0, 0]}>
-        {" "}
-        <cylinderGeometry args={[1, 1, 3, 32, 1, true]} />{" "}
-        <meshPhysicalMaterial
-          color="#ffffff"
-          transmission={1}
-          transparent
-          opacity={1}
-          roughness={0.05}
-          ior={1.5}
-          thickness={0.2}
-          envMapIntensity={2}
-          side={THREE.DoubleSide}
-        />{" "}
-      </mesh>{" "}
-      {/* Glass Bottom */}{" "}
-      <mesh position={[0, -1.5, 0]}>
-        {" "}
-        <cylinderGeometry args={[1, 1, 0.1, 32]} />{" "}
-        <meshPhysicalMaterial
-          color="#ffffff"
-          transmission={1}
-          roughness={0.05}
-          ior={1.5}
-          envMapIntensity={2}
-        />{" "}
-      </mesh>{" "}
-      {/* Glass Lip */}{" "}
-      <mesh position={[0, 1.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        {" "}
-        <torusGeometry args={[1, 0.06, 16, 32]} />{" "}
-        <meshPhysicalMaterial
-          color="#ffffff"
-          transmission={1}
-          roughness={0.05}
-          envMapIntensity={2}
-        />{" "}
-      </mesh>{" "}
-    </group>
-  );
-};
-export const ThreeDScene: React.FC<{ fillPercentage?: number }> = ({ fillPercentage = 1 }) => {
-  const frame = useCurrentFrame();
-  /* Animate camera moving slightly closer and panning */ const cameraZ =
-    interpolate(frame, [0, 180], [8, 5.5]);
-  const cameraY = interpolate(frame, [0, 180], [4, 1.5]);
-  return (
-    <AbsoluteFill>
-      {" "}
-      <ThreeCanvas
-        linear
-        width={400}
-        height={500}
-        camera={{ position: [0, cameraY, cameraZ], fov: 40 }}
-        style={{ width: "100%", height: "100%" }}
-        gl={{ antialias: true, alpha: true }}
-      >
-        {" "}
-        <ambientLight intensity={0.6} />{" "}
-        <directionalLight position={[10, 10, 5]} intensity={1.5} />{" "}
-        <directionalLight
-          position={[-10, 5, -5]}
-          intensity={1}
-          color="#C5A059"
-        />{" "}
-        {/* Realism via environment lighting */} <Environment preset="city" />{" "}
-        <group position={[0, -0.5, 0]} rotation={[0.1, frame * 0.005, 0]}>
-          {" "}
-          <GlassPot /> <RealWater targetFill={fillPercentage} /> <PouringStream />{" "}
-          {/* Bubbles in the water */}{" "}
-          <Sparkles
-            count={20}
-            scale={1.8}
-            size={2}
-            speed={0.8}
-            opacity={0.4}
-            color="#ffffff"
-            position={[0, -0.2, 0]}
-          />{" "}
-        </group>{" "}
-      </ThreeCanvas>{" "}
+    <AbsoluteFill
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#1A1A1A",
+        opacity,
+      }}
+    >
+      <div style={{ transform: `scale(${scale})`, textAlign: "center" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', gap: '8px' }}>
+            <Plane size={48} color="#C5A059" />
+            <Heart size={48} color="#E07A5F" />
+        </div>
+        <h1 style={{ fontFamily: "serif", fontSize: "42px", color: "white", marginBottom: "8px" }}>
+          Bem-vindo ao<br />
+          <span style={{ color: "#C5A059" }}>Pote Sagrado</span>
+        </h1>
+        <p
+          style={{
+            fontFamily: "sans-serif",
+            fontSize: "14px",
+            textTransform: "uppercase",
+            letterSpacing: "4px",
+            color: "rgba(255,255,255,0.7)",
+          }}
+        >
+          Sua jornada começa aqui
+        </p>
+      </div>
     </AbsoluteFill>
   );
 };
-export const RemotionIntro: React.FC<{ onComplete: () => void }> = ({
-  onComplete,
-}) => {
-  const [isPlaying, setIsPlaying] = useState(true);
-  /* Auto-dismiss handler */ useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPlaying(false);
-      onComplete();
-    }, 6000);
-    /* 6s duration */ return () => clearTimeout(timer);
-  }, [onComplete]);
-  if (!isPlaying) return null;
+
+// --- Scene 2: Interactive Walkthrough (Figma Style) ---
+const WalkthroughScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  // App UI Animations
+  const progress = spring({ fps, frame: frame - 100, from: 5, to: 35, config: { damping: 14 } });
+  
+  // Modal Animations
+  const showModal = frame > 60 && frame < 130;
+  const modalScale = spring({ fps, frame: frame - 60, from: 0, to: 1, config: { damping: 14 } });
+  const hideModalProgress = frame > 120 ? spring({ fps, frame: frame - 120, from: 0, to: 1 }) : 0;
+  
+  // Cursor Animations
+  const cursorX = interpolate(frame, [20, 50, 80, 110, 140, 170], [300, 290, 200, 200, 200, 150], { extrapolateRight: "clamp", extrapolateLeft: "clamp" });
+  const cursorY = interpolate(frame, [20, 50, 80, 110, 140, 170], [700, 650, 650, 480, 480, 750], { extrapolateRight: "clamp", extrapolateLeft: "clamp" });
+  
+  const isClickingBtn = frame > 50 && frame < 60;
+  const isClickingConfirm = frame > 110 && frame < 120;
+  const cursorScale = isClickingBtn || isClickingConfirm ? 0.8 : 1;
+
+  // Add button pulse
+  const btnScale = isClickingBtn ? 0.9 : 1;
+  const confirmBtnScale = isClickingConfirm ? 0.95 : 1;
+
+  const opacity = interpolate(frame, [180, 195], [1, 0], { extrapolateRight: 'clamp' });
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#0f0f0f", alignItems: "center", justifyContent: "center", opacity }}>
+      {/* Mock Mobile Device */}
+      <div style={{ width: "340px", height: "700px", border: "8px solid #222", borderRadius: "40px", backgroundColor: "#1A1A1A", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        
+        {/* Mock Header */}
+        <div style={{ padding: "32px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ fontFamily: "serif", color: "white", fontSize: "20px", margin: 0 }}>Pote Sagrado</h2>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", margin: 0 }}>O sonho de Paris</p>
+          </div>
+          <div style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)' }} />
+        </div>
+
+        {/* Mock Progress */}
+        <div style={{ padding: "24px" }}>
+           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{ color: 'white', fontSize: 12 }}>Progresso</span>
+              <span style={{ color: '#C5A059', fontSize: 12, fontWeight: 'bold' }}>{Math.round(progress)}%</span>
+           </div>
+           <div style={{ height: "16px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progress}%`, backgroundColor: "#C5A059" }} />
+           </div>
+        </div>
+
+        {/* Mock Content area */}
+        <div style={{ flex: 1, padding: "0 24px" }}>
+            <div style={{ height: 80, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, marginBottom: 16 }} />
+            <div style={{ height: 80, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16 }} />
+        </div>
+
+        {/* Mock Bottom Nav & FAB */}
+        <div style={{ height: "80px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+            <div style={{ width: 24, height: 24, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4 }} />
+            <div style={{ width: 24, height: 24, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4 }} />
+            <div style={{ width: 24, height: 24, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 4 }} />
+        </div>
+
+        <div style={{ position: "absolute", bottom: "100px", right: "24px", width: "56px", height: "56px", borderRadius: "28px", backgroundColor: "#C5A059", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${btnScale})`, transition: 'transform 0.1s' }}>
+          <Plus size={24} color="white" />
+        </div>
+
+        {/* Modal Overlay */}
+        {showModal && (
+          <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 1 - hideModalProgress }}>
+             <div style={{ width: "85%", padding: "24px", backgroundColor: "#222", borderRadius: "24px", transform: `scale(${modalScale})` }}>
+                <h3 style={{ color: "white", fontFamily: "serif", fontSize: "18px", marginBottom: "16px", textAlign: 'center' }}>Adicionar Valor</h3>
+                <div style={{ height: "40px", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "12px", marginBottom: "16px", display: 'flex', alignItems: 'center', padding: '0 16px' }}>
+                    <span style={{ color: 'white' }}>R$ 150,00</span>
+                </div>
+                <div style={{ height: "40px", backgroundColor: "#C5A059", borderRadius: "12px", display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `scale(${confirmBtnScale})` }}>
+                    <span style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>Depositar</span>
+                </div>
+             </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* The Fake Cursor */}
+      <div style={{ position: "absolute", left: cursorX, top: cursorY, transform: `scale(${cursorScale})`, transition: "transform 0.1s", zIndex: 100 }}>
+        <MousePointer2 size={32} color="white" fill="rgba(255,255,255,0.2)" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} />
+      </div>
+
+    </AbsoluteFill>
+  );
+};
+
+// --- Scene 3: Final Call to Action ---
+const FinalScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp", extrapolateLeft: "clamp" });
+  const scale = spring({ fps, frame, config: { damping: 12 } });
+
+  return (
+    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", backgroundColor: "#1A1A1A", opacity }}>
+       <div style={{ transform: `scale(${scale})`, textAlign: "center" }}>
+          <div style={{ display: 'inline-flex', padding: '16px', backgroundColor: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', marginBottom: '24px' }}>
+             <ShieldCheck size={64} color="#C5A059" />
+          </div>
+          <h2 style={{ fontFamily: "serif", fontSize: "36px", color: "white", marginBottom: "16px" }}>
+            Tudo pronto!
+          </h2>
+          <p style={{ fontFamily: "sans-serif", fontSize: "16px", color: "rgba(255,255,255,0.7)", maxWidth: '80%', margin: '0 auto' }}>
+            Comece a registrar seus depósitos, cumpra missões e acompanhe a evolução do seu sonho.
+          </p>
+       </div>
+    </AbsoluteFill>
+  )
+}
+
+// Main Composition
+const AppWalkthroughVideo: React.FC = () => {
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#1A1A1A" }}>
+      <Sequence from={0} durationInFrames={90}>
+        <WelcomeScene />
+      </Sequence>
+      <Sequence from={90} durationInFrames={200}>
+        <WalkthroughScene />
+      </Sequence>
+      <Sequence from={290} durationInFrames={110}>
+        <FinalScene />
+      </Sequence>
+    </AbsoluteFill>
+  );
+};
+
+// Player wrapper that can be rendered in the app
+export const RemotionIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    // If user clicks skip or video finishes
+    if (isDone) {
+      setTimeout(() => onComplete(), 500); // slight delay for fade out
+    }
+  }, [isDone, onComplete]);
+
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-cookbook-bg/95 backdrop-blur-xl animate-fade-in"
-      onClick={() => {
-        setIsPlaying(false);
-        onComplete();
-      }}
+      className={`fixed inset-0 z-[200] bg-[#1A1A1A] flex items-center justify-center transition-opacity duration-500 ${
+        isDone ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
     >
-      {" "}
-      <div
-        className="w-full max-w-sm flex flex-col items-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {" "}
-        <div className="relative w-full aspect-[4/5]">
-          {" "}
-          <Player
-            component={ThreeDScene}
-            durationInFrames={180}
-            /* 6 seconds */ compositionWidth={400}
-            compositionHeight={500}
-            fps={30}
-            style={{ width: "100%", height: "100%" }}
-            autoPlay
-            loop={false}
-          />{" "}
-          {/* Fading text overlay */}{" "}
-          <div
-            className="absolute bottom-10 left-0 w-full text-center pointer-events-none animate-fade-in"
-            style={{
-              animationDelay: "3s",
-              animationDuration: "2s",
-              animationFillMode: "both",
-            }}
-          >
-            {" "}
-            <h2 className="font-serif text-3xl text-cookbook-text drop-shadow-md">
-              {" "}
-              O Pote Sagrado{" "}
-            </h2>{" "}
-          </div>{" "}
-        </div>{" "}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsPlaying(false);
-            onComplete();
-          }}
-          className="mt-4 bg-cookbook-gold text-white px-8 py-3 rounded-full font-sans text-xs uppercase tracking-widest font-bold shadow-lg animate-fade-in transition-transform active:scale-95"
-          style={{ animationDelay: "4s", animationFillMode: "both" }}
-        >
-          {" "}
-          Iniciar{" "}
-        </button>{" "}
-      </div>{" "}
+      <div className="absolute inset-0 max-w-md mx-auto w-full h-full flex flex-col">
+        <div className="flex-1 w-full relative">
+            <Player
+                component={AppWalkthroughVideo}
+                durationInFrames={400}
+                compositionWidth={400}
+                compositionHeight={800}
+                fps={30}
+                style={{ width: "100%", height: "100%" }}
+                autoPlay
+                className="pointer-events-none" 
+            />
+        </div>
+        
+        {/* Overlay controls */}
+        <div className="absolute bottom-10 left-0 w-full px-8 flex flex-col gap-4">
+           {/* Auto-progress listener */}
+           <div className="hidden">
+              <Player
+                component={() => {
+                   const frame = useCurrentFrame();
+                   if (frame >= 390 && !isDone) {
+                      setIsDone(true);
+                   }
+                   return null;
+                }}
+                durationInFrames={400}
+                compositionWidth={10}
+                compositionHeight={10}
+                fps={30}
+                autoPlay
+              />
+           </div>
+           
+           <button
+             onClick={() => setIsDone(true)}
+             className="w-full bg-cookbook-gold text-white font-sans text-xs uppercase tracking-widest py-4 rounded-full font-bold shadow-lg active:scale-95 transition-transform text-center z-10"
+           >
+             Começar a Usar
+           </button>
+           <button
+             onClick={() => setIsDone(true)}
+             className="w-full text-white/50 hover:text-white font-sans text-[10px] uppercase tracking-widest py-2 active:scale-95 transition-all text-center z-10"
+           >
+             Pular Intro
+           </button>
+        </div>
+      </div>
     </div>
   );
 };
