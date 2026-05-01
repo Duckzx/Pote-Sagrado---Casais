@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
+import { getDateObj } from "../lib/utils";
 
 interface DisputaTabProps {
   deposits: any[];
@@ -11,13 +12,6 @@ interface DisputaTabProps {
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
   const leaderBannerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const getDateObj = (val: any) => {
-    if (!val) return null;
-    if (typeof val.toDate === "function") return val.toDate();
-    if (val instanceof Date) return val;
-    if (typeof val === "string" || typeof val === "number") return new Date(val);
-    return null;
-  };
 
   const stats = useMemo(() => {
     const currentMonth = new Date().getMonth();

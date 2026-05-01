@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { playSuccessSound, vibrate } from '../lib/audio';
-import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
@@ -188,7 +188,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, (error) => handleFirestoreError(error, OperationType.GET, 'trip_config/main'));
 
     // Listen to deposits
-    const q = query(collection(db, 'deposits'), orderBy('createdAt', 'desc'));
+    // Limit to 200 most recent deposits to control Firestore read costs.
+    // Older deposits can be loaded on-demand in ExtratoTab.
+    const q = query(collection(db, 'deposits'), orderBy('createdAt', 'desc'), limit(200));
     const unsubDeposits = onSnapshot(q, (querySnapshot) => {
       const deps: Deposit[] = [];
       let total = 0;
@@ -299,7 +301,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCanInstall(false);
   }, []);
 
-  const value: AppContextValue = {
+  // Memoize the context value to prevent unnecessary re-renders.
+  // Only re-creates when an actual dependency changes.
+  const value: AppContextValue = useMemo(() => ({
     user,
     isAuthReady,
     isDataReady,
@@ -321,7 +325,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     canInstall,
     installPrompt,
     clearInstallPrompt,
-  };
+  }), [
+    user, isAuthReady, isDataReady, activeTab, tabDirection,
+    handleTabChange, tripConfig, deposits, achievements,
+    pinboardLinks, totalSaved, bingoStats, theme, toasts,
+    addToast, removeToast, showOnboarding, handleCompleteOnboarding,
+    canInstall, installPrompt, clearInstallPrompt,
+  ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

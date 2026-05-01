@@ -10,6 +10,9 @@ service cloud.firestore {
     // Fields:
     //   - theme: string (required) - App theme preference
     //   - displayName: string (optional) - User's display name
+    //   - fcmTokens: list (optional) - FCM push notification tokens
+    //   - notificationsEnabled: bool (optional) - Push notification flag
+    //   - lastTokenUpdate: string (optional) - ISO date of last token update
     //
     // Collection: trip_config
     // Document ID: main
@@ -23,6 +26,7 @@ service cloud.firestore {
     //   - targetDate: string (optional) - Target trip date
     //   - monthlyPrize: string (optional) - Monthly battle prize
     //   - origin: string (optional) - Departure city
+    //   - fcmTokens: list (optional) - Shared FCM tokens for the couple
     //   - updatedAt: timestamp (optional) - Last update
     //
     // Collection: deposits
@@ -52,7 +56,10 @@ service cloud.firestore {
     function isValidUser(data) {
       return data.keys().hasAll(['theme']) &&
              data.theme is string && data.theme.size() < 50 &&
-             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('fcmTokens' in data) || data.fcmTokens is list) &&
+             (!('notificationsEnabled' in data) || data.notificationsEnabled is bool) &&
+             (!('lastTokenUpdate' in data) || (data.lastTokenUpdate is string && data.lastTokenUpdate.size() < 30));
     }
 
     function isValidTripConfig(data) {
@@ -65,7 +72,8 @@ service cloud.firestore {
              (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
              (!('customChallenges' in data) || data.customChallenges is list) &&
              (!('battleChallenges' in data) || data.battleChallenges is list) &&
-             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150));
+             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150)) &&
+             (!('fcmTokens' in data) || data.fcmTokens is list);
     }
 
     function isValidDeposit(data) {
@@ -123,13 +131,12 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
       // Allow any authenticated user to delete deposits (necessary for "Quebrar o Pote" logic which deletes all couple deposits)
       allow delete: if isAuthenticated();
-      // Allow owner to update amount and action only (for corrections)
+      // Allow owner to update amount, action, and createdAt (for corrections)
       allow update: if isAuthenticated() 
                     && resource.data.who == request.auth.uid
                     && isValidDepositUpdate(request.resource.data)
-                    // Prevent changing ownership or timestamp
-                    && request.resource.data.who == resource.data.who
-                    && request.resource.data.createdAt == resource.data.createdAt;
+                    // Prevent changing ownership
+                    && request.resource.data.who == resource.data.who;
     }
 
     match /achievements/{achievementId} {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { getToken } from "firebase/messaging";
-import { db, auth, logout, messaging } from "../firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db, auth, logout } from "../firebase";
+import { requestNotificationPermission, getNotificationPermissionState } from "../lib/notifications";
 import {
   LogOut,
   Save,
@@ -192,47 +192,18 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     }
   };
   const handleEnablePush = async () => {
-    if (!messaging) {
-      addToast(
-        "Erro",
-        "Seu navegador não suporta notificações Push ou você bloqueou.",
-        "info",
-      );
-      return;
-    }
     setIsRequestingPush(true);
     try {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
-      if (permission === "granted") {
-        const token = await getToken(messaging, {
-          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
-        });
-        if (token) {
-          const tripRef = doc(db, "trip_config", "main");
-          const tDoc = await getDoc(tripRef);
-          let fcmTokens: string[] = [];
-          if (tDoc.exists()) {
-            fcmTokens = tDoc.data().fcmTokens || [];
-          }
-          if (!fcmTokens.includes(token)) {
-            fcmTokens.push(token);
-            await setDoc(tripRef, { fcmTokens }, { merge: true });
-          }
-          addToast(
-            "Sucesso",
-            "Notificações Push nativas ativadas neste dispositivo!",
-            "success",
-          );
-        } else {
-          addToast(
-            "Erro",
-            "Não foi possível obter o token do aparelho.",
-            "info",
-          );
-        }
+      const granted = await requestNotificationPermission();
+      setNotificationPermission(getNotificationPermissionState() as string);
+      if (granted) {
+        addToast(
+          "Sucesso",
+          "Notificações Push nativas ativadas neste dispositivo!",
+          "success",
+        );
       } else {
-        addToast("Aviso", "Você recusou a permissão de notificações.", "info");
+        addToast("Aviso", "Não foi possível ativar as notificações.", "info");
       }
     } catch (err) {
       console.error(err);

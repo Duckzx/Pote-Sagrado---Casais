@@ -22,6 +22,7 @@ import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
 import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { getDateObj } from "../lib/utils";
 interface ExtratoTabProps {
   deposits: any[];
   addToast: (
@@ -72,13 +73,6 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     });
     return Array.from(map.entries());
   }, [deposits]);
-  const getDateObj = (val: any) => {
-    if (!val) return null;
-    if (typeof val.toDate === "function") return val.toDate();
-    if (val instanceof Date) return val;
-    if (typeof val === "string" || typeof val === "number") return new Date(val);
-    return null;
-  };
 
   /* Filtered and sorted deposits */ const filteredDeposits = useMemo(() => {
     return deposits

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useMemo, useState } from "react";
+import { getDateObj } from "../lib/utils";
 interface SavingsChartProps {
   deposits: any[];
   goalAmount: number;
@@ -18,14 +19,6 @@ export const SavingsChart: React.FC<SavingsChartProps> = ({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   /* Build cumulative data points sorted by date */ const dataPoints =
     useMemo(() => {
-      const getDateObj = (val: any) => {
-        if (!val) return null;
-        if (typeof val.toDate === "function") return val.toDate();
-        if (val instanceof Date) return val;
-        if (typeof val === "string" || typeof val === "number") return new Date(val);
-        return null;
-      };
-
       if (deposits.length === 0) return [];
       /* Sort deposits by date ascending */ const sorted = [...deposits]
         .filter((d) => getDateObj(d.createdAt))

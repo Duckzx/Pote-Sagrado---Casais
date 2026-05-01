@@ -28,7 +28,7 @@ export interface FirestoreErrorInfo {
   }
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, shouldThrow = false) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -48,5 +48,9 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path
   }
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  // Only throw for explicit write operations that have try/catch callers.
+  // Listeners (onSnapshot) run outside try/catch, so throw would be uncaught.
+  if (shouldThrow) {
+    throw new Error(JSON.stringify(errInfo));
+  }
 }

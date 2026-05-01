@@ -28,6 +28,7 @@ import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import confetti from "canvas-confetti";
 import { playCoinSound, playSuccessSound, vibrate } from "../lib/audio";
+import { getDateObj } from "../lib/utils";
 /* Types */ interface Mission {
   id: string;
   title: string;
@@ -236,13 +237,6 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
     }, [allMissions, activeFilter]);
   /* ======================================== */ /* Streak calculation */ const streaks =
     useMemo(() => {
-      const getDateObj = (val: any) => {
-        if (!val) return null;
-        if (typeof val.toDate === "function") return val.toDate();
-        if (val instanceof Date) return val;
-        if (typeof val === "string" || typeof val === "number") return new Date(val);
-        return null;
-      };
 
       if (!currentUser) return {};
       const result: Record<string, { count: number; streak: number }> = {};
