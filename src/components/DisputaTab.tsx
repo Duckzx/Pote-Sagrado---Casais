@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Trophy, Share2, Zap, Target, Shield } from "lucide-react";
+import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp } from "lucide-react";
 import domtoimage from "dom-to-image-more";
+import { motion, AnimatePresence } from "motion/react";
 
 interface DisputaTabProps {
   deposits: any[];
@@ -222,84 +223,127 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
   return (
     <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
       {" "}
-      <div className="text-center">
-        {" "}
-        <h2 className="font-serif text-2xl text-cookbook-text mb-1">
-          {" "}
-          A Grande Batalha{" "}
-        </h2>{" "}
-        <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
-          {" "}
-          Quem economiza mais este mês?{" "}
-        </p>{" "}
-      </div>{" "}
-      {/* Battle Box */}
-      <div className="bg-cookbook-bg/80 backdrop-blur-2xl border border-cookbook-border rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
-        {/* Decorative corner circles */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-cookbook-primary/5 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-cookbook-text/5 rounded-full blur-2xl transform -translate-x-1/2 translate-y-1/2"></div>
+      <div className="text-center relative">
+        <motion.div
+           initial={{ opacity: 0, y: -20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <div className="inline-flex items-center justify-center gap-2 mb-2">
+            <Swords size={20} className="text-cookbook-primary/80" />
+            <h2 className="font-serif text-2xl text-cookbook-text">A Grande Batalha</h2>
+            <Swords size={20} className="text-cookbook-primary/80" />
+          </div>
+          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">Quem domina o mês?</p>
+        </motion.div>
+      </div>
+      
+      {/* Dynamic Battle Arena */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2, duration: 0.6, type: "spring", bounce: 0.4 }}
+        className="bg-cookbook-bg/80 backdrop-blur-3xl border border-cookbook-border rounded-[2rem] p-6 shadow-2xl relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 w-48 h-48 bg-cookbook-primary/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
         
-        {/* Versus Row */}
+        {/* Versus Elements */}
         <div className="flex items-center justify-between mb-8 relative z-10">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cookbook-primary/20 to-cookbook-primary/5 border-2 border-cookbook-primary p-1 mb-2 flex items-center justify-center">
-               <div className="w-full h-full rounded-full bg-cookbook-primary/10 flex items-center justify-center text-cookbook-primary font-serif text-xl border border-cookbook-primary/20">
+          <div className="flex flex-col items-center relative gap-2">
+            {users[0].total > users[1].total && (
+               <motion.div 
+                 initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }} 
+                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                 className="absolute -top-4 -right-2 text-cookbook-gold z-20"
+               >
+                  <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
+               </motion.div>
+            )}
+            <div className={`w-16 h-16 rounded-full border-2 p-1 flex items-center justify-center transition-all duration-700
+               ${users[0].total > users[1].total ? "bg-gradient-to-tr from-cookbook-primary/30 to-cookbook-primary/10 border-cookbook-primary scale-110 shadow-[0_0_15px_rgba(var(--color-cookbook-primary),0.3)]" : "bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-cookbook-border"}`}>
+               <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
+                  ${users[0].total > users[1].total ? "bg-cookbook-primary/20 text-cookbook-primary" : "bg-cookbook-text/5 text-cookbook-text/70"}`}>
                  {users[0].name.charAt(0)}
                </div>
             </div>
-            <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text">
+            <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
               {users[0].name}
+            </span>
+            <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
+              {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[0].total)}
             </span>
           </div>
           
-          <div className="flex flex-col items-center justify-center px-4">
-             <div className="font-serif italic text-cookbook-text/30 text-2xl -mt-4">vs</div>
+          <div className="flex flex-col items-center justify-center px-2">
+             <div className="w-8 h-8 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner relative z-20 -mt-10">
+                <span className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40">vs</span>
+             </div>
           </div>
           
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-2 border-cookbook-border p-1 mb-2 flex items-center justify-center">
-               <div className="w-full h-full rounded-full bg-cookbook-text/5 flex items-center justify-center text-cookbook-text/70 font-serif text-xl border border-cookbook-border/50">
+          <div className="flex flex-col items-center relative gap-2">
+             {users[1].total > users[0].total && (
+               <motion.div 
+                 initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }} 
+                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                 className="absolute -top-4 -left-2 text-cookbook-gold z-20"
+               >
+                  <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
+               </motion.div>
+            )}
+            <div className={`w-16 h-16 rounded-full border-2 p-1 flex items-center justify-center transition-all duration-700
+               ${users[1].total > users[0].total ? "bg-gradient-to-tr from-emerald-500/30 to-emerald-500/10 border-emerald-500 scale-110 shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-cookbook-border"}`}>
+               <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
+                  ${users[1].total > users[0].total ? "bg-emerald-500/20 text-emerald-500" : "bg-cookbook-text/5 text-cookbook-text/70"}`}>
                  {users[1].name.charAt(0)}
                </div>
             </div>
-            <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/70">
+            <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
               {users[1].name}
+            </span>
+            <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
+              {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[1].total)}
             </span>
           </div>
         </div>
         
-        {/* Scores */}
-        <div className="flex justify-between items-end mb-4 relative z-10">
-          <span className="font-serif text-[28px] leading-none text-cookbook-primary">
-            {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[0].total)}
-          </span>
-          <span className="font-serif text-[24px] leading-none text-cookbook-text/60">
-            {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[1].total)}
-          </span>
+        {/* Tug of War Component */}
+        <div className="relative mt-8 mb-4">
+          <div className="h-4 bg-cookbook-text/10 rounded-full overflow-hidden flex shadow-inner border border-cookbook-border/50 relative">
+            <motion.div
+              initial={{ width: "50%" }}
+              animate={{ width: `${p1Percentage}%` }}
+              transition={{ duration: 1, ease: "circOut" }}
+              className="h-full bg-gradient-to-r from-cookbook-primary/80 to-cookbook-primary"
+            />
+            <motion.div
+              initial={{ width: "50%" }}
+              animate={{ width: `${p2Percentage}%` }}
+              transition={{ duration: 1, ease: "circOut" }}
+              className="h-full bg-gradient-to-l from-emerald-500/80 to-emerald-500"
+            />
+            
+            {/* The Clashing Center Node */}
+            <motion.div
+              initial={{ left: "50%" }}
+              animate={{ left: `${p1Percentage}%` }}
+              transition={{ duration: 1, ease: "circOut" }}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-cookbook-bg border-2 border-cookbook-text/20 shadow-md rounded-full flex items-center justify-center z-10"
+            >
+              <div className="w-2 h-2 rounded-full bg-cookbook-text/20" />
+            </motion.div>
+          </div>
+          
+          <div className="flex justify-between mt-3 px-1">
+            <span className="font-sans text-[10px] text-cookbook-primary font-bold tracking-wider">
+              {p1Percentage.toFixed(1)}%
+            </span>
+            <span className="font-sans text-[10px] text-emerald-500 font-bold tracking-wider">
+              {p2Percentage.toFixed(1)}%
+            </span>
+          </div>
         </div>
-        
-        {/* Progress bar */}
-        <div className="relative h-4 bg-cookbook-bg rounded-full overflow-hidden flex shadow-inner border border-cookbook-border/50 z-10">
-          <div
-            className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-primary transition-all duration-1000 ease-out border-r-2 border-cookbook-bg"
-            style={{ width: `${p1Percentage}%` }}
-          />
-          <div
-            className="h-full bg-cookbook-text/20 transition-all duration-1000 ease-out"
-            style={{ width: `${p2Percentage}%` }}
-          />
-        </div>
-        
-        {/* Percentage labels */}
-        <div className="flex justify-between mt-3 z-10 relative">
-          <span className="font-sans text-[10px] text-cookbook-primary font-bold tracking-wider">
-            {p1Percentage.toFixed(0)}%
-          </span>
-          <span className="font-sans text-[10px] text-cookbook-text/50 font-bold tracking-wider">
-            {p2Percentage.toFixed(0)}%
-          </span>
-        </div>
-      </div>
+      </motion.div>
       {/* Prize */}{" "}
       <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
         {" "}
@@ -314,119 +358,128 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       </div>{" "}
       {/* Leader Banner */}
       {users[0].total > 0 && users[0].total > users[1].total && (
-        <div ref={leaderBannerRef} className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
-          {" "}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />{" "}
-          <div className="w-14 h-14 mx-auto bg-cookbook-bg rounded-full flex items-center justify-center mb-4 border border-cookbook-border shadow-sm transition-transform group-hover:scale-110">
-            {" "}
-            <Trophy size={22} className="text-cookbook-primary" />{" "}
-          </div>{" "}
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, type: "spring", bounce: 0.5 }}
+          ref={leaderBannerRef} 
+          className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group"
+        >
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />
+          <motion.div 
+            initial={{ rotate: -180, scale: 0 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="w-14 h-14 mx-auto bg-gradient-to-br from-cookbook-primary/10 to-transparent rounded-full flex items-center justify-center mb-4 border border-cookbook-primary/20 shadow-sm relative"
+          >
+            <div className="absolute inset-0 rounded-full animate-ping bg-cookbook-primary/20 opacity-20" style={{ animationDuration: '3s' }}></div>
+            <Crown size={22} className="text-cookbook-primary drop-shadow-sm" />
+          </motion.div>
           <h3 className="font-serif text-lg text-cookbook-text mb-2 font-medium">
-            {" "}
-            Liderança Atual{" "}
-          </h3>{" "}
-          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-medium mb-1">
-            {" "}
-            {users[0].name} está na frente!{" "}
-          </p>{" "}
-          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5">
-            {" "}
+            Liderança Atual
+          </h3>
+          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold mb-1">
+            {users[0].name} está dominando!
+          </p>
+          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5 px-4">
             {users[0].total - users[1].total > 100 
               ? `Que surra! Se o mês acabasse hoje, ${users[1].name} pagaria a recompensa fácil.`
               : `Disputa acirrada! Mas se o mês acabasse hoje, ${users[1].name} pagaria a recompensa.`}
-          </p>{" "}
+          </p>
           
           {/* Prevent buttons from being exported when we make the screenshot */}
           <div data-html2canvas-ignore className="flex gap-2">
             <button
               onClick={() => {
                 if (window.navigator?.vibrate) window.navigator.vibrate([200, 100, 200]);
-                addToast("Mentalizado!", `Você enviou ondas neurais para lembrar ${users[1].name} de quem manda.`, "success");
+                addToast("Mentalizado!", `Você enviou ondas neurais de provocação para o adversário!`, "success");
               }}
-              className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-medium shadow-sm active:scale-95 text-center"
+              className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 hover:border-cookbook-primary/30 transition-all font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-bold shadow-sm active:scale-95 text-center flex items-center justify-center gap-2 group"
             >
+              <Sparkles size={14} className="text-cookbook-primary/50 group-hover:text-cookbook-primary transition-colors" />
               Provocar
             </button>
             <button
               onClick={handleExportShare}
               disabled={isExporting}
-              className="px-4 bg-cookbook-primary/10 border border-cookbook-primary/20 text-cookbook-primary hover:bg-cookbook-primary/20 transition-colors rounded-full flex items-center justify-center shadow-sm active:scale-95 disabled:opacity-50"
-              title="Compartilhar"
+              className="px-4 bg-cookbook-primary/10 border border-cookbook-primary/20 text-cookbook-primary hover:bg-cookbook-primary/20 transition-all rounded-full flex items-center justify-center shadow-sm active:scale-95 disabled:opacity-50"
+              title="Compartilhar Vitória"
             >
               <Share2 size={16} />
             </button>
           </div>
           
           <div className="mt-5 pt-4 border-t border-cookbook-border/30">
-            {" "}
             <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
-              {" "}
-              Diferença:{" "}
-              {Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(users[0].total - users[1].total)}{" "}
-            </span>{" "}
-          </div>{" "}
-        </div>
+              Vantagem Atual:{" "}
+              <span className="text-cookbook-primary font-bold">
+                {Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(users[0].total - users[1].total)}
+              </span>
+            </span>
+          </div>
+        </motion.div>
       )}
-      {/* Weekly breakdown */}{" "}
-      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        {" "}
+      {/* Weekly breakdown */}
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+      >
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
-          {" "}
-          Desempenho Semanal{" "}
-        </h3>{" "}
+          Desempenho Semanal
+        </h3>
         <div className="space-y-4">
-          {" "}
           {weeklyData.map((week, i) => (
             <div key={i} className="space-y-2">
-              {" "}
               <div className="flex justify-between font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
-                {" "}
-                <span>{week.label}</span>{" "}
+                <span>{week.label}</span>
                 <span className="flex gap-4">
-                  {" "}
                   <span className="text-cookbook-primary">
-                    {" "}
-                    {Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(week.p1)}{" "}
-                  </span>{" "}
-                  <span>
-                    {" "}
-                    {Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(week.p2)}{" "}
-                  </span>{" "}
-                </span>{" "}
-              </div>{" "}
-              <div className="flex h-2.5 gap-0.5 rounded-full overflow-hidden shadow-inner bg-cookbook-bg/50 border border-cookbook-border/30">
-                {" "}
-                <div
-                  className="bg-cookbook-primary/70 transition-all duration-500"
-                  style={{ width: `${(week.p1 / maxWeeklyValue) * 50}%` }}
-                />{" "}
-                <div
-                  className="bg-cookbook-text/50 transition-all duration-500"
-                  style={{ width: `${(week.p2 / maxWeeklyValue) * 50}%` }}
-                />{" "}
-              </div>{" "}
+                    {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(week.p1)}
+                  </span>
+                  <span className="text-emerald-500">
+                    {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(week.p2)}
+                  </span>
+                </span>
+              </div>
+              <div className="flex h-2.5 gap-1 rounded-full overflow-hidden bg-cookbook-bg/50">
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${(week.p1 / maxWeeklyValue) * 50}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  viewport={{ once: true }}
+                  className="bg-cookbook-primary/80 border border-cookbook-primary/20 rounded-full"
+                />
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${(week.p2 / maxWeeklyValue) * 50}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  viewport={{ once: true }}
+                  className="bg-emerald-500/80 border border-emerald-500/20 rounded-full"
+                />
+              </div>
             </div>
-          ))}{" "}
-        </div>{" "}
-      </div>{" "}
+          ))}
+        </div>
+      </motion.div>
       {/* Advanced Stats */}
-      <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <motion.div 
+         initial={{ y: 20, opacity: 0 }}
+         animate={{ y: 0, opacity: 1 }}
+         transition={{ delay: 0.4 }}
+         className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+      >
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center mb-5">
           Estatísticas Avançadas
         </h3>
         
         <div className="space-y-4">
           {/* Golpe Crítico */}
-          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+          <motion.div whileHover={{ scale: 1.02 }} className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors cursor-default">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 group-hover:bg-amber-500/20 transition-colors">
                 <Zap size={14} />
@@ -437,22 +490,24 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               </div>
             </div>
             <div className="text-right">
-              {users[0].maxHit >= users[1].maxHit ? (
+              {users[0].maxHit >= users[1].maxHit && users[0].maxHit > 0 ? (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].maxHit)}</p>
                 </>
-              ) : (
+              ) : users[1].maxHit > 0 ? (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
-                  <p className="font-serif text-sm text-cookbook-text/70">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].maxHit)}</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-emerald-500">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].maxHit)}</p>
                 </>
+              ) : (
+                <span className="font-serif text-xs text-cookbook-text/40">--</span>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Ataque Rápido */}
-          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+          <motion.div whileHover={{ scale: 1.02 }} className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors cursor-default">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
                 <Target size={14} />
@@ -463,24 +518,26 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               </div>
             </div>
             <div className="text-right">
-              {users[0].count >= users[1].count ? (
+              {users[0].count >= users[1].count && users[0].count > 0 ? (
                  <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">{users[0].count}x</p>
                  </>
-              ) : (
+              ) : users[1].count > 0 ? (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
-                  <p className="font-serif text-sm text-cookbook-text/70">{users[1].count}x</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-emerald-500">{users[1].count}x</p>
                  </>
+              ) : (
+                 <span className="font-serif text-xs text-cookbook-text/40">--</span>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Escudo Forte */}
-          <div className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors">
+          <motion.div whileHover={{ scale: 1.02 }} className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors cursor-default">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-colors">
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 border border-purple-500/20 group-hover:bg-purple-500/20 transition-colors">
                 <Shield size={14} />
               </div>
               <div>
@@ -496,24 +553,33 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                  </>
               ) : (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">{users[1].name}</p>
-                  <p className="font-serif text-sm text-cookbook-text/70">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
+                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-serif text-sm text-emerald-500">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
                  </>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
       
       {/* Historical Battles */}
       {pastStats.length > 0 && (
-        <div className="space-y-4">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-4"
+        >
           <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/40 font-bold mb-6 flex items-center justify-center gap-2">
             <Trophy size={12} className="text-cookbook-text/30" /> Histórico de Batalhas <Trophy size={12} className="text-cookbook-text/30" />
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {pastStats.map((stat, idx) => (
-              <div key={idx} className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-[2rem] p-5 flex flex-col shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
+              <motion.div 
+                whileHover={{ y: -4 }}
+                key={idx} 
+                className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-[2rem] p-5 flex flex-col shadow-sm relative overflow-hidden group transition-transform"
+              >
                  {/* Shiny gradient overlay */}
                  {stat.winner && <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-cookbook-gold/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>}
                  
@@ -545,10 +611,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                       </div>
                    </div>
                  )}
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Motivational note */}{" "}
