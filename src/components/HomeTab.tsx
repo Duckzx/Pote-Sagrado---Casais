@@ -22,7 +22,6 @@ import {
   doc,
   setDoc,
   serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import confetti from "canvas-confetti";
@@ -336,13 +335,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           goalAmount: Number(goalAmount),
           createdAt: serverTimestamp(),
         });
-        // Use writeBatch for atomic delete of all deposits (max 500 per batch)
-        const BATCH_SIZE = 500;
-        for (let i = 0; i < deposits.length; i += BATCH_SIZE) {
-          const batch = writeBatch(db);
-          const chunk = deposits.slice(i, i + BATCH_SIZE);
-          chunk.forEach(deposit => batch.delete(doc(db, "deposits", deposit.id)));
-          await batch.commit();
+        for (const deposit of deposits) {
+          try {
+            await deleteDoc(doc(db, "deposits", deposit.id));
+          } catch (e) {
+            console.error("Could not delete deposit", deposit.id, e);
+          }
         }
         addToast(
           "Conquista!",

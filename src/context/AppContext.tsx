@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { playSuccessSound, vibrate } from '../lib/audio';
 import { collection, doc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
@@ -56,6 +56,11 @@ interface AppContextValue {
 
   // Pinboard Links
   pinboardLinks: any[];
+
+  // PWA Install
+  canInstall: boolean;
+  installPrompt: any | null;
+  clearInstallPrompt: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -103,7 +108,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
-  const isInitialDepositsLoad = useRef<boolean>(true);
 
   // ---- Toasts ----
   const addToast: AddToastFn = useCallback((title, message, type = 'info', duration = 5000) => {
@@ -184,9 +188,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, (error) => handleFirestoreError(error, OperationType.GET, 'trip_config/main'));
 
     // Listen to deposits
-    // Limit to 200 most recent deposits to control Firestore read costs.
-    // Older deposits can be loaded on-demand in ExtratoTab.
-    const q = query(collection(db, 'deposits'), orderBy('createdAt', 'desc'), limit(200));
+    const q = query(
+      collection(db, 'deposits'), 
+      orderBy('createdAt', 'desc'),
+      limit(200) // Limite adicionado para evitar picos de leitura e reduzir faturamento
+    );
     const unsubDeposits = onSnapshot(q, (querySnapshot) => {
       const deps: Deposit[] = [];
       let total = 0;
@@ -207,32 +213,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      // Show toast for background updates (not initial load, and not local writes)
-      if (!isInitialDepositsLoad.current && !querySnapshot.metadata.hasPendingWrites) {
-        querySnapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            const data = change.doc.data();
-            // Don't show toast if it's the current user's action, just in case
-            if (data.who !== user.uid) {
-              const amountStr = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.amount || 0);
-              const isExpense = data.type === 'expense';
-              
-              if (isExpense) {
-                addToast('Nova Retirada', `${data.whoName || 'O seu par'} retirou ${amountStr}`, 'info');
-              } else {
-                addToast('Novo Depósito', `${data.whoName || 'O seu par'} depositou ${amountStr}`, 'success');
-              }
-            }
-          }
-        });
-      }
-
       setDeposits(deps);
       setTotalSaved(total);
       localStorage.setItem('pote_totalSaved', total.toString());
       setBingoStats(stats);
-      
-      isInitialDepositsLoad.current = false;
       
       // Delay slightly for smooth transition
       setTimeout(() => setIsDataReady(true), 200);
@@ -296,9 +280,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Memoize the context value to prevent unnecessary re-renders.
-  // Only re-creates when an actual dependency changes.
-  const value: AppContextValue = useMemo(() => ({
+  // ---- PWA Install ----
+  const [installPrompt, setInstallPrompt] = useState<any | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setCanInstall(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const clearInstallPrompt = useCallback(() => {
+    setInstallPrompt(null);
+    setCanInstall(false);
+  }, []);
+
+  const value: AppContextValue = {
     user,
     isAuthReady,
     isDataReady,
@@ -317,12 +322,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeToast,
     showOnboarding,
     handleCompleteOnboarding,
-  }), [
-    user, isAuthReady, isDataReady, activeTab, tabDirection,
-    handleTabChange, tripConfig, deposits, achievements,
-    pinboardLinks, totalSaved, bingoStats, theme, toasts,
-    addToast, removeToast, showOnboarding, handleCompleteOnboarding,
-  ]);
+    canInstall,
+    installPrompt,
+    clearInstallPrompt,
+  };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

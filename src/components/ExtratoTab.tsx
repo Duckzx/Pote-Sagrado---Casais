@@ -15,19 +15,13 @@ import {
   Plus,
   Download,
   MoreVertical,
-  Heart,
-  ReceiptText
+  Heart
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
 import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-import { getDateObj } from "../lib/utils";
-import { useAppContext } from "../context/AppContext";
-import { ReceiptWidget } from "./ReceiptWidget";
-import { createPortal } from "react-dom";
-
 interface ExtratoTabProps {
   deposits: any[];
   addToast: (
@@ -69,10 +63,6 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   const [editAction, setEditAction] = useState("");
   const [editDate, setEditDate] = useState("");
   /* Delete state */ const [deleting, setDeleting] = useState<any | null>(null);
-  /* Share Receipt state */ const [sharingReceipt, setSharingReceipt] = useState<any | null>(null);
-
-  const { tripConfig } = useAppContext();
-
   /* Get unique users */ const users = useMemo(() => {
     const map = new Map<string, string>();
     deposits.forEach((d) => {
@@ -82,6 +72,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     });
     return Array.from(map.entries());
   }, [deposits]);
+  const getDateObj = (val: any) => {
+    if (!val) return null;
+    if (typeof val.toDate === "function") return val.toDate();
+    if (val instanceof Date) return val;
+    if (typeof val === "string" || typeof val === "number") return new Date(val);
+    return null;
+  };
 
   /* Filtered and sorted deposits */ const filteredDeposits = useMemo(() => {
     return deposits
@@ -100,8 +97,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         /* User filter */ if (filterUser !== "todos" && d.who !== filterUser)
           return false;
         /* Search Query Filter */ if (searchQuery.trim() !== "") {
-          const textMatches = (d.action || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (d.whoName || "").toLowerCase().includes(searchQuery.toLowerCase());
+          const textMatches = (d.action || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             (d.whoName || "").toLowerCase().includes(searchQuery.toLowerCase());
           if (!textMatches) return false;
         }
         return true;
@@ -140,10 +137,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       const date = getDateObj(d.createdAt);
       const key = date
         ? date.toLocaleDateString("pt-BR", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })
         : "Sem data";
       if (!groups[key]) groups[key] = [];
       groups[key].push(d);
@@ -153,22 +150,22 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   /* Navigate months */ const goMonth = (dir: number) => {
     let m = selectedMonth;
     let y = selectedYear;
-
+    
     if (m === -1) {
-      const now = new Date();
-      if (dir < 0) {
-        m = now.getMonth();
-        y = now.getFullYear();
-      } else {
-        m = 0;
-        y = now.getFullYear();
-      }
+       const now = new Date();
+       if (dir < 0) {
+         m = now.getMonth();
+         y = now.getFullYear();
+       } else {
+         m = 0;
+         y = now.getFullYear();
+       }
     } else {
-      m += dir;
-      if (m < -1) { m = 11; y--; }
-      else if (m > 11) { m = -1; y++; }
+       m += dir;
+       if (m < -1) { m = 11; y--; }
+       else if (m > 11) { m = -1; y++; }
     }
-
+    
     setSelectedMonth(m);
     setSelectedYear(y);
   };
@@ -181,10 +178,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
 
     const biggestDeposit = dp.length > 0 ? dp.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
     const biggestExpense = ex.length > 0 ? ex.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
-
+    
     return { biggestDeposit, biggestExpense };
   }, [filteredDeposits]);
-
+  
   /* Chart Data */
   const chartData = useMemo(() => {
     if (selectedMonth === -1) {
@@ -196,12 +193,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         const y = date.getFullYear();
         const key = `${y}-${m}`;
         if (!monthlyStats[key]) {
-          monthlyStats[key] = { label: `${MONTHS_PT[m].slice(0, 3)}/${y.toString().slice(-2)}`, index: y * 12 + m, Entradas: 0, Saídas: 0 };
+           monthlyStats[key] = { label: `${MONTHS_PT[m].slice(0, 3)}/${y.toString().slice(-2)}`, index: y * 12 + m, Entradas: 0, Saídas: 0 };
         }
         if (d.type === 'expense') monthlyStats[key].Saídas += d.amount;
         else monthlyStats[key].Entradas += d.amount;
       });
-      return Object.values(monthlyStats).sort((a, b) => a.index - b.index);
+      return Object.values(monthlyStats).sort((a,b) => a.index - b.index);
     } else {
       const dailyStats: Record<string, { label: string; index: number; Entradas: number; Saídas: number }> = {};
       filteredDeposits.forEach(d => {
@@ -210,15 +207,15 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         const dy = date.getDate();
         const key = dy.toString();
         if (!dailyStats[key]) {
-          dailyStats[key] = { label: `${dy}`, index: dy, Entradas: 0, Saídas: 0 };
+           dailyStats[key] = { label: `${dy}`, index: dy, Entradas: 0, Saídas: 0 };
         }
         if (d.type === 'expense') dailyStats[key].Saídas += d.amount;
         else dailyStats[key].Entradas += d.amount;
       });
-      return Object.values(dailyStats).sort((a, b) => a.index - b.index);
+      return Object.values(dailyStats).sort((a,b) => a.index - b.index);
     }
   }, [selectedMonth, deposits, filteredDeposits]);
-
+  
   /* Edit handler */ const handleEdit = (deposit: any) => {
     setEditing(deposit);
     setEditAmount(deposit.amount.toString());
@@ -364,29 +361,29 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
           <ArrowUpCircle size={18} className="text-emerald-500 mx-auto mb-2 opacity-80" />
           <div className="font-serif text-sm text-emerald-700 font-medium">
-            {formatCurrency(totals.depositos)}
+             {formatCurrency(totals.depositos)}
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
-            Entradas
+             Entradas
           </div>
         </div>
         <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
           <ArrowDownCircle size={18} className="text-red-500 mx-auto mb-2 opacity-80" />
           <div className="font-serif text-sm text-red-700 font-medium">
-            {formatCurrency(totals.gastos)}
+             {formatCurrency(totals.gastos)}
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
-            Saídas
+             Saídas
           </div>
         </div>
         <div className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl p-4 text-center shadow-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-cookbook-primary/5 to-transparent"></div>
           <div className={`font-serif text-base mb-1 ${totals.saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}>
-            {formatCurrency(totals.saldo)}
+             {formatCurrency(totals.saldo)}
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-2">
-            Saldo Atual
+             Saldo Atual
           </div>
         </div>
       </div>
@@ -402,11 +399,11 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {formatCurrency(userContributions[0].amount)}
             </span>
           </div>
-
+          
           <div className="shrink-0 px-4 text-center z-10">
             <div className="bg-red-500/10 text-red-500 rounded-full w-9 h-9 flex items-center justify-center relative mx-auto group">
-              <span className="font-sans text-[10px] font-bold italic absolute group-hover:opacity-0 transition-opacity">VS</span>
-              <Heart size={16} className="opacity-0 group-hover:opacity-100 transition-opacity absolute" fill="currentColor" />
+               <span className="font-sans text-[10px] font-bold italic absolute group-hover:opacity-0 transition-opacity">VS</span>
+               <Heart size={16} className="opacity-0 group-hover:opacity-100 transition-opacity absolute" fill="currentColor" />
             </div>
           </div>
 
@@ -418,7 +415,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {formatCurrency(userContributions[1].amount)}
             </span>
           </div>
-
+          
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-cookbook-border to-transparent -z-0"></div>
         </div>
       )}
@@ -426,24 +423,24 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       {/* Chart */}
       {chartData.length > 0 && (
         <div className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-3xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] h-48 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontFamily: 'Inter' }} dy={10} minTickGap={15} />
-              <RechartsTooltip cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontSize: '12px', fontFamily: 'Inter' }} />
-              <Area type="monotone" dataKey="Entradas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorEntradas)" />
-              <Area type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorSaidas)" />
-            </AreaChart>
-          </ResponsiveContainer>
+           <ResponsiveContainer width="100%" height="100%">
+             <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+               <defs>
+                 <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                 </linearGradient>
+                 <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                 </linearGradient>
+               </defs>
+               <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontFamily: 'Inter' }} dy={10} minTickGap={15} />
+               <RechartsTooltip cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontSize: '12px', fontFamily: 'Inter' }} />
+               <Area type="monotone" dataKey="Entradas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorEntradas)" />
+               <Area type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorSaidas)" />
+             </AreaChart>
+           </ResponsiveContainer>
         </div>
       )}
 
@@ -463,26 +460,26 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               className="w-full bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl pl-10 pr-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:ring-2 focus:ring-cookbook-primary/20 focus:border-cookbook-primary transition-all placeholder:text-cookbook-text/30 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-cookbook-text/30 hover:text-cookbook-text">
-                <X size={14} />
-              </button>
+               <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-cookbook-text/30 hover:text-cookbook-text">
+                 <X size={14} />
+               </button>
             )}
           </div>
-
-          <button
+          
+          <button 
             onClick={() => setSortAsc(!sortAsc)}
             title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
             className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
           >
-            <ArrowUpCircle size={18} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
+             <ArrowUpCircle size={18} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
           </button>
-
-          <button
+          
+          <button 
             onClick={handleExportCSV}
             title="Exportar CSV"
             className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-primary hover:bg-cookbook-primary/10 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
           >
-            <Download size={18} />
+             <Download size={18} />
           </button>
         </div>
 
@@ -521,7 +518,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cookbook-text/40">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
               </div>
             </div>
           )}
@@ -533,30 +530,30 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         <div className="flex gap-2">
           {insights.biggestDeposit && (
             <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-              <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
-                <ArrowUpCircle size={10} /> Maior Entrada
-              </div>
-              <div className="font-serif text-sm text-cookbook-text font-medium">
-                {formatCurrency(insights.biggestDeposit.amount)}
-              </div>
-              <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
-                {insights.biggestDeposit.whoName}
-              </div>
+               <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
+               <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
+                 <ArrowUpCircle size={10} /> Maior Entrada
+               </div>
+               <div className="font-serif text-sm text-cookbook-text font-medium">
+                 {formatCurrency(insights.biggestDeposit.amount)}
+               </div>
+               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
+                 {insights.biggestDeposit.whoName}
+               </div>
             </div>
           )}
           {insights.biggestExpense && (
             <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-              <div className="font-sans text-[8px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
-                <ArrowDownCircle size={10} /> Maior Saída
-              </div>
-              <div className="font-serif text-sm text-cookbook-text font-medium">
-                {formatCurrency(insights.biggestExpense.amount)}
-              </div>
-              <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
-                {insights.biggestExpense.action || "Sem descrição"}
-              </div>
+               <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
+               <div className="font-sans text-[8px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
+                 <ArrowDownCircle size={10} /> Maior Saída
+               </div>
+               <div className="font-serif text-sm text-cookbook-text font-medium">
+                 {formatCurrency(insights.biggestExpense.amount)}
+               </div>
+               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
+                 {insights.biggestExpense.action || "Sem descrição"}
+               </div>
             </div>
           )}
         </div>
@@ -577,12 +574,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         ) : (
           Object.entries(groupedByDate).map(([dateLabel, items]) => {
             const dailyBalance = items.reduce((acc: number, d: any) => d.type === "expense" ? acc - d.amount : acc + d.amount, 0);
-
+            
             return (
               <div key={dateLabel} className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative">
                 {/* Receipt top notch decoration */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-2 bg-cookbook-bg rounded-full border border-cookbook-border/30 z-10" />
-
+                
                 {/* Date header */}
                 <div className="bg-cookbook-bg border-b border-dashed border-cookbook-border py-4 px-5 rounded-t-3xl flex items-center justify-between">
                   <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold flex items-center gap-2">
@@ -598,13 +595,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                     </span>
                   </div>
                 </div>
-
+                
                 {/* Items */}
                 <div className="space-y-0.5 bg-cookbook-bg rounded-b-3xl overflow-hidden">
                   {items.map((deposit: any, idx: number) => {
                     const isExpense = deposit.type === "expense";
                     const isOwner = currentUser && deposit.who === currentUser.uid;
-
+                    
                     // Pick dynamic icon based on action text
                     const act = (deposit.action || "").toLowerCase();
                     let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
@@ -624,7 +621,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
                               <Icon size={18} />
                             </div>
-
+                            
                             <div className="flex-1 min-w-0">
                               <div className="font-serif text-sm text-cookbook-text truncate font-medium">
                                 {deposit.action || (isExpense ? "Saída" : "Entrada")}
@@ -647,41 +644,31 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                             </span>
                           </div>
                         </div>
-
-                        <div className="flex border-t border-cookbook-border/10">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setSharingReceipt(deposit); }}
-                            className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors"
-                          >
-                            <ReceiptText size={12} /> Recibo
-                          </button>
-
-                          {isOwner && (
-                            <>
-                              <div className="w-px bg-cookbook-border/10" />
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
-                                className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors"
-                              >
-                                <Pencil size={12} /> Editar
-                              </button>
-                              <div className="w-px bg-cookbook-border/10" />
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
-                                className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-red-500 hover:bg-red-500/5 transition-colors"
-                              >
-                                <Trash2 size={12} /> Excluir
-                              </button>
-                            </>
-                          )}
-                        </div>
+                        
+                        {isOwner && (
+                          <div className="flex border-t border-cookbook-border/10">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
+                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors"
+                            >
+                              <Pencil size={12} /> Editar
+                            </button>
+                            <div className="w-px bg-cookbook-border/10" />
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
+                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-red-500 hover:bg-red-500/5 transition-colors"
+                            >
+                              <Trash2 size={12} /> Excluir
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
-                  })}
-                </div>
+              })}
               </div>
-            );
-          })
+            </div>
+          );
+        })
         )}
       </div>{" "}
       {/* Total count */}{" "}

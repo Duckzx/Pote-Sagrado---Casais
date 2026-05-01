@@ -5,7 +5,6 @@ import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { OnboardingModal } from "./components/OnboardingModal";
-import { OfflineBanner } from "./components/OfflineBanner";
 import { AppProvider, useAppContext } from "./context/AppContext";
 
 // ========================================
@@ -411,7 +410,6 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AppProvider>
-        <OfflineBanner />
         <AppContent />
       </AppProvider>
     </ErrorBoundary>
