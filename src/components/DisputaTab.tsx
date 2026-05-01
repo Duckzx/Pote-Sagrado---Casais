@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp } from "lucide-react";
+import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
 import { getDateObj } from "../lib/utils";
@@ -7,7 +7,7 @@ import { getDateObj } from "../lib/utils";
 interface DisputaTabProps {
   deposits: any[];
   prize?: string;
-  addToast: (title: string, msg: string, type?: "info"|"success"|"milestone") => void;
+  addToast: (title: string, msg: string, type?: "info" | "success" | "milestone") => void;
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
   const leaderBannerRef = useRef<HTMLDivElement>(null);
@@ -23,19 +23,19 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         date.getMonth() === currentMonth && date.getFullYear() === currentYear
       );
     });
-    
+
     const userTotals: Record<string, { name: string; total: number; count: number; maxHit: number; expenses: number }> = {};
-    
+
     monthlyDeposits.forEach((d) => {
       if (!userTotals[d.who]) {
         userTotals[d.who] = { name: d.whoName, total: 0, count: 0, maxHit: 0, expenses: 0 };
       }
-      
+
       if (d.type === "expense") {
         userTotals[d.who].expenses += d.amount;
         return;
       }
-      
+
       userTotals[d.who].total += d.amount;
       userTotals[d.who].count += 1;
       if (d.amount > userTotals[d.who].maxHit) {
@@ -118,7 +118,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
     ...weeklyData.map((w) => Math.max(w.p1, w.p2)),
     1,
   );
-  
+
   const MONTHS_PT = [
     "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
     "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
@@ -128,43 +128,43 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     const pastMonths: Record<string, { p1: { name: string, total: number }, p2: { name: string, total: number } }> = {};
-    
+
     deposits.forEach((d) => {
       if (d.type === "expense") return;
       const date = getDateObj(d.createdAt);
       if (!date) return;
       const m = date.getMonth();
       const y = date.getFullYear();
-      
+
       // Skip current month
       if (m === currentMonth && y === currentYear) return;
-      
+
       const key = `${MONTHS_PT[m]} ${y}`;
       if (!pastMonths[key]) {
         pastMonths[key] = { p1: { name: "", total: 0 }, p2: { name: "", total: 0 } };
       }
-      
+
       // We will map users based on who they are to keep consistent mapping 
       // For simplicity, we just add totals to whoever is the first seen or second seen
       if (!pastMonths[key].p1.name) {
-         pastMonths[key].p1.name = d.whoName;
-         pastMonths[key].p1.total += d.amount;
+        pastMonths[key].p1.name = d.whoName;
+        pastMonths[key].p1.total += d.amount;
       } else if (pastMonths[key].p1.name === d.whoName) {
-         pastMonths[key].p1.total += d.amount;
+        pastMonths[key].p1.total += d.amount;
       } else if (!pastMonths[key].p2.name) {
-         pastMonths[key].p2.name = d.whoName;
-         pastMonths[key].p2.total += d.amount;
+        pastMonths[key].p2.name = d.whoName;
+        pastMonths[key].p2.total += d.amount;
       } else if (pastMonths[key].p2.name === d.whoName) {
-         pastMonths[key].p2.total += d.amount;
+        pastMonths[key].p2.total += d.amount;
       }
     });
 
     return Object.entries(pastMonths).map(([label, data]) => {
-       const u1 = data.p1;
-       const u2 = data.p2 || { name: "Jogador 2", total: 0 };
-       const winner = u1.total > u2.total ? u1 : (u2.total > u1.total ? u2 : null);
-       return { label, u1, u2, winner };
-    }).sort((a,b) => b.label.localeCompare(a.label)); // simple string sort for now
+      const u1 = data.p1;
+      const u2 = data.p2 || { name: "Jogador 2", total: 0 };
+      const winner = u1.total > u2.total ? u1 : (u2.total > u1.total ? u2 : null);
+      return { label, u1, u2, winner };
+    }).sort((a, b) => b.label.localeCompare(a.label)); // simple string sort for now
   }, [deposits]);
 
   const handleExportShare = async () => {
@@ -178,7 +178,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       const filter = (node: HTMLElement) => {
         return !node.hasAttribute || !node.hasAttribute('data-html2canvas-ignore');
       };
-      
+
       const blob = await domtoimage.toBlob(leaderBannerRef.current, {
         bgcolor: 'transparent',
         scale: 2,
@@ -207,7 +207,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         a.click();
         URL.revokeObjectURL(url);
       }
-    } catch(err) {
+    } catch (err) {
       console.error(err);
     } finally {
       setIsExporting(false);
@@ -219,9 +219,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       {" "}
       <div className="text-center relative">
         <motion.div
-           initial={{ opacity: 0, y: -20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.6, ease: "easeOut" }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <div className="inline-flex items-center justify-center gap-2 mb-2">
             <Swords size={20} className="text-cookbook-primary/80" />
@@ -231,9 +231,9 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">Quem domina o mês?</p>
         </motion.div>
       </div>
-      
+
       {/* Dynamic Battle Arena */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2, duration: 0.6, type: "spring", bounce: 0.4 }}
@@ -241,25 +241,25 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-cookbook-primary/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
-        
+
         {/* Versus Elements */}
         <div className="flex items-center justify-between mb-8 relative z-10">
           <div className="flex flex-col items-center relative gap-2">
             {users[0].total > users[1].total && (
-               <motion.div 
-                 initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }} 
-                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                 className="absolute -top-4 -right-2 text-cookbook-gold z-20"
-               >
-                  <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
-               </motion.div>
+              <motion.div
+                initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="absolute -top-4 -right-2 text-cookbook-gold z-20"
+              >
+                <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
+              </motion.div>
             )}
             <div className={`w-16 h-16 rounded-full border-2 p-1 flex items-center justify-center transition-all duration-700
                ${users[0].total > users[1].total ? "bg-gradient-to-tr from-cookbook-primary/30 to-cookbook-primary/10 border-cookbook-primary scale-110 shadow-[0_0_15px_rgba(var(--color-cookbook-primary),0.3)]" : "bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-cookbook-border"}`}>
-               <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
+              <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
                   ${users[0].total > users[1].total ? "bg-cookbook-primary/20 text-cookbook-primary" : "bg-cookbook-text/5 text-cookbook-text/70"}`}>
-                 {users[0].name.charAt(0)}
-               </div>
+                {users[0].name.charAt(0)}
+              </div>
             </div>
             <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
               {users[0].name}
@@ -268,29 +268,29 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[0].total)}
             </span>
           </div>
-          
+
           <div className="flex flex-col items-center justify-center px-2">
-             <div className="w-8 h-8 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner relative z-20 -mt-10">
-                <span className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40">vs</span>
-             </div>
+            <div className="w-8 h-8 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner relative z-20 -mt-10">
+              <span className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40">vs</span>
+            </div>
           </div>
-          
+
           <div className="flex flex-col items-center relative gap-2">
-             {users[1].total > users[0].total && (
-               <motion.div 
-                 initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }} 
-                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                 className="absolute -top-4 -left-2 text-cookbook-gold z-20"
-               >
-                  <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
-               </motion.div>
+            {users[1].total > users[0].total && (
+              <motion.div
+                initial={{ scale: 0 }} animate={{ scale: 1, rotate: [-10, 10, -10] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="absolute -top-4 -left-2 text-cookbook-gold z-20"
+              >
+                <Trophy size={18} className="drop-shadow-md fill-cookbook-gold" />
+              </motion.div>
             )}
             <div className={`w-16 h-16 rounded-full border-2 p-1 flex items-center justify-center transition-all duration-700
                ${users[1].total > users[0].total ? "bg-gradient-to-tr from-emerald-500/30 to-emerald-500/10 border-emerald-500 scale-110 shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-gradient-to-tr from-cookbook-text/10 to-cookbook-text/5 border-cookbook-border"}`}>
-               <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
+              <div className={`w-full h-full rounded-full flex items-center justify-center font-serif text-2xl transition-colors
                   ${users[1].total > users[0].total ? "bg-emerald-500/20 text-emerald-500" : "bg-cookbook-text/5 text-cookbook-text/70"}`}>
-                 {users[1].name.charAt(0)}
-               </div>
+                {users[1].name.charAt(0)}
+              </div>
             </div>
             <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
               {users[1].name}
@@ -300,7 +300,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             </span>
           </div>
         </div>
-        
+
         {/* Tug of War Component */}
         <div className="relative mt-8 mb-4">
           <div className="h-4 bg-cookbook-text/10 rounded-full overflow-hidden flex shadow-inner border border-cookbook-border/50 relative">
@@ -316,7 +316,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               transition={{ duration: 1, ease: "circOut" }}
               className="h-full bg-gradient-to-l from-emerald-500/80 to-emerald-500"
             />
-            
+
             {/* The Clashing Center Node */}
             <motion.div
               initial={{ left: "50%" }}
@@ -327,7 +327,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               <div className="w-2 h-2 rounded-full bg-cookbook-text/20" />
             </motion.div>
           </div>
-          
+
           <div className="flex justify-between mt-3 px-1">
             <span className="font-sans text-[10px] text-cookbook-primary font-bold tracking-wider">
               {p1Percentage.toFixed(1)}%
@@ -352,15 +352,15 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       </div>{" "}
       {/* Leader Banner */}
       {users[0].total > 0 && users[0].total > users[1].total && (
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, type: "spring", bounce: 0.5 }}
-          ref={leaderBannerRef} 
+          ref={leaderBannerRef}
           className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-30" />
-          <motion.div 
+          <motion.div
             initial={{ rotate: -180, scale: 0 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
@@ -376,11 +376,11 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             {users[0].name} está dominando!
           </p>
           <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5 px-4">
-            {users[0].total - users[1].total > 100 
+            {users[0].total - users[1].total > 100
               ? `Que surra! Se o mês acabasse hoje, ${users[1].name} pagaria a recompensa fácil.`
               : `Disputa acirrada! Mas se o mês acabasse hoje, ${users[1].name} pagaria a recompensa.`}
           </p>
-          
+
           {/* Prevent buttons from being exported when we make the screenshot */}
           <div data-html2canvas-ignore className="flex gap-2">
             <button
@@ -402,7 +402,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               <Share2 size={16} />
             </button>
           </div>
-          
+
           <div className="mt-5 pt-4 border-t border-cookbook-border/30">
             <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
               Vantagem Atual:{" "}
@@ -417,7 +417,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         </motion.div>
       )}
       {/* Weekly breakdown */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -461,16 +461,16 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         </div>
       </motion.div>
       {/* Advanced Stats */}
-      <motion.div 
-         initial={{ y: 20, opacity: 0 }}
-         animate={{ y: 0, opacity: 1 }}
-         transition={{ delay: 0.4 }}
-         className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
       >
         <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center mb-5">
           Estatísticas Avançadas
         </h3>
-        
+
         <div className="space-y-4">
           {/* Golpe Crítico */}
           <motion.div whileHover={{ scale: 1.02 }} className="flex items-center justify-between p-3 bg-cookbook-text/5 rounded-2xl border border-cookbook-border/30 group hover:border-cookbook-primary/20 transition-colors cursor-default">
@@ -513,17 +513,17 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             </div>
             <div className="text-right">
               {users[0].count >= users[1].count && users[0].count > 0 ? (
-                 <>
+                <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">{users[0].count}x</p>
-                 </>
+                </>
               ) : users[1].count > 0 ? (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
                   <p className="font-serif text-sm text-emerald-500">{users[1].count}x</p>
-                 </>
+                </>
               ) : (
-                 <span className="font-serif text-xs text-cookbook-text/40">--</span>
+                <span className="font-serif text-xs text-cookbook-text/40">--</span>
               )}
             </div>
           </motion.div>
@@ -541,24 +541,24 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             </div>
             <div className="text-right">
               {users[0].expenses <= users[1].expenses ? (
-                 <>
+                <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].expenses)}</p>
-                 </>
+                </>
               ) : (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
                   <p className="font-serif text-sm text-emerald-500">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
-                 </>
+                </>
               )}
             </div>
           </motion.div>
         </div>
       </motion.div>
-      
+
       {/* Historical Battles */}
       {pastStats.length > 0 && (
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -569,42 +569,42 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </h3>
           <div className="grid grid-cols-2 gap-3">
             {pastStats.map((stat, idx) => (
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -4 }}
-                key={idx} 
+                key={idx}
                 className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-[2rem] p-5 flex flex-col shadow-sm relative overflow-hidden group transition-transform"
               >
-                 {/* Shiny gradient overlay */}
-                 {stat.winner && <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-cookbook-gold/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>}
-                 
-                 <div className="text-center relative z-10 mb-3">
-                   <div className="inline-block px-3 py-1 bg-cookbook-text/5 rounded-full font-sans text-[9px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-2">
-                     {stat.label}
-                   </div>
-                 </div>
+                {/* Shiny gradient overlay */}
+                {stat.winner && <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-cookbook-gold/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>}
 
-                 {stat.winner ? (
-                   <div className="flex flex-col items-center justify-center relative z-10 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-br from-cookbook-gold/20 to-cookbook-gold/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-gold/30 shadow-inner">
-                        <Trophy size={20} className="text-cookbook-gold drop-shadow-sm" />
-                      </div>
-                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold mb-1 text-center truncate w-full">
-                        {stat.winner.name} 
-                      </div>
-                      <div className="font-serif text-sm text-cookbook-text/80 tracking-tight">
-                         {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
-                      </div>
-                   </div>
-                 ) : (
-                   <div className="flex flex-col items-center justify-center relative z-10 flex-1 opacity-50">
-                      <div className="w-12 h-12 bg-cookbook-text/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-text/10">
-                        <span className="font-serif italic text-sm">--</span>
-                      </div>
-                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold">
-                        Empate
-                      </div>
-                   </div>
-                 )}
+                <div className="text-center relative z-10 mb-3">
+                  <div className="inline-block px-3 py-1 bg-cookbook-text/5 rounded-full font-sans text-[9px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-2">
+                    {stat.label}
+                  </div>
+                </div>
+
+                {stat.winner ? (
+                  <div className="flex flex-col items-center justify-center relative z-10 flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-cookbook-gold/20 to-cookbook-gold/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-gold/30 shadow-inner">
+                      <Trophy size={20} className="text-cookbook-gold drop-shadow-sm" />
+                    </div>
+                    <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold mb-1 text-center truncate w-full">
+                      {stat.winner.name}
+                    </div>
+                    <div className="font-serif text-sm text-cookbook-text/80 tracking-tight">
+                      {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center relative z-10 flex-1 opacity-50">
+                    <div className="w-12 h-12 bg-cookbook-text/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-text/10">
+                      <span className="font-serif italic text-sm">--</span>
+                    </div>
+                    <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold">
+                      Empate
+                    </div>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>

@@ -56,11 +56,6 @@ interface AppContextValue {
 
   // Pinboard Links
   pinboardLinks: any[];
-
-  // PWA Install
-  canInstall: boolean;
-  installPrompt: any | null;
-  clearInstallPrompt: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -108,6 +103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
+  const isInitialDepositsLoad = useRef<boolean>(true);
 
   // ---- Toasts ----
   const addToast: AddToastFn = useCallback((title, message, type = 'info', duration = 5000) => {
@@ -211,10 +207,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
+      // Show toast for background updates (not initial load, and not local writes)
+      if (!isInitialDepositsLoad.current && !querySnapshot.metadata.hasPendingWrites) {
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            // Don't show toast if it's the current user's action, just in case
+            if (data.who !== user.uid) {
+              const amountStr = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.amount || 0);
+              const isExpense = data.type === 'expense';
+              
+              if (isExpense) {
+                addToast('Nova Retirada', `${data.whoName || 'O seu par'} retirou ${amountStr}`, 'info');
+              } else {
+                addToast('Novo Depósito', `${data.whoName || 'O seu par'} depositou ${amountStr}`, 'success');
+              }
+            }
+          }
+        });
+      }
+
       setDeposits(deps);
       setTotalSaved(total);
       localStorage.setItem('pote_totalSaved', total.toString());
       setBingoStats(stats);
+      
+      isInitialDepositsLoad.current = false;
       
       // Delay slightly for smooth transition
       setTimeout(() => setIsDataReady(true), 200);
@@ -278,29 +296,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // ---- PWA Install ----
-  const [installPrompt, setInstallPrompt] = useState<any | null>(null);
-  const [canInstall, setCanInstall] = useState(false);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-      setCanInstall(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const clearInstallPrompt = useCallback(() => {
-    setInstallPrompt(null);
-    setCanInstall(false);
-  }, []);
-
   // Memoize the context value to prevent unnecessary re-renders.
   // Only re-creates when an actual dependency changes.
   const value: AppContextValue = useMemo(() => ({
@@ -322,15 +317,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     removeToast,
     showOnboarding,
     handleCompleteOnboarding,
-    canInstall,
-    installPrompt,
-    clearInstallPrompt,
   }), [
     user, isAuthReady, isDataReady, activeTab, tabDirection,
     handleTabChange, tripConfig, deposits, achievements,
     pinboardLinks, totalSaved, bingoStats, theme, toasts,
     addToast, removeToast, showOnboarding, handleCompleteOnboarding,
-    canInstall, installPrompt, clearInstallPrompt,
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

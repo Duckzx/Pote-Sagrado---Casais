@@ -1,16 +1,16 @@
 import React from "react";
 import { Download, X } from "lucide-react";
-import { useAppContext } from "../context/AppContext";
+import { usePWAInstall } from "../hooks/usePWAInstall";
+
 export const InstallPrompt: React.FC = () => {
-  const { canInstall, installPrompt, clearInstallPrompt } = useAppContext();
-  if (!canInstall || !installPrompt) return null;
+  const { canInstall, clearInstallPrompt, promptInstall } = usePWAInstall();
+  
+  if (!canInstall) return null;
+  
   const handleInstallClick = async () => {
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === "accepted") {
-      clearInstallPrompt();
-    }
+    await promptInstall();
   };
+  
   return (
     <div className="bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-xl p-4 flex items-center shadow-sm relative overflow-hidden">
       {" "}
