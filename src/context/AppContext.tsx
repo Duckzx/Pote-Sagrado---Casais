@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { playSuccessSound, vibrate } from '../lib/audio';
-import { collection, doc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, orderBy, limit, getDocs, getDoc, setDoc, deleteDoc, where } from 'firebase/firestore';
 import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
@@ -195,6 +195,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
+
+      // ----------------------------------------------------
+      // AUTOMATIC MIGRATION: copy old data to current casal (runs once per session)
+      // ----------------------------------------------------
+      if (!(window as any)._hasRunMigration && auth.currentUser) {
+        (window as any)._hasRunMigration = true;
+        const runMigration = async () => {
+          try {
+            // Migrate deposits
+            const oldDeps = await getDocs(query(collection(db, 'deposits'), where('who', '==', auth.currentUser!.uid)));
+            oldDeps.docs.forEach(async (d) => {
+              await setDoc(doc(db, `casais/${currentCasalId}/deposits`, d.id), d.data());
+              await deleteDoc(doc(db, 'deposits', d.id));
+            });
+
+            // Migrate trip_config/main if it exists and current is empty
+            const oldConfig = await getDoc(doc(db, 'trip_config', 'main'));
+            if (oldConfig.exists()) {
+              const currentConfig = await getDoc(doc(db, `casais/${currentCasalId}/trip_config`, 'main'));
+              if (!currentConfig.exists()) {
+                await setDoc(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), oldConfig.data());
+              }
+            }
+          } catch (e) {
+            console.error("Migration error:", e);
+          }
+        };
+        runMigration();
+      }
+      // ----------------------------------------------------
 
       // Listen to deposits for this specific casal
       const q = query(

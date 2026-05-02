@@ -127,6 +127,27 @@ service cloud.firestore {
       }
     }
 
+    // --- Backward compatibility paths for old app structure ---
+    match /deposits/{depositId} {
+      // old reads are fine for everyone authenticated, or just owner if possible
+      allow read: if isAuthenticated();
+      // users can still write to old path? No, let's keep old read/write open for transition:
+      allow read, write: if isAuthenticated();
+    }
+    match /trip_config/{configId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /achievements/{id} {
+      allow read, write: if isAuthenticated();
+    }
+    match /pinboard_links/{id} {
+      allow read, write: if isAuthenticated();
+    }
+    match /gallery/{id} {
+      allow read, write: if isAuthenticated();
+    }
+    // ------------------------------------------------------------
+
     match /casais/{casalId} {
       allow read: if isCasalMember(casalId);
       // Wait, there's no main 'casais' document written in the app. Let's allow write just in case.
