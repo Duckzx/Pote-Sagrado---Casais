@@ -8,14 +8,17 @@ import {
   X,
   Star,
   Zap,
+  TrendingUp,
 } from "lucide-react";
 import { clsx } from "clsx";
 import confetti from "canvas-confetti";
+
 interface UserBadgesProps {
   deposits: any[];
   currentUser: any;
   goalAmount: number;
 }
+
 const ALL_BADGES = [
   {
     id: "primeiro_passo",
@@ -26,26 +29,7 @@ const ALL_BADGES = [
     bg: "bg-cookbook-primary/10",
     border: "border-cookbook-primary/20",
     glowColor: "rgba(142, 127, 109, 0.4)",
-  },
-  {
-    id: "mestre_cuca",
-    title: "Mestre Cuca",
-    desc: "Guardou 5x com comida em casa.",
-    icon: <Coffee size={20} />,
-    color: "text-orange-500",
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
-    glowColor: "rgba(249, 115, 22, 0.4)",
-  },
-  {
-    id: "foco_total",
-    title: "Foco Total",
-    desc: "Alcançou 50% da meta.",
-    icon: <Award size={20} />,
-    color: "text-cookbook-gold",
-    bg: "bg-cookbook-gold/10",
-    border: "border-cookbook-gold/20",
-    glowColor: "rgba(197, 160, 89, 0.4)",
+    xp: 100,
   },
   {
     id: "combo_3",
@@ -56,6 +40,7 @@ const ALL_BADGES = [
     bg: "bg-red-500/10",
     border: "border-red-500/20",
     glowColor: "rgba(239, 68, 68, 0.4)",
+    xp: 250,
   },
   {
     id: "combo_7",
@@ -66,26 +51,51 @@ const ALL_BADGES = [
     bg: "bg-purple-500/10",
     border: "border-purple-500/20",
     glowColor: "rgba(168, 85, 247, 0.4)",
+    xp: 500,
+  },
+  {
+    id: "foco_total",
+    title: "Metade do Caminho",
+    desc: "Alcançou 50% da meta.",
+    icon: <TrendingUp size={20} />,
+    color: "text-cookbook-gold",
+    bg: "bg-cookbook-gold/10",
+    border: "border-cookbook-gold/20",
+    glowColor: "rgba(197, 160, 89, 0.4)",
+    xp: 1000,
+  },
+  {
+    id: "mestre_cuca",
+    title: "Cozinheiros",
+    desc: "Resistiu e comeu em casa 5x.",
+    icon: <Coffee size={20} />,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    border: "border-orange-500/20",
+    glowColor: "rgba(249, 115, 22, 0.4)",
+    xp: 300,
   },
   {
     id: "sem_delivery",
-    title: "Sem Delivery",
-    desc: "Resistiu ao iFood 5 vezes.",
+    title: "Anti-iFood",
+    desc: "Fugiu do delivery 5x.",
     icon: <Star size={20} />,
     color: "text-emerald-500",
     bg: "bg-emerald-500/10",
     border: "border-emerald-500/20",
     glowColor: "rgba(16, 185, 129, 0.4)",
+    xp: 300,
   },
   {
     id: "centenario",
-    title: "Centenário",
+    title: "Colecionadores",
     desc: "100+ depósitos no pote!",
     icon: <Trophy size={20} />,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
     border: "border-amber-500/20",
     glowColor: "rgba(245, 158, 11, 0.4)",
+    xp: 2000,
   },
   {
     id: "meta_batida",
@@ -96,9 +106,24 @@ const ALL_BADGES = [
     bg: "bg-yellow-500/10",
     border: "border-yellow-500/20",
     glowColor: "rgba(234, 179, 8, 0.5)",
+    xp: 5000,
   },
 ];
+
 const CELEBRATION_PARTICLES = ["✨", "🌟", "⭐", "💫", "🎉", "🎊"];
+
+// Fun couple levels based on XP
+const COUPLE_LEVELS = [
+  { level: 1, name: "Viajantes de Sofá", minXp: 0 },
+  { level: 2, name: "Economistas Amadores", minXp: 300 },
+  { level: 3, name: "Sócios do Cofrinho", minXp: 800 },
+  { level: 4, name: "Investidores do Amor", minXp: 1500 },
+  { level: 5, name: "Mestres da Poupança", minXp: 3000 },
+  { level: 6, name: "Colecionadores de Milhas", minXp: 5000 },
+  { level: 7, name: "Nômades Românticos", minXp: 8000 },
+  { level: 8, name: "Lendas do Aeroporto", minXp: 15000 },
+];
+
 export const UserBadges: React.FC<UserBadgesProps> = ({
   deposits,
   currentUser,
@@ -109,8 +134,10 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
   >(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevEarnedRef = useRef<Set<string>>(new Set());
+  const prevLevelRef = useRef<number>(1);
   const isInitialLoad = useRef(true);
-  const earnedBadges: Set<string> = useMemo(() => {
+
+  const { earnedBadges, totalXp, currentLevelInfo, nextLevelInfo, xpProgress } = useMemo(() => {
     const getDateObj = (val: any) => {
       if (!val) return null;
       if (typeof val.toDate === "function") return val.toDate();
@@ -119,42 +146,49 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
       return null;
     };
 
-    if (!currentUser) return new Set<string>();
+    if (!currentUser) return { 
+      earnedBadges: new Set<string>(), 
+      totalXp: 0, 
+      currentLevelInfo: COUPLE_LEVELS[0], 
+      nextLevelInfo: COUPLE_LEVELS[1],
+      xpProgress: 0 
+    };
+
     const earned = new Set<string>();
-    /* User's deposits (only income, not expenses) */ const userDeposits =
+    const userDeposits =
       deposits.filter((d) => d.who === currentUser.uid && d.type !== "expense");
-    /* 1. Primeiro Passo */ if (userDeposits.length > 0) {
-      earned.add("primeiro_passo");
-    }
-    /* 2. Mestre Cuca (check for food related actions) */ const foodDeposits =
-      userDeposits.filter(
-        (d) =>
-          d.action?.toLowerCase().includes("marmita") ||
-          d.action?.toLowerCase().includes("jantar") ||
-          d.action?.toLowerCase().includes("café") ||
-          d.action?.toLowerCase().includes("comida"),
-      );
-    if (foodDeposits.length >= 5) {
-      earned.add("mestre_cuca");
-    }
-    /* 3. Foco Total (50% of goal) */ const totalGlobalSaved = deposits.reduce(
-      (acc, d) => (d.type === "expense" ? acc - d.amount : acc + d.amount),
-      0,
+    
+    // Base XP from deposits
+    let calcXp = userDeposits.length * 50; // 50 XP per deposit
+
+    if (userDeposits.length > 0) earned.add("primeiro_passo");
+
+    const foodDeposits = userDeposits.filter(
+      (d) =>
+        d.action?.toLowerCase().includes("marmita") ||
+        d.action?.toLowerCase().includes("jantar") ||
+        d.action?.toLowerCase().includes("café") ||
+        d.action?.toLowerCase().includes("comida")
     );
-    if (goalAmount > 0 && totalGlobalSaved >= goalAmount / 2) {
-      earned.add("foco_total");
-    }
-    /* 4. Combo 3 Dias (Streak calculation is tricky with just dates, doing a simplified version) Map to unique date strings */ const depositDates =
-      Array.from(
-        new Set(
-          userDeposits
-            .map((d) => {
-              const date = getDateObj(d.createdAt);
-              return date ? date.toISOString().split("T")[0] : null;
-            })
-            .filter(Boolean) as string[],
-        ),
-      ).sort();
+    if (foodDeposits.length >= 5) earned.add("mestre_cuca");
+
+    const totalGlobalSaved = deposits.reduce(
+      (acc, d) => (d.type === "expense" ? acc - d.amount : acc + d.amount),
+      0
+    );
+    if (goalAmount > 0 && totalGlobalSaved >= goalAmount / 2) earned.add("foco_total");
+
+    const depositDates = Array.from(
+      new Set(
+        userDeposits
+          .map((d) => {
+            const date = getDateObj(d.createdAt);
+            return date ? date.toISOString().split("T")[0] : null;
+          })
+          .filter(Boolean) as string[]
+      )
+    ).sort();
+
     let maxStreak = 0;
     let currentStreak = 0;
     for (let i = 0; i < depositDates.length; i++) {
@@ -171,42 +205,61 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
           currentStreak = 1;
         }
       }
-      if (currentStreak > maxStreak) {
-        maxStreak = currentStreak;
+      if (currentStreak > maxStreak) maxStreak = currentStreak;
+    }
+
+    if (maxStreak >= 3) earned.add("combo_3");
+    if (maxStreak >= 7) earned.add("combo_7");
+
+    const noDeliveryDeposits = userDeposits.filter(
+      (d) =>
+        d.action?.toLowerCase().includes("ifood") ||
+        d.action?.toLowerCase().includes("delivery") ||
+        d.action?.toLowerCase().includes("resistiu")
+    );
+    if (noDeliveryDeposits.length >= 5) earned.add("sem_delivery");
+    if (userDeposits.length >= 100) earned.add("centenario");
+    if (goalAmount > 0 && totalGlobalSaved >= goalAmount) earned.add("meta_batida");
+
+    // Add XP from badges
+    earned.forEach(badgeId => {
+      const badge = ALL_BADGES.find(b => b.id === badgeId);
+      if (badge) calcXp += badge.xp;
+    });
+
+    let currentLvl = COUPLE_LEVELS[0];
+    let nextLvl = COUPLE_LEVELS[1];
+
+    for (let i = 0; i < COUPLE_LEVELS.length; i++) {
+      if (calcXp >= COUPLE_LEVELS[i].minXp) {
+        currentLvl = COUPLE_LEVELS[i];
+        nextLvl = COUPLE_LEVELS[i + 1] || currentLvl;
+      } else {
+        break;
       }
     }
-    if (maxStreak >= 3) {
-      earned.add("combo_3");
+
+    let progress = 100;
+    if (nextLvl.level !== currentLvl.level) {
+      const range = nextLvl.minXp - currentLvl.minXp;
+      const doneInLevel = calcXp - currentLvl.minXp;
+      progress = Math.min(100, Math.max(0, (doneInLevel / range) * 100));
     }
-    /* 5. Combo 7 Dias (7-day streak) */ if (maxStreak >= 7) {
-      earned.add("combo_7");
-    }
-    /* 6. Sem Delivery (resisted iFood 5 times) */ const noDeliveryDeposits =
-      userDeposits.filter(
-        (d) =>
-          d.action?.toLowerCase().includes("ifood") ||
-          d.action?.toLowerCase().includes("delivery") ||
-          d.action?.toLowerCase().includes("resistiu"),
-      );
-    if (noDeliveryDeposits.length >= 5) {
-      earned.add("sem_delivery");
-    }
-    /* 7. Centenário (100+ total deposits) */ if (userDeposits.length >= 100) {
-      earned.add("centenario");
-    }
-    /* 8. Meta Batida (100% of goal) */ if (
-      goalAmount > 0 &&
-      totalGlobalSaved >= goalAmount
-    ) {
-      earned.add("meta_batida");
-    }
-    return earned;
+
+    return { 
+      earnedBadges: earned, 
+      totalXp: calcXp, 
+      currentLevelInfo: currentLvl, 
+      nextLevelInfo: nextLvl,
+      xpProgress: progress 
+    };
   }, [deposits, currentUser, goalAmount]);
+
   useEffect(() => {
     if (isInitialLoad.current) {
       if (deposits.length > 0) {
-        // Wait until we actually loaded some data to drop initial load guard
         prevEarnedRef.current = new Set(earnedBadges);
+        prevLevelRef.current = currentLevelInfo.level;
         isInitialLoad.current = false;
       }
       return;
@@ -218,111 +271,123 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
       if (badgeData) {
         setNewlyUnlocked(badgeData);
         setShowCelebration(true);
-        // Staggered confetti bursts for more drama
-        setTimeout(
-          () => {
-            confetti({
-              particleCount: 80,
-              spread: 60,
-              origin: { x: 0.3, y: 0.5 },
-              zIndex: 100,
-              colors: ["#8E7F6D", "#C5A059", "#F2CC8F", "#FFD700"],
-            });
-          },
-          300,
-        );
-        setTimeout(() => {
-          confetti({
-            particleCount: 100,
-            spread: 90,
-            origin: { x: 0.7, y: 0.5 },
-            zIndex: 100,
-            colors: ["#8E7F6D", "#2C2A26", "#C5A059", "#F2CC8F"],
-          });
-        }, 600);
-        setTimeout(() => {
-          confetti({
-            particleCount: 50,
-            spread: 120,
-            origin: { x: 0.5, y: 0.4 },
-            zIndex: 100,
-            colors: ["#FFD700", "#FFA500", "#FF6347"],
-          });
-        }, 900);
+        setTimeout(() => confetti({ particleCount: 80, spread: 60, origin: { x: 0.3, y: 0.5 }, zIndex: 100, colors: ["#8E7F6D", "#C5A059", "#F2CC8F", "#FFD700"] }), 300);
+        setTimeout(() => confetti({ particleCount: 100, spread: 90, origin: { x: 0.7, y: 0.5 }, zIndex: 100, colors: ["#8E7F6D", "#2C2A26", "#C5A059", "#F2CC8F"] }), 600);
+        setTimeout(() => confetti({ particleCount: 50, spread: 120, origin: { x: 0.5, y: 0.4 }, zIndex: 100, colors: ["#FFD700", "#FFA500", "#FF6347"] }), 900);
       }
       prevEarnedRef.current = new Set(earnedBadges);
     }
   }, [earnedBadges, deposits]);
+
   const handleClose = () => {
     setShowCelebration(false);
     setTimeout(() => setNewlyUnlocked(null), 400);
   };
+
   return (
     <>
-      {" "}
-      <div className="space-y-4">
-        {" "}
-        <div className="flex items-center justify-between px-2">
-          {" "}
-          <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
-            {" "}
-            Medalhas{" "}
-          </h3>{" "}
-          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
-            {" "}
-            {earnedBadges.size} / {ALL_BADGES.length}{" "}
-          </span>{" "}
-        </div>{" "}
-        <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar -mx-6 px-6">
-          {" "}
-          {ALL_BADGES.map((badge) => {
-            const isEarned = earnedBadges.has(badge.id);
-            return (
-              <div
-                key={badge.id}
-                className={clsx(
-                  "snap-start shrink-0 w-[140px] rounded p-4 flex flex-col items-center text-center border transition-all duration-500",
-                  isEarned
-                    ? `bg-cookbook-bg ${badge.border} shadow-sm badge-newly-earned`
-                    : "bg-cookbook-bg/50 border-cookbook-border/50 opacity-60 grayscale",
-                )}
-                style={
-                  isEarned
-                    ? { boxShadow: `0 4px 20px ${badge.glowColor}` }
-                    : undefined
-                }
-              >
-                {" "}
-                <div
-                  className={clsx(
-                    "w-12 h-12 rounded-full flex items-center justify-center mb-3 text-current transition-all duration-500",
-                    isEarned
-                      ? badge.bg
-                      : "bg-cookbook-border/50 text-cookbook-text/40",
-                    isEarned ? badge.color : "",
-                  )}
-                >
-                  {" "}
-                  {badge.icon}{" "}
-                </div>{" "}
-                <h4
-                  className={clsx(
-                    "font-serif italic text-sm mb-1 leading-tight transition-colors duration-500",
-                    isEarned ? "text-cookbook-text" : "text-cookbook-text/50",
-                  )}
-                >
-                  {" "}
-                  {badge.title}{" "}
-                </h4>{" "}
-                <p className="font-sans text-[9px] uppercase tracking-wider text-cookbook-text/50 font-bold">
-                  {" "}
-                  {badge.desc}{" "}
-                </p>{" "}
+      <div className="space-y-6">
+        {/* Nível do Casal / Gamification Wrapper */}
+        <div className="bg-cookbook-surface border border-cookbook-border rounded-3xl p-5 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+            <Trophy size={100} />
+          </div>
+          
+          <div className="relative z-10 flex flex-col mb-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">
+                Nível do Casal
+              </span>
+              <div className="bg-cookbook-primary/20 text-cookbook-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
+                Lvl {currentLevelInfo.level}
               </div>
-            );
-          })}{" "}
+            </div>
+            <h3 className="font-serif text-2xl text-cookbook-text leading-tight mb-3">
+              {currentLevelInfo.name}
+            </h3>
+            
+            <div className="flex items-center justify-between mb-1.5 text-[10px] font-sans font-bold uppercase tracking-widest text-cookbook-text/60">
+              <span>{totalXp} XP</span>
+              {currentLevelInfo.level !== nextLevelInfo.level && (
+                <span>Próximo Lvl: {nextLevelInfo.minXp} XP</span>
+              )}
+            </div>
+            
+            <div className="h-1.5 w-full bg-cookbook-bg rounded-full overflow-hidden border border-cookbook-border/50">
+              <div 
+                className="h-full bg-gradient-to-r from-cookbook-primary to-cookbook-gold rounded-full transition-all duration-1000 ease-out" 
+                style={{ width: `${xpProgress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between px-2 mb-4">
+            <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
+              {" "}
+              Medalhas e Conquistas{" "}
+            </h3>{" "}
+            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
+              {" "}
+              {earnedBadges.size} / {ALL_BADGES.length}{" "}
+            </span>{" "}
+          </div>{" "}
+          <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar -mx-6 px-6">
+            {" "}
+            {ALL_BADGES.map((badge) => {
+              const isEarned = earnedBadges.has(badge.id);
+              return (
+                <div
+                  key={badge.id}
+                  className={clsx(
+                    "snap-start shrink-0 w-[140px] rounded-[24px] p-4 flex flex-col items-center text-center border transition-all duration-500",
+                    isEarned
+                      ? `bg-cookbook-surface ${badge.border} shadow-sm badge-newly-earned`
+                      : "bg-cookbook-bg/50 border-cookbook-border/50 opacity-60 grayscale",
+                  )}
+                  style={
+                    isEarned
+                      ? { boxShadow: `0 4px 20px ${badge.glowColor}` }
+                      : undefined
+                  }
+                >
+                  {" "}
+                  <div
+                    className={clsx(
+                      "w-12 h-12 rounded-full flex items-center justify-center mb-3 text-current transition-all duration-500",
+                      isEarned
+                        ? badge.bg
+                        : "bg-cookbook-border/50 text-cookbook-text/40",
+                      isEarned ? badge.color : "",
+                    )}
+                  >
+                    {" "}
+                    {badge.icon}{" "}
+                  </div>{" "}
+                  <h4
+                    className={clsx(
+                      "font-serif italic text-sm mb-1 leading-tight transition-colors duration-500",
+                      isEarned ? "text-cookbook-text" : "text-cookbook-text/50",
+                    )}
+                  >
+                    {" "}
+                    {badge.title}{" "}
+                  </h4>{" "}
+                  <p className="font-sans text-[9px] uppercase tracking-wider text-cookbook-text/60 font-medium mb-2 opacity-80">
+                    {" "}
+                    {badge.desc}{" "}
+                  </p>{" "}
+                  <span className={clsx("font-sans text-[9px] font-bold px-2 py-0.5 rounded-full mt-auto", isEarned ? badge.color + " " + badge.bg : "text-cookbook-text/40 bg-cookbook-bg")}>
+                    +{badge.xp} XP
+                  </span>
+                </div>
+              );
+            })}{" "}
+          </div>{" "}
         </div>{" "}
       </div>{" "}
+
       {/* Achievement Unlock Celebration Modal */}{" "}
       {newlyUnlocked && (
         <div
@@ -341,7 +406,6 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
           onClick={handleClose}
         >
           {" "}
-          {/* Floating celebration particles */}{" "}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {" "}
             {CELEBRATION_PARTICLES.map((particle, i) => (
@@ -368,7 +432,6 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {" "}
-            {/* Shimmer rings behind card */}{" "}
             <div
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               style={{ top: "-20%" }}
@@ -391,7 +454,6 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
             </div>{" "}
             <div className="bg-cookbook-bg border border-cookbook-border rounded-2xl w-full p-8 shadow-2xl relative text-center overflow-hidden">
               {" "}
-              {/* Top shine decoration */}{" "}
               <div
                 className="absolute top-0 left-0 w-full h-1"
                 style={{
@@ -405,22 +467,18 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
                 {" "}
                 <X size={20} />{" "}
               </button>{" "}
-              {/* Label */}{" "}
               <div className="animate-badge-text-reveal reveal-delay-1 font-sans text-[10px] uppercase tracking-[0.25em] text-cookbook-primary font-bold mb-6">
                 {" "}
-                🏆 Nova Conquista Desbloqueada!{" "}
+                🏆 Nova Conquista!{" "}
               </div>{" "}
-              {/* Glowing icon */}{" "}
               <div className="relative w-28 h-28 mx-auto mb-6">
                 {" "}
-                {/* Glow ring */}{" "}
                 <div
                   className="absolute inset-0 rounded-full animate-badge-glow"
                   style={{
                     background: `radial-gradient(circle, ${newlyUnlocked.glowColor} 0%, transparent 70%)`,
                   }}
                 />{" "}
-                {/* Icon container */}{" "}
                 <div
                   className={clsx(
                     "relative w-28 h-28 rounded-full flex items-center justify-center shadow-lg animate-badge-icon-spin",
@@ -435,17 +493,17 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
                   )}{" "}
                 </div>{" "}
               </div>{" "}
-              {/* Title with staggered reveal */}{" "}
               <h3 className="animate-badge-text-reveal reveal-delay-2 font-serif italic text-3xl text-cookbook-text mb-3">
                 {" "}
                 {newlyUnlocked.title}{" "}
               </h3>{" "}
-              {/* Description */}{" "}
-              <p className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-8 leading-relaxed px-4">
+              <p className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-2 leading-relaxed px-4">
                 {" "}
                 {newlyUnlocked.desc}{" "}
               </p>{" "}
-              {/* CTA Button */}{" "}
+              <div className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs font-bold text-cookbook-primary mb-8">
+                +{newlyUnlocked.xp} XP
+              </div>
               <button
                 onClick={handleClose}
                 className="animate-badge-text-reveal reveal-delay-4 w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
@@ -454,7 +512,7 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
                 }}
               >
                 {" "}
-                ✨ Incrível! Continuar{" "}
+                ✨ Continuar Jornada{" "}
               </button>{" "}
             </div>{" "}
           </div>{" "}
@@ -463,3 +521,4 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
     </>
   );
 };
+
