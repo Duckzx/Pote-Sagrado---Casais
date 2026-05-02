@@ -43,6 +43,7 @@ import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
+import { ActivityFeed } from "./ActivityFeed";
 
 interface HomeTabProps {
   currentUser: any;
@@ -378,6 +379,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
+
+      {/* Activity Feed (Social features) */}
+      <ActivityFeed deposits={deposits} currentUser={currentUser} />
 
       {/* Shared Album Widget */}{" "}
       {sharedAlbumUrl && <div className="mt-6 mb-2"><SharedAlbumWidget url={sharedAlbumUrl} /></div>}{" "}

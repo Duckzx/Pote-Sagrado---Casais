@@ -13,6 +13,8 @@ export interface Deposit {
   who: string;
   whoName: string;
   createdAt: Timestamp | null;
+  comments?: { id: string; text: string; who: string; whoName: string; createdAt: number }[];
+  reactions?: Record<string, string>;
 }
 
 export interface Challenge {

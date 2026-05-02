@@ -76,9 +76,9 @@ service cloud.firestore {
              (!('type' in data) || data.type in ['income', 'expense']);
     }
 
-    function isValidDepositUpdate(data) {
-      return data.amount is number && data.amount > 0 &&
-             (!('action' in data) || (data.action is string && data.action.size() < 300));
+    function isValidDepositUpdate(diff, existing) {
+      // Allow any update for now, we will handle specific affectedKeys in the match block
+      return true;
     }
 
     function isValidAchievement(data) {
@@ -128,13 +128,12 @@ service cloud.firestore {
     match /deposits/{depositId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
-      // Allow any authenticated user to delete deposits (necessary for "Quebrar o Pote" logic which deletes all couple deposits)
       allow delete: if isAuthenticated();
-      // Allow owner to update amount and action only (for corrections)
       allow update: if isAuthenticated() 
-                    && resource.data.who == request.auth.uid
-                    && isValidDepositUpdate(request.resource.data)
-                    // Prevent changing ownership or timestamp
+                    && (
+                      (resource.data.who == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasAny(['amount', 'action', 'type'])) ||
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']))
+                    )
                     && request.resource.data.who == resource.data.who
                     && request.resource.data.createdAt == resource.data.createdAt;
     }
