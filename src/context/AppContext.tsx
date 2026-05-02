@@ -185,7 +185,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCasalId(currentCasalId);
       
       // Now that we have the casalId, listen to the specific couple's config
-      const unsubConfig = onSnapshot(doc(db, 'casais', currentCasalId), (configSnap) => {
+      const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {
         if (configSnap.exists()) {
           const data = configSnap.data() as Partial<TripConfig>;
           setTripConfig(prev => {
@@ -194,7 +194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             return newConfig;
           });
         }
-      }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}`));
+      }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
 
       // Listen to deposits for this specific casal
       const q = query(

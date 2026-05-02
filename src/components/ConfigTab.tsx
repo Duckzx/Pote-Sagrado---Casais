@@ -14,6 +14,7 @@ import {
   Bell,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
+import { useAppContext } from "../context/AppContext";
 import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -59,6 +60,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   relationshipStartDate: currentRelationshipStartDate,
   addToast,
 }) => {
+  const { casalId } = useAppContext();
   const [destination, setDestination] = useState(currentDestination || "");
   const [origin, setOrigin] = useState(currentOrigin || "");
   const [goalAmount, setGoalAmount] = useState(() => {
@@ -214,8 +216,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         const token = await getToken(messaging, {
           vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
         });
-        if (token) {
-          const tripRef = doc(db, "trip_config", "main");
+        if (token && casalId) {
+          const tripRef = doc(db, `casais/${casalId}/trip_config`, "main");
           const tDoc = await getDoc(tripRef);
           let fcmTokens: string[] = [];
           if (tDoc.exists()) {
@@ -262,7 +264,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       let parsedAmount = parseCurrencyString(amountToSave);
       if (isNaN(parsedAmount)) parsedAmount = 0;
       await setDoc(
-        doc(db, "trip_config", "main"),
+        doc(db, `casais/${casalId}/trip_config`, "main"),
         {
           destination: destToSave,
           origin: originToSave,
@@ -299,7 +301,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           .then((data) => {
             if (data && data.length > 0) {
               setDoc(
-                doc(db, "trip_config", "main"),
+                doc(db, `casais/${casalId}/trip_config`, "main"),
                 { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) },
                 { merge: true },
               );
@@ -308,7 +310,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           .catch((e) => console.error("Geocoding failed", e));
       }
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "trip_config");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
       setIsSaving(false);
     }
   };
