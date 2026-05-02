@@ -5,7 +5,8 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 
 export interface GalleryPhoto {
     id: string;
-    imageBase64: string;
+    imageBase64?: string;
+    imageUrl?: string;
     createdAt: any;
     addedBy: string;
 }
@@ -36,6 +37,19 @@ export function useGallery() {
         }
     };
 
+    const addPhotoUrl = async (imageUrl: string) => {
+        if (!auth.currentUser) return;
+        try {
+            await addDoc(collection(db, 'gallery'), {
+                imageUrl,
+                createdAt: serverTimestamp(),
+                addedBy: auth.currentUser.uid
+            });
+        } catch (error) {
+            handleFirestoreError(error, OperationType.WRITE, 'gallery');
+        }
+    };
+
     const removePhoto = async (id: string) => {
         try {
             await deleteDoc(doc(db, 'gallery', id));
@@ -44,5 +58,5 @@ export function useGallery() {
         }
     };
 
-    return { photos, addPhoto, removePhoto };
+    return { photos, addPhoto, addPhotoUrl, removePhoto };
 }

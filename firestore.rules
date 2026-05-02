@@ -102,7 +102,7 @@ service cloud.firestore {
 
     function isValidGalleryPhoto(data) {
       return data.keys().hasAll(['imageBase64', 'addedBy', 'createdAt']) &&
-             data.imageBase64 is string && data.imageBase64.size() <= 500000 &&
+             data.imageBase64 is string && data.imageBase64.size() <= 1048576 &&
              data.addedBy == request.auth.uid &&
              data.createdAt == request.time;
     }
