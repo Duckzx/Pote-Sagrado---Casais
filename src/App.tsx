@@ -354,6 +354,7 @@ function AppContent() {
                   deposits={deposits}
                   achievements={achievements}
                   sharedAlbumUrl={tripConfig.sharedAlbumUrl}
+                  relationshipStartDate={tripConfig.relationshipStartDate}
                   addToast={addToast}
                 />
               )}
@@ -384,6 +385,7 @@ function AppContent() {
                   customChallenges={tripConfig.customChallenges}
                   currentSharedAlbumUrl={tripConfig.sharedAlbumUrl}
                   currentPrize={tripConfig.monthlyPrize}
+                  relationshipStartDate={tripConfig.relationshipStartDate}
                   addToast={addToast}
                 />
               )}

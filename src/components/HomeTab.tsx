@@ -25,11 +25,14 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import confetti from "canvas-confetti";
+import { motion } from "motion/react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
+import { useAppContext } from "../context/AppContext";
 import { AnimatedNumber } from "./AnimatedNumber";
 import Carousel from "./Carousel";
 import {
   formatDistanceToNow,
+  differenceInDays,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AIAssistantModal } from "./AIAssistantModal";
@@ -54,6 +57,7 @@ interface HomeTabProps {
   deposits: any[];
   achievements?: any[];
   sharedAlbumUrl?: string;
+  relationshipStartDate?: string;
   addToast: (
     title: string,
     message: string,
@@ -72,6 +76,15 @@ const MOTIVATIONAL_QUOTES = [
   { text: "Sua próxima memória inesquecível começa agora.", emoji: "📸" },
   { text: "Não é sobre gastar menos, é sobre viver mais.", emoji: "🌅" },
 ];
+
+const RELATIONSHIP_MESSAGES = [
+  "Vocês são um time incrível! Continuem cuidando um do outro.",
+  "O amor cresce nos pequenos detalhes compartilhados.",
+  "Guardar dinheiro juntos é investir na história de vocês.",
+  "Um relacionamento forte se constrói com conversas honestas e sonhos malucos.",
+  "O melhor lugar do mundo é ao lado de quem se ama.",
+  "Mantenham acesa a chama: planejem o próximo date!",
+];
 import { WaterSpill } from "./WaterSpill";
 import { compressImage } from "../lib/imageUtils";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -87,9 +100,10 @@ const MilestoneTracker = ({
   if (goalAmount <= 0) return null;
   const pct = (totalSaved / goalAmount) * 100;
   const milestones = [
-    { threshold: 25, label: "25%" },
-    { threshold: 50, label: "Metade!" },
-    { threshold: 75, label: "75%" },
+    { threshold: 25, label: "Fase 1: Aquecimento (25%)", reward: "Jantar Especial" },
+    { threshold: 50, label: "Fase 2: Na Metade do Caminho (50%)", reward: "Passeio Romântico" },
+    { threshold: 75, label: "Fase 3: Contagem Regressiva (75%)", reward: "Presentinho Surpresa" },
+    { threshold: 100, label: "Fase 4: Objetivo Concluído", reward: "Passagens na mão!" },
   ];
   /* Highest achieved */ const activeMilestone = milestones
     .slice()
@@ -109,11 +123,11 @@ const MilestoneTracker = ({
       </div>{" "}
       <h4 className="font-serif italic text-xl text-cookbook-text mb-1">
         {" "}
-        Parabéns! Pote chegou a {activeMilestone.label}{" "}
+        Conquista: {activeMilestone.label}{" "}
       </h4>{" "}
       <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-4">
         {" "}
-        Vocês merecem uma recompensa pelo esforço!{" "}
+        Vocês merecem uma recompensa: {activeMilestone.reward}{" "}
       </p>{" "}
       <button
         onClick={onRewardClick}
@@ -135,8 +149,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   deposits,
   achievements = [],
   sharedAlbumUrl,
+  relationshipStartDate,
   addToast,
 }) => {
+  const { casalId } = useAppContext();
   const [showAIModal, setShowAIModal] = useState(false);
   const [showWrapped, setShowWrapped] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
@@ -164,6 +180,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
       return MOTIVATIONAL_QUOTES[day % MOTIVATIONAL_QUOTES.length];
     }, []);
+
+  const relationshipMessage = useMemo(() => {
+    const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    return RELATIONSHIP_MESSAGES[day % RELATIONSHIP_MESSAGES.length];
+  }, []);
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -322,8 +343,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const handleBreakPotClick = () => {
     setShowBreakConfirm(true);
   };
+  const daysTogether = useMemo(() => {
+    if (!relationshipStartDate) return null;
+    const start = new Date(relationshipStartDate + 'T00:00:00');
+    if (isNaN(start.getTime())) return null;
+    return differenceInDays(new Date(), start);
+  }, [relationshipStartDate]);
+
   return (
-    <div className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto relative">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto relative"
+    >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
       <div className="text-center space-y-1 relative">
@@ -332,6 +365,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {" "}
           Reserva de Casal{" "}
         </h2>{" "}
+        {daysTogether !== null && daysTogether >= 0 && (
+          <p className="font-serif italic text-base text-cookbook-primary/80 animate-fade-in mt-1">
+            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
+          </p>
+        )}
         <button
           onClick={() => setShowShareWidget(true)}
           className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-gold/10 text-cookbook-gold rounded-full hover:bg-cookbook-gold/20 active:scale-95 transition-all shadow-sm"
@@ -367,15 +405,22 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </button>{" "}
         </div>
       )}{" "}
-      {/* Daily Motivational Quote */}{" "}
-      <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 -mt-4 shadow-sm mb-6">
-        {" "}
-        <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>{" "}
-        <span className="font-serif italic text-[13px] text-cookbook-text/80">
+      {/* Daily Motivational Quote & Relationship Message */}{" "}
+      <div className="flex flex-col gap-2 mb-6 -mt-4">
+        <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 shadow-sm">
           {" "}
-          {dailyQuote.text}{" "}
-        </span>{" "}
-      </div>{" "}
+          <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>{" "}
+          <span className="font-serif italic text-[13px] text-cookbook-text/80">
+            {" "}
+            {dailyQuote.text}{" "}
+          </span>{" "}
+        </div>{" "}
+        <div className="text-center bg-cookbook-primary/10 rounded-2xl px-5 py-3 border border-cookbook-primary/20">
+           <span className="font-sans text-[11px] font-medium text-cookbook-primary">
+            💌 {relationshipMessage}
+           </span>
+        </div>
+      </div>
 
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
@@ -842,6 +887,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           />,
           document.body,
         )}{" "}
-    </div>
+    </motion.div>
   );
 };

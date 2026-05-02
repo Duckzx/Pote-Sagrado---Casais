@@ -26,6 +26,7 @@ interface ConfigTabProps {
   customChallenges: any[];
   currentSharedAlbumUrl?: string;
   currentPrize?: string;
+  relationshipStartDate?: string;
   addToast: (
     title: string,
     message: string,
@@ -55,6 +56,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   customChallenges,
   currentSharedAlbumUrl,
   currentPrize,
+  relationshipStartDate: currentRelationshipStartDate,
   addToast,
 }) => {
   const [destination, setDestination] = useState(currentDestination || "");
@@ -66,6 +68,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [theme, setTheme] = useState(currentTheme || "cookbook");
   const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
   const [sharedAlbumUrl, setSharedAlbumUrl] = useState(currentSharedAlbumUrl || "");
+  const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
@@ -91,6 +94,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     setTheme(currentTheme || "cookbook");
     setChallenges(customChallenges || []);
     setSharedAlbumUrl(currentSharedAlbumUrl || "");
+    setRelationshipStartDate(currentRelationshipStartDate || "");
     setPrize(currentPrize || "");
   }, [
     currentDestination,
@@ -99,6 +103,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     currentTheme,
     customChallenges,
     currentSharedAlbumUrl,
+    currentRelationshipStartDate,
     currentPrize,
   ]);
   /* Handle auto-save on blur */ const handleSaveLocal = () => {
@@ -110,6 +115,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
+      relationshipStartDate
     );
   };
   useEffect(() => {
@@ -249,6 +255,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
+    startDateToSave: string
   ) => {
     setIsSaving(true);
     try {
@@ -262,6 +269,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           goalAmount: parsedAmount,
           customChallenges: challengesToSave,
           sharedAlbumUrl: sharedAlbumUrlToSave,
+          relationshipStartDate: startDateToSave,
           monthlyPrize: prizeToSave,
           theme: themeToSave,
           updatedAt: serverTimestamp(),
@@ -313,6 +321,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
+      relationshipStartDate
     );
   };
   return (
@@ -447,6 +456,20 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 onBlur={handleSaveLocal}
                 placeholder="Ex: São Paulo, SP"
                 className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+              />{" "}
+            </div>{" "}
+            <div className="space-y-1">
+              {" "}
+              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                {" "}
+                Nossa Data de Início do Relacionamento{" "}
+              </label>{" "}
+              <input
+                type="date"
+                value={relationshipStartDate}
+                onChange={(e) => setRelationshipStartDate(e.target.value)}
+                onBlur={handleSaveLocal}
+                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
               />{" "}
             </div>{" "}
             <div className="space-y-1">

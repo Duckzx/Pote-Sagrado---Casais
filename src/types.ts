@@ -34,6 +34,7 @@ export interface TripConfig {
   monthlyPrize: string;
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
+  relationshipStartDate?: string;
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
@@ -47,6 +48,7 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   monthlyPrize: '',
   sharedAlbumUrl: '',
   fcmTokens: [],
+  relationshipStartDate: '',
 };
 
 // ========================================
