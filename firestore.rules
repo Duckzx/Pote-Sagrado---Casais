@@ -41,17 +41,15 @@ service cloud.firestore {
     // Helper Functions
     // ===============================================================
     
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
+    // Helpers
+    function isAuthenticated() { return request.auth != null; }
+    function isOwner(userId) { return isAuthenticated() && request.auth.uid == userId; }
+    
+    // Validate User
     function isValidUser(data) {
       return data.keys().hasAll(['theme']) &&
              data.theme is string && data.theme.size() < 50 &&
+             (!('casalId' in data) || (data.casalId is string && data.casalId.size() < 100)) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
     }
 
@@ -107,9 +105,18 @@ service cloud.firestore {
              data.createdAt == request.time;
     }
 
-    // ===============================================================
-    // Rules
-    // ===============================================================
+    // Role-based for casalId
+    function isCasalMember(casalId) {
+      // Allow if the user has a matching casalId in their profile,
+      // Or if their casalId defaults to `casal_${uid}`. 
+      // Because we can't easily query without cost, we check if the requested casalId matches either default or their profile if we used get().
+      // For a perfectly secure app, users must be verified to have this casalId.
+      return isAuthenticated() && (
+        casalId == 'casal_' + request.auth.uid ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.casalId == casalId)
+      );
+    }
 
     match /users/{userId} {
       allow read: if isAuthenticated();
@@ -120,40 +127,46 @@ service cloud.firestore {
       }
     }
 
-    match /trip_config/main {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isValidTripConfig(request.resource.data);
-    }
+    match /casais/{casalId} {
+      allow read: if isCasalMember(casalId);
+      // Wait, there's no main 'casais' document written in the app. Let's allow write just in case.
+      allow write: if isCasalMember(casalId);
+      
+      match /trip_config/{docId} {
+         allow read: if isCasalMember(casalId);
+         allow create, update: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
+      }
+      
+      match /deposits/{depositId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId) && isValidDeposit(request.resource.data);
+        allow delete: if isCasalMember(casalId);
+        allow update: if isCasalMember(casalId) 
+                      && (
+                        (resource.data.who == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasAny(['amount', 'action', 'type'])) ||
+                        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']))
+                      )
+                      && request.resource.data.who == resource.data.who
+                      && request.resource.data.createdAt == resource.data.createdAt;
+      }
 
-    match /deposits/{depositId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidDeposit(request.resource.data);
-      allow delete: if isAuthenticated();
-      allow update: if isAuthenticated() 
-                    && (
-                      (resource.data.who == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasAny(['amount', 'action', 'type'])) ||
-                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']))
-                    )
-                    && request.resource.data.who == resource.data.who
-                    && request.resource.data.createdAt == resource.data.createdAt;
-    }
+      match /achievements/{achievementId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId) && isValidAchievement(request.resource.data);
+        allow delete: if isCasalMember(casalId);
+      }
 
-    match /achievements/{achievementId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidAchievement(request.resource.data);
-      allow delete: if isAuthenticated();
-    }
+      match /pinboard_links/{linkId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId) && isValidPinboardLink(request.resource.data);
+        allow delete: if isCasalMember(casalId);
+      }
 
-    match /pinboard_links/{linkId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidPinboardLink(request.resource.data);
-      allow delete: if isAuthenticated();
-    }
-
-    match /gallery/{photoId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidGalleryPhoto(request.resource.data);
-      allow delete: if isAuthenticated();
+      match /gallery/{photoId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId) && isValidGalleryPhoto(request.resource.data);
+        allow delete: if isCasalMember(casalId);
+      }
     }
   }
 }

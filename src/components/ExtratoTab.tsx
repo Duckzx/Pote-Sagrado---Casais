@@ -29,6 +29,7 @@ interface ExtratoTabProps {
     message: string,
     type: "info" | "success" | "milestone",
   ) => void;
+  casalId?: string | null;
 }
 type FilterType = "todos" | "depositos" | "gastos";
 const MONTHS_PT = [
@@ -48,6 +49,7 @@ const MONTHS_PT = [
 export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   deposits,
   addToast,
+  casalId,
 }) => {
   const [filter, setFilter] = useState<FilterType>("todos");
   const [filterUser, setFilterUser] = useState<string>("todos");
@@ -246,7 +248,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         updateData.createdAt = newDate;
       }
 
-      await updateDoc(doc(db, "deposits", editing.id), updateData);
+      await updateDoc(doc(db, `casais/${casalId}/deposits`, editing.id), updateData);
       playSuccessSound();
       vibrate([30, 30]);
       addToast(
@@ -256,17 +258,17 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       );
       setEditing(null);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "deposits");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     }
   };
   /* Delete handler */ const confirmDelete = async () => {
     if (!deleting) return;
     try {
-      await deleteDoc(doc(db, "deposits", deleting.id));
+      await deleteDoc(doc(db, `casais/${casalId}/deposits`, deleting.id));
       addToast("Apagado!", "Transação excluída. Foi pro buraco negro.", "info");
       setDeleting(null);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "deposits");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     }
   };
   const formatCurrency = (val: number) =>

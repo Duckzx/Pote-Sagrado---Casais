@@ -29,7 +29,7 @@ interface PinboardTabProps {
   ) => void;
 }
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
-  const { deposits, pinboardLinks, achievements } = useAppContext();
+  const { deposits, pinboardLinks, achievements, casalId } = useAppContext();
   
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -44,7 +44,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
     /* Auto generated image */ const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(newTitle)}/600/400`;
     
     try {
-      await addDoc(collection(db, "pinboard_links"), {
+      await addDoc(collection(db, `casais/${casalId}/pinboard_links`), {
         url: newUrl,
         title: newTitle,
         imageUrl: imageUrl,
@@ -56,7 +56,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       setIsAddingLink(false);
       addToast("Adicionado", "Link salvo no mural!", "success");
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "pinboard_links");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/pinboard_links`);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,10 +64,10 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
 
   const handleLinkDelete = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "pinboard_links", id));
+      await deleteDoc(doc(db, `casais/${casalId}/pinboard_links`, id));
       addToast("Removido", "Link apagado do mural.", "info");
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, "pinboard_links");
+      handleFirestoreError(error, OperationType.DELETE, `casais/${casalId}/pinboard_links`);
     }
   };
 
@@ -85,7 +85,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         const uploadTask = await uploadBytesResumable(storageRef, file);
         const downloadUrl = await getDownloadURL(uploadTask.ref);
 
-        await addDoc(collection(db, "achievements"), {
+        await addDoc(collection(db, `casais/${casalId}/achievements`), {
           destination: "Nossa Conquista",
           amount: 0,
           goalAmount: 0,
@@ -95,7 +95,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         
         addToast("Sucesso", "Mural atualizado com nova foto.", "success");
       } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, "achievements");
+        handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/achievements`);
       } finally {
         setIsUploadingPhoto(false);
       }
@@ -103,10 +103,10 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
   };
   const handleRemoveConquista = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "achievements", id));
+      await deleteDoc(doc(db, `casais/${casalId}/achievements`, id));
       addToast("Removido", "Conquista apagada.", "info");
     } catch(error) {
-      handleFirestoreError(error, OperationType.DELETE, "achievements");
+      handleFirestoreError(error, OperationType.DELETE, `casais/${casalId}/achievements`);
     }
   };
   const formatCurrency = (val: number) =>
@@ -329,7 +329,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       </section>{" "}
 
       <div className="pt-8">
-        <ExtratoTab deposits={deposits} addToast={addToast} />
+        <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />
       </div>
     </div>
   );

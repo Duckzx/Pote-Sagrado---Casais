@@ -25,6 +25,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import confetti from "canvas-confetti";
 import { playCoinSound, playSuccessSound, vibrate } from "../lib/audio";
@@ -176,6 +177,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
   currentUser,
   addToast,
 }) => {
+  const { casalId } = useAppContext();
   const [activeFilter, setActiveFilter] = useState<FilterType>("todas");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [amount, setAmount] = useState("");
@@ -338,7 +340,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       if (missionImage) {
         depositData.imageUrl = missionImage;
       }
-      await addDoc(collection(db, "deposits"), depositData);
+      await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
       confetti({
         particleCount: 100,
         spread: 70,
@@ -364,7 +366,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       setAmount("");
       setMissionImage(null);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "deposits");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     } finally {
       setIsSubmitting(false);
     }
@@ -400,7 +402,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             : c,
         );
         await setDoc(
-          doc(db, "trip_config", "main"),
+          doc(db, `casais/${casalId}/trip_config`, "main"),
           { battleChallenges: updatedChallenges },
           { merge: true },
         );
@@ -411,7 +413,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             : c,
         );
         await setDoc(
-          doc(db, "trip_config", "main"),
+          doc(db, `casais/${casalId}/trip_config`, "main"),
           { customChallenges: updatedCustom },
           { merge: true },
         );
@@ -419,7 +421,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       addToast("Tudo Certo!", "Missão editada com sucesso, mestre.", "success");
       setEditingMission(null);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "trip_config");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
     } finally {
       setIsSavingEdit(false);
     }
@@ -434,21 +436,21 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               : DEFAULT_MISSIONS.filter((m) => m.category === "desafio");
           const updated = current.filter((c) => c.id !== mission.id);
           await setDoc(
-            doc(db, "trip_config", "main"),
+            doc(db, `casais/${casalId}/trip_config`, "main"),
             { battleChallenges: updated },
             { merge: true },
           );
         } else if (mission.category === "custom") {
           const updated = customChallenges.filter((c) => c.id !== mission.id);
           await setDoc(
-            doc(db, "trip_config", "main"),
+            doc(db, `casais/${casalId}/trip_config`, "main"),
             { customChallenges: updated },
             { merge: true },
           );
         }
         addToast("Missão Abortada =(", "Sumiu do mapa!", "info");
       } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, "trip_config");
+        handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
       }
     };
   /* ======================================== */ /* Add new mission */ const handleAddMission =
@@ -469,7 +471,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               ? battleChallenges
               : DEFAULT_MISSIONS.filter((m) => m.category === "desafio");
           await setDoc(
-            doc(db, "trip_config", "main"),
+            doc(db, `casais/${casalId}/trip_config`, "main"),
             { battleChallenges: [...current, newChallenge] },
             { merge: true },
           );
@@ -480,7 +482,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             icon: newIcon || "⭐",
           };
           await setDoc(
-            doc(db, "trip_config", "main"),
+            doc(db, `casais/${casalId}/trip_config`, "main"),
             { customChallenges: [...customChallenges, newCustom] },
             { merge: true },
           );
@@ -496,7 +498,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         setNewIcon("⭐");
         setShowAddForm(false);
       } catch (error) {
-        handleFirestoreError(error, OperationType.WRITE, "trip_config");
+        handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
       } finally {
         setIsSavingEdit(false);
       }

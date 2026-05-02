@@ -74,27 +74,27 @@
     }
   },
   "firestore": {
-    "/pinboard_links/{linkId}": {
-      "schema": { "$ref": "#/entities/PinboardLink" },
-      "description": "Links and inspirations added to the dream board"
-    },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "User profiles"
     },
-    "/trip_config/main": {
+    "/casais/{casalId}/trip_config/main": {
       "schema": { "$ref": "#/entities/TripConfig" },
       "description": "The single trip configuration for the couple"
     },
-    "/deposits/{depositId}": {
+    "/casais/{casalId}/deposits/{depositId}": {
       "schema": { "$ref": "#/entities/Deposit" },
       "description": "All deposits made towards the trip"
     },
-    "/achievements/{achievementId}": {
+    "/casais/{casalId}/pinboard_links/{linkId}": {
+      "schema": { "$ref": "#/entities/PinboardLink" },
+      "description": "Links and inspirations added to the dream board"
+    },
+    "/casais/{casalId}/achievements/{achievementId}": {
       "schema": { "$ref": "#/entities/Achievement" },
       "description": "Historical records of completed pots"
     },
-    "/bingo_stats/{actionId}": {
+    "/casais/{casalId}/bingo_stats/{actionId}": {
       "schema": { "$ref": "#/entities/BingoStat" },
       "description": "Aggregated stats for each bingo action"
     }

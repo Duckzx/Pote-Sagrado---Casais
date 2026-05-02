@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from "react";
+import React, { useMemo, useEffect, useState, useRef, memo } from "react";
 import {
   Award,
   Flame,
@@ -124,7 +124,7 @@ const COUPLE_LEVELS = [
   { level: 8, name: "Lendas do Aeroporto", minXp: 15000 },
 ];
 
-export const UserBadges: React.FC<UserBadgesProps> = ({
+export const UserBadges: React.FC<UserBadgesProps> = memo(({
   deposits,
   currentUser,
   goalAmount,
@@ -520,5 +520,5 @@ export const UserBadges: React.FC<UserBadgesProps> = ({
       )}{" "}
     </>
   );
-};
+});
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, memo } from "react";
 import { Sparkles, Trophy, Heart, Star, TrendingUp, Calendar, Zap } from "lucide-react";
 import { formatDistanceToNow, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,7 +10,7 @@ interface MomentsWidgetProps {
   destination: string;
 }
 
-export const MomentsWidget: React.FC<MomentsWidgetProps> = ({
+export const MomentsWidget: React.FC<MomentsWidgetProps> = memo(({
   deposits,
   goalAmount,
   totalSaved,
@@ -213,4 +213,4 @@ export const MomentsWidget: React.FC<MomentsWidgetProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -195,7 +195,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       if (quickImage) {
         depositData.imageUrl = quickImage;
       }
-      await addDoc(collection(db, "deposits"), depositData);
+      await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
       /* Haptic and audio feedback */ vibrate([30, 50, 30]);
       if (quickType === "income") {
         playCoinSound();
@@ -223,7 +223,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       setQuickType("income");
       setQuickImage(null);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, "deposits");
+      handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     } finally {
       setIsQuickSubmitting(false);
     }
@@ -234,7 +234,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const confirmDelete = async () => {
     if (!depositToDelete) return;
     try {
-      await deleteDoc(doc(db, "deposits", depositToDelete));
+      await deleteDoc(doc(db, `casais/${casalId}/deposits`, depositToDelete));
       addToast("Excluído", "A economia foi removida com sucesso.", "info");
     } catch (error) {
       console.error("Error deleting deposit:", error);
@@ -264,7 +264,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     setIsEditing(true);
     try {
       await setDoc(
-        doc(db, "deposits", depositToEdit.id),
+        doc(db, `casais/${casalId}/deposits`, depositToEdit.id),
         { amount: parsedAmount, action: editDescription },
         { merge: true },
       );
@@ -294,7 +294,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         });
         for (const deposit of deposits) {
           try {
-            await deleteDoc(doc(db, "deposits", deposit.id));
+            await deleteDoc(doc(db, `casais/${casalId}/deposits`, deposit.id));
           } catch (e) {
             console.error("Could not delete deposit", deposit.id, e);
           }

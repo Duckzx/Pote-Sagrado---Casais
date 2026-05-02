@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MessageCircle, Heart, Send } from "lucide-react";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAppContext } from "../context/AppContext";
 import { Deposit } from "../types";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 
@@ -12,14 +13,15 @@ interface ActivityFeedProps {
   currentUser: any;
 }
 
-export const ActivityFeed: React.FC<ActivityFeedProps> = ({ deposits, currentUser }) => {
+export const ActivityFeed: React.FC<ActivityFeedProps> = memo(({ deposits, currentUser }) => {
+  const { casalId } = useAppContext();
   const [commentingOn, setCommentingOn] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
 
   const handleAddComment = async (depositId: string) => {
     if (!commentText.trim() || !currentUser) return;
 
-    const depositRef = doc(db, "deposits", depositId);
+    const depositRef = doc(db, `casais/${casalId}/deposits`, depositId);
     const newComment = {
       id: Math.random().toString(36).substring(7),
       text: commentText.trim(),
@@ -35,7 +37,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ deposits, currentUse
       setCommentText("");
       setCommentingOn(null);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `deposits/${depositId}`);
+      handleFirestoreError(err, OperationType.UPDATE, `casais/${casalId}/deposits/${depositId}`);
     }
   };
 
@@ -43,7 +45,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ deposits, currentUse
     if (!currentUser) return;
     
     // Toggle heart reaction logic
-    const depositRef = doc(db, "deposits", depositId);
+    const depositRef = doc(db, `casais/${casalId}/deposits`, depositId);
     const newReactions = { ...currentReactions };
     
     if (newReactions[currentUser.uid]) {
@@ -57,15 +59,17 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ deposits, currentUse
         reactions: newReactions,
       });
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `deposits/${depositId}`);
+      handleFirestoreError(err, OperationType.UPDATE, `casais/${casalId}/deposits/${depositId}`);
     }
   };
 
   // Sort deposits by date descending
-  const sortedDeposits = [...deposits]
-    .filter(d => d.createdAt && d.createdAt.seconds)
-    .sort((a, b) => b.createdAt!.seconds - a.createdAt!.seconds)
-    .slice(0, 10); // show only last 10 activities
+  const sortedDeposits = useMemo(() => {
+    return [...deposits]
+      .filter(d => d.createdAt && d.createdAt.seconds)
+      .sort((a, b) => b.createdAt!.seconds - a.createdAt!.seconds)
+      .slice(0, 10);
+  }, [deposits]);
 
   if (sortedDeposits.length === 0) return null;
 
@@ -189,4 +193,4 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ deposits, currentUse
       </div>
     </div>
   );
-};
+});

@@ -25,6 +25,7 @@ export interface ToastMessage {
 interface AppContextValue {
   // Auth
   user: AppUser | null;
+  casalId: string | null;
   isAuthReady: boolean;
   isDataReady: boolean;
 
@@ -81,6 +82,7 @@ export function useAppContext(): AppContextValue {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
+  const [casalId, setCasalId] = useState<string | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isDataReady, setIsDataReady] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -166,84 +168,98 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isAuthReady || !user) return;
 
-    // Listen to user profile for theme
-    const unsubUser = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().theme) {
-        const t = docSnap.data().theme as ThemeId;
-        setTheme(t);
-        localStorage.setItem('pote_theme', t);
-      }
-    }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
-
-    // Listen to trip config
-    const unsubConfig = onSnapshot(doc(db, 'trip_config', 'main'), (docSnap) => {
+    // Listen to user profile for theme and casalId
+    const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
+      let currentCasalId = `casal_${user.uid}`; // default
       if (docSnap.exists()) {
-        const data = docSnap.data() as Partial<TripConfig>;
-        setTripConfig(prev => {
-          const newConfig = { ...prev, ...data };
-          localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
-          return newConfig;
-        });
-      }
-    }, (error) => handleFirestoreError(error, OperationType.GET, 'trip_config/main'));
-
-    // Listen to deposits
-    const q = query(
-      collection(db, 'deposits'), 
-      orderBy('createdAt', 'desc'),
-      limit(200) // Limite adicionado para evitar picos de leitura e reduzir faturamento
-    );
-    const unsubDeposits = onSnapshot(q, (querySnapshot) => {
-      const deps: Deposit[] = [];
-      let total = 0;
-      const stats: Record<string, number> = {};
-
-      querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        deps.push({ id: docSnap.id, ...data } as Deposit);
-
-        if (data.type === 'expense') {
-          total -= data.amount || 0;
-        } else {
-          total += data.amount || 0;
+        if (data.theme) {
+          const t = data.theme as ThemeId;
+          setTheme(t);
+          localStorage.setItem('pote_theme', t);
         }
-
-        if (data.action && data.type !== 'expense') {
-          stats[data.action] = (stats[data.action] || 0) + 1;
+        if (data.casalId) {
+          currentCasalId = data.casalId;
         }
-      });
-
-      setDeposits(deps);
-      setTotalSaved(total);
-      localStorage.setItem('pote_totalSaved', total.toString());
-      setBingoStats(stats);
+      }
+      setCasalId(currentCasalId);
       
-      // Delay slightly for smooth transition
-      setTimeout(() => setIsDataReady(true), 200);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'deposits'));
+      // Now that we have the casalId, listen to the specific couple's config
+      const unsubConfig = onSnapshot(doc(db, 'casais', currentCasalId), (configSnap) => {
+        if (configSnap.exists()) {
+          const data = configSnap.data() as Partial<TripConfig>;
+          setTripConfig(prev => {
+            const newConfig = { ...prev, ...data };
+            localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
+            return newConfig;
+          });
+        }
+      }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}`));
 
-    // Listen to achievements
-    const qArchived = query(collection(db, 'achievements'), orderBy('createdAt', 'desc'));
-    const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
-      const arch: any[] = [];
-      querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
-      setAchievements(arch);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'achievements'));
+      // Listen to deposits for this specific casal
+      const q = query(
+        collection(db, `casais/${currentCasalId}/deposits`), 
+        orderBy('createdAt', 'desc'),
+        limit(200)
+      );
+      const unsubDeposits = onSnapshot(q, (querySnapshot) => {
+        const deps: Deposit[] = [];
+        let total = 0;
+        const stats: Record<string, number> = {};
 
-    // Listen to pinboard links
-    const qLinks = query(collection(db, 'pinboard_links'), orderBy('createdAt', 'desc'));
-    const unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
-      const linksData: any[] = [];
-      querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
-      setPinboardLinks(linksData);
-    }, (error) => handleFirestoreError(error, OperationType.LIST, 'pinboard_links'));
+        querySnapshot.forEach((depositSnap) => {
+          const data = depositSnap.data();
+          deps.push({ id: depositSnap.id, ...data } as Deposit);
+
+          if (data.type === 'expense') {
+            total -= data.amount || 0;
+          } else {
+            total += data.amount || 0;
+          }
+
+          if (data.action && data.type !== 'expense') {
+            stats[data.action] = (stats[data.action] || 0) + 1;
+          }
+        });
+
+        setDeposits(deps);
+        setTotalSaved(total);
+        localStorage.setItem('pote_totalSaved', total.toString());
+        setBingoStats(stats);
+        
+        setTimeout(() => setIsDataReady(true), 200);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/deposits`));
+
+      // Listen to achievements
+      const qArchived = query(collection(db, `casais/${currentCasalId}/achievements`), orderBy('createdAt', 'desc'));
+      const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
+        const arch: any[] = [];
+        querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
+        setAchievements(arch);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/achievements`));
+
+      // Listen to pinboard links
+      const qLinks = query(collection(db, `casais/${currentCasalId}/pinboard_links`), orderBy('createdAt', 'desc'));
+      const unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
+        const linksData: any[] = [];
+        querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
+        setPinboardLinks(linksData);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/pinboard_links`));
+
+      // Store unsubs so we can clear them when the user changes
+      (window as any)._unsubCasalConfig = unsubConfig;
+      (window as any)._unsubCasalDeposits = unsubDeposits;
+      (window as any)._unsubCasalAchievements = unsubAchievements;
+      (window as any)._unsubCasalLinks = unsubLinks;
+
+    }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
 
     return () => {
       unsubUser();
-      unsubConfig();
-      unsubDeposits();
-      unsubAchievements();
-      unsubLinks();
+      if ((window as any)._unsubCasalConfig) (window as any)._unsubCasalConfig();
+      if ((window as any)._unsubCasalDeposits) (window as any)._unsubCasalDeposits();
+      if ((window as any)._unsubCasalAchievements) (window as any)._unsubCasalAchievements();
+      if ((window as any)._unsubCasalLinks) (window as any)._unsubCasalLinks();
     };
   }, [isAuthReady, user]);
 
@@ -305,6 +321,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppContextValue = {
     user,
+    casalId,
     isAuthReady,
     isDataReady,
     activeTab,
