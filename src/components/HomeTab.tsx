@@ -42,6 +42,8 @@ import { playCoinSound, vibrate } from "../lib/audio";
 import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
+import { MomentsWidget } from "./MomentsWidget";
+
 interface HomeTabProps {
   currentUser: any;
   destination: string;
@@ -365,7 +367,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </div>
       )}{" "}
       {/* Daily Motivational Quote */}{" "}
-      <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 -mt-4 shadow-sm">
+      <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 -mt-4 shadow-sm mb-6">
         {" "}
         <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>{" "}
         <span className="font-serif italic text-[13px] text-cookbook-text/80">
@@ -373,6 +375,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {dailyQuote.text}{" "}
         </span>{" "}
       </div>{" "}
+
+      {/* Moments Widget (Dopamine Events) */}
+      <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
+
       {/* Shared Album Widget */}{" "}
       {sharedAlbumUrl && <div className="mt-6 mb-2"><SharedAlbumWidget url={sharedAlbumUrl} /></div>}{" "}
       {/* Wrapped Button */}{" "}
