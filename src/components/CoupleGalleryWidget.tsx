@@ -1,23 +1,16 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useGallery } from "../hooks/useGallery";
-import CircularGallery from "./CircularGallery";
 import { AddMediaModal } from "./AddMediaModal";
 
 export const CoupleGalleryWidget: React.FC<{ addToast: any }> = ({ addToast }) => {
-  const { photos, addPhoto, addPhotoUrl } = useGallery();
+  const { photos, addPhoto, addPhotoUrl, removePhoto } = useGallery();
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const galleryItems = photos.map((p) => ({ 
-    image: p.imageUrl || p.imageBase64 || "", 
-    text: "" 
-  }));
-
   return (
-    <div className="mb-8 relative z-10">
-      <div className="flex items-center justify-between mb-6">
-        <div />
-        <h3 className="text-center font-sans tracking-widest uppercase text-xs font-bold text-cookbook-text/60">
+    <div className="mb-4 relative z-10 w-full max-w-md mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-sans tracking-widest uppercase text-[10px] font-bold text-cookbook-text/40">
           Nosso Álbum
         </h3>
         <button
@@ -28,18 +21,29 @@ export const CoupleGalleryWidget: React.FC<{ addToast: any }> = ({ addToast }) =
         </button>
       </div>
 
-      <div style={{ height: "400px", position: "relative" }}>
-        {galleryItems.length > 0 ? (
-          <CircularGallery
-            items={galleryItems}
-            bend={3}
-            textColor="#ffffff"
-            borderRadius={0.05}
-          />
+      <div className="relative">
+        {photos.length > 0 ? (
+          <div className="flex overflow-x-auto gap-3 pb-4 pt-1 snap-x snap-mandatory hide-scrollbar px-1">
+            {photos.map((p) => (
+              <div key={p.id} className="relative shrink-0 w-56 h-72 rounded-3xl overflow-hidden snap-center group shadow-md border border-cookbook-border/20 bg-cookbook-bg">
+                <img 
+                  src={p.imageUrl || p.imageBase64 || ""} 
+                  alt="Momento" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <button
+                  onClick={() => removePhoto(p.id)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md hover:bg-red-500/80"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center border border-dashed border-cookbook-border/50 rounded-3xl">
-            <p className="text-cookbook-text/40 font-sans text-xs uppercase tracking-widest text-center px-8">
-              Adicione momentos ou links para inspirar a jornada de vocês
+          <div className="flex items-center justify-center h-48 border border-dashed border-cookbook-border/50 rounded-3xl">
+            <p className="text-cookbook-text/40 font-sans text-[10px] uppercase tracking-widest text-center px-8">
+              Adicione fotos para inspirar a jornada de vocês
             </p>
           </div>
         )}

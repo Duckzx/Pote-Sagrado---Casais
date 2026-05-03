@@ -21,9 +21,7 @@ import { db, auth, storage } from "../firebase";
 import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
-import { ActivityFeed } from "./ActivityFeed";
 import { UserBadges } from "./UserBadges";
-import { SavingsChart } from "./SavingsChart";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 interface PinboardTabProps {
   addToast: (
@@ -344,12 +342,6 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         {" "}
         <CoupleGalleryWidget addToast={addToast} />{" "}
       </section>{" "}
-
-      {/* 3. Activity & Charts */}
-      <section className="space-y-6">
-        <SavingsChart deposits={deposits} goalAmount={goalAmount} />
-        <ActivityFeed deposits={deposits} currentUser={currentUser} />
-      </section>
 
       <div className="pt-8">
         <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />

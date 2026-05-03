@@ -15,13 +15,16 @@ import {
   Plus,
   Download,
   MoreVertical,
-  Heart
+  Heart,
+  MessageCircle,
+  Send,
+  ChevronDown
 } from "lucide-react";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
-import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+
 interface ExtratoTabProps {
   deposits: any[];
   addToast: (
@@ -65,6 +68,48 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   const [editAction, setEditAction] = useState("");
   const [editDate, setEditDate] = useState("");
   /* Delete state */ const [deleting, setDeleting] = useState<any | null>(null);
+  /* Filter state */ const [showFilters, setShowFilters] = useState(false);
+  /* Comments state */
+  const [commentingOn, setCommentingOn] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState("");
+
+  const currentUser = auth.currentUser;
+
+  const handleAddComment = async (depositId: string) => {
+    if (!commentText.trim() || !currentUser) return;
+    const depositRef = doc(db, `casais/${casalId}/deposits`, depositId);
+    const newComment = {
+      id: Math.random().toString(36).substring(7),
+      text: commentText.trim(),
+      who: currentUser.uid,
+      whoName: currentUser.displayName || "Usuário",
+      createdAt: Date.now(),
+    };
+    try {
+      await updateDoc(depositRef, { comments: arrayUnion(newComment) });
+      setCommentText("");
+      setCommentingOn(null);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `casais/${casalId}/deposits/${depositId}`);
+    }
+  };
+
+  const handleToggleReaction = async (depositId: string, currentReactions: Record<string, string> = {}) => {
+    if (!currentUser) return;
+    const depositRef = doc(db, `casais/${casalId}/deposits`, depositId);
+    const newReactions = { ...currentReactions };
+    if (newReactions[currentUser.uid]) {
+      delete newReactions[currentUser.uid];
+    } else {
+      newReactions[currentUser.uid] = "❤️";
+    }
+    try {
+      await updateDoc(depositRef, { reactions: newReactions });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `casais/${casalId}/deposits/${depositId}`);
+    }
+  };
+
   /* Get unique users */ const users = useMemo(() => {
     const map = new Map<string, string>();
     deposits.forEach((d) => {
@@ -184,40 +229,6 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     return { biggestDeposit, biggestExpense };
   }, [filteredDeposits]);
   
-  /* Chart Data */
-  const chartData = useMemo(() => {
-    if (selectedMonth === -1) {
-      const monthlyStats: Record<string, { label: string; index: number; Entradas: number; Saídas: number }> = {};
-      deposits.forEach(d => {
-        const date = getDateObj(d.createdAt);
-        if (!date) return;
-        const m = date.getMonth();
-        const y = date.getFullYear();
-        const key = `${y}-${m}`;
-        if (!monthlyStats[key]) {
-           monthlyStats[key] = { label: `${MONTHS_PT[m].slice(0, 3)}/${y.toString().slice(-2)}`, index: y * 12 + m, Entradas: 0, Saídas: 0 };
-        }
-        if (d.type === 'expense') monthlyStats[key].Saídas += d.amount;
-        else monthlyStats[key].Entradas += d.amount;
-      });
-      return Object.values(monthlyStats).sort((a,b) => a.index - b.index);
-    } else {
-      const dailyStats: Record<string, { label: string; index: number; Entradas: number; Saídas: number }> = {};
-      filteredDeposits.forEach(d => {
-        const date = getDateObj(d.createdAt);
-        if (!date) return;
-        const dy = date.getDate();
-        const key = dy.toString();
-        if (!dailyStats[key]) {
-           dailyStats[key] = { label: `${dy}`, index: dy, Entradas: 0, Saídas: 0 };
-        }
-        if (d.type === 'expense') dailyStats[key].Saídas += d.amount;
-        else dailyStats[key].Entradas += d.amount;
-      });
-      return Object.values(dailyStats).sort((a,b) => a.index - b.index);
-    }
-  }, [selectedMonth, deposits, filteredDeposits]);
-  
   /* Edit handler */ const handleEdit = (deposit: any) => {
     setEditing(deposit);
     setEditAmount(deposit.amount.toString());
@@ -230,6 +241,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       setEditDate("");
     }
   };
+  
   const confirmEdit = async () => {
     const parsedAmount = Number(editAmount.replace(",", "."));
     if (!editing || !editAmount || isNaN(parsedAmount) || parsedAmount <= 0)
@@ -280,7 +292,6 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     if (!dDate) return "";
     return dDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   };
-  const currentUser = auth.currentUser;
 
   const handleExportCSV = () => {
     if (filteredDeposits.length === 0) {
@@ -422,31 +433,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         </div>
       )}
 
-      {/* Chart */}
-      {chartData.length > 0 && (
-        <div className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-3xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] h-48 w-full">
-           <ResponsiveContainer width="100%" height="100%">
-             <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-               <defs>
-                 <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                 </linearGradient>
-                 <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
-                   <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                 </linearGradient>
-               </defs>
-               <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontFamily: 'Inter' }} dy={10} minTickGap={15} />
-               <RechartsTooltip cursor={{ stroke: '#e5e7eb', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', fontSize: '12px', fontFamily: 'Inter' }} />
-               <Area type="monotone" dataKey="Entradas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorEntradas)" />
-               <Area type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorSaidas)" />
-             </AreaChart>
-           </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Filter Row */}
+      {/* Action Row */}
       <div className="flex flex-col gap-3">
         {/* Search & Actions */}
         <div className="flex items-center gap-2">
@@ -469,9 +456,17 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           </div>
           
           <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)] gap-1 text-xs font-bold uppercase tracking-wider ${showFilters ? 'bg-cookbook-primary/10 text-cookbook-primary' : 'text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5'}`}
+          >
+            <Filter size={14} />
+            <span className="hidden sm:inline">Filtros</span>
+          </button>
+
+          <button 
             onClick={() => setSortAsc(!sortAsc)}
             title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
-            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
           >
              <ArrowUpCircle size={18} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
           </button>
@@ -479,14 +474,15 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <button 
             onClick={handleExportCSV}
             title="Exportar CSV"
-            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-4 text-cookbook-primary hover:bg-cookbook-primary/10 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 text-cookbook-primary hover:bg-cookbook-primary/10 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
           >
              <Download size={18} />
           </button>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+        {showFilters && (
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 animate-slide-up-fade">
           {/* Type filter */}
           <div className="flex bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border p-1 rounded-xl shrink-0">
             {[
@@ -520,11 +516,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cookbook-text/40">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                <ChevronDown size={14} className="text-cookbook-text/40"/>
               </div>
             </div>
           )}
         </div>
+        )}
       </div>{" "}
 
       {/* Insights */}
@@ -647,23 +644,87 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                           </div>
                         </div>
                         
-                        {isOwner && (
-                          <div className="flex border-t border-cookbook-border/10">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
-                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors"
-                            >
-                              <Pencil size={12} /> Editar
-                            </button>
-                            <div className="w-px bg-cookbook-border/10" />
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
-                              className="flex-1 flex items-center justify-center py-2.5 gap-2 text-[10px] uppercase font-bold tracking-widest text-cookbook-text/40 hover:text-red-500 hover:bg-red-500/5 transition-colors"
-                            >
-                              <Trash2 size={12} /> Excluir
-                            </button>
+                        {/* Interactions Box */}
+                        <div className="flex flex-col border-t border-cookbook-border/10 bg-cookbook-bg/50">
+                          <div className="flex items-center justify-between px-4 py-2">
+                            <div className="flex items-center gap-4">
+                              <button 
+                                onClick={() => handleToggleReaction(deposit.id, deposit.reactions)}
+                                className={`flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold transition-colors ${deposit.reactions && deposit.reactions[currentUser?.uid || ''] ? 'text-red-400' : 'text-cookbook-text/40 hover:text-cookbook-text/60'}`}
+                              >
+                                <Heart size={14} className={deposit.reactions && deposit.reactions[currentUser?.uid || ''] ? 'fill-current' : ''} />
+                                {deposit.reactions ? Object.keys(deposit.reactions).length || 'Amor' : 'Amor'}
+                              </button>
+                              <button 
+                                onClick={() => setCommentingOn(commentingOn === deposit.id ? null : deposit.id)}
+                                className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40 hover:text-cookbook-text/60 transition-colors"
+                              >
+                                <MessageCircle size={14} />
+                                {deposit.comments?.length ? deposit.comments.length : 'Comentar'}
+                              </button>
+                            </div>
+                            
+                            {isOwner && (
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
+                                  className="text-[10px] uppercase font-bold tracking-widest text-cookbook-text/30 hover:text-cookbook-primary transition-colors"
+                                >
+                                  <Pencil size={12} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
+                                  className="text-[10px] uppercase font-bold tracking-widest text-cookbook-text/30 hover:text-red-500 transition-colors"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            )}
                           </div>
-                        )}
+
+                          {/* Comments List */}
+                          {deposit.comments && deposit.comments.length > 0 && (
+                            <div className="px-4 pb-3 space-y-2">
+                              {deposit.comments.map((comment: any) => (
+                                <div key={comment.id} className="flex gap-2">
+                                  <div className="w-5 h-5 rounded-full bg-cookbook-border/50 flex items-center justify-center font-bold text-[8px] text-cookbook-text/70 shrink-0 mt-0.5">
+                                    {comment.whoName.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="bg-cookbook-bg border border-cookbook-border/50 rounded-2xl rounded-tl-none p-2 flex-1">
+                                    <p className="text-[10px] font-bold text-cookbook-text/90 mb-0.5">{comment.whoName}</p>
+                                    <p className="text-[11px] text-cookbook-text/70 leading-tight">{comment.text}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Comment Input */}
+                          {commentingOn === deposit.id && (
+                            <div className="px-4 pb-3 animate-fade-in">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Escreva algo especial..."
+                                  value={commentText}
+                                  onChange={(e) => setCommentText(e.target.value)}
+                                  className="flex-1 bg-cookbook-bg border border-cookbook-border rounded-full px-3 py-1.5 text-[11px] text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleAddComment(deposit.id);
+                                  }}
+                                  autoFocus
+                                />
+                                <button 
+                                  onClick={() => handleAddComment(deposit.id)}
+                                  disabled={!commentText.trim()}
+                                  className="w-7 h-7 rounded-full bg-cookbook-primary flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
+                                >
+                                  <Send size={10} />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
               })}
