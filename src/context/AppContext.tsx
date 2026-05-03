@@ -4,7 +4,8 @@ import { playSuccessSound, vibrate } from '../lib/audio';
 import { collection, doc, onSnapshot, query, orderBy, limit, getDocs, getDoc, setDoc, deleteDoc, where } from 'firebase/firestore';
 import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
-import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, DEFAULT_TRIP_CONFIG } from '../types';
+import { useAppStore } from '../store/useAppStore';
+import type { Deposit, TripConfig, TabId, AddToastFn, ThemeId, AppUser, Partner } from '../types';
 import { TAB_ORDER } from '../types';
 
 // ========================================
@@ -19,13 +20,14 @@ export interface ToastMessage {
 }
 
 // ========================================
-// Context Shape
+// Context Shape (Slimmed down)
 // ========================================
 
 interface AppContextValue {
   // Auth
   user: AppUser | null;
   casalId: string | null;
+  partner: Partner | null;
   isAuthReady: boolean;
   isDataReady: boolean;
 
@@ -33,15 +35,6 @@ interface AppContextValue {
   activeTab: TabId;
   tabDirection: number;
   handleTabChange: (tab: TabId) => void;
-
-  // Data
-  tripConfig: TripConfig;
-  deposits: Deposit[];
-  totalSaved: number;
-  bingoStats: Record<string, number>;
-
-  // Theme
-  theme: ThemeId;
 
   // Toasts
   toasts: ToastMessage[];
@@ -52,12 +45,6 @@ interface AppContextValue {
   showOnboarding: boolean;
   handleCompleteOnboarding: () => void;
   
-  // Achievements (completed pots)
-  achievements: any[];
-
-  // Pinboard Links
-  pinboardLinks: any[];
-
   // PWA Install
   canInstall: boolean;
   installPrompt: any | null;
@@ -83,31 +70,25 @@ export function useAppContext(): AppContextValue {
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [casalId, setCasalId] = useState<string | null>(null);
+  const [partner, setPartner] = useState<Partner | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isDataReady, setIsDataReady] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [tabDirection, setTabDirection] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const [tripConfig, setTripConfig] = useState<TripConfig>(() => {
-    const saved = localStorage.getItem('pote_tripConfig');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { /* fallback */ }
-    }
-    return { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
-  });
+  // Store actions
+  const setDeposits = useAppStore(s => s.setDeposits);
+  const setTripConfig = useAppStore(s => s.setTripConfig);
+  const setTheme = useAppStore(s => s.setTheme);
 
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  // Stats/Extra state
+  const [totalSaved, setTotalSaved] = useState<number>(0);
+  const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
   const [achievements, setAchievements] = useState<any[]>([]);
   const [pinboardLinks, setPinboardLinks] = useState<any[]>([]);
-  const [totalSaved, setTotalSaved] = useState(() => {
-    const saved = localStorage.getItem('pote_totalSaved');
-    return saved ? Number(saved) : 0;
-  });
-  const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
-  const [theme, setTheme] = useState<ThemeId>(() => (localStorage.getItem('pote_theme') as ThemeId) || 'cookbook');
 
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
 
@@ -138,7 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setActiveTab(newTab);
   }, [activeTab]);
 
-  // ---- Auth ----
+  // ---- Auth & Profile Sync ----
   useEffect(() => {
     // Check invite param in URL
     const params = new URLSearchParams(window.location.search);
@@ -150,22 +131,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       window.history.replaceState({}, '', newUrl);
     }
 
-    // Check if the user is logging in from a redirect (e.g. from mobile Instagram browser bypassing popup)
     handleRedirectResult();
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthReady(true);
-
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const hasSeenOnboarding = localStorage.getItem(`onboarding_${currentUser.uid}`);
-        if (!hasSeenOnboarding) {
-          setShowOnboarding(true);
+        // Sync User Profile to get casalId/coupleId
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        
+        let profileData: any;
+        if (!userSnap.exists()) {
+          // Create default profile with a new casalId (the user's own UID)
+          profileData = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL,
+            theme: 'cookbook',
+            casalId: `casal_${currentUser.uid}`,
+            createdAt: new Date().toISOString()
+          };
+          await setDoc(userRef, profileData);
+        } else {
+          profileData = userSnap.data();
         }
+        
+        const extendedUser: AppUser = Object.assign(currentUser, { coupleId: profileData.casalId || profileData.coupleId || `casal_${currentUser.uid}` });
+        setUser(extendedUser);
+        if (profileData.theme) setTheme(profileData.theme as ThemeId);
+
+        const hasSeenOnboarding = localStorage.getItem(`onboarding_${currentUser.uid}`);
+        if (!hasSeenOnboarding) setShowOnboarding(true);
+      } else {
+        setUser(null);
       }
+      setIsAuthReady(true);
     });
     return () => unsubscribe();
-  }, []);
+  }, [setTheme]);
 
   const handleCompleteOnboarding = useCallback(() => {
     if (user) {
@@ -174,9 +177,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setShowOnboarding(false);
   }, [user]);
 
-  // ---- Firestore Listeners ----
+  // ---- Firestore Listeners (Isolated by casalId) ----
   useEffect(() => {
     if (!isAuthReady || !user) return;
+
+    let activeCasalId: string | null = null;
+    let unsubConfig: (() => void) | null = null;
+    let unsubDeposits: (() => void) | null = null;
+    let unsubAchievements: (() => void) | null = null;
+    let unsubLinks: (() => void) | null = null;
+    let unsubPartner: (() => void) | null = null;
+
+    const stopNestedListeners = () => {
+      unsubConfig?.();
+      unsubDeposits?.();
+      unsubAchievements?.();
+      unsubLinks?.();
+      unsubPartner?.();
+    };
 
     // Apply pending invite
     const pendingInvite = localStorage.getItem('pote_invite_code');
@@ -184,7 +202,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
        setDoc(doc(db, 'users', user.uid), { casalId: pendingInvite }, { merge: true })
          .then(() => {
            localStorage.removeItem('pote_invite_code');
-           // Show success toast for linking profiles
            addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
          })
          .catch((e) => console.error("Error setting pending invite", e));
@@ -192,7 +209,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Listen to user profile for theme and casalId
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
-      let currentCasalId = `casal_${user.uid}`; // default
+      let newCasalId = `casal_${user.uid}`;
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.theme) {
@@ -201,152 +218,143 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('pote_theme', t);
         }
         if (data.casalId) {
-          currentCasalId = data.casalId;
+          newCasalId = data.casalId;
         }
       }
-      setCasalId(currentCasalId);
       
-      // Now that we have the casalId, listen to the specific couple's config
-      const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {
-        if (configSnap.exists()) {
-          const data = configSnap.data() as Partial<TripConfig>;
-          setTripConfig(prev => {
-            const newConfig = { ...prev, ...data };
-            localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
-            return newConfig;
-          });
-        }
-      }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
+      setCasalId(newCasalId);
 
-      // ----------------------------------------------------
-      // AUTOMATIC MIGRATION: copy old data to current casal (runs once per session)
-      // ----------------------------------------------------
-      if (!(window as any)._hasRunMigration && auth.currentUser) {
-        (window as any)._hasRunMigration = true;
-        const runMigration = async () => {
-          try {
-            // Migrate deposits
-            const oldDeps = await getDocs(query(collection(db, 'deposits'), where('who', '==', auth.currentUser!.uid)));
-            oldDeps.docs.forEach(async (d) => {
-              await setDoc(doc(db, `casais/${currentCasalId}/deposits`, d.id), d.data());
-              await deleteDoc(doc(db, 'deposits', d.id));
+      // If casalId changed, restart nested listeners
+      if (newCasalId !== activeCasalId) {
+        stopNestedListeners();
+        activeCasalId = newCasalId;
+
+        // 1. Partner Listener
+        const partnerQuery = query(collection(db, 'users'), where('casalId', '==', newCasalId));
+        unsubPartner = onSnapshot(partnerQuery, (snap) => {
+          const other = snap.docs.find(d => d.id !== user.uid);
+          if (other) {
+            const d = other.data();
+            setPartner({
+              uid: other.id,
+              displayName: d.displayName || d.email?.split('@')[0] || 'Parceiro',
+              photoURL: d.photoURL || ''
             });
-
-            // Migrate trip_config/main if it exists and current is empty
-            const oldConfig = await getDoc(doc(db, 'trip_config', 'main'));
-            if (oldConfig.exists()) {
-              const currentConfig = await getDoc(doc(db, `casais/${currentCasalId}/trip_config`, 'main'));
-              if (!currentConfig.exists()) {
-                await setDoc(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), oldConfig.data());
-              }
-            }
-          } catch (e) {
-            console.error("Migration error:", e);
-          }
-        };
-        runMigration();
-      }
-      // ----------------------------------------------------
-
-      // Listen to deposits for this specific casal
-      const q = query(
-        collection(db, `casais/${currentCasalId}/deposits`), 
-        orderBy('createdAt', 'desc'),
-        limit(200)
-      );
-      const unsubDeposits = onSnapshot(q, (querySnapshot) => {
-        const deps: Deposit[] = [];
-        let total = 0;
-        const stats: Record<string, number> = {};
-
-        querySnapshot.forEach((depositSnap) => {
-          const data = depositSnap.data();
-          deps.push({ id: depositSnap.id, ...data } as Deposit);
-
-          if (data.type === 'expense') {
-            total -= data.amount || 0;
           } else {
-            total += data.amount || 0;
-          }
-
-          if (data.action && data.type !== 'expense') {
-            stats[data.action] = (stats[data.action] || 0) + 1;
+            setPartner(null);
           }
         });
 
-        setDeposits(deps);
-        setTotalSaved(total);
-        localStorage.setItem('pote_totalSaved', total.toString());
-        setBingoStats(stats);
-        
-        setTimeout(() => setIsDataReady(true), 200);
-      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/deposits`));
+        // 2. Trip Config Listener
+        unsubConfig = onSnapshot(doc(db, `casais/${newCasalId}/trip_config`, 'main'), (configSnap) => {
+          if (configSnap.exists()) {
+            const data = configSnap.data() as Partial<TripConfig>;
+            setTripConfig(data as TripConfig);
+            localStorage.setItem('pote_tripConfig', JSON.stringify(data));
+          }
+        }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${newCasalId}/trip_config/main`));
 
-      // Listen to achievements
-      const qArchived = query(collection(db, `casais/${currentCasalId}/achievements`), orderBy('createdAt', 'desc'));
-      const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
-        const arch: any[] = [];
-        querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
-        setAchievements(arch);
-      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/achievements`));
+        // 3. Deposits Listener
+        const qDep = query(
+          collection(db, `casais/${newCasalId}/deposits`), 
+          orderBy('createdAt', 'desc'),
+          limit(200)
+        );
+        unsubDeposits = onSnapshot(qDep, (querySnapshot) => {
+          const deps: Deposit[] = [];
+          let total = 0;
+          const stats: Record<string, number> = {};
 
-      // Listen to pinboard links
-      const qLinks = query(collection(db, `casais/${currentCasalId}/pinboard_links`), orderBy('createdAt', 'desc'));
-      const unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
-        const linksData: any[] = [];
-        querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
-        setPinboardLinks(linksData);
-      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/pinboard_links`));
+          querySnapshot.forEach((depositSnap) => {
+            const data = depositSnap.data();
+            deps.push({ id: depositSnap.id, ...data } as Deposit);
+            const amount = Number(data.amount) || 0;
+            if (data.type === 'expense') {
+              total -= amount;
+            } else {
+              total += amount;
+            }
+            if (data.action && data.type !== 'expense') {
+              stats[data.action] = (stats[data.action] || 0) + 1;
+            }
+          });
 
-      // Store unsubs so we can clear them when the user changes
-      (window as any)._unsubCasalConfig = unsubConfig;
-      (window as any)._unsubCasalDeposits = unsubDeposits;
-      (window as any)._unsubCasalAchievements = unsubAchievements;
-      (window as any)._unsubCasalLinks = unsubLinks;
+          setDeposits(deps);
+          setTotalSaved(total);
+          localStorage.setItem('pote_totalSaved', total.toString());
+          setBingoStats(stats);
+          setTimeout(() => setIsDataReady(true), 200);
+        }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${newCasalId}/deposits`));
 
+        // 4. Achievements Listener
+        const qArch = query(collection(db, `casais/${newCasalId}/achievements`), orderBy('createdAt', 'desc'));
+        unsubAchievements = onSnapshot(qArch, (querySnapshot) => {
+          const arch: any[] = [];
+          querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
+          setAchievements(arch);
+        });
+
+        // 5. Pinboard Listener
+        const qLinks = query(collection(db, `casais/${newCasalId}/pinboard_links`), orderBy('createdAt', 'desc'));
+        unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
+          const linksData: any[] = [];
+          querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
+          setPinboardLinks(linksData);
+        });
+
+        // ----------------------------------------------------
+        // AUTOMATIC MIGRATION (Unified Logic)
+        // ----------------------------------------------------
+        if (!(window as any)._hasRunMigration && auth.currentUser) {
+          (window as any)._hasRunMigration = true;
+          const runMigration = async () => {
+            try {
+              const soloPotId = `casal_${auth.currentUser!.uid}`;
+              if (newCasalId !== soloPotId) {
+                // Migrate Deposits
+                const oldDeps = await getDocs(collection(db, `casais/${soloPotId}/deposits`));
+                for (const d of oldDeps.docs) {
+                  await setDoc(doc(db, `casais/${newCasalId}/deposits`, d.id), d.data());
+                  await deleteDoc(doc(db, `casais/${soloPotId}/deposits`, d.id));
+                }
+                
+                // Migrate Achievements
+                const oldArch = await getDocs(collection(db, `casais/${soloPotId}/achievements`));
+                for (const d of oldArch.docs) {
+                  await setDoc(doc(db, `casais/${newCasalId}/achievements`, d.id), d.data());
+                  await deleteDoc(doc(db, `casais/${soloPotId}/achievements`, d.id));
+                }
+
+                // Migrate Pinboard Links
+                const oldLinks = await getDocs(collection(db, `casais/${soloPotId}/pinboard_links`));
+                for (const d of oldLinks.docs) {
+                  await setDoc(doc(db, `casais/${newCasalId}/pinboard_links`, d.id), d.data());
+                  await deleteDoc(doc(db, `casais/${soloPotId}/pinboard_links`, d.id));
+                }
+
+                if (oldDeps.size > 0) addToast("Pote Unificado", `Seus dados foram movidos para o novo Pote compartilhado!`, "success");
+              }
+              
+              // Legacy migration (v1)
+              const legacyDeps = await getDocs(query(collection(db, 'deposits'), where('who', '==', auth.currentUser!.uid)));
+              for (const d of legacyDeps.docs) {
+                await setDoc(doc(db, `casais/${newCasalId}/deposits`, d.id), d.data());
+                await deleteDoc(doc(db, 'deposits', d.id));
+              }
+            } catch (e) {
+              console.error("Migration error:", e);
+            }
+          };
+          runMigration();
+        }
+      }
     }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
 
     return () => {
       unsubUser();
-      if ((window as any)._unsubCasalConfig) (window as any)._unsubCasalConfig();
-      if ((window as any)._unsubCasalDeposits) (window as any)._unsubCasalDeposits();
-      if ((window as any)._unsubCasalAchievements) (window as any)._unsubCasalAchievements();
-      if ((window as any)._unsubCasalLinks) (window as any)._unsubCasalLinks();
+      stopNestedListeners();
     };
-  }, [isAuthReady, user]);
-
-  // ---- Milestone Notifications ----
-  useEffect(() => {
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false;
-      prevTotalRef.current = totalSaved;
-      return;
-    }
-
-    if (tripConfig.goalAmount > 0 && totalSaved > prevTotalRef.current) {
-      const prevPercentage = (prevTotalRef.current / tripConfig.goalAmount) * 100;
-      const currentPercentage = (totalSaved / tripConfig.goalAmount) * 100;
-
-      const milestones = [25, 50, 75, 90, 100];
-      for (const milestone of milestones) {
-        if (prevPercentage < milestone && currentPercentage >= milestone) {
-          const mTitle = milestone === 100 ? '🎉 META ATINGIDA! 🎉' : 'Uhuuul! Um passo mais perto!';
-          const mBody = milestone === 100
-            ? 'Aêê! O pote tá cheio! Bora quebrar e fazer as malas?'
-            : `Vocês bateram ${milestone}% da meta! Orgulho define.`;
-          addToast(mTitle, mBody, 'milestone');
-          break;
-        }
-      }
-    }
-
-    prevTotalRef.current = totalSaved;
-  }, [totalSaved, tripConfig.goalAmount, addToast]);
-
-  // ---- Theme application ----
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+  }, [isAuthReady, user, setDeposits, setTripConfig, setTheme, setAchievements, setPinboardLinks, setTotalSaved, setBingoStats, setIsDataReady, addToast]);
 
   // ---- PWA Install ----
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
@@ -358,12 +366,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setInstallPrompt(e);
       setCanInstall(true);
     };
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
   const clearInstallPrompt = useCallback(() => {
@@ -374,18 +378,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value: AppContextValue = {
     user,
     casalId,
+    partner,
     isAuthReady,
     isDataReady,
     activeTab,
     tabDirection,
     handleTabChange,
-    tripConfig,
-    deposits,
-    achievements,
-    pinboardLinks,
-    totalSaved,
-    bingoStats,
-    theme,
     toasts,
     addToast,
     removeToast,

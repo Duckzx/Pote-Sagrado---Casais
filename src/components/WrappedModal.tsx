@@ -3,21 +3,22 @@ import { X, Trophy, Heart, Sparkles, Coins, Flame, ArrowRight, Share2, Download 
 import { motion, AnimatePresence } from "motion/react";
 import { toPng } from "html-to-image";
 
+import { useAppStore } from "../store/useAppStore";
+
 interface WrappedModalProps {
   onClose: () => void;
-  deposits: any[];
-  goalAmount: number;
-  totalSaved: number;
-  destination: string;
 }
 
 export const WrappedModal: React.FC<WrappedModalProps> = ({
   onClose,
-  deposits = [],
-  goalAmount,
-  totalSaved,
-  destination
 }) => {
+
+  const deposits = useAppStore(s => s.deposits);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const { goalAmount = 0, destination = "" } = tripConfig;
+  const totalSaved = deposits
+    .filter((d) => d.type !== "expense")
+    .reduce((acc, d) => acc + (d.amount || 0), 0);
   const [slide, setSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);

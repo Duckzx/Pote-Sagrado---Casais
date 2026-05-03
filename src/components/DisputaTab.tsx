@@ -3,12 +3,14 @@ import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crow
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
 
-interface DisputaTabProps {
-  deposits: any[];
-  prize?: string;
-  addToast: (title: string, msg: string, type?: "info"|"success"|"milestone") => void;
-}
-export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
+import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
+
+export const DisputaTab: React.FC = () => {
+  const { addToast } = useAppContext();
+  const deposits = useAppStore(s => s.deposits);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const prize = tripConfig.monthlyPrize;
   const leaderBannerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const getDateObj = (val: any) => {

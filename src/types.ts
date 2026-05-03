@@ -12,6 +12,7 @@ export interface Deposit {
   type?: 'expense' | 'income';
   who: string;
   whoName: string;
+  coupleId: string;
   createdAt: Timestamp | null;
   comments?: { id: string; text: string; who: string; whoName: string; createdAt: number }[];
   reactions?: Record<string, string>;
@@ -19,8 +20,12 @@ export interface Deposit {
 
 export interface Challenge {
   id: string;
-  label: string;
+  title: string;
+  label?: string; // For backward compatibility
   icon: string;
+  desc?: string;
+  reward?: number;
+  recurrence?: "semanal" | "livre" | "diaria" | "mensal";
 }
 
 export interface TripConfig {
@@ -35,6 +40,26 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
+}
+
+export interface Achievement {
+  id: string;
+  imageUrl: string;
+  destination: string;
+  amount: number;
+  goalAmount: number;
+  coupleId: string;
+  createdAt: Timestamp | null;
+}
+
+export interface PinboardLink {
+  id: string;
+  url: string;
+  title: string;
+  imageUrl: string;
+  addedBy: string;
+  coupleId: string;
+  createdAt: Timestamp | null;
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
@@ -71,5 +96,22 @@ export interface ThemeOption {
   colors: [string, string];
 }
 
-// Re-export Firebase User for convenience
-export type AppUser = User;
+// Re-export Firebase User with extensions
+export type AppUser = User & {
+  coupleId?: string;
+};
+
+export interface UserProfile {
+  uid: string;
+  displayName?: string;
+  photoURL?: string;
+  email?: string;
+  casalId: string;
+  theme?: ThemeId;
+}
+
+export interface Partner {
+  uid: string;
+  displayName: string;
+  photoURL: string;
+}

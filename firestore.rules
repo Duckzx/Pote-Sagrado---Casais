@@ -1,116 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: users
-    // Document ID: {userId}
-    // Fields:
-    //   - theme: string (required) - App theme preference
-    //   - displayName: string (optional) - User's display name
-    //
-    // Collection: trip_config
-    // Document ID: main
-    // Fields:
-    //   - destination: string (required) - Trip destination
-    //   - goalAmount: number (required) - Financial goal
-    //   - lat: number (optional) - Latitude
-    //   - lng: number (optional) - Longitude
-    //   - customChallenges: list (optional) - Bingo custom challenges
-    //   - battleChallenges: list (optional) - Battle/Disputa challenges
-    //   - targetDate: string (optional) - Target trip date
-    //   - monthlyPrize: string (optional) - Monthly battle prize
-    //   - origin: string (optional) - Departure city
-    //   - updatedAt: timestamp (optional) - Last update
-    //
-    // Collection: deposits
-    // Document ID: {depositId}
-    // Fields:
-    //   - amount: number (required) - Saved amount
-    //   - action: string (optional) - Action description
-    //   - who: string (required) - User UID
-    //   - whoName: string (optional) - User display name
-    //   - type: string (optional) - 'income' or 'expense'
-    //   - createdAt: timestamp (required) - Entry creation time
-    //
-    // ===============================================================
-
+    
     // ===============================================================
     // Helper Functions
     // ===============================================================
     
-    // Helpers
-    function isAuthenticated() { return request.auth != null; }
-    function isOwner(userId) { return isAuthenticated() && request.auth.uid == userId; }
-    
-    // Validate User
-    function isValidUser(data) {
-      return data.keys().hasAll(['theme']) &&
-             data.theme is string && data.theme.size() < 50 &&
-             (!('casalId' in data) || (data.casalId is string && data.casalId.size() < 100)) &&
-             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    function isValidTripConfig(data) {
-      return data.keys().hasAll(['destination', 'goalAmount']) &&
-             data.destination is string && data.destination.size() < 200 &&
-             data.goalAmount is number && data.goalAmount >= 0 &&
-             (!('lat' in data) || data.lat is number) &&
-             (!('lng' in data) || data.lng is number) &&
-             (!('origin' in data) || (data.origin is string && data.origin.size() < 100)) &&
-             (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
-             (!('customChallenges' in data) || data.customChallenges is list) &&
-             (!('battleChallenges' in data) || data.battleChallenges is list) &&
-             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150));
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function isValidDeposit(data) {
-      return data.keys().hasAll(['amount', 'who', 'createdAt']) &&
-             data.amount is number && data.amount > 0 &&
-             data.who == request.auth.uid &&
-             data.createdAt == request.time &&
-             (!('type' in data) || data.type in ['income', 'expense']);
-    }
-
-    function isValidDepositUpdate(diff, existing) {
-      // Allow any update for now, we will handle specific affectedKeys in the match block
-      return true;
-    }
-
-    function isValidAchievement(data) {
-      return data.keys().hasAll(['destination', 'amount', 'goalAmount', 'createdAt']) &&
-             data.destination is string && data.destination.size() < 200 &&
-             data.amount is number &&
-             data.goalAmount is number &&
-             (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
-             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
-             data.createdAt == request.time;
-    }
-
-    function isValidPinboardLink(data) {
-      return data.keys().hasAll(['url', 'title', 'createdAt']) &&
-             data.url is string && data.url.size() <= 1024 &&
-             data.title is string && data.title.size() <= 200 &&
-             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
-             (!('addedBy' in data) || (data.addedBy is string)) &&
-             data.createdAt == request.time;
-    }
-
-    function isValidGalleryPhoto(data) {
-      return data.keys().hasAll(['imageBase64', 'addedBy', 'createdAt']) &&
-             data.imageBase64 is string && data.imageBase64.size() <= 1048576 &&
-             data.addedBy == request.auth.uid &&
-             data.createdAt == request.time;
-    }
-
-    // Role-based for casalId
     function isCasalMember(casalId) {
-      // Allow if the user has a matching casalId in their profile,
-      // Or if their casalId defaults to `casal_${uid}`. 
-      // Because we can't easily query without cost, we check if the requested casalId matches either default or their profile if we used get().
-      // For a perfectly secure app, users must be verified to have this casalId.
       return isAuthenticated() && (
         casalId == 'casal_' + request.auth.uid ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
@@ -118,76 +22,92 @@ service cloud.firestore {
       );
     }
 
+    function isValidUser(data) {
+      return data.keys().hasAll(['theme']) &&
+             data.theme is string && data.theme.size() < 50 &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
+    }
+
+    function isValidTripConfig(data) {
+      return data.keys().hasAll(['destination', 'goalAmount']) &&
+             data.destination is string && data.destination.size() < 200 &&
+             data.goalAmount is number && data.goalAmount >= 0;
+    }
+
+    function isValidDeposit(data) {
+      return data.keys().hasAll(['amount', 'who', 'createdAt']) &&
+             data.amount is number && data.amount > 0 &&
+             data.who == request.auth.uid &&
+             data.createdAt == request.time;
+    }
+
+    function isValidAchievement(data) {
+      return data.keys().hasAll(['destination', 'amount', 'goalAmount', 'createdAt']) &&
+             data.destination is string && data.amount is number &&
+             data.createdAt == request.time;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // User profiles
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
-
-      match /customDates/{dateId} {
-        allow read, write: if isOwner(userId);
-      }
     }
 
-    // --- Backward compatibility paths for old app structure ---
-    match /deposits/{depositId} {
-      // old reads are fine for everyone authenticated, or just owner if possible
-      allow read: if isAuthenticated();
-      // users can still write to old path? No, let's keep old read/write open for transition:
-      allow read, write: if isAuthenticated();
-    }
-    match /trip_config/{configId} {
-      allow read, write: if isAuthenticated();
-    }
-    match /achievements/{id} {
-      allow read, write: if isAuthenticated();
-    }
-    match /pinboard_links/{id} {
-      allow read, write: if isAuthenticated();
-    }
-    match /gallery/{id} {
-      allow read, write: if isAuthenticated();
-    }
-    // ------------------------------------------------------------
-
+    // Casais Nested Collections
     match /casais/{casalId} {
       allow read: if isCasalMember(casalId);
-      // Wait, there's no main 'casais' document written in the app. Let's allow write just in case.
-      allow write: if isCasalMember(casalId);
       
-      match /trip_config/{docId} {
-         allow read: if isCasalMember(casalId);
-         allow create, update: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
+      // Configuration
+      match /trip_config/main {
+        allow read: if isCasalMember(casalId);
+        allow write: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
       }
       
+      // Deposits / Savings
       match /deposits/{depositId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidDeposit(request.resource.data);
+        allow update: if isCasalMember(casalId) && resource.data.who == request.auth.uid;
         allow delete: if isCasalMember(casalId);
-        allow update: if isCasalMember(casalId) 
-                      && (
-                        (resource.data.who == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasAny(['amount', 'action', 'type'])) ||
-                        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']))
-                      )
-                      && request.resource.data.who == resource.data.who
-                      && request.resource.data.createdAt == resource.data.createdAt;
       }
-
+      
+      // Achievements
       match /achievements/{achievementId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidAchievement(request.resource.data);
         allow delete: if isCasalMember(casalId);
       }
-
+      
+      // Pinboard
       match /pinboard_links/{linkId} {
         allow read: if isCasalMember(casalId);
-        allow create: if isCasalMember(casalId) && isValidPinboardLink(request.resource.data);
+        allow create: if isCasalMember(casalId);
+        allow delete: if isCasalMember(casalId);
+      }
+      
+      // Custom Dates (CheapDateModal)
+      match /customDates/{dateId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId);
         allow delete: if isCasalMember(casalId);
       }
 
+      // Gallery
       match /gallery/{photoId} {
         allow read: if isCasalMember(casalId);
-        allow create: if isCasalMember(casalId) && isValidGalleryPhoto(request.resource.data);
+        allow create: if isCasalMember(casalId);
         allow delete: if isCasalMember(casalId);
       }
     }
+
+    // Legacy support (read-only for migration)
+    match /deposits/{id} { allow read, delete: if isAuthenticated(); }
+    match /achievements/{id} { allow read, delete: if isAuthenticated(); }
+    match /pinboard_links/{id} { allow read, delete: if isAuthenticated(); }
+    match /gallery/{id} { allow read, delete: if isAuthenticated(); }
   }
 }

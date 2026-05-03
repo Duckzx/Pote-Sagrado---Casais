@@ -1,40 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
+import { MapPin, Bell, Palette, Sparkles, LogOut, Share2, Heart, ExternalLink, Link2 } from 'lucide-react';
 import { db, auth, logout, messaging } from "../firebase";
+import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 import {
-  LogOut,
   Save,
-  Palette,
-  MapPin,
-  Share2,
-  Sparkles,
   Plus,
   Trash2,
-  Bell,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { useAppContext } from "../context/AppContext";
 import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
-interface ConfigTabProps {
-  currentDestination: string;
-  currentOrigin: string;
-  currentGoalAmount: number;
-  currentTheme: string;
-  customChallenges: any[];
-  currentSharedAlbumUrl?: string;
-  currentPrize?: string;
-  relationshipStartDate?: string;
-  addToast: (
-    title: string,
-    message: string,
-    type: "info" | "success" | "milestone",
-  ) => void;
-}
-const THEMES = [
+import { ThemeId } from "../types";
+
+const THEMES: { id: ThemeId; label: string; colors: [string, string] }[] = [
   {
     id: "cookbook",
     label: "Cookbook (Padrão)",
@@ -49,29 +32,24 @@ const THEMES = [
   { id: "tropical", label: "Tropical Breeze", colors: ["#F2FAF5", "#2A9D8F"] },
   { id: "midnight", label: "🌙 Midnight", colors: ["#1A1A2E", "#C5A059"] },
 ];
-export const ConfigTab: React.FC<ConfigTabProps> = ({
-  currentDestination,
-  currentOrigin,
-  currentGoalAmount,
-  currentTheme,
-  customChallenges,
-  currentSharedAlbumUrl,
-  currentPrize,
-  relationshipStartDate: currentRelationshipStartDate,
-  addToast,
-}) => {
-  const { casalId } = useAppContext();
-  const [destination, setDestination] = useState(currentDestination || "");
-  const [origin, setOrigin] = useState(currentOrigin || "");
+
+export const ConfigTab: React.FC = () => {
+  const { user, casalId, partner, addToast } = useAppContext();
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const currentTheme = useAppStore(s => s.theme);
+  
+  const [destination, setDestination] = useState(tripConfig.destination || "");
+  const [origin, setOrigin] = useState(tripConfig.origin || "");
   const [goalAmount, setGoalAmount] = useState(() => {
-    if (!currentGoalAmount) return "";
-    return (currentGoalAmount * 100).toFixed(0);
+    if (!tripConfig.goalAmount) return "";
+    return (tripConfig.goalAmount * 100).toFixed(0);
   });
   const [theme, setTheme] = useState(currentTheme || "cookbook");
-  const [challenges, setChallenges] = useState<any[]>(customChallenges || []);
-  const [sharedAlbumUrl, setSharedAlbumUrl] = useState(currentSharedAlbumUrl || "");
-  const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
-  const [prize, setPrize] = useState(currentPrize || "");
+  const [challenges, setChallenges] = useState<any[]>(tripConfig.customChallenges || []);
+  const [sharedAlbumUrl, setSharedAlbumUrl] = useState(tripConfig.sharedAlbumUrl || "");
+  const [prize, setPrize] = useState(tripConfig.monthlyPrize || "");
+  const [relationshipStartDate, setRelationshipStartDate] = useState(tripConfig.relationshipStartDate || "");
+
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
   const [isSaving, setIsSaving] = useState(false);
@@ -84,31 +62,25 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       setNotificationPermission(Notification.permission);
     }
   }, []);
+
   const [saveTrigger, setSaveTrigger] = useState(0);
+
   useEffect(() => {
-    setDestination(currentDestination || "");
-    setOrigin(currentOrigin || "");
-    if (currentGoalAmount) {
-      setGoalAmount((currentGoalAmount * 100).toFixed(0));
+    setDestination(tripConfig.destination || "");
+    setOrigin(tripConfig.origin || "");
+    if (tripConfig.goalAmount) {
+      setGoalAmount((tripConfig.goalAmount * 100).toFixed(0));
     } else {
       setGoalAmount("");
     }
     setTheme(currentTheme || "cookbook");
-    setChallenges(customChallenges || []);
-    setSharedAlbumUrl(currentSharedAlbumUrl || "");
-    setRelationshipStartDate(currentRelationshipStartDate || "");
-    setPrize(currentPrize || "");
-  }, [
-    currentDestination,
-    currentOrigin,
-    currentGoalAmount,
-    currentTheme,
-    customChallenges,
-    currentSharedAlbumUrl,
-    currentRelationshipStartDate,
-    currentPrize,
-  ]);
-  /* Handle auto-save on blur */ const handleSaveLocal = () => {
+    setChallenges(tripConfig.customChallenges || []);
+    setSharedAlbumUrl(tripConfig.sharedAlbumUrl || "");
+    setRelationshipStartDate(tripConfig.relationshipStartDate || "");
+    setPrize(tripConfig.monthlyPrize || "");
+  }, [tripConfig, currentTheme]);
+
+  const handleSaveLocal = () => {
     performSave(
       destination,
       goalAmount.toString(),
@@ -120,11 +92,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       relationshipStartDate
     );
   };
+
+
   useEffect(() => {
     if (saveTrigger > 0) {
       handleSaveLocal();
     }
   }, [saveTrigger]);
+
   const handleAddChallenge = () => {
     if (!newChallengeLabel.trim()) return;
     const newChallenge = {
@@ -136,9 +111,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     setNewChallengeLabel("");
     setNewChallengeIcon("⭐");
   };
+
   const handleRemoveChallenge = (id: string) => {
     setChallenges(challenges.filter((c) => c.id !== id));
   };
+
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       addToast(
@@ -178,6 +155,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       },
     );
   };
+
   const handleShare = async () => {
     const inviteUrl = new URL(window.location.href);
     if (casalId) {
@@ -203,11 +181,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       );
     }
   };
+
   const handleEnablePush = async () => {
-    if (!messaging) {
+    if (!messaging || !user?.coupleId) {
       addToast(
         "Erro",
-        "Seu navegador não suporta notificações Push ou você bloqueou.",
+        "Seu navegador não suporta notificações Push ou perfil não identificado.",
         "info",
       );
       return;
@@ -218,10 +197,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       setNotificationPermission(permission);
       if (permission === "granted") {
         const token = await getToken(messaging, {
-          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
+          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U'
         });
         if (token && casalId) {
           const tripRef = doc(db, `casais/${casalId}/trip_config`, "main");
+
           const tDoc = await getDoc(tripRef);
           let fcmTokens: string[] = [];
           if (tDoc.exists()) {
@@ -253,6 +233,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       setIsRequestingPush(false);
     }
   };
+
   const performSave = async (
     destToSave: string,
     amountToSave: string,
@@ -263,12 +244,18 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     themeToSave: string,
     startDateToSave: string
   ) => {
+    if (!user?.coupleId) {
+      addToast("Erro", "Perfil de casal não identificado.", "info");
+      return;
+    }
     setIsSaving(true);
     try {
       let parsedAmount = parseCurrencyString(amountToSave);
       if (isNaN(parsedAmount)) parsedAmount = 0;
+      
       await setDoc(
         doc(db, `casais/${casalId}/trip_config`, "main"),
+
         {
           destination: destToSave,
           origin: originToSave,
@@ -278,29 +265,27 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           relationshipStartDate: startDateToSave,
           monthlyPrize: prizeToSave,
           theme: themeToSave,
+          coupleId: user.coupleId,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
-      if (auth.currentUser) {
-        await setDoc(
-          doc(db, "users", auth.currentUser.uid),
-          {
-            theme: themeToSave,
-            displayName:
-              auth.currentUser.displayName ||
-              auth.currentUser.email?.split("@")[0],
-          },
-          { merge: true },
-        );
-      }
+      
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          theme: themeToSave,
+          displayName: user.displayName || user.email?.split("@")[0],
+        },
+        { merge: true },
+      );
+      
       setSaveTrigger(0);
       setIsSaving(false);
       addToast("Sucesso", "Configurações salvas!", "success");
+      
       if (destToSave) {
-        fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destToSave)}`,
-        )
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destToSave)}`)
           .then((res) => res.json())
           .then((data) => {
             if (data && data.length > 0) {
@@ -311,12 +296,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               );
             }
           })
+
           .catch((e) => console.error("Geocoding failed", e));
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
       setIsSaving(false);
     }
+
   };
   const handleSave = () => {
     performSave(
@@ -343,14 +330,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             <img
               src={
                 auth.currentUser?.photoURL ||
-                "https:/* images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"
+                "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"
               }
               alt="Profile"
               className="w-full h-full object-cover"
-            />{" "}
-            */{" "}
-          </div>{" "}
-        </div>{" "}
+            />
+          </div>
+        </div>
         <div>
           {" "}
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
@@ -527,62 +513,82 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             </div>{" "}
           </div>{" "}
         </div>{" "}
-        {/* Card 3: Permissões e Acessos */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all">
+        {/* Card 3: Conexão de Casal */}{" "}
+        <div className="bg-white/40 backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all overflow-hidden relative">
           {" "}
-          <div className="flex items-center gap-2 text-cookbook-text mb-4">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+            <Heart size={120} strokeWidth={1} />
+          </div>
+          <div className="flex items-center gap-2 text-cookbook-text mb-4 relative z-10">
             {" "}
-            <Bell size={18} className="text-cookbook-primary opacity-80" />{" "}
+            <Heart size={18} className="text-red-400 opacity-80" />{" "}
             <h3 className="font-serif text-xl font-medium">
               {" "}
-              Notificações e Parceria{" "}
+              Conexão de Casal{" "}
             </h3>{" "}
           </div>{" "}
-          <div className="flex flex-col gap-3 mt-2">
-            {" "}
-            <button
-              onClick={handleEnablePush}
-              disabled={isRequestingPush || notificationPermission === "granted"}
-              className={`flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group ${notificationPermission === "granted" ? "opacity-60 cursor-default" : ""}`}
-            >
-              {" "}
-              <div className="pr-4">
-                {" "}
-                <div className={`font-sans text-sm font-medium transition-colors ${notificationPermission === "granted" ? "text-emerald-500" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
-                  {" "}
-                  {notificationPermission === "granted" ? "Alertas Nativos Ativados" : "Ativar Alertas Nativos"}
-                </div>{" "}
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  {" "}
-                  {notificationPermission === "granted" ? "Você já está recebendo alertas deste dispositivo." : "Ser lembrado pelo navegador aumenta bastante a economia."}
-                </div>{" "}
-              </div>{" "}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${notificationPermission === "granted" ? "text-emerald-500 bg-emerald-500/10" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
-                {" "}
-                <Bell size={16} />{" "}
-              </div>{" "}
-            </button>{" "}
-            <button
-              onClick={handleShare}
-              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group"
-            >
-              {" "}
-              <div className="pr-4">
-                {" "}
-                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                  {" "}
-                  Convidar Parceiro(a){" "}
-                </div>{" "}
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  {" "}
-                  Envie o link para a pessoa acessar o app.{" "}
-                </div>{" "}
-              </div>{" "}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                {" "}
-                <Share2 size={16} />{" "}
-              </div>{" "}
-            </button>{" "}
+          
+          <div className="flex flex-col gap-4 mt-2 relative z-10">
+            {partner ? (
+              <div className="flex items-center gap-4 p-4 bg-white/50 rounded-2xl border border-cookbook-border/30">
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
+                  <img 
+                    src={partner.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=100&h=100&auto=format&fit=crop"} 
+                    alt={partner.displayName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">Conectado com</div>
+                  <div className="font-serif text-lg text-cookbook-text truncate">{partner.displayName}</div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500">
+                  <Link2 size={16} />
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-cookbook-primary/5 rounded-2xl border border-cookbook-primary/10 border-dashed">
+                <p className="text-[11px] text-cookbook-text/60 leading-relaxed italic text-center">
+                  Você está usando o pote de modo solo. Convide seu parceiro(a) para unificar os sonhos e economias!
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-2 mt-2">
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-between p-4 bg-white/60 hover:bg-white/80 rounded-2xl border border-cookbook-border/30 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-cookbook-primary/10 flex items-center justify-center text-cookbook-primary group-hover:scale-110 transition-transform">
+                    <Share2 size={18} />
+                  </div>
+                  <div>
+                    <div className="font-sans text-sm font-medium text-cookbook-text">Enviar Convite</div>
+                    <div className="text-[10px] text-cookbook-text/40">Link único do seu pote</div>
+                  </div>
+                </div>
+                <ExternalLink size={14} className="text-cookbook-text/20 group-hover:text-cookbook-primary transition-colors" />
+              </button>
+
+              <button
+                onClick={handleEnablePush}
+                disabled={isRequestingPush || notificationPermission === "granted"}
+                className={`flex items-center justify-between p-4 bg-white/60 hover:bg-white/80 rounded-2xl border border-cookbook-border/30 transition-all group ${notificationPermission === "granted" ? "opacity-60 cursor-default" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${notificationPermission === "granted" ? "bg-emerald-100 text-emerald-500" : "bg-cookbook-gold/10 text-cookbook-gold group-hover:scale-110"}`}>
+                    <Bell size={18} />
+                  </div>
+                  <div>
+                    <div className={`font-sans text-sm font-medium ${notificationPermission === "granted" ? "text-emerald-600" : "text-cookbook-text"}`}>
+                      {notificationPermission === "granted" ? "Alertas Ativados" : "Ativar Notificações"}
+                    </div>
+                    <div className="text-[10px] text-cookbook-text/40">Lembretes de economia</div>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>{" "}
         </div>{" "}
         {/* Card 4: Tema Visual */}{" "}

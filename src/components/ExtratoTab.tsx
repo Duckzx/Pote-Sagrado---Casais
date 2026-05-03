@@ -24,16 +24,10 @@ import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
+import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 
-interface ExtratoTabProps {
-  deposits: any[];
-  addToast: (
-    title: string,
-    message: string,
-    type: "info" | "success" | "milestone",
-  ) => void;
-  casalId?: string | null;
-}
 type FilterType = "todos" | "depositos" | "gastos";
 const MONTHS_PT = [
   "Janeiro",
@@ -49,11 +43,11 @@ const MONTHS_PT = [
   "Novembro",
   "Dezembro",
 ];
-export const ExtratoTab: React.FC<ExtratoTabProps> = ({
-  deposits,
-  addToast,
-  casalId,
-}) => {
+
+export const ExtratoTab: React.FC = () => {
+  const { addToast, casalId } = useAppContext();
+  const deposits = useAppStore(s => s.deposits);
+
   const [filter, setFilter] = useState<FilterType>("todos");
   const [filterUser, setFilterUser] = useState<string>("todos");
   const [searchQuery, setSearchQuery] = useState("");

@@ -21,6 +21,7 @@ import { DATE_IDEAS } from "../data/dateIdeas";
 import { collection, addDoc, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { User } from "firebase/auth";
+import { useAppContext } from "../context/AppContext";
 interface CheapDateModalProps {
   onClose: () => void;
   currentUser: User | null;
@@ -49,6 +50,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
   onClose,
   currentUser,
 }) => {
+  const { casalId } = useAppContext();
   const [selectedTier, setSelectedTier] = useState<string>("50");
   const [result, setResult] = useState<{
     title: string;
@@ -69,7 +71,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
     const fetchCustomDates = async () => {
       try {
         const q = query(
-          collection(db, "users", currentUser.uid, "customDates"),
+          collection(db, "casais", casalId || `casal_${currentUser.uid}`, "customDates"),
         );
         const querySnapshot = await getDocs(q);
         const fetchedDates = querySnapshot.docs.map((doc) => ({
@@ -130,7 +132,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
         tier: selectedTier,
       };
       const docRef = await addDoc(
-        collection(db, "users", currentUser.uid, "customDates"),
+        collection(db, "casais", casalId || `casal_${currentUser.uid}`, "customDates"),
         newCustomDate,
       );
       setCustomDates((prev) => [...prev, { id: docRef.id, ...newCustomDate }]);

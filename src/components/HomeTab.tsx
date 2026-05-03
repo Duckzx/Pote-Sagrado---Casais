@@ -41,23 +41,14 @@ import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
+import { useAppStore } from "../store/useAppStore";
+import { useTripProgress } from "../hooks/useTripProgress";
+import { UserBadges } from "./UserBadges";
+import { AIAssistantModal } from "./AIAssistantModal";
+import { SavingsChart } from "./SavingsChart";
+import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
+import type { Partner } from '../types';
 
-interface HomeTabProps {
-  currentUser: any;
-  destination: string;
-  origin: string;
-  goalAmount: number;
-  totalSaved: number;
-  deposits: any[];
-  achievements?: any[];
-  sharedAlbumUrl?: string;
-  relationshipStartDate?: string;
-  addToast: (
-    title: string,
-    message: string,
-    type: "info" | "success" | "milestone",
-  ) => void;
-}
 const MOTIVATIONAL_QUOTES = [
   { text: "Quem economiza hoje, viaja amanhã.", emoji: "✈️" },
   { text: "Cada centavo é um passo mais perto do destino.", emoji: "👣" },
@@ -79,9 +70,11 @@ const RELATIONSHIP_MESSAGES = [
   "O melhor lugar do mundo é ao lado de quem se ama.",
   "Mantenham acesa a chama: planejem o próximo date!",
 ];
+
 import { WaterSpill } from "./WaterSpill";
 import { compressImage } from "../lib/imageUtils";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
+
 const MilestoneTracker = ({
   totalSaved,
   goalAmount,
@@ -99,54 +92,73 @@ const MilestoneTracker = ({
     { threshold: 75, label: "Fase 3: Contagem Regressiva (75%)", reward: "Presentinho Surpresa" },
     { threshold: 100, label: "Fase 4: Objetivo Concluído", reward: "Passagens na mão!" },
   ];
-  /* Highest achieved */ const activeMilestone = milestones
+  const activeMilestone = milestones
     .slice()
     .reverse()
     .find((m) => pct >= m.threshold);
+    
   if (!activeMilestone || pct >= 100) return null;
+  
   return (
-    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
-      {" "}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />{" "}
+    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />
       <div className="flex justify-center mb-3">
-        {" "}
-        <Star
-          size={28}
-          className="text-amber-500 fill-amber-500 drop-shadow-md"
-        />{" "}
-      </div>{" "}
+        <Star size={28} className="text-amber-500 fill-amber-500 drop-shadow-md" />
+      </div>
       <h4 className="font-serif italic text-xl text-cookbook-text mb-1">
-        {" "}
-        Conquista: {activeMilestone.label}{" "}
-      </h4>{" "}
+        Conquista: {activeMilestone.label}
+      </h4>
       <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-4">
-        {" "}
-        Vocês merecem uma recompensa: {activeMilestone.reward}{" "}
-      </p>{" "}
+        Vocês merecem uma recompensa: {activeMilestone.reward}
+      </p>
       <button
         onClick={onRewardClick}
         className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
       >
-        {" "}
-        <Heart size={14} className="fill-white" /> Gerar "Mini Date"
-        Especial{" "}
-      </button>{" "}
+        <Heart size={14} className="fill-white" /> Gerar "Mini Date" Especial
+      </button>
     </div>
   );
 };
-export const HomeTab: React.FC<HomeTabProps> = ({
-  currentUser,
-  destination,
-  origin,
-  goalAmount,
-  totalSaved,
-  deposits,
-  achievements = [],
-  sharedAlbumUrl,
-  relationshipStartDate,
-  addToast,
-}) => {
-  const { casalId } = useAppContext();
+
+const PartnerSummary = ({ partner }: { partner: Partner }) => {
+  if (!partner) return null;
+  return (
+    <div className="flex items-center justify-center gap-3 bg-white/40 backdrop-blur-md py-2 px-4 rounded-full border border-cookbook-border/30 animate-fade-in shadow-sm">
+      <div className="flex -space-x-2">
+        <div className="w-6 h-6 rounded-full border border-white overflow-hidden shadow-sm">
+          <img 
+            src={auth.currentUser?.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=100&h=100&auto=format&fit=crop"} 
+            className="w-full h-full object-cover"
+            alt="Você"
+          />
+        </div>
+        <div className="w-6 h-6 rounded-full border border-white overflow-hidden shadow-sm bg-cookbook-primary/10">
+          <img 
+            src={partner.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=100&h=100&auto=format&fit=crop"} 
+            className="w-full h-full object-cover"
+            alt={partner.displayName}
+          />
+        </div>
+      </div>
+      <span className="text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold">
+        Poupando com <span className="text-cookbook-primary">{partner.displayName}</span>
+      </span>
+    </div>
+  );
+};
+
+export const HomeTab: React.FC = () => {
+  const { user, addToast, casalId, partner } = useAppContext();
+  const deposits = useAppStore(s => s.deposits);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const totalSaved = useAppStore(s => s.totalSaved);
+  const achievements = useAppStore(s => s.achievements);
+  const { destination, origin, goalAmount, relationshipStartDate, sharedAlbumUrl } = tripConfig;
+  
+  const { percentage: progress, isCompleted } = useTripProgress();
+  
+  const [showAIModal, setShowAIModal] = useState(false);
   const [showWrapped, setShowWrapped] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
@@ -192,10 +204,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const handleQuickDeposit = async () => {
     const parsedAmount = parseCurrencyString(quickAmount);
     if (!quickAmount || isNaN(parsedAmount) || parsedAmount <= 0) return;
+    if (!user?.coupleId) {
+      addToast("Erro", "Perfil de casal não identificado.", "info");
+      return;
+    }
     setIsQuickSubmitting(true);
     try {
-      const user = auth.currentUser;
-      if (!user) throw new Error("Not authenticated");
       const depositData: any = {
         amount: parsedAmount,
         type: quickType,
@@ -204,6 +218,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           (quickType === "income" ? "Depósito rápido" : "Gasto rápido"),
         who: user.uid,
         whoName: user.displayName || user.email?.split("@")[0] || "Alguém",
+        coupleId: user.coupleId,
         createdAt: serverTimestamp(),
       };
       if (quickImage) {
@@ -242,8 +257,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       setIsQuickSubmitting(false);
     }
   };
-  const progress =
-    goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   const flightsUrl = `https://www.google.com/travel/flights?q=Voos+de+${encodeURIComponent(origin || "Brasil")}+para+${encodeURIComponent(destination)}`;
   const confirmDelete = async () => {
     if (!depositToDelete) return;
@@ -300,10 +313,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }, 600);
     setTimeout(async () => {
       try {
-        await addDoc(collection(db, "achievements"), {
+        await addDoc(collection(db, "casais", casalId || `casal_${user?.uid}`, "achievements"), {
           destination: destination || "Nossa Viagem",
           amount: Number(totalSaved),
           goalAmount: Number(goalAmount),
+          coupleId: user?.coupleId,
           createdAt: serverTimestamp(),
         });
         for (const deposit of deposits) {
@@ -348,29 +362,30 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto relative"
     >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
-      <div className="text-center space-y-1 relative">
-        {" "}
-        <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
-          {" "}
-          Reserva de Casal{" "}
-        </h2>{" "}
-        {daysTogether !== null && daysTogether >= 0 && (
-          <p className="font-serif italic text-base text-cookbook-primary/80 animate-fade-in mt-1">
-            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
-          </p>
-        )}
-        <button
-          onClick={() => setShowShareWidget(true)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-gold/10 text-cookbook-gold rounded-full hover:bg-cookbook-gold/20 active:scale-95 transition-all shadow-sm"
-          title="Compartilhar Status / PWA"
-        >
-          {" "}
-          <Share2 size={16} />{" "}
-        </button>{" "}
+      <div className="text-center space-y-4 relative">
+        <PartnerSummary partner={partner} />
+        <div className="space-y-1">
+          <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
+            {" "}
+            {partner ? "Nosso Pote Sagrado" : "Meu Pote Sagrado"}{" "}
+          </h2>{" "}
+          {daysTogether !== null && daysTogether >= 0 && (
+            <p className="font-serif italic text-base text-cookbook-primary/80 animate-fade-in mt-1">
+              {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
+            </p>
+          )}
+          <button
+            onClick={() => setShowShareWidget(true)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-gold/10 text-cookbook-gold rounded-full hover:bg-cookbook-gold/20 active:scale-95 transition-all shadow-sm"
+            title="Compartilhar Status / PWA"
+          >
+            {" "}
+            <Share2 size={16} />{" "}
+          </button>{" "}
+        </div>{" "}
       </div>{" "}
       {/* The Animated Pot */}{" "}
       <SacredPot
@@ -385,6 +400,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         goalAmount={goalAmount}
         onRewardClick={() => setShowDateModal(true)}
       />{" "}
+      
+      {/* Visual Evolution Chart */}
+      <div className="my-6">
+        <SavingsChart deposits={deposits} goalAmount={goalAmount} />
+      </div>
       {/* Break Pot Button if reached goal */}{" "}
       {totalSaved >= goalAmount && goalAmount > 0 && (
         <div className="animate-pulse-slow">
@@ -452,10 +472,94 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           />{" "}
         </button>{" "}
       </div>{" "}
+
+      {/* AI Assistant Trigger */}{" "}
+      <div className="space-y-4">
+        <a
+          href={flightsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] relative overflow-hidden"
+        >
+          <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full border border-dashed border-cookbook-primary/20 flex items-center justify-center font-serif text-[11px] text-cookbook-primary/40 rotate-[15deg]">
+            VISTO OK
+          </div>
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="flex items-center space-x-2 text-cookbook-primary opacity-80">
+              <Plane size={18} />
+              <span className="font-sans text-[10px] uppercase tracking-widest font-medium">
+                Passaporte
+              </span>
+            </div>
+            <ArrowRight size={14} className="text-cookbook-text/30" />
+          </div>
+          <h3 className="font-serif text-2xl text-cookbook-text mb-1 relative z-10 font-medium">
+            {destination || "Defina um destino"}
+          </h3>
+          <p className="font-sans text-[10px] text-cookbook-text/40 uppercase tracking-widest relative z-10">
+            Monitorar Passagens
+          </p>
+        </a>
+
+        <button
+          onClick={() => setShowAIModal(true)}
+          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
+        >
+          <div className="flex items-center space-x-4 text-cookbook-text">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-gold bg-cookbook-gold/10 group-hover:bg-cookbook-gold/20">
+              <Sparkles size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-serif text-base text-cookbook-text font-medium">
+                Consultor de Viagem
+              </p>
+              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+                Análise com IA
+              </p>
+            </div>
+          </div>
+          <ArrowRight size={14} className="text-cookbook-text/30" strokeWidth={2} />
+        </button>
+
+        <button
+          onClick={() => setShowDateModal(true)}
+          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group"
+        >
+          <div className="flex items-center space-x-4 text-cookbook-text">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-primary bg-cookbook-primary/10 group-hover:bg-cookbook-primary/20">
+              <Heart size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-serif text-base text-cookbook-text font-medium">
+                Gerador de Encontros
+              </p>
+              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+                Ideias grátis/baratas
+              </p>
+            </div>
+          </div>
+          <ArrowRight size={14} className="text-cookbook-text/30" strokeWidth={2} />
+        </button>
+      </div>
+
+      <UserBadges deposits={deposits} currentUser={user} goalAmount={goalAmount} />
+      <SavingsChart deposits={deposits} goalAmount={goalAmount} />
+      <div className="space-y-4">
+        <CoupleGalleryWidget addToast={addToast} />
+      </div>
+
+      {showAIModal && (
+        <AIAssistantModal
+          destination={destination}
+          origin={origin}
+          onClose={() => setShowAIModal(false)}
+        />
+      )}
+
       {showDateModal && (
         <CheapDateModal
           onClose={() => setShowDateModal(false)}
-          currentUser={currentUser}
+          currentUser={user}
         />
       )}{" "}
       {/* Edit Confirmation Modal */}{" "}
@@ -745,23 +849,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         createPortal(
           <WrappedModal
             onClose={() => setShowWrapped(false)}
-            deposits={deposits}
-            goalAmount={goalAmount}
-            totalSaved={totalSaved}
-            destination={destination}
           />,
           document.body,
         )}{" "}
       {showShareWidget &&
         createPortal(
           <ShareableWidget
-            goalAmount={goalAmount}
-            totalSaved={totalSaved}
-            destination={destination}
             onClose={() => setShowShareWidget(false)}
           />,
           document.body,
         )}{" "}
     </motion.div>
+
   );
 };

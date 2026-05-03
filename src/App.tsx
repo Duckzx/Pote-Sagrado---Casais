@@ -6,6 +6,7 @@ import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { AppProvider, useAppContext } from "./context/AppContext";
+import { useAppStore } from "./store/useAppStore";
 
 // ========================================
 // Code Splitting — Lazy loaded tabs (T3)
@@ -135,12 +136,6 @@ function AppContent() {
     activeTab,
     tabDirection,
     handleTabChange,
-    tripConfig,
-    deposits,
-    achievements,
-    totalSaved,
-    bingoStats,
-    theme,
     toasts,
     addToast,
     removeToast,
@@ -148,6 +143,8 @@ function AppContent() {
     handleCompleteOnboarding,
   } = useAppContext();
 
+  // Notification Logic
+  const deposits = useAppStore(s => s.deposits);
   const previousDepositsRef = React.useRef(deposits);
 
   React.useEffect(() => {
@@ -234,7 +231,7 @@ function AppContent() {
           "Domínio Não Autorizado",
           `Poxa! O link externo (pote-sagrado-casais.vercel.app) não está autorizado no Firebase. Lembre-se de adicionar: \n1. pote-sagrado-casais.vercel.app no Firebase (Auth > Settings > Authorized domains)\n2. No Google Cloud Console (OAuth 2.0 Web Client). \n\nPara acessar pelo Vercel, isto é essencial!`,
           "info",
-          20000, // give them more time to read
+          20000,
         );
       } else if (e.message?.includes("bloqueado")) {
         setLoginError("blocked");
@@ -407,54 +404,14 @@ function AppContent() {
               transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
             >
               <Suspense fallback={<TabSkeleton />}>
-                {activeTab === "home" && (
-                <HomeTab
-                  currentUser={user}
-                  destination={tripConfig.destination}
-                  origin={tripConfig.origin}
-                  goalAmount={tripConfig.goalAmount}
-                  totalSaved={totalSaved}
-                  deposits={deposits}
-                  achievements={achievements}
-                  sharedAlbumUrl={tripConfig.sharedAlbumUrl}
-                  relationshipStartDate={tripConfig.relationshipStartDate}
-                  addToast={addToast}
-                />
-              )}
-              {activeTab === "missoes" && (
-                <MissoesTab
-                  stats={bingoStats}
-                  customChallenges={tripConfig.customChallenges}
-                  battleChallenges={tripConfig.battleChallenges}
-                  deposits={deposits}
-                  currentUser={user}
-                  addToast={addToast}
-                />
-              )}
-              {activeTab === "mural" && <PinboardTab addToast={addToast} />}
-              {activeTab === "disputa" && (
-                <DisputaTab
-                  deposits={deposits}
-                  prize={tripConfig.monthlyPrize}
-                  addToast={addToast}
-                />
-              )}
-              {activeTab === "config" && (
-                <ConfigTab
-                  currentDestination={tripConfig.destination}
-                  currentOrigin={tripConfig.origin}
-                  currentGoalAmount={tripConfig.goalAmount}
-                  currentTheme={theme}
-                  customChallenges={tripConfig.customChallenges}
-                  currentSharedAlbumUrl={tripConfig.sharedAlbumUrl}
-                  currentPrize={tripConfig.monthlyPrize}
-                  relationshipStartDate={tripConfig.relationshipStartDate}
-                  addToast={addToast}
-                />
-              )}
-            </Suspense>
-          </motion.div>
-        </AnimatePresence>
+                {activeTab === "home" && <HomeTab />}
+                {activeTab === "missoes" && <MissoesTab />}
+                {activeTab === "mural" && <PinboardTab />}
+                {activeTab === "disputa" && <DisputaTab />}
+                {activeTab === "config" && <ConfigTab />}
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
 

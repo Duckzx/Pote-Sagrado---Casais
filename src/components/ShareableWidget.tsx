@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Sparkles, Copy, Heart, Instagram, Facebook, Share, ArrowUpRight } from "lucide-react";
 import domtoimage from "dom-to-image-more";
+import { useAppStore } from "../store/useAppStore";
+
 
 interface ShareableWidgetProps {
-  goalAmount: number;
-  totalSaved: number;
-  destination: string;
   onClose: () => void;
 }
 
@@ -104,11 +103,16 @@ const PotDrawing = ({ percentage }: { percentage: number }) => {
 };
 
 export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
-  goalAmount,
-  totalSaved,
-  destination,
   onClose,
 }) => {
+  const deposits = useAppStore(s => s.deposits);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const goalAmount = tripConfig.goalAmount || 0;
+  const destination = tripConfig.destination || "Nossa Viagem";
+  const totalSaved = deposits
+    .filter((d) => d.type !== "expense")
+    .reduce((acc, d) => acc + (d.amount || 0), 0);
+
   const [isExporting, setIsExporting] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
   
