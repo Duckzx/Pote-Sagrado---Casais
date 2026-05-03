@@ -53,15 +53,6 @@ export const CoupleGalleryWidget: React.FC<{ addToast: any }> = ({ addToast }) =
         <AddMediaModal
           onClose={() => setShowAddModal(false)}
           onAddBase64={addPhoto}
-          onAddLink={async (url) => {
-            const isImage = url.match(/\.(jpeg|jpg|gif|png)$/) != null;
-            if (isImage) {
-              await addPhotoUrl(url);
-            } else {
-              const thumUrl = `https://image.thum.io/get/width/600/crop/800/${url}`;
-              await addPhotoUrl(thumUrl);
-            }
-          }}
           addToast={addToast}
         />
       )}

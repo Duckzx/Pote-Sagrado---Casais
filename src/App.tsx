@@ -148,6 +148,69 @@ function AppContent() {
     handleCompleteOnboarding,
   } = useAppContext();
 
+  const previousDepositsRef = React.useRef(deposits);
+
+  React.useEffect(() => {
+    if (!user || deposits.length === 0) {
+      previousDepositsRef.current = deposits;
+      return;
+    }
+
+    const previous = previousDepositsRef.current;
+    if (previous && previous.length > 0) {
+      deposits.forEach((currentDep) => {
+        const prevDep = previous.find((p) => p.id === currentDep.id);
+        if (prevDep) {
+          if (
+            currentDep.comments &&
+            (!prevDep.comments || currentDep.comments.length > prevDep.comments.length)
+          ) {
+            const newComments = currentDep.comments.filter(
+              (c: any) => !prevDep.comments?.some((pc: any) => pc.id === c.id)
+            );
+            newComments.forEach((nc: any) => {
+              if (nc.who !== user.uid) {
+                const messages = [
+                  "Como é bom ler isso! 🥰",
+                  "Alguém lembrou de você! 💌",
+                  "Seu pote está cheio de amor! 💕",
+                  "Uma surpresa pra você! 🌷",
+                ];
+                const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                addToast(
+                  "Novo Comentário!",
+                  `${nc.whoName} comentou: "${nc.text}"\n\n${randomMsg}`,
+                  "success"
+                );
+              }
+            });
+          }
+
+          if (currentDep.reactions) {
+            Object.keys(currentDep.reactions).forEach((uid) => {
+              if (uid !== user.uid && (!prevDep.reactions || !prevDep.reactions[uid])) {
+                const messages = [
+                  "Você fisgou um coração! 💘",
+                  "Olha quem amou isso! ✨",
+                  "Mais um sorriso no pote! 😊",
+                  "Amor espalhado com sucesso! 💖",
+                ];
+                const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                addToast(
+                  "Nova Curtida!",
+                  `${randomMsg}\n\nSeu parceiro reagiu a um depósito.`,
+                  "success"
+                );
+              }
+            });
+          }
+        }
+      });
+    }
+
+    previousDepositsRef.current = deposits;
+  }, [deposits, user, addToast]);
+
   const [loginError, setLoginError] = React.useState<string | null>(null);
 
   if (!isAuthReady) {
