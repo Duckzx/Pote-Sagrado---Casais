@@ -140,6 +140,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ---- Auth ----
   useEffect(() => {
+    // Check invite param in URL
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get('invite');
+    if (inviteCode) {
+      localStorage.setItem('pote_invite_code', inviteCode);
+      params.delete('invite');
+      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+
     // Check if the user is logging in from a redirect (e.g. from mobile Instagram browser bypassing popup)
     handleRedirectResult();
 
@@ -167,6 +177,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ---- Firestore Listeners ----
   useEffect(() => {
     if (!isAuthReady || !user) return;
+
+    // Apply pending invite
+    const pendingInvite = localStorage.getItem('pote_invite_code');
+    if (pendingInvite && pendingInvite !== `casal_${user.uid}`) {
+       setDoc(doc(db, 'users', user.uid), { casalId: pendingInvite }, { merge: true })
+         .then(() => {
+           localStorage.removeItem('pote_invite_code');
+           // Show success toast for linking profiles
+           addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
+         })
+         .catch((e) => console.error("Error setting pending invite", e));
+    }
 
     // Listen to user profile for theme and casalId
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {

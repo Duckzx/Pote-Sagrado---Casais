@@ -179,10 +179,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     );
   };
   const handleShare = async () => {
+    const inviteUrl = new URL(window.location.href);
+    if (casalId) {
+      inviteUrl.searchParams.set("invite", casalId);
+    }
     const shareData = {
       title: "Pote Sagrado",
       text: "Vem economizar comigo para a nossa próxima viagem no Pote Sagrado!",
-      url: window.location.href,
+      url: inviteUrl.toString(),
     };
     if (navigator.share) {
       try {

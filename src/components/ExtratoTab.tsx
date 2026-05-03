@@ -740,6 +740,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               })}
               </div>
             </div>
+            </div>
           );
         })
         )}
