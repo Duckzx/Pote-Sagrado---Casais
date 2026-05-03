@@ -35,17 +35,11 @@ import {
   differenceInDays,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheapDateModal } from "./CheapDateModal";
 import { playCoinSound, vibrate } from "../lib/audio";
-import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
-import { MomentsWidget } from "./MomentsWidget";
 import { useAppStore } from "../store/useAppStore";
 import { useTripProgress } from "../hooks/useTripProgress";
-import { UserBadges } from "./UserBadges";
-import { AIAssistantModal } from "./AIAssistantModal";
-import { SavingsChart } from "./SavingsChart";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 import type { Partner } from '../types';
 
@@ -75,51 +69,6 @@ import { WaterSpill } from "./WaterSpill";
 import { compressImage } from "../lib/imageUtils";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 
-const MilestoneTracker = ({
-  totalSaved,
-  goalAmount,
-  onRewardClick,
-}: {
-  totalSaved: number;
-  goalAmount: number;
-  onRewardClick: () => void;
-}) => {
-  if (goalAmount <= 0) return null;
-  const pct = (totalSaved / goalAmount) * 100;
-  const milestones = [
-    { threshold: 25, label: "Fase 1: Aquecimento (25%)", reward: "Jantar Especial" },
-    { threshold: 50, label: "Fase 2: Na Metade do Caminho (50%)", reward: "Passeio Romântico" },
-    { threshold: 75, label: "Fase 3: Contagem Regressiva (75%)", reward: "Presentinho Surpresa" },
-    { threshold: 100, label: "Fase 4: Objetivo Concluído", reward: "Passagens na mão!" },
-  ];
-  const activeMilestone = milestones
-    .slice()
-    .reverse()
-    .find((m) => pct >= m.threshold);
-    
-  if (!activeMilestone || pct >= 100) return null;
-  
-  return (
-    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />
-      <div className="flex justify-center mb-3">
-        <Star size={28} className="text-amber-500 fill-amber-500 drop-shadow-md" />
-      </div>
-      <h4 className="font-serif italic text-xl text-cookbook-text mb-1">
-        Conquista: {activeMilestone.label}
-      </h4>
-      <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-4">
-        Vocês merecem uma recompensa: {activeMilestone.reward}
-      </p>
-      <button
-        onClick={onRewardClick}
-        className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
-      >
-        <Heart size={14} className="fill-white" /> Gerar "Mini Date" Especial
-      </button>
-    </div>
-  );
-};
 
 const PartnerSummary = ({ partner }: { partner: Partner }) => {
   if (!partner) return null;
@@ -158,9 +107,6 @@ export const HomeTab: React.FC = () => {
   
   const { percentage: progress, isCompleted } = useTripProgress();
   
-  const [showAIModal, setShowAIModal] = useState(false);
-  const [showWrapped, setShowWrapped] = useState(false);
-  const [showDateModal, setShowDateModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
   const [depositToEdit, setDepositToEdit] = useState<any>(null);
   const [editAmount, setEditAmount] = useState("");
@@ -395,16 +341,7 @@ export const HomeTab: React.FC = () => {
         isBreaking={isPotBreaking}
         isBroken={isPotBroken}
       />{" "}
-      <MilestoneTracker
-        totalSaved={totalSaved}
-        goalAmount={goalAmount}
-        onRewardClick={() => setShowDateModal(true)}
-      />{" "}
       
-      {/* Visual Evolution Chart */}
-      <div className="my-6">
-        <SavingsChart deposits={deposits} goalAmount={goalAmount} />
-      </div>
       {/* Break Pot Button if reached goal */}{" "}
       {totalSaved >= goalAmount && goalAmount > 0 && (
         <div className="animate-pulse-slow">
@@ -418,6 +355,7 @@ export const HomeTab: React.FC = () => {
           </button>{" "}
         </div>
       )}{" "}
+      
       {/* Daily Motivational Quote & Relationship Message */}{" "}
       <div className="flex flex-col gap-2 mb-6 -mt-4">
         <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 shadow-sm">
@@ -435,133 +373,10 @@ export const HomeTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Moments Widget (Dopamine Events) */}
-      <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
-
-      {/* Wrapped Button */}{" "}
-      <div className="flex justify-center mt-6 mb-2">
-        {" "}
-        <button
-          onClick={() => setShowWrapped(true)}
-          className="w-full bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary text-white border border-white/20 rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all active:scale-[0.98] hover:shadow-[0_10px_40px_rgb(0,0,0,0.12)] animate-pulse-slow relative overflow-hidden"
-        >
-          {" "}
-          <div className="absolute inset-0 bg-white/10 blur-xl rounded-full scale-150 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>{" "}
-          <div className="flex items-center space-x-4 relative z-10">
-            {" "}
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
-              {" "}
-              <Sparkles size={18} className="text-white" />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif italic text-base text-white">
-                {" "}
-                Nosso Momento Wrapped{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-white/80 font-medium">
-                {" "}
-                Resumo do Casal{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={18}
-            className="text-white/70 relative z-10"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
-      </div>{" "}
-
-      {/* AI Assistant Trigger */}{" "}
-      <div className="space-y-4">
-        <a
-          href={flightsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] relative overflow-hidden"
-        >
-          <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full border border-dashed border-cookbook-primary/20 flex items-center justify-center font-serif text-[11px] text-cookbook-primary/40 rotate-[15deg]">
-            VISTO OK
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="flex items-center space-x-2 text-cookbook-primary opacity-80">
-              <Plane size={18} />
-              <span className="font-sans text-[10px] uppercase tracking-widest font-medium">
-                Passaporte
-              </span>
-            </div>
-            <ArrowRight size={14} className="text-cookbook-text/30" />
-          </div>
-          <h3 className="font-serif text-2xl text-cookbook-text mb-1 relative z-10 font-medium">
-            {destination || "Defina um destino"}
-          </h3>
-          <p className="font-sans text-[10px] text-cookbook-text/40 uppercase tracking-widest relative z-10">
-            Monitorar Passagens
-          </p>
-        </a>
-
-        <button
-          onClick={() => setShowAIModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
-        >
-          <div className="flex items-center space-x-4 text-cookbook-text">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-gold bg-cookbook-gold/10 group-hover:bg-cookbook-gold/20">
-              <Sparkles size={16} />
-            </div>
-            <div className="text-left">
-              <p className="font-serif text-base text-cookbook-text font-medium">
-                Consultor de Viagem
-              </p>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
-                Análise com IA
-              </p>
-            </div>
-          </div>
-          <ArrowRight size={14} className="text-cookbook-text/30" strokeWidth={2} />
-        </button>
-
-        <button
-          onClick={() => setShowDateModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group"
-        >
-          <div className="flex items-center space-x-4 text-cookbook-text">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-primary bg-cookbook-primary/10 group-hover:bg-cookbook-primary/20">
-              <Heart size={16} />
-            </div>
-            <div className="text-left">
-              <p className="font-serif text-base text-cookbook-text font-medium">
-                Gerador de Encontros
-              </p>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
-                Ideias grátis/baratas
-              </p>
-            </div>
-          </div>
-          <ArrowRight size={14} className="text-cookbook-text/30" strokeWidth={2} />
-        </button>
-      </div>
-
-      <UserBadges deposits={deposits} currentUser={user} goalAmount={goalAmount} />
-      <SavingsChart deposits={deposits} goalAmount={goalAmount} />
-      <div className="space-y-4">
+      <div className="space-y-4 mt-6">
         <CoupleGalleryWidget addToast={addToast} />
       </div>
 
-      {showAIModal && (
-        <AIAssistantModal
-          destination={destination}
-          origin={origin}
-          onClose={() => setShowAIModal(false)}
-        />
-      )}
-
-      {showDateModal && (
-        <CheapDateModal
-          onClose={() => setShowDateModal(false)}
-          currentUser={user}
-        />
-      )}{" "}
       {/* Edit Confirmation Modal */}{" "}
       {depositToEdit && (
         <div

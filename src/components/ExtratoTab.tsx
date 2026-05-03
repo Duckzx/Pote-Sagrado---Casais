@@ -24,7 +24,6 @@ import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
-import { AreaChart, Area, XAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { useAppContext } from "../context/AppContext";
 import { useAppStore } from "../store/useAppStore";
 

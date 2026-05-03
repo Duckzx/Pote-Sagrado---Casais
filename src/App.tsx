@@ -27,8 +27,6 @@ const ConfigTab = lazy(() =>
   import("./components/ConfigTab").then((m) => ({ default: m.ConfigTab })),
 );
 
-import { RemotionIntro } from "./components/RemotionIntro";
-import { SacredJarIcon } from "./components/SacredJarIcon";
 
 // ========================================
 // Error Boundary
@@ -120,14 +118,6 @@ function TabSkeleton() {
 // Inner App (uses context)
 // ========================================
 function AppContent() {
-  const [hasSeenIntro, setHasSeenIntro] = React.useState(() => {
-    return localStorage.getItem("pote_hasSeenIntro") === "true";
-  });
-
-  const handleIntroComplete = () => {
-    setHasSeenIntro(true);
-    localStorage.setItem("pote_hasSeenIntro", "true");
-  };
 
   const {
     user,
@@ -384,13 +374,6 @@ function AppContent() {
   return (
     <div className="min-h-[100dvh] bg-transparent relative">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <ColorBends
-        color="var(--theme-border)"
-        speed={0.1}
-        intensity={0.5}
-        className="opacity-30"
-      />
-
       <div className="relative z-10 overflow-hidden pb-28">
         {!isDataReady ? (
           <TabSkeleton />
@@ -420,7 +403,6 @@ function AppContent() {
       {showOnboarding && (
         <OnboardingModal onComplete={handleCompleteOnboarding} />
       )}
-      {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
     </div>
   );
 }
