@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { X, Trophy, Heart, Map, Sparkles, Coins, Flame, Play, ArrowLeft, Plane } from "lucide-react";
-import { Player, PlayerRef } from "@remotion/player";
-import { WrappedRemotionVideo, WrappedData } from "./WrappedVideo";
+import { X, Trophy, Heart, Sparkles, Coins, Flame, ArrowRight, Share2, Download } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { toPng } from "html-to-image";
 
 interface WrappedModalProps {
   onClose: () => void;
   deposits: any[];
   goalAmount: number;
   totalSaved: number;
+  destination: string;
 }
 
 export const WrappedModal: React.FC<WrappedModalProps> = ({
@@ -15,12 +16,12 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
   deposits = [],
   goalAmount,
   totalSaved,
+  destination
 }) => {
   const [slide, setSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
-  const [mode, setMode] = useState<"story" | "video">("story");
-  const playerRef = useRef<PlayerRef>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
 
   /* Statistics Calculation */ 
   const progress = goalAmount > 0 ? Math.min(100, (totalSaved / goalAmount) * 100) : 0;
@@ -57,17 +58,8 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
     }
   });
 
-  const wrappedData: WrappedData = {
-    numDeposits,
-    topSaver,
-    bestAmount,
-    biggestSave,
-    biggestSaver,
-    progress
-  };
-
   const totalSteps = 5;
-  const slideDuration = 5000;
+  const slideDuration = 6000;
   
   const nextSlide = useCallback(() => {
     setSlide((s) => {
@@ -83,18 +75,15 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
   }, []);
   
   useEffect(() => {
-    if (mode === "video") return;
     if (isPaused) return;
     if (slide >= totalSteps - 1) return;
     const timer = setTimeout(() => {
       nextSlide();
     }, slideDuration);
     return () => clearTimeout(timer);
-  }, [slide, isPaused, nextSlide, progressKey, mode]);
+  }, [slide, isPaused, nextSlide, progressKey]);
 
-  /* Handle tap for navigating stories */ 
   const handleTap = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mode === "video") return;
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -105,288 +94,329 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
     }
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Nosso Sonho ❤️",
+          text: `Já guardamos ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved)} e estamos ${progress.toFixed(0)}% mais perto de ${destination || "nosso destino"}!`,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    }
+  };
+
+  const handleExportImage = () => {
+    if (!storyRef.current) return;
+    setIsPaused(true);
+    toPng(storyRef.current, { quality: 0.95, cacheBust: true })
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = `pote-wrapped-${Date.now()}.png`;
+        link.href = dataUrl;
+        link.click();
+        setIsPaused(false);
+      })
+      .catch((err) => {
+        console.error("Error exporting image", err);
+        setIsPaused(false);
+      });
+  };
+
   const renderContent = () => {
     switch (slide) {
       case 0:
         return (
-          <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-8 animate-slide-up-fade"
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.8 }}
+            className="h-full flex flex-col items-center justify-center text-center space-y-8"
             key={`slide-0-${progressKey}`}
           >
-            <div className="w-24 h-24 bg-cookbook-gold/20 rounded-full flex items-center justify-center">
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="w-24 h-24 shadow-[0_0_40px_rgba(197,160,89,0.3)] bg-cookbook-gold/20 rounded-full flex items-center justify-center"
+            >
               <Sparkles size={40} className="text-cookbook-gold" />
-            </div>
+            </motion.div>
             <div className="px-4">
-              <h2 className="font-serif italic text-4xl text-white mb-2 leading-tight">
+              <motion.h2 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.6 }}
+                className="font-serif italic text-4xl text-white mb-2 leading-tight"
+              >
                 Nosso <br /> Pote Sagrado <br />
                 <span className="text-cookbook-gold">Wrapped</span>
-              </h2>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-white/70 mt-4">
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 1 }}
+                className="font-sans text-[10px] uppercase tracking-widest text-white/70 mt-4"
+              >
                 A jornada do casal
-              </p>
+              </motion.p>
             </div>
-            
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setMode("video");
-              }}
-              className="mt-8 bg-cookbook-gold text-white font-sans text-xs uppercase tracking-widest py-3 px-6 rounded-full font-bold shadow-lg flex items-center gap-2 animate-pulse active:scale-95 transition-transform"
-            >
-              <Play size={16} className="fill-white" />
-              <span>Vídeo Remotion</span>
-            </button>
-          </div>
+          </motion.div>
         );
       case 1:
         return (
-          <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade"
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="h-full flex flex-col items-center justify-center text-center space-y-6"
             key={`slide-1-${progressKey}`}
           >
-            <div className="w-20 h-20 bg-cookbook-bg/10 rounded-full flex items-center justify-center">
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1] }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="w-20 h-20 bg-[#E07A5F]/20 rounded-full flex items-center justify-center"
+            >
               <Flame size={36} className="text-[#E07A5F]" />
-            </div>
+            </motion.div>
             <div className="px-6">
               <h2 className="font-sans text-[12px] uppercase tracking-widest text-[#E07A5F] font-bold mb-4">
                 Constância
               </h2>
-              <p className="font-serif italic text-5xl text-white mb-4">
+              <p className="font-serif italic text-6xl text-white mb-4">
                 {numDeposits}
-                <span className="text-3xl text-white/60">vezes</span>
+                <span className="block text-3xl text-white/60 not-italic font-sans font-light mt-2">vezes</span>
               </p>
-              <p className="font-sans text-xs text-white/80 leading-relaxed">
-                Vocês investiram no sonho! Cada depósito foi um passo para transformar rotina em passagem.
+              <p className="font-sans text-xs text-white/80 leading-relaxed max-w-[280px] mx-auto">
+                Vocês investiram no sonho! Cada depósito foi um passo para transformar a rotina na viagem de vocês.
               </p>
             </div>
-          </div>
+          </motion.div>
         );
       case 2:
         return (
-          <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full flex flex-col items-center justify-center text-center space-y-6"
             key={`slide-2-${progressKey}`}
           >
-            <div className="w-20 h-20 bg-cookbook-bg/10 rounded-full flex items-center justify-center">
-              <Trophy size={36} className="text-cookbook-gold" />
+            <div className="relative">
+              <motion.div 
+                initial={{ rotate: -180, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 100 }}
+                className="w-24 h-24 bg-cookbook-gold/20 rounded-full flex items-center justify-center z-10 relative"
+              >
+                <Trophy size={42} className="text-cookbook-gold" />
+              </motion.div>
+              <div className="absolute inset-0 bg-cookbook-gold/30 blur-2xl rounded-full" />
             </div>
-            <div className="px-6">
+            <div className="px-6 relative z-10">
               <h2 className="font-sans text-[12px] uppercase tracking-widest text-cookbook-gold font-bold mb-4">
-                Investidor Mestre
+                Mestre do Pote
               </h2>
-              <p className="font-serif italic text-4xl text-white mb-4">
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="font-serif italic text-4xl text-white mb-4"
+              >
                 {topSaver}
-              </p>
-              <p className="font-sans text-xs text-white/80 text-balance leading-relaxed">
+              </motion.p>
+              <p className="font-sans text-sm text-white/80 text-balance leading-relaxed max-w-[280px] mx-auto">
                 {user1Total === user2Total || !user1 || !user2
-                  ? "A união de vocês é perfeita! Estão guardando juntos com o mesmo peso."
-                  : `Carregou o pote somando ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(bestAmount)}. Que orgulho!`}
+                  ? "A união de vocês é perfeita! Guardaram juntos equilibrando a balança."
+                  : `Carregou o pote com amor, somando ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(bestAmount)}. Que orgulho!`}
               </p>
             </div>
-          </div>
+          </motion.div>
         );
       case 3:
         return (
-          <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full flex flex-col items-center justify-center text-center space-y-6"
             key={`slide-3-${progressKey}`}
           >
-            <div className="w-20 h-20 bg-cookbook-bg/10 rounded-full flex items-center justify-center">
-              <Coins size={36} className="text-[#8E7F6D]" />
-            </div>
+            <motion.div 
+              initial={{ y: -50 }}
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 2.5 }}
+              className="w-20 h-20 bg-cookbook-primary/20 rounded-full flex items-center justify-center"
+            >
+              <Coins size={36} className="text-white" />
+            </motion.div>
             <div className="px-6">
-              <h2 className="font-sans text-[12px] uppercase tracking-widest text-[#8E7F6D] font-bold mb-4">
+              <h2 className="font-sans text-[12px] uppercase tracking-widest text-white/60 font-bold mb-4">
                 Maior Aporte
               </h2>
-              <p className="font-serif text-4xl text-white mb-2">
+              <motion.p 
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", bounce: 0.5 }}
+                className="font-serif text-5xl text-white mb-2"
+              >
                 {Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(biggestSave)}
-              </p>
+              </motion.p>
               <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold mb-6">
                 por {biggestSaver}
               </p>
-              <p className="font-sans text-xs text-white/80 text-balance leading-relaxed">
+              <p className="font-sans text-xs text-white/80 text-balance leading-relaxed max-w-[260px] mx-auto">
                 Aquele depósito de respeito que deu um salto absurdo no Pote Sagrado.
               </p>
             </div>
-          </div>
+          </motion.div>
         );
       case 4:
         return (
-          <div
-            className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-slide-up-fade relative"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full flex flex-col items-center justify-center text-center space-y-6 relative"
             key={`slide-4-${progressKey}`}
           >
-            <div className="relative w-full aspect-square max-w-[280px] mx-auto -mt-8 flex items-center justify-center">
-              {/* Background Glow */}
+            <div className="relative w-full aspect-square max-w-[260px] mx-auto -mt-8 flex items-center justify-center">
+              {/* Animated Progress Circle */}
               <div className="absolute inset-0 bg-cookbook-gold/10 rounded-full blur-3xl animate-pulse" />
-              
-              <svg width="240" height="240" viewBox="0 0 240 240" className="relative z-10 pointer-events-none">
-                 <path d="M 30 200 Q 120 40 210 40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" strokeDasharray="6 6" />
-                 <path d="M 30 200 Q 120 40 210 40" fill="none" stroke="#C5A059" strokeWidth="4" strokeDasharray="6 6" className="animate-[dash_3s_ease-out_forwards]" strokeDashoffset="300" />
-                 <style dangerouslySetInnerHTML={{__html: `
-                    @keyframes dash {
-                      to { stroke-dashoffset: 0; }
-                    }
-                    @keyframes fly {
-                      0% { transform: translate(30px, 200px) rotate(45deg); opacity: 0; }
-                      100% { transform: translate(210px, 40px) rotate(45deg); opacity: 1; }
-                    }
-                 `}} />
+              <svg width="200" height="200" viewBox="0 0 200 200" className="relative z-10 transform -rotate-90">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                <motion.circle 
+                  cx="100" cy="100" r="90" fill="none" stroke="#C5A059" strokeWidth="8"
+                  strokeDasharray="565"
+                  initial={{ strokeDashoffset: 565 }}
+                  animate={{ strokeDashoffset: 565 - (565 * progress) / 100 }}
+                  transition={{ duration: 2, ease: "easeOut" }}
+                />
               </svg>
-
-              <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ animation: "fly 3s ease-out forwards" }}>
-                 <div className="absolute top-0 left-0 -ml-6 -mt-6">
-                    <Plane size={48} className="text-cookbook-gold drop-shadow-lg" fill="#C5A059" />
-                 </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="font-serif text-4xl text-white font-medium"
+                >
+                  {progress.toFixed(0)}%
+                </motion.p>
               </div>
             </div>
-            <div className="px-6 -mt-12 relative z-20">
+            
+            <div className="px-6 -mt-8 relative z-20">
               <h2 className="font-sans text-[12px] uppercase tracking-widest text-cookbook-gold font-bold mb-4">
                 A Caminho do Sonho
               </h2>
-              <p className="font-serif text-5xl text-white mb-2 font-medium drop-shadow-md">
-                {progress.toFixed(0)}%
+              <p className="font-sans text-sm text-white/80 max-w-[250px] mx-auto text-balance leading-relaxed mb-8">
+                Juntos, construindo algo maior. {destination ? destination : "O nosso destino"} nos aguarda!
               </p>
-              <p className="font-sans text-xs text-white/80 max-w-[250px] mx-auto text-balance leading-relaxed">
-                A meta está cada vez mais perto. Continuem assim!
-              </p>
+
+              <div className="flex gap-4 justify-center" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={handleExportImage}
+                  className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md transition-all active:scale-95"
+                >
+                  <Download size={20} />
+                </button>
+                {navigator.share && (
+                  <button
+                    onClick={handleShare}
+                    className="bg-cookbook-gold text-white font-sans text-[10px] uppercase tracking-widest py-3 px-6 rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] flex items-center gap-2 active:scale-95"
+                  >
+                    <Share2 size={16} /> Compartilhar
+                  </button>
+                )}
+              </div>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="mt-6 bg-white/20 hover:bg-cookbook-border/30 backdrop-blur-md text-white font-sans text-[10px] uppercase tracking-widest py-3 px-8 rounded-full transition-all active:scale-95 border border-white/30 z-30 relative"
-            >
-              Voltaremos mais fortes
-            </button>
-          </div>
+          </motion.div>
         );
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-[#1A1A1A] animate-modal-backdrop"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 bg-black/90 backdrop-blur-sm animate-modal-backdrop"
       onClick={onClose}
     >
       <div
-        className="absolute inset-0 opacity-40 transition-colors duration-1000"
-        style={{
-          background: mode === "video" 
-            ? "#000" 
-            : slide === 0
-              ? "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)"
-              : slide === 1
-                ? "radial-gradient(circle at center, #E07A5F 0%, #1A1A1A 70%)"
-                : slide === 2
-                  ? "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)"
-                  : slide === 3
-                    ? "radial-gradient(circle at center, #8E7F6D 0%, #1A1A1A 70%)"
-                    : "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)",
-        }}
-      />
-      
-      <div
-        className="w-full max-w-[400px] h-[90vh] max-h-[850px] relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
+        ref={storyRef}
+        className="w-full h-full md:max-w-[400px] md:h-[90vh] md:max-h-[850px] relative overflow-hidden md:rounded-3xl border-0 md:border border-white/10 shadow-2xl flex flex-col"
         onClick={handleTap}
         onPointerDown={() => setIsPaused(true)}
         onPointerUp={() => setIsPaused(false)}
         onPointerLeave={() => setIsPaused(false)}
         style={{
-          background: mode === "video" ? "#1A1A1A" : "linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)",
-          backdropFilter: mode === "video" ? "none" : "blur(20px)",
+          background: "linear-gradient(to bottom, #111 0%, #1a1a1a 100%)",
           touchAction: "none",
         }}
       >
-        {mode === "story" ? (
-          <>
-            <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-20">
-              {Array.from({ length: totalSteps }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm"
-                >
-                  <div
-                    className={`h-full bg-white`}
-                    style={{
-                      width:
-                        slide > i
-                          ? "100%"
-                          : slide === i
-                            ? isPaused
-                              ? "auto"
-                              : "100%"
-                            : "0%",
-                      transition:
-                        slide === i && !isPaused
-                          ? `width ${slideDuration}ms linear`
-                          : "none",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-            
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="absolute top-8 right-4 text-white/60 hover:text-white z-30 p-2 rounded-full backdrop-blur-md bg-black/20"
+        <div
+          className="absolute inset-0 opacity-40 transition-colors duration-1000 pointer-events-none"
+          style={{
+            background: slide === 0
+                ? "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)"
+                : slide === 1
+                  ? "radial-gradient(circle at center, #E07A5F 0%, #1A1A1A 70%)"
+                  : slide === 2
+                    ? "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)"
+                    : slide === 3
+                      ? "radial-gradient(circle at center, #8E7F6D 0%, #1A1A1A 70%)"
+                      : "radial-gradient(circle at center, #C5A059 0%, #1A1A1A 70%)",
+          }}
+        />
+
+        {/* Progress Bars */}
+        <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-30">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div
+              key={i}
+              className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm"
             >
-              <X size={18} />
-            </button>
-            <div className="absolute inset-0 pt-16 flex flex-col justify-between">
-              <div className="flex-1 flex flex-col justify-center select-none">
-                {renderContent()}
-              </div>
-              <div className="h-32 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
-            </div>
-          </>
-        ) : (
-          <div className="absolute inset-0 flex flex-col bg-[#1a1a1a]">
-            {/* The Video Mode */ }
-            <div className="absolute top-4 left-4 z-30 flex items-center justify-between w-[calc(100%-2rem)]">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMode("story");
+              <div
+                className={`h-full bg-white`}
+                style={{
+                  width:
+                    slide > i
+                      ? "100%"
+                      : slide === i
+                        ? isPaused
+                          ? "auto"
+                          : "100%"
+                        : "0%",
+                  transition:
+                    slide === i && !isPaused
+                      ? `width ${slideDuration}ms linear`
+                      : "none",
                 }}
-                className="text-white/60 hover:text-white p-2 rounded-full backdrop-blur-md bg-black/40"
-              >
-                <ArrowLeft size={18} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClose();
-                }}
-                className="text-white/60 hover:text-white p-2 rounded-full backdrop-blur-md bg-black/40"
-              >
-                <X size={18} />
-              </button>
+              />
             </div>
-            
-            <Player
-              ref={playerRef}
-              component={WrappedRemotionVideo}
-              inputProps={wrappedData}
-              durationInFrames={540} // 90 + 90 + 90 + 90 + 180
-              compositionWidth={400}
-              compositionHeight={800}
-              fps={30}
-              style={{ width: "100%", height: "100%" }}
-              autoPlay
-              controls
-              loop={false}
-            />
-          </div>
-        )}
+          ))}
+        </div>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-8 right-4 text-white/60 hover:text-white z-40 p-2 rounded-full backdrop-blur-md bg-black/20"
+        >
+          <X size={18} />
+        </button>
+
+        <div className="flex-1 relative z-20 flex flex-col justify-center">
+          <AnimatePresence mode="wait">
+            {renderContent()}
+          </AnimatePresence>
+        </div>
+
       </div>
     </div>
   );
 };
+

@@ -874,6 +874,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             deposits={deposits}
             goalAmount={goalAmount}
             totalSaved={totalSaved}
+            destination={destination}
           />,
           document.body,
         )}{" "}
