@@ -168,7 +168,9 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
   { id: "custom", label: "Minhas", emoji: "⭐" },
 ];
 /* Component */ import { compressImage } from "../lib/imageUtils";
-import { Camera } from "lucide-react";
+import { Camera, Plane, ArrowRight, Heart, Sparkles } from "lucide-react";
+import { AIAssistantModal } from "./AIAssistantModal";
+import { CheapDateModal } from "./CheapDateModal";
 export const MissoesTab: React.FC<MissoesTabProps> = ({
   stats,
   customChallenges = [],
@@ -177,7 +179,13 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
   currentUser,
   addToast,
 }) => {
-  const { casalId } = useAppContext();
+  const { casalId, tripConfig } = useAppContext();
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
+
+  const destination = tripConfig?.destination || "";
+  const origin = tripConfig?.origin || "";
+  const flightsUrl = `https://www.skyscanner.com.br/transport/flights/${origin || "gru"}/${destination || "anywhere"}/?adultsv2=2`;
   const [activeFilter, setActiveFilter] = useState<FilterType>("todas");
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [amount, setAmount] = useState("");
@@ -535,13 +543,94 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         {" "}
         <h2 className="font-serif text-2xl text-cookbook-text mb-1">
           {" "}
-          Missões{" "}
+          Missões e Ferramentas{" "}
         </h2>{" "}
         <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
           {" "}
           Economia vira aventura{" "}
         </p>{" "}
       </div>{" "}
+
+      {/* AI Assistant Triggers */}{" "}
+      <div className="space-y-4">
+        {" "}
+        <button
+          onClick={() => setShowAIModal(true)}
+          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
+        >
+          {" "}
+          <div className="flex items-center space-x-4 text-cookbook-text">
+            {" "}
+            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-gold bg-cookbook-gold/10 group-hover:bg-cookbook-gold/20">
+              {" "}
+              <Sparkles size={16} />{" "}
+            </div>{" "}
+            <div className="text-left">
+              {" "}
+              <p className="font-serif text-base text-cookbook-text font-medium">
+                {" "}
+                Consultor de Viagem{" "}
+              </p>{" "}
+              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+                {" "}
+                Roteiro e Dicas com IA{" "}
+              </p>{" "}
+            </div>{" "}
+          </div>{" "}
+          <ArrowRight
+            size={14}
+            className="text-cookbook-text/30"
+            strokeWidth={2}
+          />{" "}
+        </button>{" "}
+        <div className="w-full grid grid-cols-2 gap-3">
+          <a
+            href={flightsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group flex flex-col justify-between"
+          >
+            {" "}
+            <div className="w-8 h-8 rounded-full mb-3 flex items-center justify-center transition-colors text-cookbook-primary bg-cookbook-primary/10 group-hover:bg-cookbook-primary/20">
+              {" "}
+              <Plane size={14} />{" "}
+            </div>{" "}
+            <div className="text-left">
+              {" "}
+              <p className="font-serif text-sm text-cookbook-text font-medium truncate" title={destination || "Destino"}>
+                {" "}
+                Passagens{" "}
+              </p>{" "}
+              <p className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+                {" "}
+                Monitoramento{" "}
+              </p>{" "}
+            </div>{" "}
+          </a>{" "}
+          <button
+            onClick={() => setShowDateModal(true)}
+            className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group flex flex-col justify-between text-left"
+          >
+            {" "}
+            <div className="w-8 h-8 rounded-full mb-3 flex items-center justify-center transition-colors text-cookbook-primary bg-cookbook-primary/10 group-hover:bg-cookbook-primary/20">
+              {" "}
+              <Heart size={14} />{" "}
+            </div>{" "}
+            <div className="text-left">
+              {" "}
+              <p className="font-serif text-sm text-cookbook-text font-medium whitespace-nowrap">
+                {" "}
+                Gerador Dates{" "}
+              </p>{" "}
+              <p className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+                {" "}
+                Ideias Grátis{" "}
+              </p>{" "}
+            </div>{" "}
+          </button>{" "}
+        </div>
+      </div>{" "}
+
       {/* Stats bar */}{" "}
       <div className="flex justify-around bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {" "}
@@ -1078,6 +1167,19 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             </div>{" "}
           </div>{" "}
         </div>
+      )}{" "}
+      {showAIModal && (
+        <AIAssistantModal
+          destination={destination}
+          origin={origin}
+          onClose={() => setShowAIModal(false)}
+        />
+      )}{" "}
+      {showDateModal && (
+        <CheapDateModal
+          onClose={() => setShowDateModal(false)}
+          currentUser={currentUser}
+        />
       )}{" "}
     </div>
   );

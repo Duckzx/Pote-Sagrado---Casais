@@ -35,18 +35,12 @@ import {
   differenceInDays,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { AIAssistantModal } from "./AIAssistantModal";
-import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
-import { UserBadges } from "./UserBadges";
-import { SharedAlbumWidget } from "./SharedAlbumWidget";
-import { SavingsChart } from "./SavingsChart";
 import { CheapDateModal } from "./CheapDateModal";
 import { playCoinSound, vibrate } from "../lib/audio";
 import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
-import { ActivityFeed } from "./ActivityFeed";
 
 interface HomeTabProps {
   currentUser: any;
@@ -153,7 +147,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   addToast,
 }) => {
   const { casalId } = useAppContext();
-  const [showAIModal, setShowAIModal] = useState(false);
   const [showWrapped, setShowWrapped] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);
@@ -425,11 +418,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
 
-      {/* Activity Feed (Social features) */}
-      <ActivityFeed deposits={deposits} currentUser={currentUser} />
-
-      {/* Shared Album Widget */}{" "}
-      {sharedAlbumUrl && <div className="mt-6 mb-2"><SharedAlbumWidget url={sharedAlbumUrl} /></div>}{" "}
       {/* Wrapped Button */}{" "}
       <div className="flex justify-center mt-6 mb-2">
         {" "}
@@ -464,120 +452,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           />{" "}
         </button>{" "}
       </div>{" "}
-      {/* AI Assistant Trigger */}{" "}
-      <div className="space-y-4">
-        {" "}
-        <a
-          href={flightsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] relative overflow-hidden"
-        >
-          {" "}
-          <div className="absolute -top-5 -right-5 w-24 h-24 rounded-full border border-dashed border-cookbook-primary/20 flex items-center justify-center font-serif text-[11px] text-cookbook-primary/40 rotate-[15deg]">
-            {" "}
-            VISTO OK{" "}
-          </div>{" "}
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            {" "}
-            <div className="flex items-center space-x-2 text-cookbook-primary opacity-80">
-              {" "}
-              <Plane size={18} />{" "}
-              <span className="font-sans text-[10px] uppercase tracking-widest font-medium">
-                {" "}
-                Passaporte{" "}
-              </span>{" "}
-            </div>{" "}
-            <ArrowRight size={14} className="text-cookbook-text/30" />{" "}
-          </div>{" "}
-          <h3 className="font-serif text-2xl text-cookbook-text mb-1 relative z-10 font-medium">
-            {" "}
-            {destination || "Defina um destino"}{" "}
-          </h3>{" "}
-          <p className="font-sans text-[10px] text-cookbook-text/40 uppercase tracking-widest relative z-10">
-            {" "}
-            Monitorar Passagens{" "}
-          </p>{" "}
-        </a>{" "}
-        <button
-          onClick={() => setShowAIModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
-        >
-          {" "}
-          <div className="flex items-center space-x-4 text-cookbook-text">
-            {" "}
-            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-gold bg-cookbook-gold/10 group-hover:bg-cookbook-gold/20">
-              {" "}
-              <Sparkles size={16} />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif text-base text-cookbook-text font-medium">
-                {" "}
-                Consultor de Viagem{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
-                {" "}
-                Análise com IA{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={14}
-            className="text-cookbook-text/30"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
-        <button
-          onClick={() => setShowDateModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all active:scale-[0.98] hover:border-cookbook-primary/30 group"
-        >
-          {" "}
-          <div className="flex items-center space-x-4 text-cookbook-text">
-            {" "}
-            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-primary bg-cookbook-primary/10 group-hover:bg-cookbook-primary/20">
-              {" "}
-              <Heart size={16} />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif text-base text-cookbook-text font-medium">
-                {" "}
-                Gerador de Encontros{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
-                {" "}
-                Ideias grátis/baratas{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={14}
-            className="text-cookbook-text/30"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
-      </div>{" "}
-      {/* Badges / Conquistas */}{" "}
-      <UserBadges
-        deposits={deposits}
-        currentUser={currentUser}
-        goalAmount={goalAmount}
-      />{" "}
-      {/* Savings Evolution Chart */}{" "}
-      <SavingsChart deposits={deposits} goalAmount={goalAmount} />{" "}
-      {/* Álbum de Fotos do Casal */}{" "}
-      <div className="space-y-4">
-        {" "}
-        <CoupleGalleryWidget addToast={addToast} />{" "}
-      </div>{" "}
-      {showAIModal && (
-        <AIAssistantModal
-          destination={destination}
-          origin={origin}
-          onClose={() => setShowAIModal(false)}
-        />
-      )}{" "}
       {showDateModal && (
         <CheapDateModal
           onClose={() => setShowDateModal(false)}

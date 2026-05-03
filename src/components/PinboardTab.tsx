@@ -21,6 +21,10 @@ import { db, auth, storage } from "../firebase";
 import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
+import { ActivityFeed } from "./ActivityFeed";
+import { UserBadges } from "./UserBadges";
+import { SavingsChart } from "./SavingsChart";
+import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 interface PinboardTabProps {
   addToast: (
     title: string,
@@ -29,7 +33,8 @@ interface PinboardTabProps {
   ) => void;
 }
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
-  const { deposits, pinboardLinks, achievements, casalId } = useAppContext();
+  const { user: currentUser, deposits, pinboardLinks, achievements, casalId, tripConfig } = useAppContext();
+  const goalAmount = tripConfig?.goalAmount || 0;
   
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -126,13 +131,20 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         />{" "}
         <h2 className="font-serif text-2xl font-medium text-cookbook-text">
           {" "}
-          Mural de Sonhos{" "}
+          Mural de Casal{" "}
         </h2>{" "}
         <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
           {" "}
           Inspirações, Memórias e Histórico{" "}
         </p>{" "}
       </div>{" "}
+
+      {/* Badges / Conquistas */}{" "}
+      <UserBadges
+        deposits={deposits}
+        currentUser={currentUser}
+        goalAmount={goalAmount}
+      />{" "}
       {/* 1. Nossos Sonhos (Roleta / Carrossel de Imagens) */}{" "}
       <section className="space-y-4">
         {" "}
@@ -327,6 +339,17 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           Você pode fixar até 6 memórias dos potes que já quebrou juntos.{" "}
         </p>{" "}
       </section>{" "}
+
+      <section className="space-y-4">
+        {" "}
+        <CoupleGalleryWidget addToast={addToast} />{" "}
+      </section>{" "}
+
+      {/* 3. Activity & Charts */}
+      <section className="space-y-6">
+        <SavingsChart deposits={deposits} goalAmount={goalAmount} />
+        <ActivityFeed deposits={deposits} currentUser={currentUser} />
+      </section>
 
       <div className="pt-8">
         <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />
