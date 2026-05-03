@@ -593,64 +593,54 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   </div>
                 </div>
                 
-                <div className="relative">
-                  {/* Timeline connecting line */}
-                  <div className="absolute left-9 top-0 bottom-0 w-px bg-cookbook-border/50 hidden md:block" />
-                  
-                  <div className="space-y-4">
-                    {items.map((deposit: any, idx: number) => {
-                      const isExpense = deposit.type === "expense";
-                      const isOwner = currentUser && deposit.who === currentUser.uid;
-                      
-                      // Pick dynamic icon based on action text
-                      const act = (deposit.action || "").toLowerCase();
-                      let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
-                      if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
-                      else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
-                      else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
-                      else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
+                {/* Items */}
+                <div className="space-y-0.5 bg-cookbook-bg rounded-b-3xl overflow-hidden mt-2">
+                  {items.map((deposit: any, idx: number) => {
+                    const isExpense = deposit.type === "expense";
+                    const isOwner = currentUser && deposit.who === currentUser.uid;
+                    
+                    // Pick dynamic icon based on action text
+                    const act = (deposit.action || "").toLowerCase();
+                    let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
+                    if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
+                    else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
+                    else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
+                    else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
 
-                      return (
-                        <div key={deposit.id} className="relative flex flex-col md:flex-row gap-0 md:gap-4 group">
-                          {/* Timeline dot (desktop) */}
-                          <div className="hidden md:flex flex-col items-center mt-6 w-10 shrink-0 relative z-10">
-                            <div className={`w-3 h-3 rounded-full border-2 border-cookbook-surface ring-4 ring-cookbook-bg ${isExpense ? 'bg-red-400' : 'bg-emerald-400'}`} />
+                    return (
+                      <div
+                        key={deposit.id}
+                        className={`relative flex flex-col group transition-colors ${idx !== items.length - 1 ? 'border-b border-cookbook-border/30' : ''} ${isExpense ? 'bg-red-500/[0.02] hover:bg-red-500/[0.05]' : 'bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}`}
+                      >
+                        <div className={`absolute top-0 bottom-0 left-0 w-1 ${isExpense ? 'bg-red-500/30' : 'bg-emerald-500/30'}`} />
+                        <div className="relative flex items-center justify-between gap-3 px-4 py-4">
+                          <div className="flex items-center gap-3 flex-1 min-w-0 pl-2">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
+                              <Icon size={18} />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="font-serif text-sm text-cookbook-text truncate font-medium">
+                                {deposit.action || (isExpense ? "Saída" : "Entrada")}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                                <span className="font-sans text-[8px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[100px] shadow-sm">
+                                  {deposit.whoName.split(' ')[0]}
+                                </span>
+                                <span className="font-sans text-[9px] text-cookbook-text/40 font-medium">
+                                  {formatTime(deposit)}
+                                </span>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="flex-1">
-                            <div className={`relative flex flex-col transition-colors border border-cookbook-border/40 rounded-3xl overflow-hidden shadow-sm hover:shadow-md ${isExpense ? 'bg-white/40 hover:bg-white/60' : 'bg-white/40 hover:bg-white/60'}`}>
-                              {/* Left Colored Bar */}
-                              <div className={`absolute top-0 bottom-0 left-0 w-1.5 ${isExpense ? 'bg-red-500/40' : 'bg-emerald-500/40'}`} />
-                              
-                              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 pl-5 sm:pl-6">
-                                <div className="flex items-start sm:items-center gap-3 md:gap-4 flex-1 min-w-0">
-                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm ${isExpense ? "bg-red-50/80 text-red-500 border-red-100" : "bg-emerald-50/80 text-emerald-500 border-emerald-100"}`}>
-                                    <Icon size={20} />
-                                  </div>
-                                  
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-serif text-base text-cookbook-text truncate font-medium">
-                                      {deposit.action || (isExpense ? "Saída" : "Entrada")}
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                                      <span className="font-sans text-[9px] uppercase tracking-widest bg-cookbook-bg/80 border border-cookbook-border text-cookbook-text/70 px-2 py-0.5 rounded-full font-bold truncate max-w-[100px] shadow-sm">
-                                        {deposit.whoName.split(' ')[0]}
-                                      </span>
-                                      <span className="font-sans text-[10px] text-cookbook-text/50 font-medium">
-                                        {formatTime(deposit)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="text-left sm:text-right shrink-0 mt-3 sm:mt-0 pl-16 sm:pl-0 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start">
-                                  <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold block sm:hidden">Valor</span>
-                                  <span className={`font-serif text-xl sm:text-2xl font-medium tracking-tight whitespace-nowrap ${isExpense ? "text-red-500" : "text-emerald-500"}`}>
-                                    {isExpense ? "−" : "+"}
-                                    {formatCurrency(deposit.amount).replace('R$', '').trim()}
-                                  </span>
-                                </div>
-                              </div>
+                          <div className="text-right shrink-0 flex items-center gap-2">
+                            <span className={`font-serif text-lg font-medium tracking-tight whitespace-nowrap ${isExpense ? "text-red-500" : "text-emerald-500"}`}>
+                              {isExpense ? "−" : "+"}
+                              {formatCurrency(deposit.amount).replace('R$', '').trim()}
+                            </span>
+                          </div>
+                        </div>
                         
                         {/* Interactions Box */}
                         <div className="flex flex-col border-t border-cookbook-border/10 bg-cookbook-bg/50">
@@ -734,15 +724,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                           )}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-            </div>
-          );
-        })
+            );
+          })
         )}
       </div>{" "}
       {/* Total count */}{" "}
