@@ -11,7 +11,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
@@ -52,8 +51,7 @@ export const ConfigTab: React.FC = () => {
 
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
-  const [isSaving, setIsSaving] = useState(false);
-  const [showAkinator, setShowAkinator] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<string>("default");
 
@@ -173,7 +171,7 @@ export const ConfigTab: React.FC = () => {
         console.error("Error sharing:", err);
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(inviteUrl.toString());
       addToast(
         "Copiado",
         "Link copiado para a área de transferência!",
@@ -669,17 +667,34 @@ export const ConfigTab: React.FC = () => {
             <LogOut size={16} strokeWidth={1.5} /> Desconectar Conta{" "}
           </button>{" "}
         </div>{" "}
-      </section>{" "}
-      {showAkinator && (
-        <AIAkinatorModal
-          onClose={() => setShowAkinator(false)}
-          onSelectDestination={(dest) => {
-            setDestination(dest);
-            setSaveTrigger((prev) => prev + 1);
-            setShowAkinator(false);
-          }}
-        />
-      )}{" "}
+        <div className="bg-white/40 backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all overflow-hidden relative">
+          <div className="flex items-center gap-2 text-cookbook-text mb-4">
+            <Sparkles size={18} className="text-cookbook-gold opacity-80" />
+            <h3 className="font-serif text-xl font-medium">Dúvidas e Ajuda</h3>
+          </div>
+          <div className="space-y-3">
+            <details className="group bg-white/50 rounded-2xl border border-cookbook-border/30 overflow-hidden transition-all">
+              <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
+                <span className="font-sans text-xs font-medium text-cookbook-text">Como conectar com meu parceiro?</span>
+                <Plus size={14} className="text-cookbook-text/40 group-open:rotate-45 transition-transform" />
+              </summary>
+              <div className="px-4 pb-4 text-[11px] text-cookbook-text/60 leading-relaxed border-t border-cookbook-border/10 pt-3">
+                Clique no botão <b>"Enviar Convite"</b> acima e mande o link para o seu parceiro(a). Ao clicar no link, ele(a) será vinculado automaticamente ao seu pote.
+              </div>
+            </details>
+            
+            <details className="group bg-white/50 rounded-2xl border border-cookbook-border/30 overflow-hidden transition-all">
+              <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
+                <span className="font-sans text-xs font-medium text-cookbook-text">Onde vejo nossos depósitos?</span>
+                <Plus size={14} className="text-cookbook-text/40 group-open:rotate-45 transition-transform" />
+              </summary>
+              <div className="px-4 pb-4 text-[11px] text-cookbook-text/60 leading-relaxed border-t border-cookbook-border/10 pt-3">
+                No menu <b>"Pote"</b> (ícone central), clique no botão <b>"Extrato"</b>. Lá você verá a linha do tempo de todas as economias do casal.
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

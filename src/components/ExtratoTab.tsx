@@ -210,17 +210,6 @@ export const ExtratoTab: React.FC = () => {
     setSelectedYear(y);
   };
 
-  /* Insights */
-  const insights = useMemo(() => {
-    if (deposits.length === 0) return null;
-    const dp = filteredDeposits.filter(d => d.type !== 'expense');
-    const ex = filteredDeposits.filter(d => d.type === 'expense');
-
-    const biggestDeposit = dp.length > 0 ? dp.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
-    const biggestExpense = ex.length > 0 ? ex.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
-    
-    return { biggestDeposit, biggestExpense };
-  }, [filteredDeposits]);
   
   /* Edit handler */ const handleEdit = (deposit: any) => {
     setEditing(deposit);
@@ -515,39 +504,6 @@ export const ExtratoTab: React.FC = () => {
         )}
       </div>{" "}
 
-      {/* Insights */}
-      {insights && (insights.biggestDeposit || insights.biggestExpense) && (
-        <div className="flex gap-2">
-          {insights.biggestDeposit && (
-            <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-               <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
-                 <ArrowUpCircle size={10} /> Maior Entrada
-               </div>
-               <div className="font-serif text-sm text-cookbook-text font-medium">
-                 {formatCurrency(insights.biggestDeposit.amount)}
-               </div>
-               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
-                 {insights.biggestDeposit.whoName}
-               </div>
-            </div>
-          )}
-          {insights.biggestExpense && (
-            <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
-               <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-               <div className="font-sans text-[8px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
-                 <ArrowDownCircle size={10} /> Maior Saída
-               </div>
-               <div className="font-serif text-sm text-cookbook-text font-medium">
-                 {formatCurrency(insights.biggestExpense.amount)}
-               </div>
-               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
-                 {insights.biggestExpense.action || "Sem descrição"}
-               </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Timeline */}
       <div className="space-y-4">

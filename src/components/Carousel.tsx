@@ -19,25 +19,8 @@ function CarouselItem({
   index,
   itemWidth,
   round,
-  trackItemOffset,
-  x,
   transition,
 }: CarouselItemProps) {
-  const range = [
-    -(index + 1) * trackItemOffset,
-    -index * trackItemOffset,
-    -(index - 1) * trackItemOffset,
-  ];
-  const outputRange = [90, 0, -90];
-  const rotateY = useTransform(x, range, outputRange, { clamp: false });
-  /* Parallax transforms */ const iconParallax = useTransform(
-    x,
-    range,
-    [40, 0, -40],
-    { clamp: false },
-  );
-  const textParallax = useTransform(x, range, [20, 0, -20], { clamp: false });
-  const bgParallax = useTransform(x, range, [-30, 0, 30], { clamp: false });
   return (
     <motion.div
       key={`${item?.id ?? index}-${index}`}
@@ -45,25 +28,23 @@ function CarouselItem({
       style={{
         width: itemWidth,
         height: round ? itemWidth : "100%",
-        rotateY: rotateY,
         ...(round && { borderRadius: "50%" }),
       }}
       transition={transition}
     >
       {" "}
-      <motion.div
+      <div
         className="absolute inset-0 bg-gradient-to-tr from-black/[0.03] to-transparent pointer-events-none z-0"
-        style={{ x: bgParallax }}
       />{" "}
       {item.image && (
-        <div className="absolute inset-0 z-0 opacity-40">
+        <div className="absolute inset-0 z-0">
           {" "}
           <img
             src={item.image}
             alt="deposit"
             className="w-full h-full object-cover"
           />{" "}
-          <div className="absolute inset-0 bg-gradient-to-t from-cookbook-bg via-cookbook-bg/60 to-transparent"></div>{" "}
+          <div className="absolute inset-0 bg-gradient-to-t from-cookbook-bg/20 via-transparent to-transparent"></div>{" "}
         </div>
       )}{" "}
       {item.actionNode && (
@@ -73,21 +54,20 @@ function CarouselItem({
         className={`carousel-item-header z-10 w-full ${round ? "round" : ""}`}
       >
         {" "}
-        <motion.span
+        <span
           className="carousel-icon-container inline-flex shadow-sm"
-          style={{ x: iconParallax }}
         >
           {" "}
           {item.icon}{" "}
-        </motion.span>{" "}
+        </span>{" "}
       </div>{" "}
       <div className="carousel-item-content z-10 w-full overflow-hidden">
         {" "}
-        <motion.div style={{ x: textParallax }}>
+        <div>
           {" "}
           <div className="carousel-item-title">{item.title}</div>{" "}
           <p className="carousel-item-description">{item.description}</p>{" "}
-        </motion.div>{" "}
+        </div>{" "}
       </div>{" "}
     </motion.div>
   );
@@ -235,8 +215,6 @@ export default function Carousel({
         style={{
           width: itemWidth,
           gap: `${GAP}px`,
-          perspective: 1000,
-          perspectiveOrigin: `${position * trackItemOffset + itemWidth / 2}px 50%`,
           x,
         }}
         onDragEnd={handleDragEnd}
@@ -253,8 +231,6 @@ export default function Carousel({
             index={index}
             itemWidth={itemWidth}
             round={round}
-            trackItemOffset={trackItemOffset}
-            x={x}
             transition={effectiveTransition}
           />
         ))}{" "}

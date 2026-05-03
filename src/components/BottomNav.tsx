@@ -42,7 +42,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     ];
   const tabsRight = [
     { id: "disputa", icon: Swords, label: "Duelo" },
-    { id: "config", icon: Settings, label: "Ajustes" },
+    { id: "config", icon: Settings, label: "Config" },
   ];
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-4 pointer-events-none pb-safe">

@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { loginWithGoogle } from "./firebase";
-import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { OnboardingModal } from "./components/OnboardingModal";
@@ -246,17 +245,6 @@ function AppContent() {
     return (
       <div className="min-h-[100dvh] bg-transparent flex flex-col items-center justify-center p-6 relative overflow-hidden">
         <ToastContainer toasts={toasts} removeToast={removeToast} />
-        <ColorBends
-          color="#8E7F6D"
-          speed={0.2}
-          frequency={1.0}
-          noise={0.15}
-          bandWidth={0.14}
-          rotation={90}
-          fadeTop={0.75}
-          iterations={1}
-          intensity={1.3}
-        />
 
         <div className="relative z-10 text-center space-y-8 max-w-sm w-full">
           <div className="space-y-4">
