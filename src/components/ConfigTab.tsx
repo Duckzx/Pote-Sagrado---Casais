@@ -652,17 +652,94 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             ))}{" "}
           </div>{" "}
         </div>{" "}
-        {/* Danger Zone */}{" "}
-        <div className="col-span-1 md:col-span-2 flex justify-center mt-6">
-          {" "}
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest font-medium text-red-500/80 hover:text-red-500 px-6 py-3 transition-colors rounded-full hover:bg-red-500/10 active:scale-95"
-          >
-            {" "}
-            <LogOut size={16} strokeWidth={1.5} /> Desconectar Conta{" "}
-          </button>{" "}
-        </div>{" "}
+        {/* Support & Legal */}
+        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
+          <div className="flex items-center gap-2 text-cookbook-text mb-6">
+            <h3 className="font-serif text-xl font-medium">Ajuda, Termos e Privacidade</h3>
+          </div>
+          <div className="flex flex-col gap-3">
+             <button
+              onClick={() => {
+                 window.open("mailto:suporte@potesagrado.com", "_blank");
+              }}
+              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
+            >
+              <div className="pr-4">
+                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                  Atendimento e Suporte
+                </div>
+                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                  Tire suas dúvidas ou reporte problemas.
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                 addToast("Transparência (LGPD)", "Estes são nossos Termos de Uso e Política de Privacidade. Ao continuar usando, você aceita o processamento mínimo de dados para funcionalidade.", "info");
+              }}
+              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
+            >
+              <div className="pr-4">
+                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                  Termos de Uso e Política de Privacidade
+                </div>
+                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                  Leia sobre seus direitos e como tratamos os dados (LGPD).
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="bg-red-500/5 backdrop-blur-2xl border border-red-500/20 rounded-3xl p-6 md:p-8 flex flex-col col-span-1 md:col-span-2 transition-all">
+           <div className="flex items-center gap-2 text-red-500 mb-6">
+            <h3 className="font-serif text-xl font-medium">Zona de Perigo</h3>
+          </div>
+          <div className="flex flex-col gap-6">
+            <button
+              onClick={async () => {
+                if (window.confirm("Você tem CERTEZA que deseja eliminar sua conta e TODOS os seus dados? Esta ação é IRREVERSÍVEL e removerá todo seu histórico.")) {
+                  try {
+                    if (auth.currentUser) {
+                      const user = auth.currentUser;
+                      const { deleteDoc, doc } = await import("firebase/firestore");
+                      await deleteDoc(doc(db, "users", user.uid));
+                      
+                      const { deleteUser } = await import("firebase/auth");
+                      await deleteUser(user);
+                      
+                      logout();
+                    }
+                  } catch (e: any) {
+                    console.error("Erro ao deletar", e);
+                    if (e.code === 'auth/requires-recent-login') {
+                       alert("Por questões de segurança, você precisa fazer login novamente antes de deletar sua conta.");
+                       logout();
+                    } else {
+                       alert("Erro ao excluir conta");
+                    }
+                  }
+                }
+              }}
+              className="flex gap-4 items-center justify-start py-4 px-6 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500/20 active:scale-[0.98] transition-all border border-red-500/20 text-left"
+            >
+               <Trash2 size={24} className="shrink-0" />
+               <div className="pointer-events-none">
+                  <div className="font-sans text-xs uppercase tracking-widest font-bold mb-1">Eliminar Minha Conta e Dados (Direito ao Esquecimento)</div>
+                  <div className="font-sans text-[10px] opacity-70 leading-tight">Ação irreversível de acordo com a LGPD e GDPR</div>
+               </div>
+            </button>
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 font-sans text-[11px] uppercase tracking-widest font-medium text-cookbook-text/60 hover:text-cookbook-text px-6 py-3 transition-colors rounded-full hover:bg-cookbook-text/5 active:scale-95"
+              >
+                <LogOut size={16} strokeWidth={1.5} /> Desconectar Conta
+              </button>
+            </div>
+          </div>
+        </div>
       </section>{" "}
       {showAkinator && (
         <AIAkinatorModal

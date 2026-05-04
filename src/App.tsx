@@ -119,6 +119,8 @@ function TabSkeleton() {
 // Inner App (uses context)
 // ========================================
 function AppContent() {
+  const isTermos = window.location.pathname === "/termos";
+
   const [hasSeenIntro, setHasSeenIntro] = React.useState(() => {
     return localStorage.getItem("pote_hasSeenIntro") === "true";
   });
@@ -127,6 +129,25 @@ function AppContent() {
     setHasSeenIntro(true);
     localStorage.setItem("pote_hasSeenIntro", "true");
   };
+
+  if (isTermos) {
+    return (
+      <div className="min-h-[100dvh] bg-cookbook-bg p-6 text-cookbook-text font-serif">
+        <h1 className="text-2xl font-bold mb-4">Termos de Uso e LGPD</h1>
+        <div className="space-y-4 text-sm opacity-80 font-sans">
+          <p>Bem-vindo ao Pote Sagrado. Ao utilizar este aplicativo, coletamos apenas dados mínimos necessários (e-mail, nome, e id do dispositivo) para manter o registro de contas do casal em sincronia e enviar notificações básicas de gastos.</p>
+          <p>Garantimos os seguintes direitos amparados pela Lei Geral de Proteção de Dados (LGPD):</p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Transparência:</strong> Seus dados não são vendidos e servem unicamente para uso do aplicativo.</li>
+            <li><strong>Direito de Exclusão (Esquecimento):</strong> Você pode apagar todos os seus dados nas Configurações clicando em "Eliminar Minha Conta". Todos os registros serão removidos permanentemente.</li>
+            <li><strong>Restrição de Acesso:</strong> Seus dados financeiros e fotos só são visíveis pelo seu perfil e o perfil emparelhado.</li>
+          </ul>
+          <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
+        </div>
+        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
+      </div>
+    );
+  }
 
   const {
     user,
@@ -464,6 +485,38 @@ function AppContent() {
         <OnboardingModal onComplete={handleCompleteOnboarding} />
       )}
       {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
+      
+      {/* Cookie Consent Banner */}
+      {!localStorage.getItem("pote_cookies_accepted") && (
+         <div className="fixed bottom-0 md:bottom-4 left-0 md:left-4 right-0 md:right-4 z-50 p-4 bg-cookbook-bg/95 backdrop-blur-xl border-t md:border border-cookbook-border md:rounded-2xl shadow-2xl flex flex-col md:flex-row gap-4 items-center justify-between mx-auto max-w-4xl max-h-[50vh] overflow-y-auto w-full animate-slide-up pb-8 md:pb-4 border-l-4 sm:border-l-0 border-l-cookbook-primary">
+            <div className="flex-1 pr-0 md:pr-4">
+              <h4 className="font-serif text-base text-cookbook-text font-bold mb-1">Nós respeitamos sua privacidade (LGPD)</h4>
+              <p className="font-sans text-xs text-cookbook-text/70 leading-relaxed max-w-prose">
+                Utilizamos cookies apenas para o funcionamento essencial do app (manter sua sessão ativa e salvar preferências locais). Não vendemos seus dados nem exibimos anúncios rastreados. Ao continuar navegando você concorda com nossos Termos de Uso.
+              </p>
+            </div>
+            <div className="flex w-full md:w-auto items-center gap-3 shrink-0 flex-col sm:flex-row">
+              <button 
+                onClick={() => {
+                   window.open("/termos", "_blank");
+                }}
+                className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/50 hover:text-cookbook-primary font-bold transition-colors w-full sm:w-auto py-2"
+              >
+                 Ler Termos
+              </button>
+              <button 
+                 onClick={() => {
+                   localStorage.setItem("pote_cookies_accepted", "true");
+                   // re-render trick or just let react handle it via state
+                   window.location.reload();
+                 }}
+                 className="bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-3 px-6 rounded-full font-bold hover:bg-cookbook-primary-hover active:scale-[0.98] transition-all shadow-md w-full sm:w-auto"
+              >
+                 Ciente e Aceito
+              </button>
+            </div>
+         </div>
+      )}
     </div>
   );
 }
