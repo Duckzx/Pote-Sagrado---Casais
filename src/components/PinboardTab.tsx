@@ -23,16 +23,16 @@ import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
-import { useAppStore } from "../store/useAppStore";
-
-export const PinboardTab: React.FC = () => {
-  const { user, casalId, addToast } = useAppContext();
-  const tripConfig = useAppStore(s => s.tripConfig);
-  const deposits = useAppStore(s => s.deposits);
-  const pinboardLinks = useAppStore(s => s.pinboardLinks);
-  const achievements = useAppStore(s => s.achievements);
+interface PinboardTabProps {
+  addToast: (
+    title: string,
+    message: string,
+    type: "info" | "success" | "milestone",
+  ) => void;
+}
+export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
+  const { user: currentUser, deposits, pinboardLinks, achievements, casalId, tripConfig } = useAppContext();
   const goalAmount = tripConfig?.goalAmount || 0;
-
   
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -42,7 +42,7 @@ export const PinboardTab: React.FC = () => {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const handleAddLink = async () => {
-    if (!newTitle || !newUrl || !user?.coupleId) return;
+    if (!newTitle || !newUrl) return;
     setIsSubmitting(true);
     /* Auto generated image */ const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(newTitle)}/600/400`;
     
@@ -51,8 +51,7 @@ export const PinboardTab: React.FC = () => {
         url: newUrl,
         title: newTitle,
         imageUrl: imageUrl,
-        addedBy: user.uid,
-        coupleId: user.coupleId,
+        addedBy: auth.currentUser?.uid || "",
         createdAt: serverTimestamp(),
       });
       setNewTitle("");
@@ -77,7 +76,7 @@ export const PinboardTab: React.FC = () => {
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && user?.coupleId) {
+    if (file) {
       if (achievements.length >= 6) {
         addToast("Atenção", "Você já tem muitas conquistas salvas.", "info");
         return;
@@ -85,7 +84,7 @@ export const PinboardTab: React.FC = () => {
       setIsUploadingPhoto(true);
 
       try {
-        const storageRef = ref(storage, `conquistas/${user.coupleId}/${Date.now()}_${file.name}`);
+        const storageRef = ref(storage, `conquistas/${Date.now()}_${file.name}`);
         const uploadTask = await uploadBytesResumable(storageRef, file);
         const downloadUrl = await getDownloadURL(uploadTask.ref);
 
@@ -94,7 +93,6 @@ export const PinboardTab: React.FC = () => {
           amount: 0,
           goalAmount: 0,
           imageUrl: downloadUrl,
-          coupleId: user.coupleId,
           createdAt: serverTimestamp(),
         });
         
@@ -142,7 +140,7 @@ export const PinboardTab: React.FC = () => {
       {/* Badges / Conquistas */}{" "}
       <UserBadges
         deposits={deposits}
-        currentUser={user}
+        currentUser={currentUser}
         goalAmount={goalAmount}
       />{" "}
       {/* 1. Nossos Sonhos (Roleta / Carrossel de Imagens) */}{" "}
@@ -346,10 +344,7 @@ export const PinboardTab: React.FC = () => {
       </section>{" "}
 
       <div className="pt-8">
-      <div className="pt-8">
-        <ExtratoTab />
-      </div>
-
+        <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />
       </div>
     </div>
   );
