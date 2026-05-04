@@ -2,8 +2,12 @@ import React from "react";
 import { Target, Swords, Settings, Pin, LayoutGrid } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
-/* Custom SVG matching the theme format, designed to perfectly resemble the animated Safe Pot */ const SacredPotIcon =
-  ({ size = 24, strokeWidth = 2, className = "" }) => (
+/*
+ * ⚡ Bolt: Memoized static SVG icon to prevent re-renders.
+ * Expected impact: Reduces VDOM diffing for complex SVG on every navigation change.
+ */
+const SacredPotIcon = React.memo(
+  ({ size = 24, strokeWidth = 2, className = "" }: { size?: number; strokeWidth?: number; className?: string }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size}
@@ -26,12 +30,18 @@ import { motion } from "motion/react";
       {/* Marca do Líquido/Moedas (Fill line) */}{" "}
       <path d="M4.5 15h15" strokeDasharray="3 3" strokeOpacity={0.6} />{" "}
     </svg>
-  );
+  )
+);
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-export const BottomNav: React.FC<BottomNavProps> = ({
+/*
+ * ⚡ Bolt: Memoized navigation component.
+ * Why: Prevents BottomNav from re-rendering when parent context (AppProvider)
+ * updates for unrelated reasons (e.g. background data syncing).
+ */
+export const BottomNav: React.FC<BottomNavProps> = React.memo(({
   activeTab,
   setActiveTab,
 }) => {
@@ -143,4 +153,4 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       </div>{" "}
     </div>
   );
-};
+});

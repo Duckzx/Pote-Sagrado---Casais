@@ -12,7 +12,12 @@ interface ColorBendsProps {
   intensity?: number;
   className?: string;
 }
-export const ColorBends: React.FC<ColorBendsProps> = ({
+/**
+ * ⚡ Bolt: Memoized decorative background component.
+ * Why: Purely visual component with motion animations. Memoization prevents
+ * re-renders during state changes that don't affect theme or positioning.
+ */
+export const ColorBends: React.FC<ColorBendsProps> = React.memo(({
   color = "#8E7F6D",
   className = "",
 }) => {
@@ -44,4 +49,4 @@ export const ColorBends: React.FC<ColorBendsProps> = ({
       />{" "}
     </div>
   );
-};
+});

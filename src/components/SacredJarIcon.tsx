@@ -1,5 +1,10 @@
 import React from "react";
-export const SacredJarIcon = ({ className = "w-24 h-24 mx-auto" }) => {
+/**
+ * ⚡ Bolt: Memoized static SVG icon.
+ * Why: This component renders a large SVG tree. Memoization avoids unnecessary
+ * Virtual DOM reconstruction on every re-render of the login screen.
+ */
+export const SacredJarIcon = React.memo(({ className = "w-24 h-24 mx-auto" }: { className?: string }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -95,4 +100,4 @@ export const SacredJarIcon = ({ className = "w-24 h-24 mx-auto" }) => {
       />{" "}
     </svg>
   );
-};
+});

@@ -1,0 +1,3 @@
+## 2025-05-14 - Memoization of high-level UI and static SVG components
+**Learning:** High-level UI components like `BottomNav` and complex SVG components like `SacredJarIcon` can cause unnecessary re-renders when the global application state (provided via Context) changes frequently. Since these components often rely on a subset of the context or are purely static, wrapping them in `React.memo` effectively skips the Virtual DOM diffing process.
+**Action:** Always check for complex SVG components or high-level navigation components that are rendered within providers and apply `React.memo` if they depend on stable props or no props at all.
