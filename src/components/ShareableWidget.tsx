@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
 import { Sparkles, Copy, Heart, Instagram, Facebook, ArrowUpRight } from "lucide-react";
 import html2canvas from "html2canvas";
+import { useAppContext } from "../context/AppContext";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "../firebase";
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -109,9 +112,49 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   destination,
   onClose,
 }) => {
+  const { casalId, deposits, addToast } = useAppContext();
   const [isExporting, setIsExporting] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
   
+  const giveXpToPartner = async (platform: string) => {
+    try {
+      const user = auth.currentUser;
+      if (!user || !casalId) return;
+      
+      const partnerDeposit = deposits.find(d => d.who && d.who !== user.uid);
+      if (!partnerDeposit) return;
+      
+      const partnerUid = partnerDeposit.who;
+      const partnerName = partnerDeposit.whoName;
+
+      // Ensure user doesn't spam for XP (max 1 bonus per day per platform)
+      const todayString = new Date().toISOString().split('T')[0];
+      const alreadyGained = deposits.some(d => 
+        d.who === partnerUid && 
+        d.isXpBonus === true &&
+        d.createdAt && 
+        d.createdAt.toDate && 
+        new Date(d.createdAt.toDate()).toISOString().split('T')[0] === todayString
+      );
+      
+      if (alreadyGained) return;
+
+      await addDoc(collection(db, `casais/${casalId}/deposits`), {
+        amount: 0,
+        type: "income",
+        action: `Seu parceiro(a) compartilhou no ${platform}! ✨`,
+        who: partnerUid,
+        whoName: partnerName,
+        createdAt: serverTimestamp(),
+        isXpBonus: true
+      });
+      
+      addToast("Gamificação", `Seu parceiro ganhou +50 XP pelo seu compartilhamento no ${platform}! 🎁`, "success");
+    } catch(e) {
+      console.error("XP Error", e);
+    }
+  };
+
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   
   const formattedTotal = Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved);
@@ -125,9 +168,16 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
       
       const canvas = await html2canvas(widgetRef.current, {
         backgroundColor: '#151515',
-        scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+        scale: 3,
         useCORS: true,
         logging: false,
+        onclone: (clonedDoc) => {
+          // Remove unsupported filters like drop-shadow that bug out html2canvas
+          const svgs = clonedDoc.querySelectorAll('svg.drop-shadow-\\[0_0_15px_rgba\\(253\\,246\\,227\\,0\\.3\\)\\]');
+          svgs.forEach(el => {
+             el.classList.remove('drop-shadow-[0_0_15px_rgba(253,246,227,0.3)]');
+          });
+        }
       });
 
       canvas.toBlob(async (blob) => {
@@ -162,6 +212,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
         setIsExporting(false);
+        giveXpToPartner('Native Share / Download');
       }, 'image/png', 1.0);
     } catch (err: any) {
       console.error(err);
@@ -172,17 +223,20 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   const copyLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    alert("Link copiado para a área de transferência!");
+    addToast("Link copiado!", "Você pode colar esse link para seus amigos.", "success");
+    giveXpToPartner('Link Copiado');
   };
 
   const shareWhatsApp = () => {
     const text = encodeURIComponent(`Acompanhe nossa meta para ${destination || "nossa viagem"}! Já conseguimos ${percentage.toFixed(0)}% do valor. Acesse: ${window.location.href}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
+    giveXpToPartner('WhatsApp');
   };
 
   const shareFacebook = () => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    giveXpToPartner('Facebook');
   };
 
   return (

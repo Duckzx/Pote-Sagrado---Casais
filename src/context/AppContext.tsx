@@ -254,10 +254,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         orderBy('createdAt', 'desc'),
         limit(200)
       );
+      
+      let isInitialLoadDeposits = true;
+      
       const unsubDeposits = onSnapshot(q, (querySnapshot) => {
         const deps: Deposit[] = [];
         let total = 0;
         const stats: Record<string, number> = {};
+
+        if (!isInitialLoadDeposits) {
+          querySnapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const data = change.doc.data();
+              if (data.isXpBonus === true && data.who === user.uid) {
+                // Play coin sound
+                const audio = new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=coin-pickup-98269.mp3");
+                audio.play().catch(() => {});
+                addToast("Bônus Recebido! 🎁", data.action || "Seu parceiro compartilhou a jornada e você ganhou XP!", "success");
+              }
+            }
+          });
+        }
+        isInitialLoadDeposits = false;
 
         querySnapshot.forEach((depositSnap) => {
           const data = depositSnap.data();
