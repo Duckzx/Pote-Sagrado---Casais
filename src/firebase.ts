@@ -9,9 +9,10 @@ import {
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import firebaseConfig from '../firebase-applet-config.json';
 
-import { getMessaging, isSupported } from 'firebase/messaging';
+import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -22,9 +23,16 @@ export const db = initializeFirestore(app, {
 export const storage = getStorage(app);
 
 export let messaging: any = null;
-isSupported().then((supported) => {
+isMessagingSupported().then((supported) => {
   if (supported) {
     messaging = getMessaging(app);
+  }
+});
+
+export let analytics: any = null;
+isAnalyticsSupported().then((supported) => {
+  if (supported) {
+    analytics = getAnalytics(app);
   }
 });
 
