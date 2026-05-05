@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-import { Sparkles, Copy, Heart, Instagram, Facebook, Share, ArrowUpRight } from "lucide-react";
-import domtoimage from "dom-to-image-more";
+import { Sparkles, Copy, Heart, Instagram, Facebook, ArrowUpRight } from "lucide-react";
+import html2canvas from "html2canvas";
 
 interface ShareableWidgetProps {
   goalAmount: number;
@@ -120,49 +120,49 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   const handleShare = async () => {
     try {
       setIsExporting(true);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // wait for layout
       if (!widgetRef.current) return;
-      const blob = await domtoimage.toBlob(widgetRef.current, {
-        bgcolor: '#111111',
-        scale: 2,
-        height: widgetRef.current.offsetHeight * 2,
-        width: widgetRef.current.offsetWidth * 2,
-        style: {
-          transform: 'scale(2)',
-          transformOrigin: 'top left',
-          width: widgetRef.current.offsetWidth + 'px',
-          height: widgetRef.current.offsetHeight + 'px',
-        }
+      
+      const canvas = await html2canvas(widgetRef.current, {
+        backgroundColor: '#151515',
+        scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
+        useCORS: true,
+        logging: false,
       });
-      if (!blob) {
-        setIsExporting(false);
-        return;
-      }
-      const file = new File([blob], "pote-sagrado-status.png", { type: "image/png" });
-      let shared = false;
-      try {
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: "Pote Sagrado",
-            text: "Meu Status!",
-          });
-          shared = true;
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setIsExporting(false);
+          return;
         }
-      } catch (shareErr) {
-        console.error("Share API failed:", shareErr);
-      }
-      if (!shared) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.download = "pote-sagrado-status.png";
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
-      setIsExporting(false);
+
+        const file = new File([blob], "pote-sagrado-status.png", { type: "image/png" });
+        let shared = false;
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: "Pote Sagrado",
+              text: "Olha nosso progresso na viagem! ✈️",
+            });
+            shared = true;
+          }
+        } catch (shareErr) {
+          console.error("Share API failed:", shareErr);
+        }
+        
+        if (!shared) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = "pote-sagrado-status.png";
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        setIsExporting(false);
+      }, 'image/png', 1.0);
     } catch (err: any) {
       console.error(err);
       setIsExporting(false);
@@ -247,31 +247,29 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
               </div>
             </div>
 
-            {/* Share action box */}
-            {/* Not rendered in image output if exporting, but since we capture the whole ref we will capture it. 
-                The user's example image *includes* the share box in the screenshot, so we leave it. */}
-            <div className="w-full bg-[#1F1F1F] rounded-2xl p-4 shadow-inner relative z-20 mb-5">
-              <h4 className="font-sans text-[9px] uppercase tracking-[0.1em] font-bold text-white/60 mb-1">
-                Compartilhe e ajude
-              </h4>
-              <p className="font-sans text-[10px] text-white/40 mb-4 tracking-wide">
-                Juntos, transformando rotina em passagem.
-              </p>
-              <div className="flex justify-between gap-1">
-                <ShareButton icon={<WhatsappIcon />} label="WhatsApp" onClick={shareWhatsApp} />
-                <ShareButton icon={<Instagram size={18} />} label="Instagram" onClick={() => handleShare()} />
-                <ShareButton icon={<Facebook size={18} />} label="Facebook" onClick={shareFacebook} />
-                <ShareButton icon={<Copy size={18} />} label="Copiar link" onClick={copyLink} />
-                <ShareButton icon={<ArrowUpRight size={18} />} label="Compartilhar" onClick={handleShare} active />
-              </div>
-            </div>
-
             {/* Footer heart text */}
-            <div className="flex items-center justify-center gap-2 text-white/30 text-[9px] font-bold relative z-20">
+            <div className="flex items-center justify-center gap-2 text-white/30 text-[9px] font-bold relative z-20 mt-4 mb-2">
               <Heart size={10} className="text-white/30" />
               Obrigado por apoiar essa jornada!
             </div>
 
+          </div>
+        </div>
+
+        {/* Share action box - OUTSIDE the exportable ref */}
+        <div className="w-full bg-[#151515] rounded-[32px] p-6 shadow-2xl mt-4 border border-white/5">
+          <h4 className="font-sans text-[9px] uppercase tracking-[0.1em] font-bold text-white/60 mb-1">
+            Compartilhe e ajude
+          </h4>
+          <p className="font-sans text-[10px] text-white/40 mb-4 tracking-wide">
+            Juntos, transformando rotina em passagem.
+          </p>
+          <div className="flex justify-between gap-1">
+            <ShareButton icon={<WhatsappIcon />} label="WhatsApp" onClick={shareWhatsApp} />
+            <ShareButton icon={<Instagram size={18} />} label="Instagram" onClick={() => handleShare()} />
+            <ShareButton icon={<Facebook size={18} />} label="Facebook" onClick={shareFacebook} />
+            <ShareButton icon={<Copy size={18} />} label="Copiar link" onClick={copyLink} />
+            <ShareButton icon={<ArrowUpRight size={18} />} label="Salvar Imagem" onClick={handleShare} active={isExporting} />
           </div>
         </div>
       </div>

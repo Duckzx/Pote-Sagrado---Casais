@@ -348,7 +348,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="space-y-10 pb-24 pt-6 px-6 max-w-md mx-auto relative"
+      className="space-y-8 pb-32 pt-6 px-6 max-w-md mx-auto relative"
     >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
@@ -359,13 +359,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           Reserva de Casal{" "}
         </h2>{" "}
         {daysTogether !== null && daysTogether >= 0 && (
-          <p className="font-serif italic text-base text-cookbook-primary/80 animate-fade-in mt-1">
+          <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1">
             {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
           </p>
         )}
         <button
           onClick={() => setShowShareWidget(true)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-gold/10 text-cookbook-gold rounded-full hover:bg-cookbook-gold/20 active:scale-95 transition-all shadow-sm"
+          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm"
           title="Compartilhar Status / PWA"
         >
           {" "}
@@ -398,28 +398,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </button>{" "}
         </div>
       )}{" "}
-      {/* Daily Motivational Quote & Relationship Message */}{" "}
-      <div className="flex flex-col gap-2 mb-6 -mt-4">
-        <div className="text-center bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl px-5 py-3 shadow-sm">
-          {" "}
-          <span className="text-lg mr-1.5">{dailyQuote.emoji}</span>{" "}
-          <span className="font-serif italic text-[13px] text-cookbook-text/80">
-            {" "}
-            {dailyQuote.text}{" "}
-          </span>{" "}
-        </div>{" "}
-        <div className="text-center bg-cookbook-primary/10 rounded-2xl px-5 py-3 border border-cookbook-primary/20">
-           <span className="font-sans text-[11px] font-medium text-cookbook-primary">
-            💌 {relationshipMessage}
-           </span>
-        </div>
-      </div>
 
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
 
       {/* Wrapped Button */}{" "}
-      <div className="flex justify-center mt-6 mb-2">
+      <div className="flex justify-center mt-2 mb-6">
         {" "}
         <button
           onClick={() => setShowWrapped(true)}
