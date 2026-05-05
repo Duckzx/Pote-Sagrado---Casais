@@ -103,11 +103,25 @@ const MilestoneTracker = ({
     .slice()
     .reverse()
     .find((m) => pct >= m.threshold);
+  const [animatedPct, setAnimatedPct] = useState(0);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedPct(pct);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [pct]);
+
   if (!activeMilestone || pct >= 100) return null;
   return (
-    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center relative overflow-hidden">
+    <div className="bg-cookbook-bg backdrop-blur-2xl border border-amber-300/40 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-in -mt-4 relative z-10 text-center overflow-hidden">
       {" "}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 opacity-50" />{" "}
+      <div className="absolute top-0 left-0 w-full h-1.5 bg-cookbook-border overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 transition-all duration-1000 ease-out" 
+          style={{ width: `${animatedPct}%` }}
+        />
+      </div>{" "}
       <div className="flex justify-center mb-3">
         {" "}
         <Star

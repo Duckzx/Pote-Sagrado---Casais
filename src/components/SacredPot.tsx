@@ -34,6 +34,19 @@ export const SacredPot: React.FC<SacredPotProps> = ({
   }, [targetProgress, isBroken]);
   const [hasCelebrated, setHasCelebrated] = useState(false);
 
+  const [isPulsing, setIsPulsing] = useState(false);
+  const prevTotalRef = useRef(totalSaved);
+
+  useEffect(() => {
+    if (totalSaved > prevTotalRef.current && !isBroken && !isBreaking) {
+      setIsPulsing(true);
+      const timer = setTimeout(() => setIsPulsing(false), 600);
+      prevTotalRef.current = totalSaved;
+      return () => clearTimeout(timer);
+    }
+    prevTotalRef.current = totalSaved;
+  }, [totalSaved, isBroken, isBreaking]);
+
   /* Trigger light confetti if goal reached (transition only) */ 
   useEffect(() => {
     if (isGoalReached && !isBreaking && !isBroken && canvasRef.current && !hasCelebrated) {
@@ -71,7 +84,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-50 scale-150"
       />{" "}
       <div
-        className={`sacred-pot relative z-10 transition-transform duration-75 ${isBreaking && !isBroken ? "scale-105 rotate-1" : ""} ${!isBreaking && !isBroken ? "animate-float" : ""}`}
+        className={`sacred-pot relative z-10 transition-transform duration-300 ${isBreaking && !isBroken ? "scale-105 rotate-1" : ""} ${isPulsing ? "scale-110" : ""} ${!isBreaking && !isBroken && !isPulsing ? "animate-float" : ""}`}
       >
         {" "}
         {/* Visual Identity Logo/Sticker */}{" "}
