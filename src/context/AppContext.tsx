@@ -43,6 +43,11 @@ interface AppContextValue {
   // Theme
   theme: ThemeId;
 
+  // Legal
+  lgpdConsent: boolean | null;
+  hasCheckedConsent: boolean;
+  acceptLgpd: () => void;
+
   // Toasts
   toasts: ToastMessage[];
   addToast: AddToastFn;
@@ -107,6 +112,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
   const [theme, setTheme] = useState<ThemeId>(() => (localStorage.getItem('pote_theme') as ThemeId) || 'cookbook');
 
+  const [lgpdConsent, setLgpdConsent] = useState<boolean | null>(null);
+  const [hasCheckedConsent, setHasCheckedConsent] = useState(false);
+
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const prevTotalRef = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
@@ -162,6 +170,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!hasSeenOnboarding) {
           setShowOnboarding(true);
         }
+      } else {
+        setLgpdConsent(!!localStorage.getItem('pote_lgpdConsent'));
+        setHasCheckedConsent(true);
       }
     });
     return () => unsubscribe();
@@ -205,6 +216,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (data.casalId) {
           currentCasalId = data.casalId;
         }
+        setLgpdConsent(!!data.lgpdConsent);
+        setHasCheckedConsent(true);
+      } else {
+        setLgpdConsent(false);
+        setHasCheckedConsent(true);
       }
       setCasalId(currentCasalId);
       
@@ -390,6 +406,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCanInstall(false);
   }, []);
 
+  const acceptLgpd = useCallback(() => {
+    if (user) {
+      setDoc(doc(db, 'users', user.uid), { lgpdConsent: true, lgpdConsentDate: new Date().toISOString() }, { merge: true })
+        .then(() => setLgpdConsent(true))
+        .catch(console.error);
+    } else {
+      setLgpdConsent(true);
+      localStorage.setItem('pote_lgpdConsent', 'true');
+    }
+  }, [user]);
+
   const value: AppContextValue = {
     user,
     casalId,
@@ -405,6 +432,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     totalSaved,
     bingoStats,
     theme,
+    lgpdConsent,
+    hasCheckedConsent,
+    acceptLgpd,
     toasts,
     addToast,
     removeToast,

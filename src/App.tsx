@@ -6,6 +6,7 @@ import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { AppProvider, useAppContext } from "./context/AppContext";
+import { LegalConsentPopup } from "./components/LegalConsentPopup";
 
 // ========================================
 // Code Splitting — Lazy loaded tabs (T3)
@@ -486,6 +487,9 @@ function AppContent() {
       )}
       {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
       
+      {/* LGPD Consent Modal for logged-in users */}
+      <LegalConsentPopup />
+
       {/* Cookie Consent Banner */}
       {!localStorage.getItem("pote_cookies_accepted") && (
          <div className="fixed bottom-0 md:bottom-4 left-0 md:left-4 right-0 md:right-4 z-50 p-4 bg-cookbook-bg/95 backdrop-blur-xl border-t md:border border-cookbook-border md:rounded-2xl shadow-2xl flex flex-col md:flex-row gap-4 items-center justify-between mx-auto max-w-4xl max-h-[50vh] overflow-y-auto w-full animate-slide-up pb-8 md:pb-4 border-l-4 sm:border-l-0 border-l-cookbook-primary">
