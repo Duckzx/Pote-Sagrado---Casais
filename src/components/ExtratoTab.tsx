@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowUpCircle,
   ArrowDownCircle,
@@ -68,7 +69,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   const [editAction, setEditAction] = useState("");
   const [editDate, setEditDate] = useState("");
   /* Delete state */ const [deleting, setDeleting] = useState<any | null>(null);
-  /* Filter state */ const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(20);
   /* Comments state */
   const [commentingOn, setCommentingOn] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -180,7 +182,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
 
   /* Group by date */ const groupedByDate = useMemo(() => {
     const groups: Record<string, any[]> = {};
-    filteredDeposits.forEach((d) => {
+    const visibleDeposits = filteredDeposits.slice(0, displayLimit);
+    visibleDeposits.forEach((d) => {
       const date = getDateObj(d.createdAt);
       const key = date
         ? date.toLocaleDateString("pt-BR", {
@@ -193,7 +196,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       groups[key].push(d);
     });
     return groups;
-  }, [filteredDeposits]);
+  }, [filteredDeposits, displayLimit]);
+
+  React.useEffect(() => {
+    setDisplayLimit(20);
+  }, [filter, filterUser, selectedMonth, selectedYear, searchQuery, sortAsc]);
+
   /* Navigate months */ const goMonth = (dir: number) => {
     let m = selectedMonth;
     let y = selectedYear;
@@ -569,11 +577,17 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             </p>
           </div>
         ) : (
-          Object.entries(groupedByDate).map(([dateLabel, items]) => {
+          Object.entries(groupedByDate).map(([dateLabel, items], groupIndex) => {
             const dailyBalance = items.reduce((acc: number, d: any) => d.type === "expense" ? acc - d.amount : acc + d.amount, 0);
             
             return (
-              <div key={dateLabel} className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: groupIndex * 0.1 }}
+                key={dateLabel} 
+                className="bg-cookbook-bg/40 border border-cookbook-border/30 rounded-3xl p-1 relative"
+              >
                 {/* Receipt top notch decoration */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-2 bg-cookbook-bg rounded-full border border-cookbook-border/30 z-10" />
                 
@@ -727,22 +741,28 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
       </div>{" "}
-      {/* Total count */}{" "}
+      {/* Load More & Total count */}
       {filteredDeposits.length > 0 && (
-        <div className="text-center pt-2">
-          {" "}
+        <div className="flex flex-col items-center gap-3 pt-2">
+          {displayLimit < filteredDeposits.length && (
+            <button
+              onClick={() => setDisplayLimit((prev) => prev + 20)}
+              className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl px-6 py-2.5 font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold hover:bg-cookbook-primary/5 transition-all shadow-sm"
+            >
+              Ver mais ({filteredDeposits.length - displayLimit} restantes)
+            </button>
+          )}
           <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/30 font-bold">
-            {" "}
-            {filteredDeposits.length} transaç{" "}
-            {filteredDeposits.length === 1 ? "ão" : "ões"}{" "}
-          </span>{" "}
+            Mostrando {Math.min(displayLimit, filteredDeposits.length)} de {filteredDeposits.length} transaç
+            {filteredDeposits.length === 1 ? "ão" : "ões"}
+          </span>
         </div>
-      )}{" "}
+      )}
       {/* ========== Edit Modal ========== */}{" "}
       {editing && (
         <div
