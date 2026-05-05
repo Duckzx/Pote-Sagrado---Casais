@@ -183,11 +183,11 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           className={`pot-label transition-opacity duration-300 ${isBroken ? "opacity-0" : "opacity-100"}`}
         >
           {" "}
-          <div className="font-serif text-3xl font-bold text-cookbook-primary">
+          <div className="font-serif text-[42px] leading-none font-bold text-cookbook-primary tracking-tight">
             {" "}
             <AnimatedNumber value={totalSaved} />{" "}
           </div>{" "}
-          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 mt-1 font-bold">
+          <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-primary/80 mt-2 font-bold bg-cookbook-primary/10 inline-block px-3 py-1 rounded-full">
             {" "}
             de{" "}
             {Intl.NumberFormat("pt-BR", {

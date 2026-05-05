@@ -292,23 +292,23 @@ function AppContent() {
           intensity={1.3}
         />
 
-        <div className="relative z-10 text-center space-y-8 max-w-sm w-full">
-          <div className="space-y-4">
-            <SacredJarIcon className="w-24 h-24 mx-auto animate-float" />
-            <div className="space-y-2">
-              <h1 className="font-serif text-4xl text-cookbook-text">
-                Pote Sagrado
+        <div className="relative z-10 text-center space-y-10 max-w-[85%] mx-auto w-full pt-12">
+          <div className="space-y-6">
+            <SacredJarIcon className="w-28 h-28 mx-auto animate-float drop-shadow-xl text-cookbook-primary" />
+            <div className="space-y-4">
+              <h1 className="font-serif text-[56px] leading-[0.9] text-cookbook-text font-medium tracking-tight">
+                Pote<br/><span className="text-cookbook-primary italic">Sagrado</span>
               </h1>
-              <p className="font-sans text-xs uppercase tracking-widest text-cookbook-text/60">
+              <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-cookbook-text/60 font-bold max-w-[200px] mx-auto leading-relaxed">
                 O diário financeiro do casal
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 pt-12">
             <button
               onClick={handleLoginClick}
-              className="w-full bg-cookbook-text text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
+              className="w-full bg-cookbook-text text-cookbook-bg font-sans text-[10px] uppercase tracking-[0.15em] py-5 rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.12)] transition-transform active:scale-[0.98] flex items-center justify-center gap-3 font-bold"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path
