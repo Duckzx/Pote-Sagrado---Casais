@@ -498,7 +498,7 @@ function AppContent() {
             <div className="flex w-full md:w-auto items-center gap-3 shrink-0 flex-col sm:flex-row">
               <button 
                 onClick={() => {
-                   window.open("/termos", "_blank");
+                   window.dispatchEvent(new CustomEvent('open-legal', { detail: 'termos' }));
                 }}
                 className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/50 hover:text-cookbook-primary font-bold transition-colors w-full sm:w-auto py-2"
               >
@@ -524,11 +524,24 @@ function AppContent() {
 // ========================================
 // Root App
 // ========================================
+import { LegalModal, LegalDocType } from './components/LegalModal';
+
 export default function App() {
+  const [legalDoc, setLegalDoc] = React.useState<LegalDocType>(null);
+  
+  React.useEffect(() => {
+    const handleOpenLegal = (e: any) => {
+       if (e.detail) setLegalDoc(e.detail as LegalDocType);
+    };
+    window.addEventListener('open-legal', handleOpenLegal);
+    return () => window.removeEventListener('open-legal', handleOpenLegal);
+  }, []);
+
   return (
     <ErrorBoundary>
       <AppProvider>
         <AppContent />
+        <LegalModal type={legalDoc} onClose={() => setLegalDoc(null)} />
       </AppProvider>
     </ErrorBoundary>
   );

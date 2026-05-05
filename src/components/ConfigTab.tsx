@@ -675,7 +675,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             </button>
             <button
               onClick={() => {
-                 addToast("Transparência (LGPD)", "Estes são nossos Termos de Uso e Política de Privacidade. Ao continuar usando, você aceita o processamento mínimo de dados para funcionalidade.", "info");
+                 window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacidade' }));
               }}
               className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
             >

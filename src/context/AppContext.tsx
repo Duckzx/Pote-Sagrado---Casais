@@ -190,6 +190,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
          .catch((e) => console.error("Error setting pending invite", e));
     }
 
+    let currentUnsubs: (() => void)[] = [];
+
     // Listen to user profile for theme and casalId
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
       let currentCasalId = `casal_${user.uid}`; // default
@@ -206,6 +208,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       setCasalId(currentCasalId);
       
+      // Clear previous nested unsubs if casalId changed or on re-run
+      currentUnsubs.forEach(unsub => unsub());
+      currentUnsubs = [];
+
       // Now that we have the casalId, listen to the specific couple's config
       const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {
         if (configSnap.exists()) {
@@ -217,6 +223,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
+      currentUnsubs.push(unsubConfig);
 
       // ----------------------------------------------------
       // AUTOMATIC MIGRATION: copy old data to current casal (runs once per session)
@@ -299,6 +306,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         
         setTimeout(() => setIsDataReady(true), 200);
       }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/deposits`));
+      currentUnsubs.push(unsubDeposits);
 
       // Listen to achievements
       const qArchived = query(collection(db, `casais/${currentCasalId}/achievements`), orderBy('createdAt', 'desc'));
@@ -307,6 +315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
         setAchievements(arch);
       }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/achievements`));
+      currentUnsubs.push(unsubAchievements);
 
       // Listen to pinboard links
       const qLinks = query(collection(db, `casais/${currentCasalId}/pinboard_links`), orderBy('createdAt', 'desc'));
@@ -315,21 +324,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));
         setPinboardLinks(linksData);
       }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/pinboard_links`));
-
-      // Store unsubs so we can clear them when the user changes
-      (window as any)._unsubCasalConfig = unsubConfig;
-      (window as any)._unsubCasalDeposits = unsubDeposits;
-      (window as any)._unsubCasalAchievements = unsubAchievements;
-      (window as any)._unsubCasalLinks = unsubLinks;
+      currentUnsubs.push(unsubLinks);
 
     }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
 
     return () => {
       unsubUser();
-      if ((window as any)._unsubCasalConfig) (window as any)._unsubCasalConfig();
-      if ((window as any)._unsubCasalDeposits) (window as any)._unsubCasalDeposits();
-      if ((window as any)._unsubCasalAchievements) (window as any)._unsubCasalAchievements();
-      if ((window as any)._unsubCasalLinks) (window as any)._unsubCasalLinks();
+      currentUnsubs.forEach(unsub => unsub());
     };
   }, [isAuthReady, user]);
 

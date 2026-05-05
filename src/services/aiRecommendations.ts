@@ -1,14 +1,5 @@
-import { GoogleGenAI } from '@google/genai';
-
 export async function getDestinationRecommendation(answers: string[]) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.warn("GEMINI_API_KEY is missing.");
-      return null;
-    }
-    const ai = new GoogleGenAI({ apiKey });
-
     const prompt = `Como um consultor de viagens de luxo para casais, o casal respondeu às seguintes preferências sobre o estilo de viagem deles:
 ${answers.join(', ')}.
 
@@ -17,17 +8,22 @@ Por favor, baseando-se nestas preferências, sugira EXATAMENTE UM destino incrí
 2. "reason": Uma frase de duas a três linhas explicando vividamente e de forma super romântica o motivo ideal para irem para lá e porque baseou-se nos gostos deles.
 3. "imageKeyword": Uma única palavra-chave em inglês para buscar uma foto desse destino no Unsplash.
 
-Retorne SOMENTE o JSON puro (sem marcação block tick, sem \`\`\`json).`;
+Retorne SOMENTE o JSON puro.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
+    const response = await fetch('/api/gemini', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
     });
-
-    const text = response.text || "{}";
+    const dataGen = await response.json();
+    
+    if (dataGen.error) {
+      throw new Error(dataGen.error);
+    }
+    
+    const textRaw = dataGen.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = textRaw ? textRaw.replace(/^```json/, '').replace(/```$/, '').trim() : "{}";
+    
     const data = JSON.parse(text);
     return {
       dest: data.dest || "Destino Mistério",
