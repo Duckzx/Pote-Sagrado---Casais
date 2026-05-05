@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { AnimatedNumber } from "./AnimatedNumber";
 import confetti from "canvas-confetti";
+import { BRL } from "../lib/maskUtils";
 import "./SacredPot.css";
 interface SacredPotProps {
   totalSaved: number;
@@ -176,11 +177,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           </div>{" "}
           <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 mt-1 font-bold">
             {" "}
-            de{" "}
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(goalAmount)}{" "}
+            de {BRL.format(goalAmount)}{" "}
           </p>{" "}
         </div>{" "}
       </div>{" "}
