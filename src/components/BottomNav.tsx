@@ -59,11 +59,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const iconPixelSize = totalTabs >= 5 ? 18 : 20;
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-4 pointer-events-none pb-safe">
-      <div className={cn("bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/60 rounded-3xl px-2 h-16 flex items-center w-full shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-cookbook-border/50 pointer-events-auto relative", maxWidthClass)}>
+    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-2 md:px-4 pointer-events-none pb-safe">
+      <div className={cn("bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/60 rounded-3xl h-16 flex items-center w-full px-2 shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-cookbook-border/50 pointer-events-auto relative", maxWidthClass)}>
         
         {/* Left Tabs */}
-        <div className="flex flex-1 justify-around h-full items-center pl-1 pr-6">
+        <div className="flex flex-1 justify-around h-full items-center">
           {tabsLeft.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -72,7 +72,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center rounded-full transition-all duration-400 ease-out",
+                  "relative flex flex-col items-center justify-center rounded-full transition-all duration-400 ease-out z-10",
                   iconSizeClass,
                   isActive
                     ? "text-cookbook-primary"
@@ -81,8 +81,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 {isActive && (
                   <motion.div
-                    layoutId="nav-pill-left"
-                    className="absolute inset-0 bg-cookbook-primary/10 rounded-full"
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-cookbook-text/5 rounded-full"
                     transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                   />
                 )}
@@ -96,12 +96,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           })}
         </div>
         
-        {/* Center Prominent Home Button */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex justify-center z-20">
+        {/* Espaçador central travado no meio */}
+        <div className="w-16 shrink-0" />
+
+        {/* Center Prominent Home Button (Absolute exactly in middle) */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center z-20">
           <button
             onClick={() => setActiveTab("home")}
             className={cn(
-              "absolute -top-12 flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_20px_rgba(40,129,156,0.3)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
+               "absolute -top-12 flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_20px_rgba(40,129,156,0.3)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
               activeTab === "home"
                 ? "bg-cookbook-primary scale-105"
                 : "bg-cookbook-primary/90 hover:bg-cookbook-primary hover:scale-105 active:scale-95",
@@ -119,7 +122,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         </div>
         
         {/* Right Tabs */}
-        <div className="flex flex-1 justify-around h-full items-center pr-1 pl-6">
+        <div className="flex flex-1 justify-around h-full items-center">
           {tabsRight.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -128,7 +131,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center rounded-full transition-all duration-400 ease-out",
+                  "relative flex flex-col items-center justify-center rounded-full transition-all duration-400 ease-out z-10",
                   iconSizeClass,
                   isActive
                     ? "text-cookbook-primary"
@@ -137,8 +140,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 {isActive && (
                   <motion.div
-                    layoutId="nav-pill-right"
-                    className="absolute inset-0 bg-cookbook-primary/10 rounded-full"
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-cookbook-text/5 rounded-full"
                     transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                   />
                 )}
@@ -151,6 +154,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             );
           })}
         </div>
+
       </div>
     </div>
   );

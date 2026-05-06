@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, ErrorInfo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { loginWithGoogle } from "./firebase";
 import { ColorBends } from "./components/ColorBends";
@@ -432,9 +432,10 @@ function AppContent() {
               exit={{ opacity: 0, x: tabDirection * -15, scale: 0.98 }}
               transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
             >
-              <Suspense fallback={<TabSkeleton />}>
-                {activeTab === "home" && (
-                <HomeTab
+              <ErrorBoundary>
+                <Suspense fallback={<TabSkeleton />}>
+                  {activeTab === "home" && (
+                  <HomeTab
                   currentUser={user}
                   destination={tripConfig.destination}
                   origin={tripConfig.origin}
@@ -485,9 +486,10 @@ function AppContent() {
                   addToast={addToast}
                 />
               )}
-            </Suspense>
-          </motion.div>
-        </AnimatePresence>
+              </Suspense>
+              </ErrorBoundary>
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
 
