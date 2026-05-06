@@ -1,7 +1,9 @@
 import React from "react";
-import { Target, Swords, Settings, Pin, LayoutGrid } from "lucide-react";
+import { Target, Swords, Settings, Pin, LayoutGrid, FileText } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
+import { useAppContext } from "../context/AppContext";
+
 /* Custom SVG matching the theme format, designed to perfectly resemble the animated Safe Pot */ const SacredPotIcon =
   ({ size = 24, strokeWidth = 2, className = "" }) => (
     <svg
@@ -35,15 +37,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   setActiveTab,
 }) => {
-  /* Reduced to 5 focused items, removing Extrato since it mixes with Home's Diário de Bordo. Focus is now balanced around a prominent center. */ const tabsLeft =
-    [
-      { id: "mural", icon: LayoutGrid, label: "Feed" },
-      { id: "missoes", icon: Target, label: "Conquistas" },
-    ];
-  const tabsRight = [
-    { id: "disputa", icon: Swords, label: "Duelo" },
-    { id: "config", icon: Settings, label: "Ajustes" },
-  ];
+  const { tripConfig } = useAppContext();
+  const mods = tripConfig?.activeModules || {};
+
+  const allTabs = [
+    { id: "mural", icon: LayoutGrid, label: "Feed", active: mods.feed !== false },
+    { id: "missoes", icon: Target, label: "Conquistas", active: mods.missoes !== false },
+    { id: "extrato", icon: FileText, label: "Extrato", active: mods.extrato !== false },
+    { id: "disputa", icon: Swords, label: "Duelo", active: mods.disputa !== false },
+  ].filter(t => t.active);
+
+  // Split into left and right, leaving config always on the right
+  const leftCount = Math.ceil((allTabs.length) / 2);
+  const tabsLeft = allTabs.slice(0, leftCount);
+  const tabsRight = [...allTabs.slice(leftCount), { id: "config", icon: Settings, label: "Ajustes", active: true }];
+
   return (
     <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-4 pointer-events-none pb-safe">
       {" "}

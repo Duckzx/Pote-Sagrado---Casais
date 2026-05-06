@@ -60,7 +60,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   relationshipStartDate: currentRelationshipStartDate,
   addToast,
 }) => {
-  const { casalId } = useAppContext();
+  const { casalId, tripConfig } = useAppContext();
+  
+  // Custom sub-tabs state
+  const [configSubTab, setConfigSubTab] = useState<"geral" | "personalizacao" | "avancado">("geral");
+
   const [destination, setDestination] = useState(currentDestination || "");
   const [origin, setOrigin] = useState(currentOrigin || "");
   const [goalAmount, setGoalAmount] = useState(() => {
@@ -72,6 +76,15 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [sharedAlbumUrl, setSharedAlbumUrl] = useState(currentSharedAlbumUrl || "");
   const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
+  
+  // Modules state
+  const [activeModules, setActiveModules] = useState<{ [key: string]: boolean }>({
+    feed: tripConfig?.activeModules?.feed !== false,
+    missoes: tripConfig?.activeModules?.missoes !== false,
+    extrato: tripConfig?.activeModules?.extrato !== false,
+    disputa: tripConfig?.activeModules?.disputa !== false,
+  });
+
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
   const [isSaving, setIsSaving] = useState(false);
@@ -85,6 +98,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     }
   }, []);
   const [saveTrigger, setSaveTrigger] = useState(0);
+
   useEffect(() => {
     setDestination(currentDestination || "");
     setOrigin(currentOrigin || "");
@@ -98,6 +112,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     setSharedAlbumUrl(currentSharedAlbumUrl || "");
     setRelationshipStartDate(currentRelationshipStartDate || "");
     setPrize(currentPrize || "");
+    setActiveModules({
+      feed: tripConfig?.activeModules?.feed !== false,
+      missoes: tripConfig?.activeModules?.missoes !== false,
+      extrato: tripConfig?.activeModules?.extrato !== false,
+      disputa: tripConfig?.activeModules?.disputa !== false,
+    });
   }, [
     currentDestination,
     currentOrigin,
@@ -107,7 +127,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     currentSharedAlbumUrl,
     currentRelationshipStartDate,
     currentPrize,
+    tripConfig?.activeModules
   ]);
+
   /* Handle auto-save on blur */ const handleSaveLocal = () => {
     performSave(
       destination,
@@ -117,7 +139,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate
+      relationshipStartDate,
+      activeModules
     );
   };
   useEffect(() => {
@@ -261,7 +284,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
-    startDateToSave: string
+    startDateToSave: string,
+    modulesToSave: { [key: string]: boolean }
   ) => {
     setIsSaving(true);
     try {
@@ -278,6 +302,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           relationshipStartDate: startDateToSave,
           monthlyPrize: prizeToSave,
           theme: themeToSave,
+          activeModules: modulesToSave,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
@@ -327,429 +352,453 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate
+      relationshipStartDate,
+      activeModules
     );
   };
   return (
-    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-10 animate-fade-in">
-      {" "}
-      {/* Profile Header Section */}{" "}
-      <section className="flex flex-col items-center text-center gap-3 mt-0 mb-6 relative">
-        {" "}
+    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-6 animate-fade-in">
+      {/* Profile Header Section */}
+      <section className="flex flex-col items-center text-center gap-3 mt-0 mb-4 relative">
         <div className="relative group cursor-pointer">
-          {" "}
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
-            {" "}
+          <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-2 border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
             <img
               src={
                 auth.currentUser?.photoURL ||
-                "https:/* images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"
+                "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"
               }
               alt="Profile"
               className="w-full h-full object-cover"
-            />{" "}
-            */{" "}
-          </div>{" "}
-        </div>{" "}
+            />
+          </div>
+        </div>
         <div>
-          {" "}
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
-            {" "}
-            {auth.currentUser?.displayName || "Casal Sonhador"}{" "}
-          </h2>{" "}
+            {auth.currentUser?.displayName || "Casal Sonhador"}
+          </h2>
           <p className="font-sans text-[10px] text-cookbook-text/40 mt-1 uppercase tracking-widest">
-            {" "}
-            {auth.currentUser?.email}{" "}
-          </p>{" "}
-        </div>{" "}
-      </section>{" "}
-      <InstallPrompt /> {/* Bento Grid */}{" "}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-        {" "}
-        {/* Card 1: Destino e Meta */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
-          {" "}
-          <div className="flex items-center gap-2 text-cookbook-text mb-6">
-            {" "}
-            <MapPin
-              size={18}
-              className="text-cookbook-primary opacity-80"
-            />{" "}
-            <h3 className="font-serif text-xl font-medium">A Aventura</h3>{" "}
-          </div>{" "}
-          <div className="space-y-6 relative z-10 flex-1">
-            {" "}
-            <div className="space-y-1">
-              {" "}
-              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                {" "}
-                Destino{" "}
-              </label>{" "}
-              <div className="relative">
-                {" "}
-                <input
-                  type="text"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  onBlur={handleSaveLocal}
-                  placeholder="Paris, Praia, Disney..."
-                  className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
-                />{" "}
+            {auth.currentUser?.email}
+          </p>
+        </div>
+      </section>
+
+      {/* Tabs Switcher */}
+      <div className="flex bg-cookbook-bg/50 backdrop-blur-md p-1 rounded-full border border-cookbook-border/50 sticky top-4 z-40">
+        <button
+          onClick={() => setConfigSubTab('geral')}
+          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'geral' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
+        >
+          Geral
+        </button>
+        <button
+          onClick={() => setConfigSubTab('personalizacao')}
+          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'personalizacao' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
+        >
+          Visual & Funcões
+        </button>
+        <button
+          onClick={() => setConfigSubTab('avancado')}
+          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'avancado' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
+        >
+          Conta
+        </button>
+      </div>
+
+      <InstallPrompt />
+
+      <section className="relative z-10 space-y-6">
+        {/* ======================= GERAL TAB ======================= */}
+        {configSubTab === 'geral' && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Card 1: Destino e Meta */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <MapPin size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">A Aventura</h3>
+              </div>
+              <div className="space-y-6 relative z-10 flex-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    Destino
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                      onBlur={handleSaveLocal}
+                      placeholder="Paris, Praia, Disney..."
+                      className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                    />
+                    <button
+                      title="Ajuda com I.A."
+                      onClick={() => setShowAkinator(true)}
+                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100"
+                    >
+                      <Sparkles size={16} />
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    Meta Financeira (R$)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={maskCurrency(goalAmount)}
+                    onChange={(e) => setGoalAmount(maskCurrency(e.target.value))}
+                    onBlur={handleSaveLocal}
+                    placeholder="0,00"
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-2xl font-medium text-cookbook-primary focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-primary/20"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Detalhes da Aventura */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <Sparkles size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">Detalhes Estendidos</h3>
+              </div>
+              <div className="space-y-6 flex-1">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                      Partida
+                    </label>
+                    <button
+                      onClick={handleGetLocation}
+                      className="text-[9px] uppercase tracking-widest text-cookbook-primary hover:text-cookbook-gold font-medium"
+                    >
+                      Usar GPS
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    onBlur={handleSaveLocal}
+                    placeholder="Ex: São Paulo, SP"
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    Nossa Data de Início do Relacionamento
+                  </label>
+                  <input
+                    type="date"
+                    value={relationshipStartDate}
+                    onChange={(e) => setRelationshipStartDate(e.target.value)}
+                    onBlur={handleSaveLocal}
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    Álbum Compartilhado de Fotos (Opcional)
+                  </label>
+                  <input
+                    type="url"
+                    value={sharedAlbumUrl}
+                    onChange={(e) => setSharedAlbumUrl(e.target.value)}
+                    onBlur={handleSaveLocal}
+                    placeholder="Cole o link do Google Photos, iCloud..."
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                      Aposta da Batalha (Duelo)
+                    </label>
+                    <button
+                      onClick={() => {
+                        setPrize(
+                          ORGANIC_PUNISHMENTS[
+                            Math.floor(Math.random() * ORGANIC_PUNISHMENTS.length)
+                          ]
+                        );
+                        setSaveTrigger((prev) => prev + 1);
+                      }}
+                      className="text-[9px] uppercase tracking-widest text-cookbook-gold hover:text-cookbook-primary font-medium"
+                    >
+                      Sortear
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={prize}
+                    onChange={(e) => setPrize(e.target.value)}
+                    onBlur={handleSaveLocal}
+                    placeholder="O perdedor paga a conta..."
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Permissões e Acessos */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-4">
+                <Bell size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">
+                  Notificações e Parceria
+                </h3>
+              </div>
+              <div className="flex flex-col gap-3 mt-2">
                 <button
-                  title="Ajuda com I.A."
-                  onClick={() => setShowAkinator(true)}
-                  className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100"
+                  onClick={handleEnablePush}
+                  disabled={isRequestingPush || notificationPermission === "granted"}
+                  className={`flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group ${notificationPermission === "granted" ? "opacity-60 cursor-default" : ""}`}
                 >
-                  {" "}
-                  <Sparkles size={16} />{" "}
-                </button>{" "}
-              </div>{" "}
-            </div>{" "}
-            <div className="space-y-1">
-              {" "}
-              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                {" "}
-                Meta Financeira (R$){" "}
-              </label>{" "}
-              <input
-                type="text"
-                inputMode="numeric"
-                value={maskCurrency(goalAmount)}
-                onChange={(e) => setGoalAmount(maskCurrency(e.target.value))}
-                onBlur={handleSaveLocal}
-                placeholder="0,00"
-                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-2xl font-medium text-cookbook-primary focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-primary/20"
-              />{" "}
-            </div>{" "}
-          </div>{" "}
-        </div>{" "}
-        {/* Card 2: Detalhes da Aventura */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
-          {" "}
-          <div className="flex items-center gap-2 text-cookbook-text mb-6">
-            {" "}
-            <Sparkles
-              size={18}
-              className="text-cookbook-primary opacity-80"
-            />{" "}
-            <h3 className="font-serif text-xl font-medium">
-              {" "}
-              Detalhes Estendidos{" "}
-            </h3>{" "}
-          </div>{" "}
-          <div className="space-y-6 flex-1">
-            {" "}
-            <div className="space-y-1">
-              {" "}
-              <div className="flex items-center justify-between">
-                {" "}
-                <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                  {" "}
-                  Partida{" "}
-                </label>{" "}
+                  <div className="pr-4">
+                    <div className={`font-sans text-sm font-medium transition-colors ${notificationPermission === "granted" ? "text-emerald-500" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
+                      {notificationPermission === "granted" ? "Alertas Nativos Ativados" : "Ativar Alertas Nativos"}
+                    </div>
+                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      {notificationPermission === "granted" ? "Você já está recebendo alertas deste dispositivo." : "Ser lembrado pelo navegador aumenta bastante a economia."}
+                    </div>
+                  </div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${notificationPermission === "granted" ? "text-emerald-500 bg-emerald-500/10" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
+                    <Bell size={16} />
+                  </div>
+                </button>
                 <button
-                  onClick={handleGetLocation}
-                  className="text-[9px] uppercase tracking-widest text-cookbook-primary hover:text-cookbook-gold font-medium"
+                  onClick={handleShare}
+                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group"
                 >
-                  {" "}
-                  Usar GPS{" "}
-                </button>{" "}
-              </div>{" "}
-              <input
-                type="text"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                onBlur={handleSaveLocal}
-                placeholder="Ex: São Paulo, SP"
-                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
-              />{" "}
-            </div>{" "}
-            <div className="space-y-1">
-              {" "}
-              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                {" "}
-                Nossa Data de Início do Relacionamento{" "}
-              </label>{" "}
-              <input
-                type="date"
-                value={relationshipStartDate}
-                onChange={(e) => setRelationshipStartDate(e.target.value)}
-                onBlur={handleSaveLocal}
-                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
-              />{" "}
-            </div>{" "}
-            <div className="space-y-1">
-              {" "}
-              <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                {" "}
-                Álbum Compartilhado de Fotos (Opcional){" "}
-              </label>{" "}
-              <input
-                type="url"
-                value={sharedAlbumUrl}
-                onChange={(e) => setSharedAlbumUrl(e.target.value)}
-                onBlur={handleSaveLocal}
-                placeholder="Cole o link do Google Photos, iCloud..."
-                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
-              />{" "}
-            </div>{" "}
-            <div className="space-y-1">
-              {" "}
-              <div className="flex items-center justify-between">
-                {" "}
-                <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                  {" "}
-                  Aposta da Batalha{" "}
-                </label>{" "}
+                  <div className="pr-4">
+                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                      Convidar Parceiro(a)
+                    </div>
+                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      Envie o link para a pessoa acessar o app.
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                    <Share2 size={16} />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= PERSONALIZAÇÃO E FUNÇÕES TAB ======================= */}
+        {configSubTab === 'personalizacao' && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Tema Visual */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <Palette size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">Tema Visual</h3>
+              </div>
+              <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
+                {THEMES.map((t) => (
+                  <div
+                    key={t.id}
+                    onClick={() => {
+                      setTheme(t.id);
+                      setSaveTrigger((prev) => prev + 1);
+                    }}
+                    className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
+                  >
+                    <div
+                      className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
+                    >
+                      <div
+                        className="w-full h-full rounded-xl overflow-hidden flex flex-col"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
+                        }}
+                      >
+                        <div
+                          className="h-1/3 w-full"
+                          style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
+                        ></div>
+                        <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
+                          <div
+                            className="w-3/4 h-1 rounded-full"
+                            style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
+                          ></div>
+                          <div
+                            className="w-1/2 h-1 rounded-full"
+                            style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
+                          ></div>
+                        </div>
+                      </div>
+                      {theme === t.id && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
+                          <Sparkles size={12} />
+                        </div>
+                      )}
+                    </div>
+                    <span
+                      className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
+                    >
+                      {t.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Módulos do App */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <Sparkles size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">Funções do App</h3>
+              </div>
+              <p className="font-sans text-xs text-cookbook-text/60 mb-6 leading-relaxed">
+                Desative abas e funções que vocês não usam para ter um aplicativo mais limpo e focado no essencial.
+              </p>
+              
+              <div className="space-y-4">
+                {[
+                  { id: 'feed', label: 'Feed do Casal (Mural de fotos)', desc: 'Desativando remove o mural de momentos e widgets de galeria.' },
+                  { id: 'missoes', label: 'Conquistas & Missões', desc: 'Desativa o sistema de missões diárias e o tracker de ofensivas.' },
+                  { id: 'extrato', label: 'Extrato Financeiro', desc: 'Aba de resumo e controle para ver todas as transações.' },
+                  { id: 'disputa', label: 'Duelo (Competição)', desc: 'Quem economiza mais e sistema de punições divertidas.' }
+                ].map(mod => (
+                  <div key={mod.id} className="flex items-center justify-between py-2 border-b border-cookbook-border/30 last:border-0 hover:bg-cookbook-text/5 p-3 rounded-xl transition-colors">
+                    <div className="pr-4">
+                      <div className="font-sans text-sm font-medium text-cookbook-text">
+                        {mod.label}
+                      </div>
+                      <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                        {mod.desc}
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        setActiveModules(prev => {
+                          const newState = { ...prev, [mod.id]: !prev[mod.id] };
+                          setSaveTrigger(cur => cur + 1);
+                          return newState;
+                        });
+                      }}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${activeModules[mod.id] !== false ? 'bg-cookbook-primary' : 'bg-cookbook-text/20'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activeModules[mod.id] !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= AVANÇADO TAB ======================= */}
+        {configSubTab === 'avancado' && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Support & Legal */}
+            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <h3 className="font-serif text-xl font-medium">Ajuda, Termos e Privacidade</h3>
+              </div>
+              <div className="flex flex-col gap-3">
+                 <button
+                  onClick={() => {
+                     window.open("mailto:suporte@potesagrado.com", "_blank");
+                  }}
+                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
+                >
+                  <div className="pr-4">
+                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                      Atendimento e Suporte
+                    </div>
+                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      Tire suas dúvidas ou reporte problemas.
+                    </div>
+                  </div>
+                </button>
                 <button
                   onClick={() => {
-                    setPrize(
-                      ORGANIC_PUNISHMENTS[
-                        Math.floor(Math.random() * ORGANIC_PUNISHMENTS.length)
-                      ],
-                    );
-                    setSaveTrigger((prev) => prev + 1);
+                     window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacidade' }));
                   }}
-                  className="text-[9px] uppercase tracking-widest text-cookbook-gold hover:text-cookbook-primary font-medium"
+                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
                 >
-                  {" "}
-                  Sortear{" "}
-                </button>{" "}
-              </div>{" "}
-              <input
-                type="text"
-                value={prize}
-                onChange={(e) => setPrize(e.target.value)}
-                onBlur={handleSaveLocal}
-                placeholder="O perdedor paga a conta..."
-                className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
-              />{" "}
-            </div>{" "}
-          </div>{" "}
-        </div>{" "}
-        {/* Card 3: Permissões e Acessos */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 transition-all">
-          {" "}
-          <div className="flex items-center gap-2 text-cookbook-text mb-4">
-            {" "}
-            <Bell size={18} className="text-cookbook-primary opacity-80" />{" "}
-            <h3 className="font-serif text-xl font-medium">
-              {" "}
-              Notificações e Parceria{" "}
-            </h3>{" "}
-          </div>{" "}
-          <div className="flex flex-col gap-3 mt-2">
-            {" "}
-            <button
-              onClick={handleEnablePush}
-              disabled={isRequestingPush || notificationPermission === "granted"}
-              className={`flex items-center justify-between py-3 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group ${notificationPermission === "granted" ? "opacity-60 cursor-default" : ""}`}
-            >
-              {" "}
-              <div className="pr-4">
-                {" "}
-                <div className={`font-sans text-sm font-medium transition-colors ${notificationPermission === "granted" ? "text-emerald-500" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
-                  {" "}
-                  {notificationPermission === "granted" ? "Alertas Nativos Ativados" : "Ativar Alertas Nativos"}
-                </div>{" "}
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  {" "}
-                  {notificationPermission === "granted" ? "Você já está recebendo alertas deste dispositivo." : "Ser lembrado pelo navegador aumenta bastante a economia."}
-                </div>{" "}
-              </div>{" "}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${notificationPermission === "granted" ? "text-emerald-500 bg-emerald-500/10" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
-                {" "}
-                <Bell size={16} />{" "}
-              </div>{" "}
-            </button>{" "}
-            <button
-              onClick={handleShare}
-              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group"
-            >
-              {" "}
-              <div className="pr-4">
-                {" "}
-                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                  {" "}
-                  Convidar Parceiro(a){" "}
-                </div>{" "}
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  {" "}
-                  Envie o link para a pessoa acessar o app.{" "}
-                </div>{" "}
-              </div>{" "}
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                {" "}
-                <Share2 size={16} />{" "}
-              </div>{" "}
-            </button>{" "}
-          </div>{" "}
-        </div>{" "}
-        {/* Card 4: Tema Visual */}{" "}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
-          {" "}
-          <div className="flex items-center gap-2 text-cookbook-text mb-6">
-            {" "}
-            <Palette
-              size={18}
-              className="text-cookbook-primary opacity-80"
-            />{" "}
-            <h3 className="font-serif text-xl font-medium">Tema Visual</h3>{" "}
-          </div>{" "}
-          <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
-            {" "}
-            {THEMES.map((t) => (
-              <div
-                key={t.id}
-                onClick={() => {
-                  setTheme(t.id);
-                  setSaveTrigger((prev) => prev + 1);
-                }}
-                className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
-              >
-                {" "}
-                <div
-                  className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
-                >
-                  {" "}
-                  <div
-                    className="w-full h-full rounded-xl overflow-hidden flex flex-col"
-                    style={{
-                      background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
-                    }}
-                  >
-                    {" "}
-                    <div
-                      className="h-1/3 w-full"
-                      style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
-                    ></div>{" "}
-                    <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
-                      {" "}
-                      <div
-                        className="w-3/4 h-1 rounded-full"
-                        style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
-                      ></div>{" "}
-                      <div
-                        className="w-1/2 h-1 rounded-full"
-                        style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
-                      ></div>{" "}
-                    </div>{" "}
-                  </div>{" "}
-                  {theme === t.id && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
-                      {" "}
-                      <Sparkles size={12} />{" "}
+                  <div className="pr-4">
+                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                      Termos de Uso e Política de Privacidade
                     </div>
-                  )}{" "}
-                </div>{" "}
-                <span
-                  className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
-                >
-                  {" "}
-                  {t.label}{" "}
-                </span>{" "}
+                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      Leia sobre seus direitos e como tratamos os dados (LGPD).
+                    </div>
+                  </div>
+                </button>
               </div>
-            ))}{" "}
-          </div>{" "}
-        </div>{" "}
-        {/* Support & Legal */}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
-          <div className="flex items-center gap-2 text-cookbook-text mb-6">
-            <h3 className="font-serif text-xl font-medium">Ajuda, Termos e Privacidade</h3>
-          </div>
-          <div className="flex flex-col gap-3">
-             <button
-              onClick={() => {
-                 window.open("mailto:suporte@potesagrado.com", "_blank");
-              }}
-              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
-            >
-              <div className="pr-4">
-                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                  Atendimento e Suporte
-                </div>
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  Tire suas dúvidas ou reporte problemas.
-                </div>
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                 window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacidade' }));
-              }}
-              className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
-            >
-              <div className="pr-4">
-                <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                  Termos de Uso e Política de Privacidade
-                </div>
-                <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                  Leia sobre seus direitos e como tratamos os dados (LGPD).
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
+            </div>
 
-        {/* Advanced & Account */}
-        <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col col-span-1 md:col-span-2 transition-all">
-          <div className="flex items-center gap-2 text-cookbook-text mb-6">
-            <h3 className="font-serif text-xl font-medium">Conta e Configurações Avançadas</h3>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={logout}
-                className="flex items-center gap-3 py-4 border-b border-cookbook-border/30 hover:border-cookbook-primary/50 transition-colors text-left group"
-              >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-cookbook-text/5 text-cookbook-text group-hover:bg-cookbook-primary/10 group-hover:text-cookbook-primary transition-colors shrink-0">
-                  <LogOut size={16} />
+            {/* Advanced & Account */}
+            <div className="bg-cookbook-bg/50 backdrop-blur-2xl border border-cookbook-border/50 rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
+              <div className="flex items-center gap-2 text-cookbook-text mb-6">
+                <h3 className="font-serif text-xl font-medium">Desconectar Safeway</h3>
+              </div>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-3 py-4 hover:border-cookbook-primary/50 transition-colors text-left group bg-cookbook-bg border border-cookbook-border shadow-sm rounded-2xl px-5"
+                  >
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-cookbook-text/5 text-cookbook-text group-hover:bg-cookbook-primary/10 group-hover:text-cookbook-primary transition-colors shrink-0">
+                      <LogOut size={16} />
+                    </div>
+                    <div>
+                      <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                        Sair do Aplicativo
+                      </div>
+                      <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                        Sua conta e saldo permanecem seguros nas nuvens.
+                      </div>
+                    </div>
+                  </button>
                 </div>
-                <div>
-                  <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                    Desconectar do Aplicativo
-                  </div>
-                  <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                    Sair da sua conta para este dispositivo.
-                  </div>
+                
+                <div className="flex justify-end pt-8 opacity-40 hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={async () => {
+                      if (window.confirm("Você tem certeza que deseja excluir sua conta e dados permanentemente? Esta ação não pode ser desfeita e excluirá também suas economias salvas!")) {
+                        try {
+                          if (auth.currentUser) {
+                            const user = auth.currentUser;
+                            const { deleteDoc, doc } = await import("firebase/firestore");
+                            await deleteDoc(doc(db, "users", user.uid));
+                            
+                            const { deleteUser } = await import("firebase/auth");
+                            await deleteUser(user);
+                            
+                            logout();
+                          }
+                        } catch (e: any) {
+                          console.error("Erro ao deletar", e);
+                          if (e.code === 'auth/requires-recent-login') {
+                             alert("Para sua segurança, faça login novamente para excluir a conta.");
+                             logout();
+                          } else {
+                             alert("Erro ao excluir conta");
+                          }
+                        }
+                      }
+                    }}
+                    className="font-sans text-[10px] uppercase tracking-widest font-medium text-red-500 hover:text-red-600 transition-colors"
+                  >
+                    Excluir Conta Permanentemente
+                  </button>
                 </div>
-              </button>
-            </div>
-            
-            <div className="flex justify-end pt-4 opacity-50 hover:opacity-100 transition-opacity">
-              <button
-                onClick={async () => {
-                  if (window.confirm("Você tem certeza que deseja excluir sua conta e dados permanentemente? Esta ação não pode ser desfeita.")) {
-                    try {
-                      if (auth.currentUser) {
-                        const user = auth.currentUser;
-                        const { deleteDoc, doc } = await import("firebase/firestore");
-                        await deleteDoc(doc(db, "users", user.uid));
-                        
-                        const { deleteUser } = await import("firebase/auth");
-                        await deleteUser(user);
-                        
-                        logout();
-                      }
-                    } catch (e: any) {
-                      console.error("Erro ao deletar", e);
-                      if (e.code === 'auth/requires-recent-login') {
-                         alert("Para sua segurança, faça login novamente para excluir a conta.");
-                         logout();
-                      } else {
-                         alert("Erro ao excluir conta");
-                      }
-                    }
-                  }
-                }}
-                className="font-sans text-[10px] uppercase tracking-widest font-medium text-red-500/80 hover:text-red-500 transition-colors underline underline-offset-4"
-              >
-                Solicitar exclusão da conta
-              </button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>{" "}
+        )}
+      </section>
+
       {showAkinator && (
         <AIAkinatorModal
           onClose={() => setShowAkinator(false)}
@@ -759,7 +808,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             setShowAkinator(false);
           }}
         />
-      )}{" "}
+      )}
     </div>
   );
 };

@@ -35,6 +35,15 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
+  activeModules?: {
+    feed?: boolean;
+    missoes?: boolean;
+    extrato?: boolean;
+    disputa?: boolean;
+    akinator?: boolean;
+    quiz?: boolean;
+    [key: string]: boolean | undefined;
+  };
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
@@ -49,6 +58,14 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   sharedAlbumUrl: '',
   fcmTokens: [],
   relationshipStartDate: '',
+  activeModules: {
+    feed: true,
+    missoes: true,
+    extrato: true,
+    disputa: true,
+    akinator: true,
+    quiz: true,
+  }
 };
 
 // ========================================
