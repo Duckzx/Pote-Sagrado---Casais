@@ -15,6 +15,7 @@ export interface Deposit {
   createdAt: Timestamp | null;
   comments?: { id: string; text: string; who: string; whoName: string; createdAt: number }[];
   reactions?: Record<string, string>;
+  isXpBonus?: boolean;
 }
 
 export interface Challenge {

@@ -20,6 +20,9 @@ const MissoesTab = lazy(() =>
 const PinboardTab = lazy(() =>
   import("./components/PinboardTab").then((m) => ({ default: m.PinboardTab })),
 );
+const ExtratoTab = lazy(() =>
+  import("./components/ExtratoTab").then((m) => ({ default: m.ExtratoTab })),
+);
 const DisputaTab = lazy(() =>
   import("./components/DisputaTab").then((m) => ({ default: m.DisputaTab })),
 );
@@ -152,6 +155,7 @@ function AppContent() {
 
   const {
     user,
+    casalId,
     isAuthReady,
     isDataReady,
     activeTab,
@@ -450,6 +454,13 @@ function AppContent() {
                   battleChallenges={tripConfig.battleChallenges}
                   deposits={deposits}
                   currentUser={user}
+                  addToast={addToast}
+                />
+              )}
+              {activeTab === "extrato" && (
+                <ExtratoTab
+                  casalId={casalId}
+                  deposits={deposits}
                   addToast={addToast}
                 />
               )}

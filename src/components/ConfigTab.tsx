@@ -788,9 +788,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         }
                       }
                     }}
-                    className="font-sans text-[10px] uppercase tracking-widest font-medium text-red-500 hover:text-red-600 transition-colors"
+                    className="font-sans text-[9px] uppercase tracking-widest font-medium text-cookbook-text/30 hover:text-red-500 transition-colors"
                   >
-                    Excluir Conta Permanentemente
+                    Encerrar conta
                   </button>
                 </div>
               </div>
