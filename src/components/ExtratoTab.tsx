@@ -70,7 +70,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   const [editDate, setEditDate] = useState("");
   /* Delete state */ const [deleting, setDeleting] = useState<any | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [displayLimit, setDisplayLimit] = useState(20);
+  const [displayLimit, setDisplayLimit] = useState(10);
   /* Comments state */
   const [commentingOn, setCommentingOn] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -199,7 +199,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
   }, [filteredDeposits, displayLimit]);
 
   React.useEffect(() => {
-    setDisplayLimit(20);
+    setDisplayLimit(10);
   }, [filter, filterUser, selectedMonth, selectedYear, searchQuery, sortAsc]);
 
   /* Navigate months */ const goMonth = (dir: number) => {
@@ -751,7 +751,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         <div className="flex flex-col items-center gap-3 pt-2">
           {displayLimit < filteredDeposits.length && (
             <button
-              onClick={() => setDisplayLimit((prev) => prev + 20)}
+              onClick={() => setDisplayLimit((prev) => prev + 10)}
               className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl px-6 py-2.5 font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold hover:bg-cookbook-primary/5 transition-all shadow-sm"
             >
               Ver mais ({filteredDeposits.length - displayLimit} restantes)
