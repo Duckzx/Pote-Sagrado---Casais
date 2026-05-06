@@ -700,7 +700,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   </button>
                 </div>
                 
-                <div className="flex justify-end pt-8 opacity-40 hover:opacity-100 transition-opacity">
+                <div className="flex flex-col items-end pt-10 pb-2 opacity-50 hover:opacity-100 transition-opacity">
                   <button
                     onClick={async () => {
                       if (window.confirm("Você tem certeza que deseja excluir sua conta e dados permanentemente? Esta ação não pode ser desfeita e excluirá também suas economias salvas!")) {
@@ -726,10 +726,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         }
                       }
                     }}
-                    className="font-sans text-[9px] uppercase tracking-widest font-medium text-cookbook-text/30 hover:text-red-500 transition-colors"
+                    className="font-sans text-[10px] uppercase tracking-widest font-bold text-red-500/80 hover:text-red-500 transition-colors mb-1"
                   >
                     Encerrar conta
                   </button>
+                  <p className="font-sans text-[10px] text-red-500/60 leading-tight max-w-[220px] text-right">
+                    Apaga permanentemente todos os seus dados e o seu perfil. Ação irreversível.
+                  </p>
                 </div>
               </div>
             </div>
