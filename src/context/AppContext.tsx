@@ -146,15 +146,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setActiveTab(newTab);
   }, [activeTab]);
 
-  useEffect(() => {
-    if (tripConfig?.activeModules && activeTab !== 'home' && activeTab !== 'config') {
-      const isEnabled = tripConfig.activeModules[activeTab as string] !== false;
-      if (!isEnabled) {
-        setActiveTab('home');
-      }
-    }
-  }, [tripConfig?.activeModules, activeTab]);
-
   // ---- Auth ----
   useEffect(() => {
     // Check invite param in URL

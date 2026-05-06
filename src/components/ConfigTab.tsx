@@ -77,14 +77,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
   
-  // Modules state
-  const [activeModules, setActiveModules] = useState<{ [key: string]: boolean }>({
-    feed: tripConfig?.activeModules?.feed !== false,
-    missoes: tripConfig?.activeModules?.missoes !== false,
-    extrato: tripConfig?.activeModules?.extrato !== false,
-    disputa: tripConfig?.activeModules?.disputa !== false,
-  });
-
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
   const [isSaving, setIsSaving] = useState(false);
@@ -112,12 +104,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     setSharedAlbumUrl(currentSharedAlbumUrl || "");
     setRelationshipStartDate(currentRelationshipStartDate || "");
     setPrize(currentPrize || "");
-    setActiveModules({
-      feed: tripConfig?.activeModules?.feed !== false,
-      missoes: tripConfig?.activeModules?.missoes !== false,
-      extrato: tripConfig?.activeModules?.extrato !== false,
-      disputa: tripConfig?.activeModules?.disputa !== false,
-    });
   }, [
     currentDestination,
     currentOrigin,
@@ -126,8 +112,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     customChallenges,
     currentSharedAlbumUrl,
     currentRelationshipStartDate,
-    currentPrize,
-    tripConfig?.activeModules
+    currentPrize
   ]);
 
   /* Handle auto-save on blur */ const handleSaveLocal = () => {
@@ -139,8 +124,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate,
-      activeModules
+      relationshipStartDate
     );
   };
   useEffect(() => {
@@ -284,8 +268,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
-    startDateToSave: string,
-    modulesToSave: { [key: string]: boolean }
+    startDateToSave: string
   ) => {
     setIsSaving(true);
     try {
@@ -302,7 +285,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           relationshipStartDate: startDateToSave,
           monthlyPrize: prizeToSave,
           theme: themeToSave,
-          activeModules: modulesToSave,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
@@ -352,8 +334,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate,
-      activeModules
+      relationshipStartDate
     );
   };
   return (
@@ -649,49 +630,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
             </div>
 
-            {/* Módulos do App */}
-            <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
-              <div className="flex items-center gap-2 text-cookbook-text mb-6">
-                <Sparkles size={18} className="text-cookbook-primary opacity-80" />
-                <h3 className="font-serif text-xl font-medium">Funções do App</h3>
-              </div>
-              <p className="font-sans text-xs text-cookbook-text/60 mb-6 leading-relaxed">
-                Desative abas e funções que vocês não usam para ter um aplicativo mais limpo e focado no essencial.
-              </p>
-              
-              <div className="space-y-4">
-                {[
-                  { id: 'feed', label: 'Feed do Casal (Mural de fotos)', desc: 'Desativando remove o mural de momentos e widgets de galeria.' },
-                  { id: 'missoes', label: 'Conquistas & Missões', desc: 'Desativa o sistema de missões diárias e o tracker de ofensivas.' },
-                  { id: 'extrato', label: 'Extrato Financeiro', desc: 'Aba de resumo e controle para ver todas as transações.' },
-                  { id: 'disputa', label: 'Duelo (Competição)', desc: 'Quem economiza mais e sistema de punições divertidas.' }
-                ].map(mod => (
-                  <div key={mod.id} className="flex items-center justify-between py-2 border-b border-cookbook-border/30 last:border-0 hover:bg-cookbook-text/5 p-3 rounded-xl transition-colors">
-                    <div className="pr-4">
-                      <div className="font-sans text-sm font-medium text-cookbook-text">
-                        {mod.label}
-                      </div>
-                      <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                        {mod.desc}
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => {
-                        setActiveModules(prev => {
-                          const newState = { ...prev, [mod.id]: !prev[mod.id] };
-                          setSaveTrigger(cur => cur + 1);
-                          return newState;
-                        });
-                      }}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${activeModules[mod.id] !== false ? 'bg-cookbook-primary' : 'bg-cookbook-text/20'}`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activeModules[mod.id] !== false ? 'translate-x-6' : 'translate-x-1'}`} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 

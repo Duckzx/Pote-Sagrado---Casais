@@ -37,17 +37,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   setActiveTab,
 }) => {
-  const { tripConfig } = useAppContext();
-  const mods = tripConfig?.activeModules || {};
-
-  const activeModules = [
-    { id: "mural", icon: LayoutGrid, label: "Feed", active: mods.feed !== false },
-    { id: "missoes", icon: Target, label: "Conquistas", active: mods.missoes !== false },
-    { id: "extrato", icon: FileText, label: "Extrato", active: mods.extrato !== false },
-    { id: "disputa", icon: Swords, label: "Duelo", active: mods.disputa !== false },
-  ].filter(t => t.active);
-
-  const allSecondaryTabs = [...activeModules, { id: "config", icon: Settings, label: "Ajustes", active: true }];
+  const allSecondaryTabs = [
+    { id: "mural", icon: LayoutGrid, label: "Feed" },
+    { id: "missoes", icon: Target, label: "Conquistas" },
+    { id: "extrato", icon: FileText, label: "Extrato" },
+    { id: "disputa", icon: Swords, label: "Duelos" },
+    { id: "config", icon: Settings, label: "Ajustes" },
+  ];
   
   // Encontrar o meio para inserir o botão Home
   const halfMatch = Math.ceil(allSecondaryTabs.length / 2);
