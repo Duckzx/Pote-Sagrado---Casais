@@ -40,7 +40,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const allSecondaryTabs = [
     { id: "mural", icon: LayoutGrid, label: "Feed" },
     { id: "missoes", icon: Target, label: "Conquistas" },
-    { id: "extrato", icon: FileText, label: "Extrato" },
     { id: "disputa", icon: Swords, label: "Duelos" },
     { id: "config", icon: Settings, label: "Ajustes" },
   ];
