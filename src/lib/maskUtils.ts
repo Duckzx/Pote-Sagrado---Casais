@@ -1,13 +1,20 @@
+/**
+ * Singleton instance of Intl.NumberFormat for BRL currency.
+ * Reusing this instance is significantly more performant than creating a new one on every call,
+ * especially in frequently rendered components or animation hooks.
+ */
+export const BRL = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export const maskCurrency = (value: string): string => {
   const digits = value.replace(/\D/g, '');
   if (!digits) return '';
   const numberValue = Number(digits) / 100;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(numberValue);
+  return BRL.format(numberValue);
 };
 
 export const parseCurrencyString = (value: string): number => {

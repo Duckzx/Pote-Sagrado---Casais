@@ -13,6 +13,7 @@ export interface Deposit {
   who: string;
   whoName: string;
   createdAt: Timestamp | null;
+  isXpBonus?: boolean;
   comments?: { id: string; text: string; who: string; whoName: string; createdAt: number }[];
   reactions?: Record<string, string>;
 }
