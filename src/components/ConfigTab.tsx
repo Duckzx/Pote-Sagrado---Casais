@@ -63,28 +63,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   relationshipStartDate: currentRelationshipStartDate,
   addToast,
 }) => {
-  const { casalId, tripConfig } = useAppContext();
+  const { casalId, tripConfig, coupleMembers } = useAppContext();
   
-  const [coupleMembers, setCoupleMembers] = useState<any[]>([]);
-  useEffect(() => {
-    if (!casalId || !auth.currentUser) return;
-    const fetchMembers = async () => {
-      try {
-        const { query, collection, where, getDocs } = await import("firebase/firestore");
-        const q = query(collection(db, "users"), where("casalId", "==", casalId));
-        const snap = await getDocs(q);
-        const members: any[] = [];
-        snap.forEach(doc => {
-          members.push({ id: doc.id, ...doc.data() });
-        });
-        setCoupleMembers(members);
-      } catch (e) {
-        console.error("Error fetching couple members:", e);
-      }
-    };
-    fetchMembers();
-  }, [casalId, auth.currentUser]);
-
   const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !auth.currentUser) return;
     const file = e.target.files[0];
@@ -98,7 +78,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         await updateProfile(auth.currentUser!, { photoURL: base64String });
         await setDoc(doc(db, "users", auth.currentUser!.uid), { photoURL: base64String }, { merge: true });
         addToast("Sucesso", "Foto de perfil atualizada!", "success");
-        setCoupleMembers(prev => prev.map(m => m.id === auth.currentUser?.uid ? { ...m, photoURL: base64String } : m));
       } catch (err) {
         console.error(err);
         addToast("Erro", "Falha ao atualizar foto", "info");
@@ -121,6 +100,41 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [sharedAlbumUrl, setSharedAlbumUrl] = useState(currentSharedAlbumUrl || "");
   const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
+  const [inviteCodeInput, setInviteCodeInput] = useState("");
+
+  const handleApplyInviteCode = async () => {
+    if (!inviteCodeInput) {
+      addToast("Aviso", "Digite um código de convite.", "info");
+      return;
+    }
+    const { collection, query, where, getDocs, doc, setDoc } = await import("firebase/firestore");
+    try {
+      const q = query(collection(db, 'users'), where('inviteCode', '==', inviteCodeInput.trim().toUpperCase()));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const partnerDoc = snap.docs[0];
+        if (partnerDoc.id === auth.currentUser?.uid) {
+           addToast("Aviso", "Este é o seu próprio código.", "info");
+           return;
+        }
+        const partnerCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
+        await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: partnerCasalId }, { merge: true });
+        addToast("Sucesso", "Casal conectado com sucesso!", "success");
+        setInviteCodeInput("");
+      } else {
+        if (inviteCodeInput.trim().startsWith('casal_')) {
+           await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: inviteCodeInput.trim() }, { merge: true });
+           addToast("Sucesso", "Casal conectado!", "success");
+           setInviteCodeInput("");
+        } else {
+           addToast("Erro", "Código não encontrado.", "info");
+        }
+      }
+    } catch (err) {
+      addToast("Erro", "Falha ao vincular código.", "info");
+      console.error(err);
+    }
+  };
   
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
@@ -230,10 +244,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       },
     );
   };
+  const me = coupleMembers.find(m => m.id === auth.currentUser?.uid);
+
   const handleShare = async () => {
     const inviteUrl = new URL(window.location.href);
-    if (casalId) {
-      inviteUrl.searchParams.set("invite", casalId);
+    const code = me?.inviteCode || casalId;
+    if (code) {
+      inviteUrl.searchParams.set("invite", code);
     }
     const shareData = {
       title: "Pote Sagrado",
@@ -591,22 +608,52 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <Bell size={16} />
                   </div>
                 </button>
-                <button
-                  onClick={handleShare}
-                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group"
-                >
-                  <div className="pr-4">
-                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                      Convidar Parceiro(a)
+                <div className="pt-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans text-sm font-medium text-cookbook-text">
+                      Código de Convite
                     </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                      Envie o link para a pessoa acessar o app.
-                    </div>
+                    {me?.inviteCode && (
+                       <div className="px-3 py-1 bg-cookbook-primary/10 text-cookbook-primary rounded-full font-mono text-sm tracking-widest font-bold">
+                         {me.inviteCode}
+                       </div>
+                    )}
                   </div>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                  <div className="font-sans text-[11px] text-cookbook-text/40 mb-3 leading-tight">
+                    Compartilhe este código ou o link abaixo com seu par para conectarem as contas.
+                  </div>
+                  
+                  <button
+                    onClick={handleShare}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-cookbook-gold text-white font-sans text-[10px] uppercase tracking-widest rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] active:scale-95 transition-transform"
+                  >
                     <Share2 size={16} />
-                  </div>
-                </button>
+                    Enviar Convite
+                  </button>
+
+                  {coupleMembers.length <= 1 && (
+                    <div className="mt-4 pt-4 border-t border-cookbook-border/30">
+                      <div className="font-sans text-xs font-medium text-cookbook-text mb-2">
+                        Já tem um código?
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={inviteCodeInput}
+                          onChange={(e) => setInviteCodeInput(e.target.value)}
+                          placeholder="Digite o código"
+                          className="flex-1 bg-cookbook-bg border border-cookbook-border/50 rounded-full px-3 py-2 text-sm font-mono text-center uppercase tracking-widest focus:outline-none focus:border-cookbook-primary"
+                        />
+                        <button
+                          onClick={handleApplyInviteCode}
+                          className="px-4 py-2 bg-cookbook-primary text-white rounded-full text-[10px] uppercase tracking-widest font-bold"
+                        >
+                          Vincular
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

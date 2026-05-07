@@ -67,6 +67,9 @@ interface AppContextValue {
   canInstall: boolean;
   installPrompt: any | null;
   clearInstallPrompt: () => void;
+
+  // Couple Members
+  coupleMembers: any[];
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -111,6 +114,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [bingoStats, setBingoStats] = useState<Record<string, number>>({});
   const [theme, setTheme] = useState<ThemeId>(() => (localStorage.getItem('pote_theme') as ThemeId) || 'cookbook');
+  const [coupleMembers, setCoupleMembers] = useState<any[]>([]);
 
   const [lgpdConsent, setLgpdConsent] = useState<boolean | null>(null);
   const [hasCheckedConsent, setHasCheckedConsent] = useState(false);
@@ -191,14 +195,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Apply pending invite
     const pendingInvite = localStorage.getItem('pote_invite_code');
-    if (pendingInvite && pendingInvite !== `casal_${user.uid}`) {
-       setDoc(doc(db, 'users', user.uid), { casalId: pendingInvite }, { merge: true })
-         .then(() => {
-           localStorage.removeItem('pote_invite_code');
-           // Show success toast for linking profiles
-           addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
-         })
-         .catch((e) => console.error("Error setting pending invite", e));
+    if (pendingInvite) {
+      const applyInvite = async () => {
+        try {
+          let resolvedCasalId = pendingInvite;
+          if (!pendingInvite.startsWith('casal_')) {
+            // It might be a short invite code, let's look it up
+            const q = query(collection(db, 'users'), where('inviteCode', '==', pendingInvite));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+              const partnerDoc = snap.docs[0];
+              // Use their casalId or default to casal_uid
+              resolvedCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
+            }
+          }
+          if (resolvedCasalId !== `casal_${user.uid}`) {
+            await setDoc(doc(db, 'users', user.uid), { casalId: resolvedCasalId }, { merge: true });
+            addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
+          }
+          localStorage.removeItem('pote_invite_code');
+        } catch (e) {
+          console.error("Error setting pending invite", e);
+        }
+      };
+      applyInvite();
     }
 
     let currentUnsubs: (() => void)[] = [];
@@ -208,6 +228,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       let currentCasalId = `casal_${user.uid}`; // default
       if (docSnap.exists()) {
         const data = docSnap.data();
+        if (!data.inviteCode) {
+           const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+           setDoc(doc(db, 'users', user.uid), { inviteCode: newCode }, { merge: true });
+        }
         if (data.theme) {
           const t = data.theme as ThemeId;
           setTheme(t);
@@ -219,6 +243,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setLgpdConsent(!!data.lgpdConsent);
         setHasCheckedConsent(true);
       } else {
+        const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        setDoc(doc(db, 'users', user.uid), { lgpdConsent: false, inviteCode: newCode }, { merge: true });
         setLgpdConsent(false);
         setHasCheckedConsent(true);
       }
@@ -240,6 +266,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
       currentUnsubs.push(unsubConfig);
+
+      // Listen to couple members based on casalId
+      const unsubMembers = onSnapshot(query(collection(db, 'users'), where('casalId', '==', currentCasalId)), (membersSnap) => {
+        const members: any[] = [];
+        membersSnap.forEach(m => members.push({ id: m.id, ...m.data() }));
+        setCoupleMembers(members);
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'users'));
+      currentUnsubs.push(unsubMembers);
 
       // ----------------------------------------------------
       // AUTOMATIC MIGRATION: copy old data to current casal (runs once per session)
@@ -429,6 +463,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deposits,
     achievements,
     pinboardLinks,
+    coupleMembers,
     totalSaved,
     bingoStats,
     theme,
