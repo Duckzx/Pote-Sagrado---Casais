@@ -14,7 +14,7 @@ import {
   Bell,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext, triggerConnectionCelebration } from "../context/AppContext";
 import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -120,11 +120,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         const partnerCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
         await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: partnerCasalId }, { merge: true });
         addToast("Sucesso", "Casal conectado com sucesso!", "success");
+        triggerConnectionCelebration();
         setInviteCodeInput("");
       } else {
         if (inviteCodeInput.trim().startsWith('casal_')) {
            await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: inviteCodeInput.trim() }, { merge: true });
            addToast("Sucesso", "Casal conectado!", "success");
+           triggerConnectionCelebration();
            setInviteCodeInput("");
         } else {
            addToast("Erro", "Código não encontrado.", "info");

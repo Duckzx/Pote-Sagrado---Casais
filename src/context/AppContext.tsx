@@ -88,6 +88,40 @@ export function useAppContext(): AppContextValue {
 // Provider
 // ========================================
 
+// ========================================
+// Validation Tool Function
+// ========================================
+import confetti from 'canvas-confetti';
+
+export const triggerConnectionCelebration = () => {
+  const duration = 3 * 1000;
+  const end = Date.now() + duration;
+
+  const frame = () => {
+    confetti({
+      particleCount: 5,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#c5a059', '#ffb703', '#fb8500', '#8ecae6'],
+      zIndex: 9999
+    });
+    confetti({
+      particleCount: 5,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#c5a059', '#ffb703', '#fb8500', '#8ecae6'],
+      zIndex: 9999
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  };
+  frame();
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [casalId, setCasalId] = useState<string | null>(null);
@@ -212,6 +246,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (resolvedCasalId !== `casal_${user.uid}`) {
             await setDoc(doc(db, 'users', user.uid), { casalId: resolvedCasalId }, { merge: true });
             addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
+            triggerConnectionCelebration();
           }
           localStorage.removeItem('pote_invite_code');
         } catch (e) {
