@@ -47,10 +47,13 @@ service cloud.firestore {
     
     // Validate User
     function isValidUser(data) {
-      return data.keys().hasAll(['theme']) &&
-             data.theme is string && data.theme.size() < 50 &&
+      return (!('theme' in data) || (data.theme is string && data.theme.size() < 50)) &&
              (!('casalId' in data) || (data.casalId is string && data.casalId.size() < 100)) &&
-             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100));
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 1048576)) &&
+             (!('inviteCode' in data) || (data.inviteCode is string && data.inviteCode.size() < 20)) &&
+             (!('lgpdConsent' in data) || data.lgpdConsent is bool) &&
+             (!('lgpdConsentDate' in data) || (data.lgpdConsentDate is string && data.lgpdConsentDate.size() < 50));
     }
 
     function isValidTripConfig(data) {
