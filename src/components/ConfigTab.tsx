@@ -19,6 +19,9 @@ import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
+import { AvatarGroup } from "./ui/avatar-group";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 interface ConfigTabProps {
   currentDestination: string;
   currentOrigin: string;
@@ -62,6 +65,48 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
 }) => {
   const { casalId, tripConfig } = useAppContext();
   
+  const [coupleMembers, setCoupleMembers] = useState<any[]>([]);
+  useEffect(() => {
+    if (!casalId || !auth.currentUser) return;
+    const fetchMembers = async () => {
+      try {
+        const { query, collection, where, getDocs } = await import("firebase/firestore");
+        const q = query(collection(db, "users"), where("casalId", "==", casalId));
+        const snap = await getDocs(q);
+        const members: any[] = [];
+        snap.forEach(doc => {
+          members.push({ id: doc.id, ...doc.data() });
+        });
+        setCoupleMembers(members);
+      } catch (e) {
+        console.error("Error fetching couple members:", e);
+      }
+    };
+    fetchMembers();
+  }, [casalId, auth.currentUser]);
+
+  const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !auth.currentUser) return;
+    const file = e.target.files[0];
+    const { updateProfile } = await import("firebase/auth");
+    
+    // Convert to base64 using FileReader
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      try {
+        await updateProfile(auth.currentUser!, { photoURL: base64String });
+        await setDoc(doc(db, "users", auth.currentUser!.uid), { photoURL: base64String }, { merge: true });
+        addToast("Sucesso", "Foto de perfil atualizada!", "success");
+        setCoupleMembers(prev => prev.map(m => m.id === auth.currentUser?.uid ? { ...m, photoURL: base64String } : m));
+      } catch (err) {
+        console.error(err);
+        addToast("Erro", "Falha ao atualizar foto", "info");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Custom sub-tabs state
   const [configSubTab, setConfigSubTab] = useState<"geral" | "personalizacao" | "avancado">("geral");
 
@@ -341,18 +386,30 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-6 animate-fade-in">
       {/* Profile Header Section */}
       <section className="flex flex-col items-center text-center gap-3 mt-0 mb-4 relative">
-        <div className="relative group cursor-pointer">
-          <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-2 border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
-            <img
-              src={
-                auth.currentUser?.photoURL ||
-                "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"
-              }
-              alt="Profile"
-              className="w-full h-full object-cover"
+        <label className="relative group cursor-pointer block">
+          <input type="file" className="hidden" accept="image/*" onChange={handleProfilePhotoChange} />
+          {coupleMembers.length > 1 ? (
+            <AvatarGroup 
+              avatarUrls={coupleMembers.map(m => ({
+                imageUrl: m.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop",
+                name: m.displayName || m.email?.split("@")[0] || "Profile",
+              }))}
             />
+          ) : (
+            <Avatar variant="app" className="w-20 h-20 md:w-28 md:h-28 shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:scale-[1.02] transition-transform duration-300">
+              <AvatarImage 
+                src={auth.currentUser?.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"} 
+                alt="Profile" 
+              />
+              <AvatarFallback className="bg-cookbook-primary/20 text-cookbook-primary text-xl">
+                {auth.currentUser?.displayName?.slice(0, 2).toUpperCase() || auth.currentUser?.email?.slice(0, 2).toUpperCase() || "P"}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center -z-0">
+             <span className="text-white text-xs font-bold uppercase tracking-widest z-10">Alterar</span>
           </div>
-        </div>
+        </label>
         <div>
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
             {auth.currentUser?.displayName || "Casal Sonhador"}
@@ -363,33 +420,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </div>
       </section>
 
-      {/* Tabs Switcher */}
-      <div className="flex bg-cookbook-bg/50 backdrop-blur-md p-1 rounded-full border border-cookbook-border/50 sticky top-4 z-40">
-        <button
-          onClick={() => setConfigSubTab('geral')}
-          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'geral' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
-        >
-          Geral
-        </button>
-        <button
-          onClick={() => setConfigSubTab('personalizacao')}
-          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'personalizacao' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
-        >
-          Visual & Funcões
-        </button>
-        <button
-          onClick={() => setConfigSubTab('avancado')}
-          className={`flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold ${configSubTab === 'avancado' ? 'bg-cookbook-primary text-white shadow-md' : 'text-cookbook-text/60 hover:bg-cookbook-text/5'}`}
-        >
-          Conta
-        </button>
-      </div>
+      <Tabs defaultValue="geral" className="w-full">
+        <TabsList>
+          <TabsTrigger value="geral">Geral</TabsTrigger>
+          <TabsTrigger value="personalizacao">Visual & Funcões</TabsTrigger>
+          <TabsTrigger value="avancado">Conta</TabsTrigger>
+        </TabsList>
 
       <InstallPrompt />
 
-      <section className="relative z-10 space-y-6">
-        {/* ======================= GERAL TAB ======================= */}
-        {configSubTab === 'geral' && (
+      <section className="relative z-10 space-y-6 mt-6">
+        <TabsContent value="geral">
           <div className="space-y-6 animate-fade-in">
             {/* Card 1: Destino e Meta */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
@@ -569,10 +610,10 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
             </div>
           </div>
-        )}
+        </TabsContent>
 
         {/* ======================= PERSONALIZAÇÃO E FUNÇÕES TAB ======================= */}
-        {configSubTab === 'personalizacao' && (
+        <TabsContent value="personalizacao">
           <div className="space-y-6 animate-fade-in">
             {/* Tema Visual */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -631,10 +672,10 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             </div>
 
           </div>
-        )}
+        </TabsContent>
 
         {/* ======================= AVANÇADO TAB ======================= */}
-        {configSubTab === 'avancado' && (
+        <TabsContent value="avancado">
           <div className="space-y-6 animate-fade-in">
             {/* Support & Legal */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -737,8 +778,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
             </div>
           </div>
-        )}
+        </TabsContent>
       </section>
+      </Tabs>
 
       {showAkinator && (
         <AIAkinatorModal
