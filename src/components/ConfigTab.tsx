@@ -107,30 +107,40 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       addToast("Aviso", "Digite um código de convite.", "info");
       return;
     }
-    const { collection, query, where, getDocs, doc, setDoc } = await import("firebase/firestore");
+    const { collection, query, where, getDocs, doc, setDoc, getDoc } = await import("firebase/firestore");
+    const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
     try {
       const q = query(collection(db, 'users'), where('inviteCode', '==', inviteCodeInput.trim().toUpperCase()));
       const snap = await getDocs(q);
+      
+      let newCasalId = "";
       if (!snap.empty) {
         const partnerDoc = snap.docs[0];
         if (partnerDoc.id === auth.currentUser?.uid) {
            addToast("Aviso", "Este é o seu próprio código.", "info");
            return;
         }
-        const partnerCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
-        await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: partnerCasalId }, { merge: true });
-        addToast("Sucesso", "Casal conectado com sucesso!", "success");
-        triggerConnectionCelebration();
-        setInviteCodeInput("");
+        newCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
       } else {
         if (inviteCodeInput.trim().startsWith('casal_')) {
-           await setDoc(doc(db, 'users', auth.currentUser!.uid), { casalId: inviteCodeInput.trim() }, { merge: true });
-           addToast("Sucesso", "Casal conectado!", "success");
-           triggerConnectionCelebration();
-           setInviteCodeInput("");
+          newCasalId = inviteCodeInput.trim();
         } else {
            addToast("Erro", "Código não encontrado.", "info");
+           return;
         }
+      }
+
+      if (newCasalId) {
+        const myDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
+        const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${auth.currentUser!.uid}`) : `casal_${auth.currentUser!.uid}`;
+        if (newCasalId !== myCurrentCasalId) {
+          await migrateUserToAnotherCouple(auth.currentUser!.uid, myCurrentCasalId, newCasalId);
+          addToast("Sucesso", "Casal conectado com sucesso!", "success");
+          triggerConnectionCelebration();
+        } else {
+          addToast("Aviso", "Você já está conectado a este casal.", "info");
+        }
+        setInviteCodeInput("");
       }
     } catch (err) {
       addToast("Erro", "Falha ao vincular código.", "info");

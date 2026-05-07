@@ -232,6 +232,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (pendingInvite) {
       const applyInvite = async () => {
         try {
+          const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
+          
           let resolvedCasalId = pendingInvite;
           if (!pendingInvite.startsWith('casal_')) {
             // It might be a short invite code, let's look it up
@@ -239,12 +241,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             const snap = await getDocs(q);
             if (!snap.empty) {
               const partnerDoc = snap.docs[0];
+              if (partnerDoc.id === user.uid) {
+                localStorage.removeItem('pote_invite_code');
+                return; // own code
+              }
               // Use their casalId or default to casal_uid
               resolvedCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
             }
           }
-          if (resolvedCasalId !== `casal_${user.uid}`) {
-            await setDoc(doc(db, 'users', user.uid), { casalId: resolvedCasalId }, { merge: true });
+          
+          const myDoc = await getDoc(doc(db, 'users', user.uid));
+          const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${user.uid}`) : `casal_${user.uid}`;
+
+          if (resolvedCasalId !== myCurrentCasalId) {
+            await migrateUserToAnotherCouple(user.uid, myCurrentCasalId, resolvedCasalId);
             addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
             triggerConnectionCelebration();
           }
