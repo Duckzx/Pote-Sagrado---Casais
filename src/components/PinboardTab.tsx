@@ -20,6 +20,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, auth, storage } from "../firebase";
 import { useAppContext } from "../context/AppContext";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
+import { formatBRL } from "../lib/maskUtils";
 import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
@@ -112,10 +113,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       handleFirestoreError(error, OperationType.DELETE, `casais/${casalId}/achievements`);
     }
   };
-  const formatCurrency = (val: number) =>
-    Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-      val,
-    );
+  const formatCurrency = (val: number) => formatBRL(val);
 
   return (
     <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-12 animate-fade-in relative min-h-[100dvh]">
