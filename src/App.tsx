@@ -4,9 +4,9 @@ import { loginWithGoogle, loginWithEmail } from "./firebase";
 import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
-import { OnboardingModal } from "./components/OnboardingModal";
-import { useAppStore } from "./store/useAppStore";
+import { GuidedTutorial } from "./components/GuidedTutorial";
 import { LegalConsentPopup } from "./components/LegalConsentPopup";
+import { useAppStore } from "./store/useAppStore";
 
 // ========================================
 // Code Splitting — Lazy loaded tabs (T3)
@@ -30,7 +30,7 @@ const LoveCardsTab = lazy(() =>
   import("./components/LoveCardsTab").then((m) => ({ default: m.LoveCardsTab })),
 );
 
-import { RemotionIntro } from "./components/RemotionIntro";
+const RemotionIntro = React.lazy(() => import("./components/RemotionIntro"));
 import { SacredJarIcon } from "./components/SacredJarIcon";
 import { useFirebaseSync } from "./hooks/useFirebaseSync";
 
@@ -509,6 +509,7 @@ function AppContent() {
                   {activeTab === "home" && (
                   <HomeTab
                   currentUser={user}
+                  goalType={tripConfig.goalType}
                   destination={tripConfig.destination}
                   origin={tripConfig.origin}
                   goalAmount={tripConfig.goalAmount}
@@ -541,6 +542,7 @@ function AppContent() {
               {activeTab === "lovecards" && <LoveCardsTab />}
               {activeTab === "config" && (
                 <ConfigTab
+                  currentGoalType={tripConfig.goalType}
                   currentDestination={tripConfig.destination}
                   currentOrigin={tripConfig.origin}
                   currentGoalAmount={tripConfig.goalAmount}
@@ -561,9 +563,7 @@ function AppContent() {
 
       <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
 
-      {showOnboarding && (
-        <OnboardingModal onComplete={handleCompleteOnboarding} />
-      )}
+      <GuidedTutorial />
       {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
       
       {/* LGPD Consent Modal for logged-in users */}

@@ -24,7 +24,10 @@ export interface Challenge {
   icon: string;
 }
 
+export type GoalType = 'travel' | 'car' | 'motorcycle' | 'house' | 'wedding' | 'savings' | 'other';
+
 export interface TripConfig {
+  goalType?: GoalType;
   destination: string;
   origin: string;
   goalAmount: number;
@@ -39,6 +42,7 @@ export interface TripConfig {
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
+  goalType: 'travel',
   destination: '',
   origin: '',
   goalAmount: 0,

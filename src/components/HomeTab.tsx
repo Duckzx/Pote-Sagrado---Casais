@@ -14,7 +14,10 @@ import {
   Camera,
   Star,
   Share2,
+  Target,
 } from "lucide-react";
+import { GOAL_CATEGORIES } from "../data/goalCategories";
+import { GoalType } from "../types";
 import {
   addDoc,
   collection,
@@ -44,6 +47,7 @@ import { MomentsWidget } from "./MomentsWidget";
 
 interface HomeTabProps {
   currentUser: any;
+  goalType?: GoalType;
   destination: string;
   origin: string;
   goalAmount: number;
@@ -150,6 +154,7 @@ const MilestoneTracker = ({
 };
 export const HomeTab: React.FC<HomeTabProps> = ({
   currentUser,
+  goalType,
   destination,
   origin,
   goalAmount,
@@ -182,16 +187,31 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [quickType, setQuickType] = useState<"income" | "expense">("income");
   const [quickImage, setQuickImage] = useState<string | null>(null);
   const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
-  /* Daily motivational quote (deterministic based on day of year) */ const dailyQuote =
-    useMemo(() => {
-      const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-      return MOTIVATIONAL_QUOTES[day % MOTIVATIONAL_QUOTES.length];
-    }, []);
+  /* Daily motivational quote (deterministic based on day of year) */ const currentCategory = useMemo(() => {
+    return GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
+  }, [goalType]);
 
-  const relationshipMessage = useMemo(() => {
-    const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    return RELATIONSHIP_MESSAGES[day % RELATIONSHIP_MESSAGES.length];
+  const motivationalQuotes = useMemo(() => {
+    return currentCategory.motivationalQuotes;
+  }, [currentCategory]);
+
+  const [quote, setQuote] = useState(() => {
+    const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+    return q;
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [motivationalQuotes]);
+
+  const relationshipQuote = useMemo(() => {
+    return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
   }, []);
+
+  const Icon = currentCategory.icon;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -397,6 +417,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         achievements={achievements}
         isBreaking={isPotBreaking}
         isBroken={isPotBroken}
+        goalType={goalType}
       />{" "}
       <MilestoneTracker
         totalSaved={totalSaved}

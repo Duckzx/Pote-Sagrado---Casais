@@ -17,6 +17,8 @@ import {
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
+import { GOAL_CATEGORIES } from "../data/goalCategories";
+import { GoalType } from "../types";
 import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -25,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 interface ConfigTabProps {
+  currentGoalType?: GoalType;
   currentDestination: string;
   currentOrigin: string;
   currentGoalAmount: number;
@@ -94,6 +97,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   // Custom sub-tabs state
   const [configSubTab, setConfigSubTab] = useState<"geral" | "personalizacao" | "avancado">("geral");
 
+  const [goalType, setGoalType] = useState<GoalType>(currentGoalType || 'travel');
   const [destination, setDestination] = useState(currentDestination || "");
   const [origin, setOrigin] = useState(currentOrigin || "");
   const [goalAmount, setGoalAmount] = useState(() => {
@@ -200,7 +204,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate
+      relationshipStartDate,
+      goalType
     );
   };
   useEffect(() => {
@@ -347,7 +352,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
-    startDateToSave: string
+    startDateToSave: string,
+    goalTypeToSave: GoalType
   ) => {
     setIsSaving(true);
     try {
@@ -356,6 +362,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       await setDoc(
         doc(db, `casais/${casalId}/trip_config`, "main"),
         {
+          goalType: goalTypeToSave,
           destination: destToSave,
           origin: originToSave,
           goalAmount: parsedAmount,
@@ -413,7 +420,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate
+      relationshipStartDate,
+      goalType
     );
   };
   return (
@@ -469,13 +477,41 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             {/* Card 1: Destino e Meta */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
               <div className="flex items-center gap-2 text-cookbook-text mb-6">
-                <MapPin size={18} className="text-cookbook-primary opacity-80" />
-                <h3 className="font-serif text-xl font-medium">A Aventura</h3>
+                <Target size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">Nosso Objetivo</h3>
               </div>
               <div className="space-y-6 relative z-10 flex-1">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    Tipo de Conquista
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {GOAL_CATEGORIES.map((cat) => {
+                      const Icon = cat.icon;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            setGoalType(cat.id);
+                            if (!destination) setDestination(cat.placeholder);
+                            setSaveTrigger(prev => prev + 1);
+                          }}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-medium transition-all ${
+                            goalType === cat.id
+                              ? "bg-cookbook-primary text-white border-cookbook-primary shadow-sm"
+                              : "bg-cookbook-bg/50 border-cookbook-border text-cookbook-text/60 hover:border-cookbook-primary/50"
+                          }`}
+                        >
+                          <Icon size={14} /> {cat.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                    Destino
+                    {GOAL_CATEGORIES.find(c => c.id === goalType)?.label || "Objetivo"}
                   </label>
                   <div className="relative">
                     <input
@@ -483,7 +519,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       value={destination}
                       onChange={(e) => setDestination(e.target.value)}
                       onBlur={handleSaveLocal}
-                      placeholder="Paris, Praia, Disney..."
+                      placeholder={GOAL_CATEGORIES.find(c => c.id === goalType)?.placeholder || "Descreva aqui..."}
                       className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
                     />
                     <button
