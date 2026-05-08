@@ -19,6 +19,21 @@ export const LegalConsentPopup: React.FC = () => {
      return null; // Not logged in yet. They see it after login.
   }
 
+  const [isAccepting, setIsAccepting] = React.useState(false);
+
+  const handleAccept = async () => {
+    setIsAccepting(true);
+    try {
+      await acceptLgpd();
+    } catch (err) {
+      console.error("Failed to accept LGPD", err);
+    } finally {
+      // The store update should trigger a re-render and hide the modal, 
+      // but we keep loading for a bit just in case of slow Firestore sync
+      setTimeout(() => setIsAccepting(false), 1000);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[250] flex justify-center items-end sm:items-center bg-black/80 backdrop-blur-sm sm:p-6 transition-opacity animate-fade-in">
       <div 
@@ -54,10 +69,16 @@ export const LegalConsentPopup: React.FC = () => {
         
         <div className="p-6 border-t border-cookbook-border bg-cookbook-bg/80 backdrop-blur-md">
            <button 
-             onClick={acceptLgpd}
-             className="w-full bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_16px_rgba(197,160,89,0.3)] transition-transform hover:bg-cookbook-primary-hover active:scale-[0.98] font-bold flex items-center justify-center gap-2"
+             onClick={handleAccept}
+             disabled={isAccepting}
+             className={`w-full bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_16px_rgba(197,160,89,0.3)] transition-all hover:bg-cookbook-primary-hover active:scale-[0.98] font-bold flex items-center justify-center gap-2 ${isAccepting ? 'opacity-70 grayscale cursor-wait' : ''}`}
            >
-             <Check size={18} /> Aceitar e Continuar
+             {isAccepting ? (
+               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+             ) : (
+               <Check size={18} />
+             )}
+             {isAccepting ? 'Processando...' : 'Aceitar e Continuar'}
            </button>
            <p className="text-center font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 mt-4 leading-relaxed">
             Ao clicar em aceitar, este consentimento ficará gravado no seu perfil permanentemente.

@@ -141,14 +141,14 @@ export function useFirebaseSync() {
         if (configSnap.exists()) {
           const data = configSnap.data() as Partial<TripConfig>;
           setTripConfig(prev => {
-            const current = prev || { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
+            const current = prev || { goalType: 'travel', destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
             const newConfig = { ...current, ...data };
             localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
             return newConfig;
           });
         } else {
           // If config not exist yet, we still need to set it to an empty config so UI won't fail
-          setTripConfig(prev => prev || { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' });
+          setTripConfig(prev => prev || { goalType: 'travel', destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' });
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
       currentUnsubs.push(unsubConfig);

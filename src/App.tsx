@@ -506,7 +506,7 @@ function AppContent() {
             >
               <ErrorBoundary>
                 <Suspense fallback={<TabSkeleton />}>
-                  {activeTab === "home" && (
+                  {activeTab === "home" && tripConfig && (
                   <HomeTab
                   currentUser={user}
                   goalType={tripConfig.goalType}
@@ -521,7 +521,7 @@ function AppContent() {
                   addToast={addToast}
                 />
               )}
-              {activeTab === "missoes" && (
+              {activeTab === "missoes" && tripConfig && (
                 <MissoesTab
                   stats={bingoStats}
                   customChallenges={tripConfig.customChallenges}
@@ -532,7 +532,7 @@ function AppContent() {
                 />
               )}
               {activeTab === "mural" && <PinboardTab addToast={addToast} />}
-              {activeTab === "disputa" && (
+              {activeTab === "disputa" && tripConfig && (
                 <DisputaTab
                   deposits={deposits}
                   prize={tripConfig.monthlyPrize}
@@ -540,7 +540,7 @@ function AppContent() {
                 />
               )}
               {activeTab === "lovecards" && <LoveCardsTab />}
-              {activeTab === "config" && (
+              {activeTab === "config" && tripConfig && (
                 <ConfigTab
                   currentGoalType={tripConfig.goalType}
                   currentDestination={tripConfig.destination}
@@ -564,7 +564,11 @@ function AppContent() {
       <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
 
       <GuidedTutorial />
-      {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
+      {!hasSeenIntro && (
+        <Suspense fallback={null}>
+          <RemotionIntro onComplete={handleIntroComplete} />
+        </Suspense>
+      )}
       
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />

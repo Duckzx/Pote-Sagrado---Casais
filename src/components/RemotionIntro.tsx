@@ -190,7 +190,7 @@ const AppWalkthroughVideo: React.FC = () => {
 };
 
 // Player wrapper that can be rendered in the app
-export const RemotionIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+const RemotionIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
@@ -257,3 +257,5 @@ export const RemotionIntro: React.FC<{ onComplete: () => void }> = ({ onComplete
     </div>
   );
 };
+
+export default RemotionIntro;

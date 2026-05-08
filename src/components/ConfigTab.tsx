@@ -13,6 +13,7 @@ import {
   Trash2,
   Bell,
   HelpCircle,
+  Target,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
@@ -59,6 +60,7 @@ const THEMES = [
   { id: "noir", label: "Noir (P&B)", colors: ["#FFFFFF", "#000000"] },
 ];
 export const ConfigTab: React.FC<ConfigTabProps> = ({
+  currentGoalType,
   currentDestination,
   currentOrigin,
   currentGoalAmount,
