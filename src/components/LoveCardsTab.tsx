@@ -119,7 +119,7 @@ const AnswerDrawer: React.FC<{
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         onClick={e => e.stopPropagation()}
-        className="relative w-full max-w-md bg-cookbook-bg rounded-t-[2rem] p-6 pb-10 shadow-2xl border-t border-cookbook-border"
+        className="relative w-full max-w-md md:max-w-xl bg-cookbook-bg rounded-t-[2rem] md:rounded-[2rem] p-6 pb-10 md:pb-6 shadow-2xl border-t md:border border-cookbook-border"
       >
         <div className="w-10 h-1 bg-cookbook-border rounded-full mx-auto mb-6" />
 
@@ -272,7 +272,7 @@ export const LoveCardsTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
+      <div className="pb-24 pt-6 px-6 w-full max-w-md md:max-w-4xl mx-auto space-y-6">
         <div className="h-8 bg-cookbook-border/30 rounded-lg animate-pulse w-48 mx-auto" />
         <div className="h-12 bg-cookbook-border/20 rounded-xl animate-pulse" />
         <div className="h-80 bg-cookbook-border/20 rounded-3xl animate-pulse" />
@@ -283,7 +283,7 @@ export const LoveCardsTab: React.FC = () => {
   const drawerCardData = drawerCard ? ALL_LOVE_CARDS.find(c => c.id === drawerCard) : null;
 
   return (
-    <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
+    <div className="pb-24 pt-6 px-6 w-full max-w-md md:max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -352,7 +352,7 @@ export const LoveCardsTab: React.FC = () => {
       </motion.div>
 
       {/* Card stack area */}
-      <div className="relative" style={{ perspective: 1200, minHeight: 360 }}>
+      <div className="relative max-w-md mx-auto w-full" style={{ perspective: 1200, minHeight: 360 }}>
         {/* Background stacked cards */}
         {cards.length > 1 && (
           <>

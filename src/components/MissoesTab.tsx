@@ -537,7 +537,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
   const isEditable = (mission: Mission) =>
     mission.category === "desafio" || mission.category === "custom";
   /* ======================================== */ /* Render */ return (
-    <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
+    <div className="pb-24 pt-6 px-6 w-full max-w-md md:max-w-5xl mx-auto space-y-6">
       {" "}
       {/* Header */}{" "}
       <div className="text-center">
@@ -553,7 +553,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       </div>{" "}
 
       {/* AI Assistant Triggers */}{" "}
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-xl mx-auto w-full">
         {" "}
         <button
           onClick={() => setShowAIModal(true)}
@@ -633,7 +633,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       </div>{" "}
 
       {/* Stats bar */}{" "}
-      <div className="flex justify-around bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="flex justify-around bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] max-w-xl mx-auto w-full">
         {" "}
         <div className="text-center">
           {" "}
@@ -695,7 +695,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         ))}{" "}
       </div>{" "}
       {/* Mission Cards */}{" "}
-      <div className="space-y-3">
+      <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
         {" "}
         {filteredMissions.length === 0 ? (
           <div className="text-center py-10 px-6 bg-cookbook-bg border border-cookbook-border border-dashed rounded-xl w-full flex flex-col items-center">

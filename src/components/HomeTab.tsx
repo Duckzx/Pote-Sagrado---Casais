@@ -362,11 +362,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="space-y-8 pb-32 pt-6 px-6 max-w-md mx-auto relative"
+      className="pb-32 md:pb-12 pt-6 px-6 w-full max-w-md md:max-w-6xl mx-auto relative flex flex-col"
     >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
-      <div className="text-center space-y-1 relative">
+      <div className="text-center space-y-1 relative mb-8">
         {" "}
         <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
           {" "}
@@ -379,13 +379,17 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         )}
         <button
           onClick={() => setShowShareWidget(true)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm"
+          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm md:static md:translate-y-0 md:mt-4 md:mx-auto md:block md:w-auto"
           title="Compartilhar Status / PWA"
         >
           {" "}
-          <Share2 size={16} />{" "}
+          <Share2 size={16} className="md:inline md:mr-2" /> <span className="hidden md:inline font-sans text-[10px] uppercase tracking-widest font-bold">Compartilhar</span>{" "}
         </button>{" "}
       </div>{" "}
+
+      <div className="md:grid md:grid-cols-2 lg:grid-cols-2 md:gap-12 lg:gap-16 items-start">
+        {/* Esquerda: Cofre e Estatísticas */}
+        <div className="space-y-8">
       {/* The Animated Pot */}{" "}
       <SacredPot
         totalSaved={totalSaved}
@@ -412,7 +416,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </button>{" "}
         </div>
       )}{" "}
+        </div>
 
+        {/* Direita: Interações e Ações */}
+        <div className="space-y-8 mt-8 md:mt-0">
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
 
@@ -483,6 +490,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             strokeWidth={2}
           />{" "}
         </button>{" "}
+      </div>{" "}
+        </div>
       </div>{" "}
       {showDateModal && (
         <CheapDateModal

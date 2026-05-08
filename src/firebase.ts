@@ -5,7 +5,8 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  signOut
+  signOut,
+  signInWithEmailAndPassword
 } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -75,6 +76,18 @@ export const loginWithGoogle = async () => {
     }
 
     throw new Error('Erro ao tentar login com Google: ' + (error.message || 'Erro desconhecido'));
+  }
+};
+
+/**
+ * Handles Admin login via Email and Password.
+ */
+export const loginWithEmail = async (email: string, pass: string) => {
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (error: any) {
+    console.error('Email login failed.', error.code, error.message);
+    throw new Error('Falha no login Administrativo: Verifique suas credenciais.');
   }
 };
 

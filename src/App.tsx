@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, ErrorInfo } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { loginWithGoogle } from "./firebase";
+import { loginWithGoogle, loginWithEmail } from "./firebase";
 import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
@@ -244,6 +244,10 @@ function AppContent() {
   }, [deposits, user, addToast]);
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [showAdminLogin, setShowAdminLogin] = React.useState(false);
+  const [adminEmail, setAdminEmail] = React.useState("");
+  const [adminPass, setAdminPass] = React.useState("");
+  const [isLoggingInAdmin, setIsLoggingInAdmin] = React.useState(false);
 
   if (!isAuthReady) {
     return (
@@ -287,6 +291,23 @@ function AppContent() {
     }
   };
 
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminEmail || !adminPass) {
+      addToast("Atenção", "Preencha e-mail e senha", "info");
+      return;
+    }
+    setIsLoggingInAdmin(true);
+    try {
+      await loginWithEmail(adminEmail, adminPass);
+      // loginWithEmail will throw if it fails. If success, user state will update automatically via Firebase auth listener.
+    } catch (e: any) {
+      addToast("Erro", e.message || "Credenciais inválidas", "error");
+    } finally {
+      setIsLoggingInAdmin(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-[100dvh] bg-transparent flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -303,7 +324,7 @@ function AppContent() {
           intensity={1.3}
         />
 
-        <div className="relative z-10 text-center space-y-10 max-w-[85%] mx-auto w-full pt-12">
+        <div className="relative z-10 text-center space-y-10 max-w-[85%] md:max-w-md mx-auto w-full pt-12">
           <div className="space-y-6">
             <SacredJarIcon className="w-28 h-28 mx-auto animate-float drop-shadow-xl text-cookbook-primary" />
             <div className="space-y-4">
@@ -411,13 +432,57 @@ function AppContent() {
               </div>
             )}
           </div>
+          
+          <div className="pt-6 border-t border-cookbook-border/30 max-w-[250px] mx-auto w-full">
+            {!showAdminLogin ? (
+              <button
+                onClick={() => setShowAdminLogin(true)}
+                className="w-full text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40 hover:text-cookbook-text/60 transition-colors flex items-center justify-center gap-2"
+              >
+                Acesso Administrativo
+              </button>
+            ) : (
+              <form onSubmit={handleAdminLogin} className="space-y-3 animate-fade-in text-left">
+                <input
+                  type="email"
+                  placeholder="E-mail"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="w-full bg-cookbook-bg/80 border border-cookbook-border px-3 py-2 rounded-xl text-sm font-sans focus:outline-none focus:border-cookbook-primary"
+                />
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={adminPass}
+                  onChange={(e) => setAdminPass(e.target.value)}
+                  className="w-full bg-cookbook-bg/80 border border-cookbook-border px-3 py-2 rounded-xl text-sm font-sans focus:outline-none focus:border-cookbook-primary"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminLogin(false)}
+                    className="flex-1 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-cookbook-text/50 bg-cookbook-bg border border-cookbook-border hover:bg-cookbook-border/30"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoggingInAdmin}
+                    className="flex-1 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white bg-cookbook-primary shadow-sm hover:bg-cookbook-primary-hover disabled:opacity-50"
+                  >
+                    {isLoggingInAdmin ? "..." : "Entrar"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent relative">
+    <div className="min-h-[100dvh] bg-transparent relative flex flex-col md:flex-row">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <ColorBends
         color="var(--theme-border)"
@@ -426,7 +491,8 @@ function AppContent() {
         className="opacity-30"
       />
 
-      <div className="relative z-10 overflow-hidden pb-28">
+      {/* Main Content Area - Expands on Desktop */}
+      <div className="relative z-10 overflow-hidden pb-28 md:pb-0 w-full md:flex-1 md:ml-24 h-[100dvh] overflow-y-auto">
         {!isDataReady ? (
           <TabSkeleton />
         ) : (

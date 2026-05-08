@@ -416,7 +416,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     );
   };
   return (
-    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-6 animate-fade-in">
+    <div className="pb-32 pt-6 px-4 w-full max-w-md md:max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Profile Header Section */}
       <section className="flex flex-col items-center text-center gap-3 mt-0 mb-4 relative">
         <label className="relative group cursor-pointer block">
