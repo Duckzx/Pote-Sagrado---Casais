@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
-import { Heart, Lock, Sparkles, ChevronLeft, ChevronRight, Check, CheckCheck, Send, RefreshCw, X } from 'lucide-react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Heart, Lock, Sparkles, ChevronLeft, ChevronRight, Check, CheckCheck, Send, RefreshCw, X, Share2 } from 'lucide-react';
 import { useOptimisticLoveCards } from '../hooks/useOptimisticLoveCards';
 import { useAppStore } from '../store/useAppStore';
 import { LoveCardCategory } from '../types';
@@ -186,11 +186,7 @@ export const LoveCardsTab: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [drawerCard, setDrawerCard] = useState<string | null>(null);
-
-  // Swipe motion
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-15, 15]);
-  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0.5, 1, 1, 1, 0.5]);
+  const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
 
   useEffect(() => {
     loadInitial();
@@ -200,6 +196,7 @@ export const LoveCardsTab: React.FC = () => {
   useEffect(() => {
     setCurrentIndex(0);
     setIsFlipped(false);
+    setExitDirection(null);
   }, [activeCategory]);
 
   // Current level and cards
@@ -213,21 +210,29 @@ export const LoveCardsTab: React.FC = () => {
 
   const handleNext = useCallback(() => {
     setIsFlipped(false);
+    setExitDirection('left');
     setTimeout(() => {
       setCurrentIndex(i => Math.min(i + 1, cards.length - 1));
-    }, 150);
+      setExitDirection(null);
+    }, 200);
   }, [cards.length]);
 
   const handlePrev = useCallback(() => {
     setIsFlipped(false);
+    setExitDirection('right');
     setTimeout(() => {
       setCurrentIndex(i => Math.max(i - 1, 0));
-    }, 150);
+      setExitDirection(null);
+    }, 200);
   }, []);
 
   const handleDragEnd = useCallback((_: any, info: any) => {
-    if (info.offset.x > 100 && currentIndex < cards.length - 1) handleNext();
-    else if (info.offset.x < -100 && currentIndex > 0) handlePrev();
+    const swipeThreshold = 80;
+    if (info.offset.x < -swipeThreshold && currentIndex < cards.length - 1) {
+      handleNext();
+    } else if (info.offset.x > swipeThreshold && currentIndex > 0) {
+      handlePrev();
+    }
   }, [currentIndex, cards.length, handleNext, handlePrev]);
 
   const handleRespond = useCallback(async (answer?: string) => {
@@ -236,6 +241,25 @@ export const LoveCardsTab: React.FC = () => {
     setIsFlipped(false);
     await respondToCard(currentCard.id, answer);
   }, [currentCard, respondToCard]);
+
+  // Share Partner Invite
+  const handleShare = useCallback(async () => {
+    const text = "Vem jogar Cartas do Amor comigo! 💕 Temos várias cartas para descobrir juntos no Pote Sagrado.";
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Cartas do Amor',
+          text: text,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Error sharing', err);
+      }
+    } else {
+      navigator.clipboard.writeText(`${text} ${window.location.href}`);
+      alert("Link copiado para a área de transferência!");
+    }
+  }, []);
 
   const meta = CATEGORY_META[activeCategory];
 
@@ -290,13 +314,22 @@ export const LoveCardsTab: React.FC = () => {
             {goldDust} Pó de Ouro
           </span>
         </div>
-        <button
-          onClick={refreshInteractions}
-          className="p-2 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95"
-          title="Atualizar dados"
-        >
-          <RefreshCw size={14} className="text-cookbook-text/40" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95 text-cookbook-primary"
+          >
+            <Share2 size={12} />
+            <span className="font-sans text-[9px] uppercase tracking-widest font-bold">Convidar Parceiro(a)</span>
+          </button>
+          <button
+            onClick={refreshInteractions}
+            className="p-2 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95"
+            title="Atualizar dados"
+          >
+            <RefreshCw size={14} className="text-cookbook-text/40" />
+          </button>
+        </div>
       </motion.div>
 
       {/* Category pills */}
@@ -332,22 +365,27 @@ export const LoveCardsTab: React.FC = () => {
         <AnimatePresence mode="wait">
           {currentCard ? (
             <motion.div
-              key={currentCard.id}
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -20 }}
+              key={currentCard.id + currentIndex}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0, x: 0, rotate: 0 }}
+              exit={{ 
+                opacity: 0, 
+                x: exitDirection === 'left' ? -300 : exitDirection === 'right' ? 300 : 0, 
+                rotate: exitDirection === 'left' ? -15 : exitDirection === 'right' ? 15 : 0,
+                scale: 0.9,
+                transition: { duration: 0.2 } 
+              }}
               transition={{ duration: 0.4, type: 'spring', bounce: 0.3 }}
-              className="relative"
+              className="relative cursor-pointer select-none"
               style={{ transformStyle: 'preserve-3d' }}
+              drag="x"
+              dragSnapToOrigin
+              onDragEnd={handleDragEnd}
+              whileTap={{ cursor: 'grabbing' }}
+              onClick={() => !hasUserResponded(currentCard.id) && setIsFlipped(f => !f)}
             >
               <motion.div
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                style={{ x, rotate, opacity, transformStyle: 'preserve-3d' as const }}
-                onDragEnd={handleDragEnd}
-                whileTap={{ cursor: 'grabbing' }}
-                onClick={() => !hasUserResponded(currentCard.id) && setIsFlipped(f => !f)}
-                className="relative cursor-pointer select-none"
+                className="relative"
               >
                 <motion.div
                   animate={{ rotateY: isFlipped ? 180 : 0 }}

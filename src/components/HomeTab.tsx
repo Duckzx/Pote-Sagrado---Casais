@@ -450,6 +450,40 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           />{" "}
         </button>{" "}
       </div>{" "}
+
+      {/* Missoes/Conquistas Shortcut Button */}{" "}
+      <div className="flex justify-center mb-6">
+        {" "}
+        <button
+          onClick={() => useAppStore.getState().setActiveTab('missoes')}
+          className="w-full bg-cookbook-bg/80 backdrop-blur-xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-sm transition-all active:scale-[0.98] hover:shadow-md"
+        >
+          {" "}
+          <div className="flex items-center space-x-4">
+            {" "}
+            <div className="w-10 h-10 rounded-full bg-cookbook-text/5 flex items-center justify-center border border-cookbook-border/50">
+              {" "}
+              <Trophy size={18} className="text-cookbook-text/60" />{" "}
+            </div>{" "}
+            <div className="text-left">
+              {" "}
+              <p className="font-serif italic text-base text-cookbook-text">
+                {" "}
+                Nossas Conquistas{" "}
+              </p>{" "}
+              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-medium">
+                {" "}
+                Metas e Desafios{" "}
+              </p>{" "}
+            </div>{" "}
+          </div>{" "}
+          <ArrowRight
+            size={18}
+            className="text-cookbook-text/30"
+            strokeWidth={2}
+          />{" "}
+        </button>{" "}
+      </div>{" "}
       {showDateModal && (
         <CheapDateModal
           onClose={() => setShowDateModal(false)}
