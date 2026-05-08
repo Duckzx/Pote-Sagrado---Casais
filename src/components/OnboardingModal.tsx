@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PiggyBank, Target, Trophy, ArrowRight, Check } from "lucide-react";
+import { PiggyBank, Target, Trophy, ArrowRight, Check, Heart, Pin } from "lucide-react";
 import FocusTrap from "focus-trap-react";
 import { SacredJarIcon } from "./SacredJarIcon";
 interface OnboardingModalProps {
@@ -14,19 +14,37 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
       icon: <SacredJarIcon className="w-16 h-16 mx-auto mb-4" />,
       title: "Bem-vindo ao Pote Sagrado",
       description:
-        "O lugar onde vocês guardam dinheiro juntos para realizar a viagem dos sonhos. Cada centavo conta!",
+        "O Pote Sagrado é o cofrinho digital do casal. O objetivo é ajudar vocês a economizarem juntos para um sonho especial, de forma divertida e gamificada.",
+    },
+    {
+      icon: <PiggyBank size={48} className="text-cookbook-primary mx-auto mb-4" />,
+      title: "O Pote e o Sonho",
+      description:
+        "Na tela inicial, vocês definem o destino e a meta. O Pote cresce visualmente conforme vocês guardam. Ao atingir a meta, vocês podem 'quebrar' o pote e celebrar!",
     },
     {
       icon: <Target size={48} className="text-cookbook-primary mx-auto mb-4" />,
-      title: "Bingo de Atitudes",
+      title: "Missões e Bingo",
       description:
-        "Pequenas escolhas viram grandes viagens. Evitou o delivery hoje? Fez o café em casa? Registre no Bingo e guarde o valor no Pote!",
+        "Evitou um gasto hoje (como um delivery ou café)? Marque no Bingo! O valor economizado vai direto para o Pote. É a economia do cotidiano virando realidade.",
     },
     {
       icon: <Trophy size={48} className="text-cookbook-primary mx-auto mb-4" />,
-      title: "Disputa Saudável",
+      title: "Arena de Disputas",
       description:
-        "Acompanhem quem está guardando mais dinheiro no mês. Que tal o perdedor pagar um lanche no final de semana?",
+        "Uma competição saudável! Vejam quem guardou mais no mês e ganhem prêmios simbólicos. O ranking incentiva ambos a manterem o foco no objetivo do casal.",
+    },
+    {
+      icon: <Pin size={48} className="text-cookbook-primary mx-auto mb-4" />,
+      title: "Mural de Sonhos",
+      description:
+        "Um espaço para guardar links de hotéis, fotos de inspiração e ver suas medalhas. É o quadro de visualização do futuro de vocês.",
+    },
+    {
+      icon: <Heart size={48} className="text-cookbook-primary mx-auto mb-4" />,
+      title: "LoveCards",
+      description:
+        "Conexão emocional! Um jogo de cartas com perguntas e desafios para vocês se conhecerem melhor e fortalecerem o laço enquanto economizam.",
     },
   ];
   const handleNext = () => {

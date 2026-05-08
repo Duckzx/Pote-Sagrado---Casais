@@ -12,6 +12,7 @@ import {
   Plus,
   Trash2,
   Bell,
+  HelpCircle,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
@@ -746,6 +747,21 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <h3 className="font-serif text-xl font-medium">Ajuda, Termos e Privacidade</h3>
               </div>
               <div className="flex flex-col gap-3">
+                 <button
+                  onClick={() => {
+                     useAppStore.getState().setShowOnboarding(true);
+                  }}
+                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
+                >
+                  <div className="pr-4">
+                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors flex items-center gap-2">
+                      <HelpCircle size={16} className="text-cookbook-primary/60" /> Ver Tutorial de Boas-Vindas
+                    </div>
+                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      Releia o guia passo a passo de como usar o Pote Sagrado.
+                    </div>
+                  </div>
+                </button>
                  <button
                   onClick={() => {
                      window.open("mailto:suporte@potesagrado.com", "_blank");
