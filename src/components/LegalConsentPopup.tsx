@@ -3,6 +3,8 @@ import { Shield, Check } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 
 export const LegalConsentPopup: React.FC = () => {
+  const [isAccepting, setIsAccepting] = React.useState(false);
+
   const lgpdConsent = useAppStore(s => s.lgpdConsent);
   const hasCheckedConsent = useAppStore(s => s.hasCheckedConsent);
   const acceptLgpd = useAppStore(s => s.acceptLgpd);
@@ -18,8 +20,6 @@ export const LegalConsentPopup: React.FC = () => {
   if (!user) {
      return null; // Not logged in yet. They see it after login.
   }
-
-  const [isAccepting, setIsAccepting] = React.useState(false);
 
   const handleAccept = async () => {
     setIsAccepting(true);

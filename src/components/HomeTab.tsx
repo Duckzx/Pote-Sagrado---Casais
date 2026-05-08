@@ -95,6 +95,17 @@ const MilestoneTracker = ({
   goalAmount: number;
   onRewardClick: () => void;
 }) => {
+  const [animatedPct, setAnimatedPct] = useState(0);
+
+  React.useEffect(() => {
+    if (goalAmount <= 0) return;
+    const pct = (totalSaved / goalAmount) * 100;
+    const timer = setTimeout(() => {
+      setAnimatedPct(pct);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [totalSaved, goalAmount]);
+
   if (goalAmount <= 0) return null;
   const pct = (totalSaved / goalAmount) * 100;
   const milestones = [
@@ -107,14 +118,6 @@ const MilestoneTracker = ({
     .slice()
     .reverse()
     .find((m) => pct >= m.threshold);
-  const [animatedPct, setAnimatedPct] = useState(0);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimatedPct(pct);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [pct]);
 
   if (!activeMilestone || pct >= 100) return null;
   return (
