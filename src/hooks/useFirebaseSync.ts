@@ -56,6 +56,8 @@ export function useFirebaseSync() {
           setShowOnboarding(true);
         }
       } else {
+        // Logged out - clear state
+        useAppStore.getState().resetData();
         setLgpdConsent(!!localStorage.getItem('pote_lgpdConsent'));
         setHasCheckedConsent(true);
       }
@@ -136,19 +138,49 @@ export function useFirebaseSync() {
       currentUnsubs.forEach(unsub => unsub());
       currentUnsubs = [];
 
+      // Reset specific data before loading new couple's data
+      setTripConfig(null);
+      setDeposits([]);
+      setTotalSaved(0);
+      setBingoStats({});
+      setAchievements([]);
+
       // Listen to config
       const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {
         if (configSnap.exists()) {
-          const data = configSnap.data() as Partial<TripConfig>;
-          setTripConfig(prev => {
-            const current = prev || { goalType: 'travel', destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
-            const newConfig = { ...current, ...data };
-            localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
-            return newConfig;
-          });
+          const data = configSnap.data() as TripConfig;
+          // IMPORTANT: Do NOT merge with prev here, as prev might be from a different user session
+          const newConfig = { 
+            goalType: data.goalType || 'travel',
+            destination: data.destination || '',
+            origin: data.origin || '',
+            goalAmount: data.goalAmount || 0,
+            lat: data.lat || 0,
+            lng: data.lng || 0,
+            customChallenges: data.customChallenges || [],
+            battleChallenges: data.battleChallenges || [],
+            sharedAlbumUrl: data.sharedAlbumUrl || '',
+            monthlyPrize: data.monthlyPrize || '',
+            relationshipStartDate: data.relationshipStartDate || ''
+          };
+          localStorage.setItem(`pote_tripConfig_${currentCasalId}`, JSON.stringify(newConfig));
+          setTripConfig(newConfig);
         } else {
-          // If config not exist yet, we still need to set it to an empty config so UI won't fail
-          setTripConfig(prev => prev || { goalType: 'travel', destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' });
+          // New couple, provide default empty config
+          const defaultConfig: TripConfig = { 
+            goalType: 'travel', 
+            destination: '', 
+            origin: '', 
+            goalAmount: 0, 
+            lat: 0, 
+            lng: 0, 
+            customChallenges: [], 
+            battleChallenges: [], 
+            sharedAlbumUrl: '', 
+            monthlyPrize: '',
+            relationshipStartDate: ''
+          };
+          setTripConfig(defaultConfig);
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
       currentUnsubs.push(unsubConfig);

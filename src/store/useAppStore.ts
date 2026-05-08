@@ -72,6 +72,8 @@ interface AppState {
   setCanInstall: (v: boolean) => void;
   setInstallPrompt: (v: any) => void;
   clearInstallPrompt: () => void;
+
+  resetData: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -162,4 +164,18 @@ export const useAppStore = create<AppState>((set) => ({
   setCanInstall: (canInstall) => set({ canInstall }),
   setInstallPrompt: (installPrompt) => set({ installPrompt }),
   clearInstallPrompt: () => set({ installPrompt: null, canInstall: false }),
+
+  resetData: () => set({
+    casalId: null,
+    coupleMembers: [],
+    deposits: [],
+    pinboardLinks: [],
+    achievements: [],
+    totalSaved: 0,
+    bingoStats: {},
+    tripConfig: null,
+    isDataReady: false,
+    activeTab: 'home',
+    theme: 'cookbook'
+  }),
 }));
