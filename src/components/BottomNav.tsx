@@ -1,5 +1,5 @@
 import React from "react";
-import { Target, Swords, Settings, Pin, LayoutGrid, FileText } from "lucide-react";
+import { Target, Swords, Settings, Pin, LayoutGrid, FileText, Heart } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useAppStore } from "../store/useAppStore";
@@ -40,6 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const allSecondaryTabs = [
     { id: "mural", icon: LayoutGrid, label: "Feed" },
     { id: "missoes", icon: Target, label: "Conquistas" },
+    { id: "lovecards", icon: Heart, label: "Cartas" },
     { id: "disputa", icon: Swords, label: "Duelos" },
     { id: "config", icon: Settings, label: "Ajustes" },
   ];

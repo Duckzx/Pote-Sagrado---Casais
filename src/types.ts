@@ -60,9 +60,9 @@ export type ToastType = 'info' | 'success' | 'milestone';
 
 export type AddToastFn = (title: string, message: string, type?: ToastType, duration?: number) => void;
 
-export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'config';
+export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'lovecards' | 'config';
 
-export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'config'];
+export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'lovecards', 'config'];
 
 export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight';
 
@@ -74,3 +74,36 @@ export interface ThemeOption {
 
 // Re-export Firebase User for convenience
 export type AppUser = User;
+
+// ========================================
+// Love Cards Domain Types
+// ========================================
+
+export type LoveCardCategory =
+  | 'love_romance'
+  | 'mutual_knowledge'
+  | 'spicy'
+  | 'truth_or_dare';
+
+export type LoveCardLevel = 1 | 2 | 3 | 4 | 5;
+
+export interface LoveCard {
+  id: string;
+  title: string;
+  description: string;
+  category: LoveCardCategory;
+  level: LoveCardLevel;
+  emoji: string;
+}
+
+export interface CardInteraction {
+  id?: string;
+  cardId: string;
+  partnerId: string;
+  partnerName: string;
+  hasResponded: boolean;
+  answer?: string;
+  respondedAt: Timestamp | null;
+}
+
+export type LoveCardsProgress = Record<LoveCardCategory, number>;

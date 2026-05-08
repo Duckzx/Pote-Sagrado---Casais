@@ -26,6 +26,9 @@ const DisputaTab = lazy(() =>
 const ConfigTab = lazy(() =>
   import("./components/ConfigTab").then((m) => ({ default: m.ConfigTab })),
 );
+const LoveCardsTab = lazy(() =>
+  import("./components/LoveCardsTab").then((m) => ({ default: m.LoveCardsTab })),
+);
 
 import { RemotionIntro } from "./components/RemotionIntro";
 import { SacredJarIcon } from "./components/SacredJarIcon";
@@ -465,6 +468,7 @@ function AppContent() {
                   addToast={addToast}
                 />
               )}
+              {activeTab === "lovecards" && <LoveCardsTab />}
               {activeTab === "config" && (
                 <ConfigTab
                   currentDestination={tripConfig.destination}
