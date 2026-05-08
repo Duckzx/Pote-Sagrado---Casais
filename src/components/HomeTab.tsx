@@ -27,7 +27,7 @@ import { db, auth } from "../firebase";
 import confetti from "canvas-confetti";
 import { motion } from "motion/react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 import { AnimatedNumber } from "./AnimatedNumber";
 import Carousel from "./Carousel";
 import {
@@ -160,7 +160,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   relationshipStartDate,
   addToast,
 }) => {
-  const { casalId } = useAppContext();
+  const casalId = useAppStore(s => s.casalId);
   const [showWrapped, setShowWrapped] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
   const [depositToDelete, setDepositToDelete] = useState<string | null>(null);

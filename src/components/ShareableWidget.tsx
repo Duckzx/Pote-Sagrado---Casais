@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Sparkles, Copy, Heart, Instagram, Facebook, ArrowUpRight } from "lucide-react";
 import html2canvas from "html2canvas";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -112,7 +112,9 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   destination,
   onClose,
 }) => {
-  const { casalId, deposits, addToast } = useAppContext();
+  const casalId = useAppStore(s => s.casalId);
+  const deposits = useAppStore(s => s.deposits);
+  const addToast = useAppStore(s => s.addToast);
   const [isExporting, setIsExporting] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
   

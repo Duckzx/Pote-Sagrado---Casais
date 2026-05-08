@@ -18,7 +18,7 @@ import {
 import { doc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, auth, storage } from "../firebase";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
@@ -31,7 +31,12 @@ interface PinboardTabProps {
   ) => void;
 }
 export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
-  const { user: currentUser, deposits, pinboardLinks, achievements, casalId, tripConfig } = useAppContext();
+  const currentUser = useAppStore(s => s.user);
+  const deposits = useAppStore(s => s.deposits);
+  const pinboardLinks = useAppStore(s => s.pinboardLinks);
+  const achievements = useAppStore(s => s.achievements);
+  const casalId = useAppStore(s => s.casalId);
+  const tripConfig = useAppStore(s => s.tripConfig);
   const goalAmount = tripConfig?.goalAmount || 0;
   
   const [isAddingLink, setIsAddingLink] = useState(false);

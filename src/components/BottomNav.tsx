@@ -2,7 +2,7 @@ import React from "react";
 import { Target, Swords, Settings, Pin, LayoutGrid, FileText } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 
 /* Custom SVG matching the theme format, designed to perfectly resemble the animated Safe Pot */ const SacredPotIcon =
   ({ size = 24, strokeWidth = 2, className = "" }) => (

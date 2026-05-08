@@ -25,7 +25,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import confetti from "canvas-confetti";
 import { playCoinSound, playSuccessSound, vibrate } from "../lib/audio";
@@ -179,7 +179,8 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
   currentUser,
   addToast,
 }) => {
-  const { casalId, tripConfig } = useAppContext();
+  const casalId = useAppStore(s => s.casalId);
+  const tripConfig = useAppStore(s => s.tripConfig);
   const [showAIModal, setShowAIModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
 

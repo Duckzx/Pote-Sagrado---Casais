@@ -5,7 +5,7 @@ import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { OnboardingModal } from "./components/OnboardingModal";
-import { AppProvider, useAppContext } from "./context/AppContext";
+import { useAppStore } from "./store/useAppStore";
 import { LegalConsentPopup } from "./components/LegalConsentPopup";
 
 // ========================================
@@ -29,6 +29,7 @@ const ConfigTab = lazy(() =>
 
 import { RemotionIntro } from "./components/RemotionIntro";
 import { SacredJarIcon } from "./components/SacredJarIcon";
+import { useFirebaseSync } from "./hooks/useFirebaseSync";
 
 // ========================================
 // Error Boundary
@@ -120,6 +121,8 @@ function TabSkeleton() {
 // Inner App (uses context)
 // ========================================
 function AppContent() {
+  useFirebaseSync();
+
   const isTermos = window.location.pathname === "/termos";
 
   const [hasSeenIntro, setHasSeenIntro] = React.useState(() => {
@@ -130,6 +133,28 @@ function AppContent() {
     setHasSeenIntro(true);
     localStorage.setItem("pote_hasSeenIntro", "true");
   };
+
+  const tabDirection = useAppStore(s => s.tabDirection);
+  const handleTabChange = useAppStore(s => s.setActiveTab);
+  const toasts = useAppStore(s => s.toasts);
+  const addToast = useAppStore(s => s.addToast);
+  const removeToast = useAppStore(s => s.removeToast);
+  const showOnboarding = useAppStore(s => s.showOnboarding);
+  const handleCompleteOnboarding = useAppStore(s => s.completeOnboarding);
+
+  const user = useAppStore(s => s.user);
+  const casalId = useAppStore(s => s.casalId);
+  const isAuthReady = useAppStore(s => s.isAuthReady);
+  const isDataReady = useAppStore(s => s.isDataReady);
+  const activeTab = useAppStore(s => s.activeTab);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const deposits = useAppStore(s => s.deposits);
+  const achievements = useAppStore(s => s.achievements);
+  const totalSaved = useAppStore(s => s.totalSaved);
+  const bingoStats = useAppStore(s => s.bingoStats);
+  const theme = useAppStore(s => s.theme);
+
+  const previousDepositsRef = React.useRef(deposits);
 
   if (isTermos) {
     return (
@@ -149,29 +174,6 @@ function AppContent() {
       </div>
     );
   }
-
-  const {
-    user,
-    casalId,
-    isAuthReady,
-    isDataReady,
-    activeTab,
-    tabDirection,
-    handleTabChange,
-    tripConfig,
-    deposits,
-    achievements,
-    totalSaved,
-    bingoStats,
-    theme,
-    toasts,
-    addToast,
-    removeToast,
-    showOnboarding,
-    handleCompleteOnboarding,
-  } = useAppContext();
-
-  const previousDepositsRef = React.useRef(deposits);
 
   React.useEffect(() => {
     if (!user || deposits.length === 0) {
@@ -546,10 +548,8 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AppProvider>
-        <AppContent />
-        <LegalModal type={legalDoc} onClose={() => setLegalDoc(null)} />
-      </AppProvider>
+      <AppContent />
+      <LegalModal type={legalDoc} onClose={() => setLegalDoc(null)} />
     </ErrorBoundary>
   );
 }

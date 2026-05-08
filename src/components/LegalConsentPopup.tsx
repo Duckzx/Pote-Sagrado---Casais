@@ -1,9 +1,12 @@
 import React from "react";
 import { Shield, Check } from "lucide-react";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 
 export const LegalConsentPopup: React.FC = () => {
-  const { lgpdConsent, hasCheckedConsent, acceptLgpd, user } = useAppContext();
+  const lgpdConsent = useAppStore(s => s.lgpdConsent);
+  const hasCheckedConsent = useAppStore(s => s.hasCheckedConsent);
+  const acceptLgpd = useAppStore(s => s.acceptLgpd);
+  const user = useAppStore(s => s.user);
 
   // If we haven't loaded the consent state yet from Firestore, or if they already consented, hide
   if (!hasCheckedConsent || lgpdConsent) {

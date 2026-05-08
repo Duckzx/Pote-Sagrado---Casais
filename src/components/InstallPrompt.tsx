@@ -1,8 +1,10 @@
 import React from "react";
 import { Download, X } from "lucide-react";
-import { useAppContext } from "../context/AppContext";
+import { useAppStore } from "../store/useAppStore";
 export const InstallPrompt: React.FC = () => {
-  const { canInstall, installPrompt, clearInstallPrompt } = useAppContext();
+  const canInstall = useAppStore(s => s.canInstall);
+  const installPrompt = useAppStore(s => s.installPrompt);
+  const clearInstallPrompt = useAppStore(s => s.clearInstallPrompt);
   if (!canInstall || !installPrompt) return null;
   const handleInstallClick = async () => {
     installPrompt.prompt();

@@ -14,7 +14,8 @@ import {
   Bell,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { useAppContext, triggerConnectionCelebration } from "../context/AppContext";
+import { triggerConnectionCelebration } from "../lib/utils";
+import { useAppStore } from "../store/useAppStore";
 import { AIAkinatorModal } from "./AIAkinatorModal";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -63,7 +64,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   relationshipStartDate: currentRelationshipStartDate,
   addToast,
 }) => {
-  const { casalId, tripConfig, coupleMembers } = useAppContext();
+  const casalId = useAppStore(s => s.casalId);
+  const tripConfig = useAppStore(s => s.tripConfig);
+  const coupleMembers = useAppStore(s => s.coupleMembers);
   
   const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !auth.currentUser) return;
