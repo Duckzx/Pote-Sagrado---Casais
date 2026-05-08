@@ -806,19 +806,16 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <div className="flex flex-col items-center pt-8 pb-4 opacity-75 hover:opacity-100 transition-opacity">
                   <div className="bg-red-500/10 p-4 rounded-xl border border-red-500/20 max-w-sm text-center">
                     <h4 className="font-serif text-red-600 font-medium mb-1 flex items-center justify-center gap-2">
-                      <Trash2 size={16} /> LGPD / GDPR Compliance
+                      <Trash2 size={16} /> Exclusão de Dados (LGPD)
                     </h4>
                     <p className="font-sans text-[10px] text-red-500/80 leading-tight mb-4 text-center px-2">
-                      Request complete removal of your data. This triggers a Cloud Function that recursively deletes all associated deposits, images, and config. This action is irreversible.
+                      Solicite a remoção completa dos seus dados. Esta ação é irreversível e aciona a exclusão segura de todos os depósitos e fotos em nossos servidores.
                     </p>
                     <button
                       onClick={async () => {
                         if (window.confirm("Você tem certeza que deseja excluir sua conta e dados permanentemente? Esta ação não pode ser desfeita e excluirá também suas economias salvas!")) {
                           try {
                             if (auth.currentUser) {
-                              // Enterprise Note: In a production environment, user deletion triggers 
-                              // a Firebase Auth Cloud Function (auth.user.delete) which runs 
-                              // a recursive delete on the backend to enforce GDPR/LGPD compliance.
                               const user = auth.currentUser;
                               const { deleteDoc, doc } = await import("firebase/firestore");
                               await deleteDoc(doc(db, "users", user.uid));
@@ -841,7 +838,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       }}
                       className="w-full bg-red-600 hover:bg-red-700 text-white font-sans text-[10px] uppercase tracking-widest font-bold py-3 rounded-full transition-colors shadow-md"
                     >
-                      Delete My Account & Data
+                      Excluir Minha Conta e Dados
                     </button>
                   </div>
                 </div>
