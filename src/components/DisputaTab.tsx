@@ -351,11 +351,48 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           {" "}
           ◈ Recompensa do Mês{" "}
         </span>{" "}
-        <p className="font-serif italic text-sm text-cookbook-text mt-1">
+        <p className="font-serif italic text-sm text-cookbook-text mt-1 mb-2">
           {" "}
           {prize || "Quem juntar menos paga um jantar!"}{" "}
         </p>{" "}
       </div>{" "}
+
+      {/* Invite Friends Challenge (Viral Loop) */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.25 }}
+        className="bg-gradient-to-br from-cookbook-primary/5 to-emerald-500/5 rounded-3xl p-6 border border-cookbook-primary/10 shadow-sm relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+          <Share2 size={64} className="text-cookbook-primary transform rotate-12 group-hover:rotate-45 transition-transform duration-700" />
+        </div>
+        <h3 className="font-serif text-lg text-cookbook-text mb-2 flex items-center gap-2">
+          <Swords size={18} className="text-cookbook-primary" />
+          Batalha de Casais (2v2)
+        </h3>
+        <p className="font-sans text-xs text-cookbook-text/60 mb-5 relative z-10">
+          Acha que vocês economizam mais? Desafie outro casal amigo e veja quem junta mais dinheiro no Pote Sagrado!
+        </p>
+        <button
+          onClick={() => {
+             if (navigator.share) {
+               navigator.share({
+                 title: "Desafio do Pote Sagrado",
+                 text: "Nosso casal desafiou vocês para uma batalha de economia! Quem juntar mais em 15 dias ganha. Entrem na arena:",
+                 url: window.location.origin + "?invite=" + Math.random().toString(36).substring(2,8)
+               }).catch(e => console.error(e));
+             } else {
+               navigator.clipboard.writeText(window.location.origin + "?invite=" + Math.random().toString(36).substring(2,8));
+               addToast("Link Copiado!", "Envie para o casal amigo via WhatsApp", "success");
+             }
+          }}
+          className="w-full bg-cookbook-bg text-cookbook-primary hover:bg-cookbook-primary hover:text-white border border-cookbook-primary transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold shadow-sm relative z-10 active:scale-95 flex items-center justify-center gap-2"
+        >
+           <Share2 size={16} /> Desafiar Casal Amigo
+        </button>
+      </motion.div>
+
       {/* Leader Banner */}
       {users[0].total > 0 && users[0].total > users[1].total && (
         <motion.div 

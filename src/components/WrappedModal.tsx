@@ -313,8 +313,10 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
               <h2 className="font-sans text-[12px] uppercase tracking-widest text-cookbook-gold font-bold mb-4">
                 A Caminho do Sonho
               </h2>
-              <p className="font-sans text-sm text-white/80 max-w-[250px] mx-auto text-balance leading-relaxed mb-8">
-                Juntos, construindo algo maior. {destination ? destination : "O nosso destino"} nos aguarda!
+              <p className="font-sans text-sm text-white/80 max-w-[280px] mx-auto text-balance leading-relaxed mb-8">
+                {progress >= 50 
+                  ? `Este casal sobreviveu à vontade de pedir iFood e está ${progress.toFixed(0)}% mais perto de ${destination ? destination : "seus sonhos"}!`
+                  : `Juntos, construindo algo maior. ${destination ? destination : "O nosso destino"} nos aguarda!`}
               </p>
 
               <div className="flex gap-4 justify-center" onClick={(e) => e.stopPropagation()}>

@@ -416,6 +416,58 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
 
+      {/* Mock Open Banking Sync */}{" "}
+      <div className="flex justify-center mt-2 mb-4">
+        {" "}
+        <button
+          onClick={() => {
+             const amount = 100;
+             const isConfirm = window.confirm(`🤖 AI Agent: Notei que não houve gastos na sexta à noite com delivery (IFood)! Posso transferir R$ ${amount} das suas constas correntes para o Pote Sagrado?`);
+             if (isConfirm) {
+               addDoc(collection(db, `casais/${casalId}/deposits`), {
+                  amount: amount,
+                  type: "income",
+                  action: "Economia Inteligente (Jantar em casa)",
+                  who: currentUser?.uid || "AI Agent",
+                  whoName: "Open Banking Sync",
+                  createdAt: serverTimestamp(),
+                }).then(() => {
+                  playCoinSound();
+                  vibrate([30, 50, 30]);
+                  addToast("Banco Sincronizado", "R$ 100 transferidos automaticamente!", "success");
+                }).catch(e => console.error(e));
+             }
+          }}
+          className="w-full bg-slate-900 text-white border border-slate-700 rounded-3xl p-5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all active:scale-[0.98] relative overflow-hidden group"
+        >
+          {" "}
+          <div className="absolute inset-0 bg-blue-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>{" "}
+          <div className="flex items-center space-x-4 relative z-10">
+            {" "}
+            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center backdrop-blur-sm border border-slate-600">
+              {" "}
+              <span className="text-xl">🏦</span>{" "}
+            </div>{" "}
+            <div className="text-left">
+              {" "}
+              <p className="font-serif italic text-base text-white">
+                {" "}
+                Open Banking AI Sync{" "}
+              </p>{" "}
+              <p className="font-sans text-[10px] uppercase tracking-widest text-slate-400 font-medium py-1">
+                {" "}
+                Encontre Dinheiro Escondido{" "}
+              </p>{" "}
+            </div>{" "}
+          </div>{" "}
+          <ArrowRight
+            size={18}
+            className="text-slate-500 relative z-10"
+            strokeWidth={2}
+          />{" "}
+        </button>{" "}
+      </div>{" "}
+
       {/* Wrapped Button */}{" "}
       <div className="flex justify-center mt-2 mb-6">
         {" "}

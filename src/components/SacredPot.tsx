@@ -73,6 +73,26 @@ export const SacredPot: React.FC<SacredPotProps> = ({
   }, [isGoalReached, isBreaking, isBroken, hasCelebrated]);
   return (
     <div className="sacred-pot-container relative">
+      <div className="sr-only">
+        <h2>Progresso da Economia</h2>
+        <table>
+          <caption>Dados de progresso financeiro</caption>
+          <tbody>
+            <tr>
+              <th scope="row">Meta</th>
+              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(goalAmount)}</td>
+            </tr>
+            <tr>
+              <th scope="row">Valor Guardado</th>
+              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved)}</td>
+            </tr>
+            <tr>
+              <th scope="row">Progresso</th>
+              <td>{calculatedPct.toFixed(1)}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       {" "}
       {/* Background Glow when Goal Reached */}{" "}
       {isGoalReached && !isBroken && (

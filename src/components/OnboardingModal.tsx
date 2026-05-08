@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PiggyBank, Target, Trophy, ArrowRight, Check } from "lucide-react";
+import FocusTrap from "focus-trap-react";
 import { SacredJarIcon } from "./SacredJarIcon";
 interface OnboardingModalProps {
   onComplete: () => void;
@@ -36,48 +37,56 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     }
   };
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-md animate-modal-backdrop">
-      {" "}
-      <div className="bg-cookbook-bg border border-cookbook-border rounded-3xl w-full max-w-sm p-8 shadow-2xl relative overflow-hidden text-center animate-modal-enter">
+    <FocusTrap>
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-cookbook-bg/90 backdrop-blur-md animate-modal-backdrop"
+      >
         {" "}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />{" "}
-        <div className="min-h-[220px] flex flex-col justify-center">
+        <div className="bg-cookbook-bg border border-cookbook-border rounded-3xl w-full max-w-sm p-8 shadow-2xl relative overflow-hidden text-center animate-modal-enter">
           {" "}
-          {steps[step].icon}{" "}
-          <h2 className="font-serif text-2xl text-cookbook-text mb-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />{" "}
+          <div className="min-h-[220px] flex flex-col justify-center">
             {" "}
-            {steps[step].title}{" "}
-          </h2>{" "}
-          <p className="font-sans text-sm text-cookbook-text/70 leading-relaxed">
+            {steps[step].icon}{" "}
+            <h2 id="onboarding-title" className="font-serif text-2xl text-cookbook-text mb-3">
+              {" "}
+              {steps[step].title}{" "}
+            </h2>{" "}
+            <p className="font-sans text-sm text-cookbook-text/70 leading-relaxed">
+              {" "}
+              {steps[step].description}{" "}
+            </p>{" "}
+          </div>{" "}
+          <div className="flex justify-center space-x-2 my-6">
             {" "}
-            {steps[step].description}{" "}
-          </p>{" "}
+            {steps.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-1.5 rounded-full transition-all duration-300 ${idx === step ? "w-6 bg-cookbook-primary" : "w-1.5 bg-cookbook-border"}`}
+              />
+            ))}{" "}
+          </div>{" "}
+          <button
+            onClick={handleNext}
+            aria-label={step === steps.length - 1 ? "Começar a Guardar" : "Próxima etapa"}
+            className="w-full flex items-center justify-center space-x-2 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold transition-transform active:scale-95 shadow-md"
+          >
+            {" "}
+            <span>
+              {" "}
+              {step === steps.length - 1 ? "Começar a Guardar" : "Próximo"}{" "}
+            </span>{" "}
+            {step === steps.length - 1 ? (
+              <Check size={16} />
+            ) : (
+              <ArrowRight size={16} />
+            )}{" "}
+          </button>{" "}
         </div>{" "}
-        <div className="flex justify-center space-x-2 my-6">
-          {" "}
-          {steps.map((_, idx) => (
-            <div
-              key={idx}
-              className={`h-1.5 rounded-full transition-all duration-300 ${idx === step ? "w-6 bg-cookbook-primary" : "w-1.5 bg-cookbook-border"}`}
-            />
-          ))}{" "}
-        </div>{" "}
-        <button
-          onClick={handleNext}
-          className="w-full flex items-center justify-center space-x-2 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded font-bold transition-transform active:scale-95 shadow-md"
-        >
-          {" "}
-          <span>
-            {" "}
-            {step === steps.length - 1 ? "Começar a Guardar" : "Próximo"}{" "}
-          </span>{" "}
-          {step === steps.length - 1 ? (
-            <Check size={16} />
-          ) : (
-            <ArrowRight size={16} />
-          )}{" "}
-        </button>{" "}
-      </div>{" "}
-    </div>
+      </div>
+    </FocusTrap>
   );
 };
