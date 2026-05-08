@@ -16,7 +16,11 @@
   --theme-battle: #F4F1EA;
   --theme-mural: #FFF9E6;
 
-  /* Tailwind Theme Tokens (v4 compatible) */
+  --font-serif-family: "Cormorant Garamond", "Georgia", serif;
+  --font-sans-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@theme {
   --color-cookbook-bg: var(--theme-bg);
   --color-cookbook-text: var(--theme-text);
   --color-cookbook-border: var(--theme-border);
@@ -26,8 +30,8 @@
   --color-cookbook-battle: var(--theme-battle);
   --color-cookbook-mural: var(--theme-mural);
   
-  --font-serif: "Cormorant Garamond", "Georgia", serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif-family);
+  --font-sans: var(--font-sans-family);
 }
 
 [data-theme="mediterranean"] {
@@ -72,6 +76,17 @@
   --theme-gold: #E9C46A;
   --theme-battle: #1A1A1A;
   --theme-mural: #1C1C1C;
+}
+
+[data-theme="noir"] {
+  --theme-bg: #FFFFFF;
+  --theme-text: #000000;
+  --theme-border: #E0E0E0;
+  --theme-primary: #333333;
+  --theme-primary-hover: #000000;
+  --theme-gold: #888888;
+  --theme-battle: #F5F5F5;
+  --theme-mural: #FAFAFA;
 }
 
 /* Dark theme overrides for specific elements */

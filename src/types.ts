@@ -64,7 +64,7 @@ export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'love
 
 export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'lovecards', 'config'];
 
-export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight';
+export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight' | 'noir';
 
 export interface ThemeOption {
   id: ThemeId;

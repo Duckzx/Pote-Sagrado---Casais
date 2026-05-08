@@ -157,6 +157,10 @@ function AppContent() {
   const bingoStats = useAppStore(s => s.bingoStats);
   const theme = useAppStore(s => s.theme);
 
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme || "cookbook");
+  }, [theme]);
+
   const previousDepositsRef = React.useRef(deposits);
 
   if (isTermos) {
