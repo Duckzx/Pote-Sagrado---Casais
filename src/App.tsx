@@ -161,26 +161,13 @@ function AppContent() {
     document.documentElement.setAttribute("data-theme", theme || "cookbook");
   }, [theme]);
 
-  const previousDepositsRef = React.useRef(deposits);
+  const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [showAdminLogin, setShowAdminLogin] = React.useState(false);
+  const [adminEmail, setAdminEmail] = React.useState("");
+  const [adminPass, setAdminPass] = React.useState("");
+  const [isLoggingInAdmin, setIsLoggingInAdmin] = React.useState(false);
 
-  if (isTermos) {
-    return (
-      <div className="min-h-[100dvh] bg-cookbook-bg p-6 text-cookbook-text font-serif">
-        <h1 className="text-2xl font-bold mb-4">Termos de Uso e LGPD</h1>
-        <div className="space-y-4 text-sm opacity-80 font-sans">
-          <p>Bem-vindo ao Pote Sagrado. Ao utilizar este aplicativo, coletamos apenas dados mínimos necessários (e-mail, nome, e id do dispositivo) para manter o registro de contas do casal em sincronia e enviar notificações básicas de gastos.</p>
-          <p>Garantimos os seguintes direitos amparados pela Lei Geral de Proteção de Dados (LGPD):</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Transparência:</strong> Seus dados não são vendidos e servem unicamente para uso do aplicativo.</li>
-            <li><strong>Direito de Exclusão (Esquecimento):</strong> Você pode apagar todos os seus dados nas Configurações clicando em "Eliminar Minha Conta". Todos os registros serão removidos permanentemente.</li>
-            <li><strong>Restrição de Acesso:</strong> Seus dados financeiros e fotos só são visíveis pelo seu perfil e o perfil emparelhado.</li>
-          </ul>
-          <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
-        </div>
-        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
-      </div>
-    );
-  }
+  const previousDepositsRef = React.useRef(deposits);
 
   React.useEffect(() => {
     if (!user || deposits.length === 0) {
@@ -243,11 +230,24 @@ function AppContent() {
     previousDepositsRef.current = deposits;
   }, [deposits, user, addToast]);
 
-  const [loginError, setLoginError] = React.useState<string | null>(null);
-  const [showAdminLogin, setShowAdminLogin] = React.useState(false);
-  const [adminEmail, setAdminEmail] = React.useState("");
-  const [adminPass, setAdminPass] = React.useState("");
-  const [isLoggingInAdmin, setIsLoggingInAdmin] = React.useState(false);
+  if (isTermos) {
+    return (
+      <div className="min-h-[100dvh] bg-cookbook-bg p-6 text-cookbook-text font-serif">
+        <h1 className="text-2xl font-bold mb-4">Termos de Uso e LGPD</h1>
+        <div className="space-y-4 text-sm opacity-80 font-sans">
+          <p>Bem-vindo ao Pote Sagrado. Ao utilizar este aplicativo, coletamos apenas dados mínimos necessários (e-mail, nome, e id do dispositivo) para manter o registro de contas do casal em sincronia e enviar notificações básicas de gastos.</p>
+          <p>Garantimos os seguintes direitos amparados pela Lei Geral de Proteção de Dados (LGPD):</p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Transparência:</strong> Seus dados não são vendidos e servem unicamente para uso do aplicativo.</li>
+            <li><strong>Direito de Exclusão (Esquecimento):</strong> Você pode apagar todos os seus dados nas Configurações clicando em "Eliminar Minha Conta". Todos os registros serão removidos permanentemente.</li>
+            <li><strong>Restrição de Acesso:</strong> Seus dados financeiros e fotos só são visíveis pelo seu perfil e o perfil emparelhado.</li>
+          </ul>
+          <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
+        </div>
+        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
+      </div>
+    );
+  }
 
   if (!isAuthReady) {
     return (
