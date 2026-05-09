@@ -73,6 +73,10 @@ interface AppState {
   setInstallPrompt: (v: any) => void;
   clearInstallPrompt: () => void;
 
+  // Premium
+  isPremium: boolean;
+  setPremium: (v: boolean) => void;
+
   resetData: () => void;
 }
 
@@ -164,6 +168,12 @@ export const useAppStore = create<AppState>((set) => ({
   setCanInstall: (canInstall) => set({ canInstall }),
   setInstallPrompt: (installPrompt) => set({ installPrompt }),
   clearInstallPrompt: () => set({ installPrompt: null, canInstall: false }),
+
+  isPremium: localStorage.getItem('pote_isPremium') === 'true',
+  setPremium: (isPremium) => {
+    localStorage.setItem('pote_isPremium', isPremium ? 'true' : 'false');
+    set({ isPremium });
+  },
 
   resetData: () => set({
     casalId: null,

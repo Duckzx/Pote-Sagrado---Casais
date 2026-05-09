@@ -6,6 +6,8 @@ import { useAppStore } from '../store/useAppStore';
 import { LoveCardCategory } from '../types';
 import { ALL_LOVE_CARDS, CATEGORY_META, getCardsByLevel, getUnlockedCards } from '../data/loveCards';
 import { cn } from '../lib/utils';
+import { PremiumGate } from './PremiumGate';
+import { openPremiumModal } from '../lib/premium';
 
 // ========================================
 // Sub-components
@@ -519,16 +521,24 @@ export const LoveCardsTab: React.FC = () => {
           </h3>
           <div className="flex gap-2 justify-center">
             {lockedLevels.map(lvl => (
-              <div
+              <PremiumGate 
                 key={lvl}
-                className="px-4 py-3 bg-cookbook-text/3 border border-cookbook-border/50 rounded-2xl flex items-center gap-2 opacity-40"
+                onOpenPremium={openPremiumModal}
+                className={lvl >= 4 ? "" : "pointer-events-none"} // Only show gate for 4+
               >
-                <Lock size={10} className="text-cookbook-text/30" />
-                <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
-                  Nível {lvl}
-                </span>
-                <span className="text-xs">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
-              </div>
+                <div
+                  className={cn(
+                    "px-4 py-3 bg-cookbook-text/3 border border-cookbook-border/50 rounded-2xl flex items-center gap-2 opacity-40",
+                    lvl >= 4 && "bg-amber-500/5 border-amber-500/20"
+                  )}
+                >
+                  <Lock size={10} className="text-cookbook-text/30" />
+                  <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+                    Nível {lvl}
+                  </span>
+                  <span className="text-xs">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
+                </div>
+              </PremiumGate>
             ))}
           </div>
         </motion.div>

@@ -21,6 +21,8 @@ import { useAppStore } from "../store/useAppStore";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
 import { GoalType } from "../types";
 import { AIAkinatorModal } from "./AIAkinatorModal";
+import { PremiumGate } from "./PremiumGate";
+import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
@@ -526,9 +528,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     />
                     <button
                       title="Ajuda com I.A."
-                      onClick={() => setShowAkinator(true)}
-                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100"
+                      onClick={() => {
+                        const isPremium = useAppStore.getState().isPremium;
+                        if (!isPremium) {
+                          openPremiumModal();
+                        } else {
+                          setShowAkinator(true);
+                        }
+                      }}
+                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100 flex items-center gap-1 group"
                     >
+                      <span className="text-[8px] bg-amber-500 text-white px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity font-bold">PRO</span>
                       <Sparkles size={16} />
                     </button>
                   </div>
@@ -725,50 +735,68 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
               <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
                 {THEMES.map((t) => (
-                  <div
+                  <PremiumGate
                     key={t.id}
-                    onClick={() => {
-                      setTheme(t.id);
-                      setSaveTrigger((prev) => prev + 1);
-                    }}
-                    className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
+                    onOpenPremium={openPremiumModal}
+                    className="snap-center shrink-0"
+                    fallback={ (t.id === 'midnight' || t.id === 'noir') ? (
+                      <div className="flex flex-col items-center gap-3 grayscale-[0.8] opacity-50">
+                        <div className="w-20 h-28 rounded-2xl border border-cookbook-border/20 flex flex-col overflow-hidden" style={{ background: t.colors[0] }}>
+                          <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
+                        </div>
+                        <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40">{t.label}</span>
+                      </div>
+                    ) : undefined}
                   >
                     <div
-                      className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
+                      onClick={() => {
+                        setTheme(t.id);
+                        setSaveTrigger((prev) => prev + 1);
+                      }}
+                      className="flex flex-col items-center gap-3 cursor-pointer group"
                     >
                       <div
-                        className="w-full h-full rounded-xl overflow-hidden flex flex-col"
-                        style={{
-                          background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
-                        }}
+                        className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
                       >
                         <div
-                          className="h-1/3 w-full"
-                          style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
-                        ></div>
-                        <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
+                          className="w-full h-full rounded-xl overflow-hidden flex flex-col"
+                          style={{
+                            background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
+                          }}
+                        >
                           <div
-                            className="w-3/4 h-1 rounded-full"
-                            style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
+                            className="h-1/3 w-full"
+                            style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
                           ></div>
-                          <div
-                            className="w-1/2 h-1 rounded-full"
-                            style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
-                          ></div>
+                          <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
+                            <div
+                              className="w-3/4 h-1 rounded-full"
+                              style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
+                            ></div>
+                            <div
+                              className="w-1/2 h-1 rounded-full"
+                              style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
+                            ></div>
+                          </div>
                         </div>
+                        {theme === t.id && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
+                            <Sparkles size={12} />
+                          </div>
+                        )}
+                        {(t.id === 'midnight' || t.id === 'noir') && (
+                          <div className="absolute -top-2 -left-2 bg-amber-500 text-white p-1 rounded-full shadow-lg">
+                            <Crown size={10} />
+                          </div>
+                        )}
                       </div>
-                      {theme === t.id && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
-                          <Sparkles size={12} />
-                        </div>
-                      )}
+                      <span
+                        className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
+                      >
+                        {t.label}
+                      </span>
                     </div>
-                    <span
-                      className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
-                    >
-                      {t.label}
-                    </span>
-                  </div>
+                  </PremiumGate>
                 ))}
               </div>
             </div>

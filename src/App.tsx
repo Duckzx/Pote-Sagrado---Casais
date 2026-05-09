@@ -6,6 +6,7 @@ import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
 import { GuidedTutorial } from "./components/GuidedTutorial";
 import { LegalConsentPopup } from "./components/LegalConsentPopup";
+import { PremiumModal } from "./components/PremiumModal";
 import { useAppStore } from "./store/useAppStore";
 
 // ========================================
@@ -162,12 +163,26 @@ function AppContent() {
   }, [theme]);
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [showPremiumModal, setShowPremiumModal] = React.useState(false);
   const [showAdminLogin, setShowAdminLogin] = React.useState(false);
   const [adminEmail, setAdminEmail] = React.useState("");
   const [adminPass, setAdminPass] = React.useState("");
   const [isLoggingInAdmin, setIsLoggingInAdmin] = React.useState(false);
 
   const previousDepositsRef = React.useRef(deposits);
+  const prevShowOnboardingRef = React.useRef(showOnboarding);
+
+  // Trigger Premium Modal after Onboarding
+  React.useEffect(() => {
+    if (prevShowOnboardingRef.current === true && showOnboarding === false) {
+      // Just finished onboarding
+      const timer = setTimeout(() => {
+        setShowPremiumModal(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+    prevShowOnboardingRef.current = showOnboarding;
+  }, [showOnboarding]);
 
   React.useEffect(() => {
     if (!user || deposits.length === 0) {
@@ -604,6 +619,18 @@ function AppContent() {
             </div>
          </div>
       )}
+
+      <AnimatePresence>
+        {showPremiumModal && (
+          <PremiumModal onClose={() => setShowPremiumModal(false)} />
+        )}
+      </AnimatePresence>
+
+      <React.useEffect(() => {
+        const handleOpenPremium = () => setShowPremiumModal(true);
+        window.addEventListener('open-premium', handleOpenPremium);
+        return () => window.removeEventListener('open-premium', handleOpenPremium);
+      }, []);
     </div>
   );
 }
