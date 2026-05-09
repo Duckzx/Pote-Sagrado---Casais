@@ -172,6 +172,12 @@ function AppContent() {
   const previousDepositsRef = React.useRef(deposits);
   const prevShowOnboardingRef = React.useRef(showOnboarding);
 
+  React.useEffect(() => {
+    const handleOpenPremium = () => setShowPremiumModal(true);
+    window.addEventListener('open-premium', handleOpenPremium);
+    return () => window.removeEventListener('open-premium', handleOpenPremium);
+  }, []);
+
   // Trigger Premium Modal after Onboarding
   React.useEffect(() => {
     if (prevShowOnboardingRef.current === true && showOnboarding === false) {
@@ -317,7 +323,7 @@ function AppContent() {
       await loginWithEmail(adminEmail, adminPass);
       // loginWithEmail will throw if it fails. If success, user state will update automatically via Firebase auth listener.
     } catch (e: any) {
-      addToast("Erro", e.message || "Credenciais inválidas", "error");
+      addToast("Erro", e.message || "Credenciais inválidas", "info");
     } finally {
       setIsLoggingInAdmin(false);
     }
@@ -625,12 +631,6 @@ function AppContent() {
           <PremiumModal onClose={() => setShowPremiumModal(false)} />
         )}
       </AnimatePresence>
-
-      <React.useEffect(() => {
-        const handleOpenPremium = () => setShowPremiumModal(true);
-        window.addEventListener('open-premium', handleOpenPremium);
-        return () => window.removeEventListener('open-premium', handleOpenPremium);
-      }, []);
     </div>
   );
 }

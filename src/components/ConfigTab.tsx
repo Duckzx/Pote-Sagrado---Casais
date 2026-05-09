@@ -14,6 +14,7 @@ import {
   Bell,
   HelpCircle,
   Target,
+  Crown,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
