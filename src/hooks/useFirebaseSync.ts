@@ -26,6 +26,7 @@ export function useFirebaseSync() {
   const setIsDataReady = useAppStore(s => s.setIsDataReady);
   const setAchievements = useAppStore(s => s.setAchievements);
   const setPinboardLinks = useAppStore(s => s.setPinboardLinks);
+  const setPremium = useAppStore(s => s.setPremium);
 
   // We need addToast here for error and success
   // Currently useAppStore has setToasts, we should add addToast to useAppStore
@@ -105,11 +106,14 @@ export function useFirebaseSync() {
       applyInvite();
     }
 
+    const lastCasalIdRef = { current: '' as string | null };
     let currentUnsubs: (() => void)[] = [];
 
     // Listen to user profile for theme and casalId
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
       let currentCasalId = `casal_${user.uid}`; // default
+      let currentTheme: ThemeId = 'cookbook';
+      
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (!data.inviteCode) {
@@ -117,9 +121,9 @@ export function useFirebaseSync() {
            setDoc(doc(db, 'users', user.uid), { inviteCode: newCode }, { merge: true });
         }
         if (data.theme) {
-          const t = data.theme as ThemeId;
-          setTheme(t);
-          localStorage.setItem('pote_theme', t);
+          currentTheme = data.theme as ThemeId;
+          setTheme(currentTheme);
+          localStorage.setItem('pote_theme', currentTheme);
         }
         if (data.casalId) {
           currentCasalId = data.casalId;
@@ -132,9 +136,16 @@ export function useFirebaseSync() {
         setLgpdConsent(false);
         setHasCheckedConsent(true);
       }
+
+      // ONLY if casalId changed, we reset and restart listeners
+      if (lastCasalIdRef.current === currentCasalId) {
+        return;
+      }
+      
+      lastCasalIdRef.current = currentCasalId;
       setCasalId(currentCasalId);
       
-      // Clear previous nested unsubs if casalId changed or on re-run
+      // Clear previous nested unsubs
       currentUnsubs.forEach(unsub => unsub());
       currentUnsubs = [];
 
@@ -144,6 +155,21 @@ export function useFirebaseSync() {
       setTotalSaved(0);
       setBingoStats({});
       setAchievements([]);
+      setPremium(false);
+      setIsDataReady(false); // Reset readiness for new casal
+
+      // Listen to Casal document for premium status
+      const unsubCasal = onSnapshot(doc(db, 'casais', currentCasalId), (casalSnap) => {
+        if (casalSnap.exists()) {
+          const data = casalSnap.data();
+          setPremium(!!data.isPremium);
+        } else {
+          // If casal doc doesn't exist, create it with default free status
+          setDoc(doc(db, 'casais', currentCasalId), { createdAt: new Date().toISOString(), isPremium: false }, { merge: true });
+          setPremium(false);
+        }
+      });
+      currentUnsubs.push(unsubCasal);
 
       // Listen to config
       const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {

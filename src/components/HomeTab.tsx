@@ -15,6 +15,8 @@ import {
   Star,
   Share2,
   Target,
+  Crown,
+  ChevronRight,
 } from "lucide-react";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
 import { GoalType } from "../types";
@@ -26,6 +28,8 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import { PremiumGate } from "./PremiumGate";
+import { openPremiumModal } from "../lib/premium";
 import { db, auth } from "../firebase";
 import confetti from "canvas-confetti";
 import { motion } from "motion/react";
@@ -144,15 +148,52 @@ const MilestoneTracker = ({
         {" "}
         Vocês merecem uma recompensa: {activeMilestone.reward}{" "}
       </p>{" "}
-      <button
-        onClick={onRewardClick}
-        className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
-      >
-        {" "}
-        <Heart size={14} className="fill-white" /> Gerar "Mini Date"
-        Especial{" "}
-      </button>{" "}
+      <PremiumGate onOpenPremium={openPremiumModal}>
+        <button
+          onClick={onRewardClick}
+          className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
+        >
+          {" "}
+          <Heart size={14} className="fill-white" /> Gerar "Mini Date"
+          Especial{" "}
+        </button>{" "}
+      </PremiumGate>
     </div>
+  );
+};
+
+const PremiumBanner = () => {
+  const isPremium = useAppStore(s => s.isPremium);
+  if (isPremium) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-6 mb-8 group cursor-pointer"
+      onClick={() => {
+        useAppStore.getState().setActiveTab('config');
+        localStorage.setItem('pote_configSubTab', 'premium');
+        // Force state update if needed, but the ConfigTab should pick it up on mount
+      }}
+    >
+      <div className="flex items-center justify-between p-1.5 pr-5 bg-cookbook-bg border border-cookbook-border/40 rounded-full hover:border-amber-500/30 transition-all shadow-sm hover:shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20 group-hover:rotate-12 transition-transform">
+            <Crown size={14} fill="white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-sans text-[9px] uppercase tracking-[0.2em] font-bold text-cookbook-text/40">
+              Versão Gratuita
+            </span>
+            <span className="font-serif text-[13px] text-cookbook-text group-hover:text-amber-600 transition-colors">
+              Fazer upgrade para Premium
+            </span>
+          </div>
+        </div>
+        <ChevronRight size={14} className="text-cookbook-text/20 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+      </div>
+    </motion.div>
   );
 };
 export const HomeTab: React.FC<HomeTabProps> = ({
@@ -389,6 +430,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
+      <PremiumBanner />
       <div className="text-center space-y-1 relative mb-8">
         {" "}
         <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">

@@ -109,9 +109,12 @@ export const useAppStore = create<AppState>((set) => ({
   setIsDataReady: (isDataReady) => set({ isDataReady }),
   setIsAuthReady: (isAuthReady) => set({ isAuthReady }),
 
-  activeTab: 'home',
+  activeTab: (localStorage.getItem('pote_lastTab') as TabId) || 'home',
   tabDirection: 0,
-  setActiveTab: (activeTab) => set({ activeTab }),
+  setActiveTab: (activeTab) => {
+    localStorage.setItem('pote_lastTab', activeTab);
+    set({ activeTab });
+  },
   setTabDirection: (tabDirection) => set({ tabDirection }),
 
   theme: 'cookbook',
@@ -169,11 +172,8 @@ export const useAppStore = create<AppState>((set) => ({
   setInstallPrompt: (installPrompt) => set({ installPrompt }),
   clearInstallPrompt: () => set({ installPrompt: null, canInstall: false }),
 
-  isPremium: localStorage.getItem('pote_isPremium') === 'true',
-  setPremium: (isPremium) => {
-    localStorage.setItem('pote_isPremium', isPremium ? 'true' : 'false');
-    set({ isPremium });
-  },
+  isPremium: false,
+  setPremium: (isPremium) => set({ isPremium }),
 
   resetData: () => set({
     casalId: null,

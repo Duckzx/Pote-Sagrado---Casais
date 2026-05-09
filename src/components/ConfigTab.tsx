@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Target,
   Crown,
+  ChevronRight,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
@@ -75,6 +76,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   addToast,
 }) => {
   const casalId = useAppStore(s => s.casalId);
+  const isPremium = useAppStore(s => s.isPremium);
   const tripConfig = useAppStore(s => s.tripConfig);
   const coupleMembers = useAppStore(s => s.coupleMembers);
   
@@ -100,7 +102,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   };
 
   // Custom sub-tabs state
-  const [configSubTab, setConfigSubTab] = useState<"geral" | "personalizacao" | "avancado">("geral");
+  const [configSubTab, setConfigSubTab] = useState<string>(localStorage.getItem('pote_configSubTab') || "geral");
+
+  const handleTabChange = (val: string) => {
+    setConfigSubTab(val);
+    localStorage.setItem('pote_configSubTab', val);
+  };
 
   const [goalType, setGoalType] = useState<GoalType>(currentGoalType || 'travel');
   const [destination, setDestination] = useState(currentDestination || "");
@@ -456,6 +463,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center -z-0">
              <span className="text-white text-xs font-bold uppercase tracking-widest z-10">Alterar</span>
           </div>
+          {isPremium && (
+            <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-1.5 rounded-full shadow-lg border-2 border-cookbook-bg z-20">
+              <Crown size={14} fill="white" />
+            </div>
+          )}
         </label>
         <div>
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
@@ -467,11 +479,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </div>
       </section>
 
-      <Tabs defaultValue="geral" className="w-full">
+      <Tabs value={configSubTab} onValueChange={handleTabChange} className="w-full">
         <TabsList>
           <TabsTrigger value="geral">Geral</TabsTrigger>
-          <TabsTrigger value="personalizacao">Visual & Funcões</TabsTrigger>
+          <TabsTrigger value="personalizacao">Visual</TabsTrigger>
           <TabsTrigger value="avancado">Conta</TabsTrigger>
+          <TabsTrigger value="premium" className="text-amber-600 dark:text-amber-400">Premium</TabsTrigger>
         </TabsList>
 
       <InstallPrompt />
@@ -930,6 +943,62 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             </div>
           </div>
         </TabsContent>
+
+        {/* ======================= PREMIUM TAB ======================= */}
+        <TabsContent value="premium">
+          <div className="space-y-6 animate-fade-in">
+            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-amber-500/20">
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/30">
+                  <Crown size={24} className="text-white" />
+                </div>
+                <h3 className="font-serif text-2xl font-medium mb-2">Pote Sagrado Premium</h3>
+                <p className="font-sans text-sm text-white/80 mb-8 max-w-[240px]">
+                  Sua jornada a dois merece o melhor. Desbloqueie todos os recursos e personalize cada detalhe.
+                </p>
+                
+                <ul className="space-y-4 mb-8">
+                  {[
+                    "Temas Exclusivos (Midnight, Noir)",
+                    "Akinator I.A. para Objetivos",
+                    "Upload de Fotos Ilimitado",
+                    "Métricas de Economia Avançadas",
+                    "Selos de Casal Premium",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm font-medium">
+                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center border border-white/20">
+                        <Sparkles size={12} />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                
+                <button 
+                  onClick={openPremiumModal}
+                  className="w-full bg-white text-amber-600 font-sans text-xs uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg hover:bg-amber-50 active:scale-[0.98] transition-all"
+                >
+                  {isPremium ? "Assinatura Ativa" : "Assinar Agora - R$ 9,90/mês"}
+                </button>
+                
+                <p className="text-center mt-4 text-[10px] text-white/50 uppercase tracking-[0.2em] font-medium">
+                  Valor único para o casal
+                </p>
+              </div>
+              
+              <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-[-20%] left-[-20%] w-64 h-64 bg-amber-400/20 rounded-full blur-3xl" />
+            </div>
+
+            <div className="bg-cookbook-bg/50 backdrop-blur-xl border border-cookbook-border/30 rounded-3xl p-6 text-center">
+              <h4 className="font-serif text-lg text-cookbook-text mb-2">Por que ser Premium?</h4>
+              <p className="font-sans text-xs text-cookbook-text/50 leading-relaxed">
+                Ao se tornar premium, você ajuda a manter o Pote Sagrado independente e sem anúncios. O valor é cobrado por casal, permitindo que ambos aproveitem os benefícios simultaneamente.
+              </p>
+            </div>
+          </div>
+        </TabsContent>
+
       </section>
       </Tabs>
 

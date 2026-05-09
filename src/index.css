@@ -371,3 +371,50 @@ input[type="date"] {
   animation: card-shimmer 3s ease-in-out infinite;
 }
 
+/* Premium Glassmorphism & Gold Effects */
+.premium-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.premium-gradient-text {
+  background: linear-gradient(135deg, #C5A059 0%, #E9C46A 50%, #C5A059 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.premium-shimmer-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-shimmer-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 55%
+  );
+  animation: premium-shimmer 3s infinite;
+}
+
+@keyframes premium-shimmer {
+  0% { transform: translateX(-150%) rotate(25deg); }
+  100% { transform: translateX(150%) rotate(25deg); }
+}
+
+.premium-card-border {
+  background: linear-gradient(var(--theme-bg), var(--theme-bg)) padding-box,
+              linear-gradient(135deg, #C5A059, #E9C46A, #C5A059) border-box;
+  border: 1.5px solid transparent;
+}
+
