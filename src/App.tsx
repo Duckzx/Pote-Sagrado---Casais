@@ -34,6 +34,7 @@ const LoveCardsTab = lazy(() =>
 const RemotionIntro = React.lazy(() => import("./components/RemotionIntro"));
 import { SacredJarIcon } from "./components/SacredJarIcon";
 import { useFirebaseSync } from "./hooks/useFirebaseSync";
+import { useNotifications } from "./hooks/useNotifications";
 
 // ========================================
 // Error Boundary
@@ -126,6 +127,7 @@ function TabSkeleton() {
 // ========================================
 function AppContent() {
   useFirebaseSync();
+  useNotifications();
 
   const isTermos = window.location.pathname === "/termos";
 
@@ -563,15 +565,15 @@ function AppContent() {
               {activeTab === "lovecards" && <LoveCardsTab />}
               {activeTab === "config" && tripConfig && (
                 <ConfigTab
-                  currentGoalType={tripConfig.goalType}
-                  currentDestination={tripConfig.destination}
-                  currentOrigin={tripConfig.origin}
-                  currentGoalAmount={tripConfig.goalAmount}
+                  currentGoalType={tripConfig?.goalType || 'travel'}
+                  currentDestination={tripConfig?.destination || ''}
+                  currentOrigin={tripConfig?.origin || ''}
+                  currentGoalAmount={tripConfig?.goalAmount || 0}
                   currentTheme={theme}
-                  customChallenges={tripConfig.customChallenges}
-                  currentSharedAlbumUrl={tripConfig.sharedAlbumUrl}
-                  currentPrize={tripConfig.monthlyPrize}
-                  relationshipStartDate={tripConfig.relationshipStartDate}
+                  customChallenges={tripConfig?.customChallenges || []}
+                  currentSharedAlbumUrl={tripConfig?.sharedAlbumUrl || ''}
+                  currentPrize={tripConfig?.monthlyPrize || ''}
+                  relationshipStartDate={tripConfig?.relationshipStartDate || ''}
                   addToast={addToast}
                 />
               )}

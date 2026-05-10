@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { collection, getDocs, addDoc, doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, getDoc, setDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { CardInteraction, LoveCardCategory, LoveCardsProgress } from '../types';
 import { ALL_LOVE_CARDS, getCardsByLevel } from '../data/loveCards';
@@ -30,6 +30,7 @@ interface LoveCardsState {
  */
 export function useOptimisticLoveCards(casalId: string | null) {
   const addToast = useAppStore(s => s.addToast);
+  const coupleMembers = useAppStore(s => s.coupleMembers);
 
   const [state, setState] = useState<LoveCardsState>({
     interactions: {},
@@ -150,6 +151,19 @@ export function useOptimisticLoveCards(casalId: string | null) {
     }));
 
     try {
+      // Create a notification for the partner
+      const partnerId = coupleMembers.find(m => m.uid !== auth.currentUser?.uid)?.uid;
+      if (partnerId) {
+        await addDoc(collection(db, 'casais', casalId, 'notifications'), {
+          type: 'love_card_response',
+          cardId,
+          from: auth.currentUser?.uid,
+          to: partnerId,
+          timestamp: serverTimestamp(),
+          read: false
+        });
+      }
+
       // Write to Firestore
       await addDoc(
         collection(db, `casais/${casalId}/love_interactions`),

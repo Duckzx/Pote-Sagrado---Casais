@@ -219,6 +219,8 @@ export function useFirebaseSync() {
       }, (error) => handleFirestoreError(error, OperationType.LIST, 'users'));
       currentUnsubs.push(unsubMembers);
 
+      /* 
+      // Legacy Migration - Disabled to prevent cross-contamination between accounts
       if (!(window as any)._hasRunMigration && auth.currentUser) {
         (window as any)._hasRunMigration = true;
         const runMigration = async () => {
@@ -242,6 +244,7 @@ export function useFirebaseSync() {
         };
         runMigration();
       }
+      */
 
       // Listen to deposits
       const q = query(

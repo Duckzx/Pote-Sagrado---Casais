@@ -1,20 +1,40 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img width="1200" height="475" alt="Pote Sagrado Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Pote Sagrado - Casais 🍯❤️
 
-This contains everything you need to run your app locally.
+**Pote Sagrado** é uma plataforma exclusiva para casais que desejam transformar sua gestão financeira em uma jornada de conexão e conquistas. Combinando tecnologia, gamificação e um design premium, o app permite que casais economizem juntos para seus maiores sonhos.
 
-View your app in AI Studio: https://ai.studio/apps/8f6943a1-117e-4411-b48b-2e89efb1e3a7
+## ✨ Funcionalidades Principais
 
-## Run Locally
+- **Metas Compartilhadas**: Economize para viagens, casa própria, veículos ou qualquer objetivo que o casal definir.
+- **Love Cards 💌**: Desafios e perguntas interativas para fortalecer a conexão emocional enquanto cuidam do bolso.
+- **Ecossistema Premium**: Temas exclusivos (*Midnight*, *Noir*), upload ilimitado de fotos e auxílio de I.A. (Akinator) para planejar seus objetivos.
+- **Notificações em Tempo Real**: Fique por dentro de cada interação e depósito do seu parceiro(a).
+- **Segurança e Privacidade**: Isolamento completo de dados por casal, seguindo as diretrizes da LGPD.
 
-**Prerequisites:**  Node.js
+## 🚀 Como Rodar Localmente
 
+1. **Instale as dependências**:
+   ```bash
+   npm install
+   ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2. **Configure o Firebase**:
+   Crie um arquivo `.env` baseado no `.env.example` com suas chaves do Firebase.
+
+3. **Inicie o servidor de desenvolvimento**:
+   ```bash
+   npm run dev
+   ```
+
+## 🛠️ Tecnologias
+
+- **Frontend**: React 19, Vite, Tailwind CSS, Lucide Icons.
+- **Backend/DB**: Firebase (Auth, Firestore, Hosting).
+- **Animações**: Framer Motion, GSAP.
+- **Estado**: Zustand.
+
+---
+*Desenvolvido com carinho para casais que sonham alto.*

@@ -37,6 +37,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   setActiveTab,
 }) => {
+  const hasUnreadNotifications = useAppStore(s => s.hasUnreadNotifications);
   const allSecondaryTabs = [
     { id: "mural", icon: LayoutGrid, label: "Feed" },
     { id: "lovecards", icon: Heart, label: "Cartas" },
@@ -119,6 +120,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 strokeWidth={isActive ? 2.5 : 2}
                 className="relative z-10"
               />
+              {tab.id === 'lovecards' && hasUnreadNotifications && (
+                <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white z-20" />
+              )}
             </button>
           );
         })}

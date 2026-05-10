@@ -748,24 +748,15 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <h3 className="font-serif text-xl font-medium">Tema Visual</h3>
               </div>
               <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
-                {THEMES.map((t) => (
-                  <PremiumGate
-                    key={t.id}
-                    onOpenPremium={openPremiumModal}
-                    className="snap-center shrink-0"
-                    fallback={ (t.id === 'midnight' || t.id === 'noir') ? (
-                      <div className="flex flex-col items-center gap-3 grayscale-[0.8] opacity-50">
-                        <div className="w-20 h-28 rounded-2xl border border-cookbook-border/20 flex flex-col overflow-hidden" style={{ background: t.colors[0] }}>
-                          <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
-                        </div>
-                        <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40">{t.label}</span>
-                      </div>
-                    ) : undefined}
-                  >
+                {THEMES.map((t) => {
+                  const isPremiumTheme = t.id === 'midnight' || t.id === 'noir';
+                  const themeContent = (
                     <div
                       onClick={() => {
-                        setTheme(t.id);
-                        setSaveTrigger((prev) => prev + 1);
+                        if (!isPremiumTheme || isPremium) {
+                          setTheme(t.id);
+                          setSaveTrigger((prev) => prev + 1);
+                        }
                       }}
                       className="flex flex-col items-center gap-3 cursor-pointer group"
                     >
@@ -798,7 +789,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                             <Sparkles size={12} />
                           </div>
                         )}
-                        {(t.id === 'midnight' || t.id === 'noir') && (
+                        {isPremiumTheme && (
                           <div className="absolute -top-2 -left-2 bg-amber-500 text-white p-1 rounded-full shadow-lg">
                             <Crown size={10} />
                           </div>
@@ -810,8 +801,37 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         {t.label}
                       </span>
                     </div>
-                  </PremiumGate>
-                ))}
+                  );
+
+                  if (isPremiumTheme) {
+                    return (
+                      <PremiumGate
+                        key={t.id}
+                        onOpenPremium={openPremiumModal}
+                        className="snap-center shrink-0"
+                        fallback={
+                          <div className="flex flex-col items-center gap-3 grayscale-[0.8] opacity-50 cursor-pointer">
+                            <div className="w-20 h-28 rounded-2xl border border-cookbook-border/20 flex flex-col overflow-hidden relative" style={{ background: t.colors[0] }}>
+                              <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
+                              <div className="absolute top-1 left-1 bg-amber-500/20 text-amber-600 p-1 rounded-full">
+                                <Crown size={10} />
+                              </div>
+                            </div>
+                            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40">{t.label}</span>
+                          </div>
+                        }
+                      >
+                        {themeContent}
+                      </PremiumGate>
+                    );
+                  }
+
+                  return (
+                    <div key={t.id} className="snap-center shrink-0">
+                      {themeContent}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -974,12 +994,23 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   ))}
                 </ul>
                 
-                <button 
-                  onClick={openPremiumModal}
-                  className="w-full bg-white text-amber-600 font-sans text-xs uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg hover:bg-amber-50 active:scale-[0.98] transition-all"
-                >
-                  {isPremium ? "Assinatura Ativa" : "Assinar Agora - R$ 9,90/mês"}
-                </button>
+                {isPremium ? (
+                  <div className="w-full bg-white/20 backdrop-blur-md border border-white/30 p-4 rounded-2xl flex flex-col items-center gap-3">
+                    <div className="flex items-center gap-2 text-white font-bold text-sm uppercase tracking-widest">
+                      <Crown size={16} fill="white" /> Assinatura Ativa
+                    </div>
+                    <p className="text-[10px] text-white/70 text-center uppercase tracking-widest font-medium">
+                      Obrigado por apoiar o Pote Sagrado! <br/> Aproveite todos os recursos.
+                    </p>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={openPremiumModal}
+                    className="w-full bg-white text-amber-600 font-sans text-xs uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg hover:bg-amber-50 active:scale-[0.98] transition-all"
+                  >
+                    Assinar Agora - R$ 9,90/mês
+                  </button>
+                )}
                 
                 <p className="text-center mt-4 text-[10px] text-white/50 uppercase tracking-[0.2em] font-medium">
                   Valor único para o casal

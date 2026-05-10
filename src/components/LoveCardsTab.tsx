@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { auth } from '../firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Lock, Sparkles, ChevronLeft, ChevronRight, Check, CheckCheck, Send, RefreshCw, X, Share2 } from 'lucide-react';
 import { useOptimisticLoveCards } from '../hooks/useOptimisticLoveCards';
+import { useNotifications } from '../hooks/useNotifications';
 import { useAppStore } from '../store/useAppStore';
 import { LoveCardCategory } from '../types';
 import { ALL_LOVE_CARDS, CATEGORY_META, getCardsByLevel, getUnlockedCards } from '../data/loveCards';
@@ -171,6 +173,12 @@ const AnswerDrawer: React.FC<{
 
 export const LoveCardsTab: React.FC = () => {
   const casalId = useAppStore(s => s.casalId);
+  const { markNotificationsAsRead } = useNotifications();
+
+  useEffect(() => {
+    markNotificationsAsRead();
+  }, [markNotificationsAsRead]);
+
   const {
     interactions,
     progress,
@@ -464,9 +472,42 @@ export const LoveCardsTab: React.FC = () => {
                         <Send size={12} /> Responder
                       </button>
                     ) : (
-                      <span className="flex items-center gap-2 text-emerald-600 font-sans text-[10px] uppercase tracking-widest font-bold">
-                        <Check size={14} /> Já respondeu
-                      </span>
+                      <div className="w-full space-y-4 overflow-y-auto max-h-[200px] pr-2 custom-scrollbar">
+                        {/* Your response */}
+                        <div className="bg-cookbook-text/5 rounded-2xl p-4 text-left border border-cookbook-border/50">
+                          <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-1">Sua Resposta</p>
+                          <p className="font-sans text-xs text-cookbook-text italic">
+                            "{interactions[currentCard.id]?.find(i => i.partnerId === auth.currentUser?.uid)?.answer || 'Completado!'}"
+                          </p>
+                        </div>
+
+                        {/* Partner response */}
+                        {isMatch(currentCard.id) ? (
+                          <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="bg-cookbook-primary/10 rounded-2xl p-4 text-left border border-cookbook-primary/20"
+                          >
+                            <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-primary/60 font-bold mb-1">Resposta do Parceiro(a)</p>
+                            <p className="font-sans text-xs text-cookbook-text font-medium">
+                              "{interactions[currentCard.id]?.find(i => i.partnerId !== auth.currentUser?.uid)?.answer || 'Completado!'}"
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <div className="bg-cookbook-text/5 rounded-2xl p-4 text-center border border-dashed border-cookbook-border/30 opacity-50">
+                            <p className="font-sans text-[10px] text-cookbook-text/40 italic">Aguardando resposta do parceiro para revelar...</p>
+                          </div>
+                        )}
+
+                        {isMatch(currentCard.id) && (
+                          <div className="pt-2 flex justify-center">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-cookbook-gold/20 text-cookbook-gold rounded-full border border-cookbook-gold/20 animate-bounce">
+                              <Sparkles size={12} />
+                              <span className="font-sans text-[9px] uppercase tracking-widest font-black">Match Perfeito!</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </motion.div>

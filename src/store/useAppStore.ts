@@ -56,7 +56,7 @@ interface AppState {
   hasCheckedConsent: boolean;
   setLgpdConsent: (v: boolean | null) => void;
   setHasCheckedConsent: (v: boolean) => void;
-  acceptLgpd: () => void;
+  acceptLgpd: () => Promise<void>;
 
   showOnboarding: boolean;
   setShowOnboarding: (v: boolean) => void;
@@ -76,6 +76,10 @@ interface AppState {
   // Premium
   isPremium: boolean;
   setPremium: (v: boolean) => void;
+
+  // Notifications
+  hasUnreadNotifications: boolean;
+  setHasUnreadNotifications: (v: boolean) => void;
 
   resetData: () => void;
 }
@@ -124,16 +128,17 @@ export const useAppStore = create<AppState>((set) => ({
   hasCheckedConsent: false,
   setLgpdConsent: (lgpdConsent) => set({ lgpdConsent }),
   setHasCheckedConsent: (hasCheckedConsent) => set({ hasCheckedConsent }),
-  acceptLgpd: () => {
-    set((state) => {
-      if (state.user) {
-        setDoc(doc(db, 'users', state.user.uid), { lgpdConsent: true, lgpdConsentDate: new Date().toISOString() }, { merge: true })
-          .catch(console.error);
-      } else {
-        localStorage.setItem('pote_lgpdConsent', 'true');
-      }
-      return { lgpdConsent: true };
-    });
+  acceptLgpd: async () => {
+    const state = useAppStore.getState();
+    if (state.user) {
+      await setDoc(doc(db, 'users', state.user.uid), { 
+        lgpdConsent: true, 
+        lgpdConsentDate: new Date().toISOString() 
+      }, { merge: true });
+    } else {
+      localStorage.setItem('pote_lgpdConsent', 'true');
+    }
+    set({ lgpdConsent: true });
   },
 
   showOnboarding: false,
@@ -175,6 +180,9 @@ export const useAppStore = create<AppState>((set) => ({
   isPremium: false,
   setPremium: (isPremium) => set({ isPremium }),
 
+  hasUnreadNotifications: false,
+  setHasUnreadNotifications: (hasUnreadNotifications) => set({ hasUnreadNotifications }),
+
   resetData: () => set({
     casalId: null,
     coupleMembers: [],
@@ -186,6 +194,7 @@ export const useAppStore = create<AppState>((set) => ({
     tripConfig: null,
     isDataReady: false,
     activeTab: 'home',
-    theme: 'cookbook'
+    theme: 'cookbook',
+    hasUnreadNotifications: false
   }),
 }));
