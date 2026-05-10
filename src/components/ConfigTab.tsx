@@ -337,28 +337,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       setIsRequestingPush(false);
     }
   };
-  const handleSimulateGateway = async (txId: string) => {
-    setIsSaving(true);
-    addToast("Processando...", "Verificando transação de pagamento...", "info");
-    try {
-      // Fake network delay for gateway integration
-      await new Promise(r => setTimeout(r, 1500));
-      await setDoc(
-        doc(db, `casais/${casalId}/trip_config`, "main"),
-        {
-          isPremium: true,
-          premiumTransactionId: txId,
-        },
-        { merge: true },
-      );
-      addToast("Pagamento Confirmado!", "Você agora é Premium! Todos os recursos foram desbloqueados.", "success");
-    } catch (e) {
-      console.error(e);
-      addToast("Erro", "Falha ao validar a transação premium.", "info");
-    } finally {
-      setIsSaving(false);
-    }
-  };
   const performSave = async (
     destToSave: string,
     amountToSave: string,
@@ -476,10 +454,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
 
       <Tabs defaultValue="geral" className="w-full">
         <TabsList>
-          <TabsTrigger value="geral">GERAL</TabsTrigger>
-          <TabsTrigger value="visual">VISUAL</TabsTrigger>
-          <TabsTrigger value="conta">CONTA</TabsTrigger>
-          <TabsTrigger value="premium">PREMIUM</TabsTrigger>
+          <TabsTrigger value="geral">Geral</TabsTrigger>
+          <TabsTrigger value="personalizacao">Visual & Funcões</TabsTrigger>
+          <TabsTrigger value="avancado">Conta</TabsTrigger>
         </TabsList>
 
       <InstallPrompt />
@@ -509,13 +486,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     />
                     <button
                       title="Ajuda com I.A."
-                      onClick={() => {
-                        if (tripConfig?.isPremium) {
-                          setShowAkinator(true);
-                        } else {
-                          addToast("Aviso", "Akinator I.A. é exclusivo para assinantes Premium.", "info");
-                        }
-                      }}
+                      onClick={() => setShowAkinator(true)}
                       className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100"
                     >
                       <Sparkles size={16} />
@@ -704,7 +675,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </TabsContent>
 
         {/* ======================= PERSONALIZAÇÃO E FUNÇÕES TAB ======================= */}
-        <TabsContent value="visual">
+        <TabsContent value="personalizacao">
           <div className="space-y-6 animate-fade-in">
             {/* Tema Visual */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -717,31 +688,20 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   <div
                     key={t.id}
                     onClick={() => {
-                      if (t.id !== 'cookbook' && !tripConfig?.isPremium) {
-                        addToast("Aviso", "Este tema é exclusivo para assinantes Premium.", "info");
-                        return;
-                      }
                       setTheme(t.id);
                       setSaveTrigger((prev) => prev + 1);
                     }}
                     className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
                   >
                     <div
-                      className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"} ${t.id !== 'cookbook' && !tripConfig?.isPremium ? "opacity-50 grayscale" : ""}`}
+                      className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
                     >
                       <div
-                        className="w-full h-full rounded-xl overflow-hidden flex flex-col relative"
+                        className="w-full h-full rounded-xl overflow-hidden flex flex-col"
                         style={{
                           background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
                         }}
                       >
-                        {t.id !== 'cookbook' && !tripConfig?.isPremium && (
-                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px] z-20">
-                             <div className="bg-orange-500 text-white rounded-full px-2 py-1 flex items-center justify-center shadow-lg">
-                               <Sparkles size={12} />
-                             </div>
-                           </div>
-                        )}
                         <div
                           className="h-1/3 w-full"
                           style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
@@ -758,22 +718,16 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         </div>
                       </div>
                       {theme === t.id && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in z-30">
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
                           <Sparkles size={12} />
                         </div>
                       )}
-                      
                     </div>
-                    <div className="flex flex-col items-center gap-1 mt-1">
-                      <span
-                        className={`font-sans text-[10px] text-center uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
-                      >
-                        {t.label}
-                      </span>
-                      {t.id !== 'cookbook' && (
-                        <span className="bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-widest">Premium</span>
-                      )}
-                    </div>
+                    <span
+                      className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
+                    >
+                      {t.label}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -783,7 +737,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </TabsContent>
 
         {/* ======================= AVANÇADO TAB ======================= */}
-        <TabsContent value="conta">
+        <TabsContent value="avancado">
           <div className="space-y-6 animate-fade-in">
             {/* Support & Legal */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -791,22 +745,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <h3 className="font-serif text-xl font-medium">Ajuda, Termos e Privacidade</h3>
               </div>
               <div className="flex flex-col gap-3">
-                 <button
-                  onClick={() => {
-                     // Trigger onboarding/tutorial again
-                     useAppStore.setState({ showOnboarding: true });
-                  }}
-                  className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
-                >
-                  <div className="pr-4">
-                    <div className="flex items-center gap-2 font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
-                      <Sparkles size={14} className="text-cookbook-primary" /> Ver Tutorial de Boas-Vindas
-                    </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
-                      Releia o guia passo a passo de como usar o Pote Sagrado.
-                    </div>
-                  </div>
-                </button>
                  <button
                   onClick={() => {
                      window.open("mailto:suporte@potesagrado.com", "_blank");
@@ -909,82 +847,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           </div>
         </TabsContent>
 
-        <TabsContent value="premium">
-          <div className="bg-gradient-to-br from-[#f59e0b] to-[#d97706] rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(245,158,11,0.2)] flex flex-col relative overflow-hidden animate-fade-in text-white min-h-[500px]">
-             {/* Decorative Background */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl pointer-events-none"></div>
-            
-             <div className="relative z-10">
-               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-6">
-                 <Sparkles size={24} className="text-white" />
-               </div>
-               
-               <h3 className="font-serif text-3xl font-bold mb-3">Pote Sagrado Premium</h3>
-               <p className="font-sans text-sm text-white/90 leading-relaxed mb-8">
-                 Sua jornada a dois merece o melhor. Desbloqueie todos os recursos e personalize cada detalhe.
-               </p>
 
-               <ul className="space-y-4 mb-8 text-sm">
-                 <li className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                     <Sparkles size={12} />
-                   </div>
-                   Temas Exclusivos (Midnight, Noir)
-                 </li>
-                 <li className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                     <Sparkles size={12} />
-                   </div>
-                   Akinator I.A. para Objetivos
-                 </li>
-                 <li className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                     <Sparkles size={12} />
-                   </div>
-                   Upload de Fotos Ilimitado
-                 </li>
-                 <li className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                     <Sparkles size={12} />
-                   </div>
-                   Métricas de Economia Avançadas
-                 </li>
-                 <li className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-                     <Sparkles size={12} />
-                   </div>
-                   Selos de Casal Premium
-                 </li>
-               </ul>
-
-               {!tripConfig?.isPremium ? (
-                 <div className="flex flex-col gap-3">
-                   <button 
-                     onClick={() => {
-                        const newId = prompt("Pagamento efetuado! (Simulação HOMOLOGAÇÃO). Digite um ID de transação ou deixe em branco para simular ID:");
-                        if (newId !== null) {
-                           const txId = newId || "tx_" + Date.now();
-                           handleSimulateGateway(txId);
-                        }
-                     }}
-                     className="w-full bg-white text-orange-600 hover:bg-orange-50 font-sans text-[11px] uppercase tracking-widest font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95"
-                   >
-                     ASSINAR AGORA - R$ 9,90/MÊS
-                   </button>
-                   <p className="text-center font-sans text-[9px] uppercase tracking-widest text-white/60">
-                     Valor único para o casal
-                   </p>
-                 </div>
-               ) : (
-                 <div className="bg-white/20 border border-white/30 rounded-xl p-4 text-center mt-6 backdrop-blur-sm">
-                   <h4 className="font-serif text-lg font-bold mb-1">Vocês são Premium! 👑</h4>
-                   <p className="font-sans text-xs text-white/80">Transação #{tripConfig.premiumTransactionId}</p>
-                 </div>
-               )}
-             </div>
-          </div>
-        </TabsContent>
-        
       </section>
       </Tabs>
 

@@ -36,8 +36,6 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
-  isPremium?: boolean;
-  premiumTransactionId?: string;
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
@@ -52,7 +50,6 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   sharedAlbumUrl: '',
   fcmTokens: [],
   relationshipStartDate: '',
-  isPremium: false,
 };
 
 // ========================================

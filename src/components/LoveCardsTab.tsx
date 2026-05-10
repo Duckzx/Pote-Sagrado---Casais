@@ -65,11 +65,8 @@ const DECKS: DeckCategory[] = [
   }
 ];
 
-import { useAppStore } from "../store/useAppStore";
-
 export const LoveCardsTab: React.FC<LoveCardsTabProps> = ({ currentUser, casalId }) => {
-  const tripConfig = useAppStore(s => s.tripConfig);
-  const isUserPremium = !!tripConfig?.isPremium;
+  const isUserPremium = false; // Em um app real, buscar isso dos claims
   const [selectedDeck, setSelectedDeck] = useState<LoveCardCategory | null>(null);
   
   const { cards, interactions, respondToCard, loading } = useOptimisticLoveCards(casalId, currentUser);
