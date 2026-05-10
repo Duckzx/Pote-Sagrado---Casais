@@ -123,7 +123,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
     );
 
   return (
-    <div className="pb-32 pt-6 px-4 w-full max-w-md md:max-w-5xl mx-auto space-y-12 animate-fade-in relative min-h-[100dvh]">
+    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-12 animate-fade-in relative min-h-[100dvh]">
       {" "}
       {/* Header */}{" "}
       <div className="text-center space-y-2 mt-2">
@@ -272,7 +272,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
             {achievements.filter(a => a.imageUrl).length + (isUploadingPhoto ? 1 : 0)} de 6{" "}
           </span>{" "}
         </div>{" "}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {" "}
           {achievements.filter(a => a.imageUrl).map((item) => (
             <div

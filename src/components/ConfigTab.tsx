@@ -12,19 +12,11 @@ import {
   Plus,
   Trash2,
   Bell,
-  HelpCircle,
-  Target,
-  Crown,
-  ChevronRight,
 } from "lucide-react";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
-import { GOAL_CATEGORIES } from "../data/goalCategories";
-import { GoalType } from "../types";
 import { AIAkinatorModal } from "./AIAkinatorModal";
-import { PremiumGate } from "./PremiumGate";
-import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
@@ -32,7 +24,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 interface ConfigTabProps {
-  currentGoalType?: GoalType;
   currentDestination: string;
   currentOrigin: string;
   currentGoalAmount: number;
@@ -61,10 +52,8 @@ const THEMES = [
   { id: "nordic", label: "Nordic Twilight", colors: ["#F0F4F8", "#5C7C8A"] },
   { id: "tropical", label: "Tropical Breeze", colors: ["#F2FAF5", "#2A9D8F"] },
   { id: "midnight", label: "🌙 Midnight", colors: ["#1A1A2E", "#C5A059"] },
-  { id: "noir", label: "Noir (P&B)", colors: ["#FFFFFF", "#000000"] },
 ];
 export const ConfigTab: React.FC<ConfigTabProps> = ({
-  currentGoalType,
   currentDestination,
   currentOrigin,
   currentGoalAmount,
@@ -76,7 +65,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   addToast,
 }) => {
   const casalId = useAppStore(s => s.casalId);
-  const isPremium = useAppStore(s => s.isPremium);
   const tripConfig = useAppStore(s => s.tripConfig);
   const coupleMembers = useAppStore(s => s.coupleMembers);
   
@@ -102,14 +90,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   };
 
   // Custom sub-tabs state
-  const [configSubTab, setConfigSubTab] = useState<string>(localStorage.getItem('pote_configSubTab') || "geral");
+  const [configSubTab, setConfigSubTab] = useState<"geral" | "personalizacao" | "avancado">("geral");
 
-  const handleTabChange = (val: string) => {
-    setConfigSubTab(val);
-    localStorage.setItem('pote_configSubTab', val);
-  };
-
-  const [goalType, setGoalType] = useState<GoalType>(currentGoalType || 'travel');
   const [destination, setDestination] = useState(currentDestination || "");
   const [origin, setOrigin] = useState(currentOrigin || "");
   const [goalAmount, setGoalAmount] = useState(() => {
@@ -216,8 +198,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate,
-      goalType
+      relationshipStartDate
     );
   };
   useEffect(() => {
@@ -356,6 +337,28 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       setIsRequestingPush(false);
     }
   };
+  const handleSimulateGateway = async (txId: string) => {
+    setIsSaving(true);
+    addToast("Processando...", "Verificando transação de pagamento...", "info");
+    try {
+      // Fake network delay for gateway integration
+      await new Promise(r => setTimeout(r, 1500));
+      await setDoc(
+        doc(db, `casais/${casalId}/trip_config`, "main"),
+        {
+          isPremium: true,
+          premiumTransactionId: txId,
+        },
+        { merge: true },
+      );
+      addToast("Pagamento Confirmado!", "Você agora é Premium! Todos os recursos foram desbloqueados.", "success");
+    } catch (e) {
+      console.error(e);
+      addToast("Erro", "Falha ao validar a transação premium.", "info");
+    } finally {
+      setIsSaving(false);
+    }
+  };
   const performSave = async (
     destToSave: string,
     amountToSave: string,
@@ -364,8 +367,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     sharedAlbumUrlToSave: string,
     prizeToSave: string,
     themeToSave: string,
-    startDateToSave: string,
-    goalTypeToSave: GoalType
+    startDateToSave: string
   ) => {
     setIsSaving(true);
     try {
@@ -374,7 +376,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       await setDoc(
         doc(db, `casais/${casalId}/trip_config`, "main"),
         {
-          goalType: goalTypeToSave,
           destination: destToSave,
           origin: originToSave,
           goalAmount: parsedAmount,
@@ -432,12 +433,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       sharedAlbumUrl,
       prize,
       theme,
-      relationshipStartDate,
-      goalType
+      relationshipStartDate
     );
   };
   return (
-    <div className="pb-32 pt-6 px-4 w-full max-w-md md:max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div className="pb-32 pt-6 px-4 max-w-2xl mx-auto space-y-6 animate-fade-in">
       {/* Profile Header Section */}
       <section className="flex flex-col items-center text-center gap-3 mt-0 mb-4 relative">
         <label className="relative group cursor-pointer block">
@@ -463,11 +463,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center -z-0">
              <span className="text-white text-xs font-bold uppercase tracking-widest z-10">Alterar</span>
           </div>
-          {isPremium && (
-            <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-1.5 rounded-full shadow-lg border-2 border-cookbook-bg z-20">
-              <Crown size={14} fill="white" />
-            </div>
-          )}
         </label>
         <div>
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
@@ -479,12 +474,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </div>
       </section>
 
-      <Tabs value={configSubTab} onValueChange={handleTabChange} className="w-full">
+      <Tabs defaultValue="geral" className="w-full">
         <TabsList>
-          <TabsTrigger value="geral">Geral</TabsTrigger>
-          <TabsTrigger value="personalizacao">Visual</TabsTrigger>
-          <TabsTrigger value="avancado">Conta</TabsTrigger>
-          <TabsTrigger value="premium" className="text-amber-600 dark:text-amber-400">Premium</TabsTrigger>
+          <TabsTrigger value="geral">GERAL</TabsTrigger>
+          <TabsTrigger value="visual">VISUAL</TabsTrigger>
+          <TabsTrigger value="conta">CONTA</TabsTrigger>
+          <TabsTrigger value="premium">PREMIUM</TabsTrigger>
         </TabsList>
 
       <InstallPrompt />
@@ -495,41 +490,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             {/* Card 1: Destino e Meta */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
               <div className="flex items-center gap-2 text-cookbook-text mb-6">
-                <Target size={18} className="text-cookbook-primary opacity-80" />
-                <h3 className="font-serif text-xl font-medium">Nosso Objetivo</h3>
+                <MapPin size={18} className="text-cookbook-primary opacity-80" />
+                <h3 className="font-serif text-xl font-medium">A Aventura</h3>
               </div>
               <div className="space-y-6 relative z-10 flex-1">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                    Tipo de Conquista
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {GOAL_CATEGORIES.map((cat) => {
-                      const Icon = cat.icon;
-                      return (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setGoalType(cat.id);
-                            if (!destination) setDestination(cat.placeholder);
-                            setSaveTrigger(prev => prev + 1);
-                          }}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-medium transition-all ${
-                            goalType === cat.id
-                              ? "bg-cookbook-primary text-white border-cookbook-primary shadow-sm"
-                              : "bg-cookbook-bg/50 border-cookbook-border text-cookbook-text/60 hover:border-cookbook-primary/50"
-                          }`}
-                        >
-                          <Icon size={14} /> {cat.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                    {GOAL_CATEGORIES.find(c => c.id === goalType)?.label || "Objetivo"}
+                    Destino
                   </label>
                   <div className="relative">
                     <input
@@ -537,22 +504,20 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       value={destination}
                       onChange={(e) => setDestination(e.target.value)}
                       onBlur={handleSaveLocal}
-                      placeholder={GOAL_CATEGORIES.find(c => c.id === goalType)?.placeholder || "Descreva aqui..."}
+                      placeholder="Paris, Praia, Disney..."
                       className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
                     />
                     <button
                       title="Ajuda com I.A."
                       onClick={() => {
-                        const isPremium = useAppStore.getState().isPremium;
-                        if (!isPremium) {
-                          openPremiumModal();
-                        } else {
+                        if (tripConfig?.isPremium) {
                           setShowAkinator(true);
+                        } else {
+                          addToast("Aviso", "Akinator I.A. é exclusivo para assinantes Premium.", "info");
                         }
                       }}
-                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100 flex items-center gap-1 group"
+                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100"
                     >
-                      <span className="text-[8px] bg-amber-500 text-white px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity font-bold">PRO</span>
                       <Sparkles size={16} />
                     </button>
                   </div>
@@ -739,7 +704,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </TabsContent>
 
         {/* ======================= PERSONALIZAÇÃO E FUNÇÕES TAB ======================= */}
-        <TabsContent value="personalizacao">
+        <TabsContent value="visual">
           <div className="space-y-6 animate-fade-in">
             {/* Tema Visual */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -749,68 +714,67 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
               <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
                 {THEMES.map((t) => (
-                  <PremiumGate
+                  <div
                     key={t.id}
-                    onOpenPremium={openPremiumModal}
-                    className="snap-center shrink-0"
-                    fallback={ (t.id === 'midnight' || t.id === 'noir') ? (
-                      <div className="flex flex-col items-center gap-3 grayscale-[0.8] opacity-50">
-                        <div className="w-20 h-28 rounded-2xl border border-cookbook-border/20 flex flex-col overflow-hidden" style={{ background: t.colors[0] }}>
-                          <div className="h-1/3 w-full" style={{ backgroundColor: t.colors[1], opacity: 0.15 }}></div>
-                        </div>
-                        <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40">{t.label}</span>
-                      </div>
-                    ) : undefined}
+                    onClick={() => {
+                      if (t.id !== 'cookbook' && !tripConfig?.isPremium) {
+                        addToast("Aviso", "Este tema é exclusivo para assinantes Premium.", "info");
+                        return;
+                      }
+                      setTheme(t.id);
+                      setSaveTrigger((prev) => prev + 1);
+                    }}
+                    className="snap-center shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
                   >
                     <div
-                      onClick={() => {
-                        setTheme(t.id);
-                        setSaveTrigger((prev) => prev + 1);
-                      }}
-                      className="flex flex-col items-center gap-3 cursor-pointer group"
+                      className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"} ${t.id !== 'cookbook' && !tripConfig?.isPremium ? "opacity-50 grayscale" : ""}`}
                     >
                       <div
-                        className={`w-20 h-28 rounded-2xl p-1 shadow-sm relative transition-all duration-300 border border-transparent ${theme === t.id ? "ring-2 ring-cookbook-primary ring-offset-2 ring-offset-cookbook-bg -translate-y-2 scale-105" : "hover:ring-2 hover:ring-cookbook-primary/40 hover:ring-offset-1 hover:ring-offset-cookbook-bg hover:-translate-y-1 border-cookbook-border/20"}`}
+                        className="w-full h-full rounded-xl overflow-hidden flex flex-col relative"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
+                        }}
                       >
+                        {t.id !== 'cookbook' && !tripConfig?.isPremium && (
+                           <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px] z-20">
+                             <div className="bg-orange-500 text-white rounded-full px-2 py-1 flex items-center justify-center shadow-lg">
+                               <Sparkles size={12} />
+                             </div>
+                           </div>
+                        )}
                         <div
-                          className="w-full h-full rounded-xl overflow-hidden flex flex-col"
-                          style={{
-                            background: `linear-gradient(to bottom right, ${t.colors[0]}, ${t.colors[0]}ee)`,
-                          }}
-                        >
+                          className="h-1/3 w-full"
+                          style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
+                        ></div>
+                        <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
                           <div
-                            className="h-1/3 w-full"
-                            style={{ backgroundColor: t.colors[1], opacity: 0.15 }}
+                            className="w-3/4 h-1 rounded-full"
+                            style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
                           ></div>
-                          <div className="p-2 flex flex-col gap-1.5 flex-1 justify-end">
-                            <div
-                              className="w-3/4 h-1 rounded-full"
-                              style={{ backgroundColor: t.colors[1], opacity: 0.8 }}
-                            ></div>
-                            <div
-                              className="w-1/2 h-1 rounded-full"
-                              style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
-                            ></div>
-                          </div>
+                          <div
+                            className="w-1/2 h-1 rounded-full"
+                            style={{ backgroundColor: t.colors[1], opacity: 0.5 }}
+                          ></div>
                         </div>
-                        {theme === t.id && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
-                            <Sparkles size={12} />
-                          </div>
-                        )}
-                        {(t.id === 'midnight' || t.id === 'noir') && (
-                          <div className="absolute -top-2 -left-2 bg-amber-500 text-white p-1 rounded-full shadow-lg">
-                            <Crown size={10} />
-                          </div>
-                        )}
                       </div>
+                      {theme === t.id && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in z-30">
+                          <Sparkles size={12} />
+                        </div>
+                      )}
+                      
+                    </div>
+                    <div className="flex flex-col items-center gap-1 mt-1">
                       <span
-                        className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
+                        className={`font-sans text-[10px] text-center uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
                       >
                         {t.label}
                       </span>
+                      {t.id !== 'cookbook' && (
+                        <span className="bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-widest">Premium</span>
+                      )}
                     </div>
-                  </PremiumGate>
+                  </div>
                 ))}
               </div>
             </div>
@@ -819,7 +783,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         </TabsContent>
 
         {/* ======================= AVANÇADO TAB ======================= */}
-        <TabsContent value="avancado">
+        <TabsContent value="conta">
           <div className="space-y-6 animate-fade-in">
             {/* Support & Legal */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
@@ -829,13 +793,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               <div className="flex flex-col gap-3">
                  <button
                   onClick={() => {
-                     useAppStore.getState().setShowOnboarding(true);
+                     // Trigger onboarding/tutorial again
+                     useAppStore.setState({ showOnboarding: true });
                   }}
                   className="flex items-center justify-between py-3 hover:border-cookbook-primary/50 transition-colors text-left group border-b border-cookbook-border/30"
                 >
                   <div className="pr-4">
-                    <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors flex items-center gap-2">
-                      <HelpCircle size={16} className="text-cookbook-primary/60" /> Ver Tutorial de Boas-Vindas
+                    <div className="flex items-center gap-2 font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
+                      <Sparkles size={14} className="text-cookbook-primary" /> Ver Tutorial de Boas-Vindas
                     </div>
                     <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
                       Releia o guia passo a passo de como usar o Pote Sagrado.
@@ -944,61 +909,82 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           </div>
         </TabsContent>
 
-        {/* ======================= PREMIUM TAB ======================= */}
         <TabsContent value="premium">
-          <div className="space-y-6 animate-fade-in">
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-amber-500/20">
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/30">
-                  <Crown size={24} className="text-white" />
-                </div>
-                <h3 className="font-serif text-2xl font-medium mb-2">Pote Sagrado Premium</h3>
-                <p className="font-sans text-sm text-white/80 mb-8 max-w-[240px]">
-                  Sua jornada a dois merece o melhor. Desbloqueie todos os recursos e personalize cada detalhe.
-                </p>
-                
-                <ul className="space-y-4 mb-8">
-                  {[
-                    "Temas Exclusivos (Midnight, Noir)",
-                    "Akinator I.A. para Objetivos",
-                    "Upload de Fotos Ilimitado",
-                    "Métricas de Economia Avançadas",
-                    "Selos de Casal Premium",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm font-medium">
-                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center border border-white/20">
-                        <Sparkles size={12} />
-                      </div>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                
-                <button 
-                  onClick={openPremiumModal}
-                  className="w-full bg-white text-amber-600 font-sans text-xs uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg hover:bg-amber-50 active:scale-[0.98] transition-all"
-                >
-                  {isPremium ? "Assinatura Ativa" : "Assinar Agora - R$ 9,90/mês"}
-                </button>
-                
-                <p className="text-center mt-4 text-[10px] text-white/50 uppercase tracking-[0.2em] font-medium">
-                  Valor único para o casal
-                </p>
-              </div>
-              
-              <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-              <div className="absolute bottom-[-20%] left-[-20%] w-64 h-64 bg-amber-400/20 rounded-full blur-3xl" />
-            </div>
+          <div className="bg-gradient-to-br from-[#f59e0b] to-[#d97706] rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(245,158,11,0.2)] flex flex-col relative overflow-hidden animate-fade-in text-white min-h-[500px]">
+             {/* Decorative Background */}
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl pointer-events-none"></div>
+            
+             <div className="relative z-10">
+               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-6">
+                 <Sparkles size={24} className="text-white" />
+               </div>
+               
+               <h3 className="font-serif text-3xl font-bold mb-3">Pote Sagrado Premium</h3>
+               <p className="font-sans text-sm text-white/90 leading-relaxed mb-8">
+                 Sua jornada a dois merece o melhor. Desbloqueie todos os recursos e personalize cada detalhe.
+               </p>
 
-            <div className="bg-cookbook-bg/50 backdrop-blur-xl border border-cookbook-border/30 rounded-3xl p-6 text-center">
-              <h4 className="font-serif text-lg text-cookbook-text mb-2">Por que ser Premium?</h4>
-              <p className="font-sans text-xs text-cookbook-text/50 leading-relaxed">
-                Ao se tornar premium, você ajuda a manter o Pote Sagrado independente e sem anúncios. O valor é cobrado por casal, permitindo que ambos aproveitem os benefícios simultaneamente.
-              </p>
-            </div>
+               <ul className="space-y-4 mb-8 text-sm">
+                 <li className="flex items-center gap-3">
+                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                     <Sparkles size={12} />
+                   </div>
+                   Temas Exclusivos (Midnight, Noir)
+                 </li>
+                 <li className="flex items-center gap-3">
+                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                     <Sparkles size={12} />
+                   </div>
+                   Akinator I.A. para Objetivos
+                 </li>
+                 <li className="flex items-center gap-3">
+                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                     <Sparkles size={12} />
+                   </div>
+                   Upload de Fotos Ilimitado
+                 </li>
+                 <li className="flex items-center gap-3">
+                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                     <Sparkles size={12} />
+                   </div>
+                   Métricas de Economia Avançadas
+                 </li>
+                 <li className="flex items-center gap-3">
+                   <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                     <Sparkles size={12} />
+                   </div>
+                   Selos de Casal Premium
+                 </li>
+               </ul>
+
+               {!tripConfig?.isPremium ? (
+                 <div className="flex flex-col gap-3">
+                   <button 
+                     onClick={() => {
+                        const newId = prompt("Pagamento efetuado! (Simulação HOMOLOGAÇÃO). Digite um ID de transação ou deixe em branco para simular ID:");
+                        if (newId !== null) {
+                           const txId = newId || "tx_" + Date.now();
+                           handleSimulateGateway(txId);
+                        }
+                     }}
+                     className="w-full bg-white text-orange-600 hover:bg-orange-50 font-sans text-[11px] uppercase tracking-widest font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95"
+                   >
+                     ASSINAR AGORA - R$ 9,90/MÊS
+                   </button>
+                   <p className="text-center font-sans text-[9px] uppercase tracking-widest text-white/60">
+                     Valor único para o casal
+                   </p>
+                 </div>
+               ) : (
+                 <div className="bg-white/20 border border-white/30 rounded-xl p-4 text-center mt-6 backdrop-blur-sm">
+                   <h4 className="font-serif text-lg font-bold mb-1">Vocês são Premium! 👑</h4>
+                   <p className="font-sans text-xs text-white/80">Transação #{tripConfig.premiumTransactionId}</p>
+                 </div>
+               )}
+             </div>
           </div>
         </TabsContent>
-
+        
       </section>
       </Tabs>
 

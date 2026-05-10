@@ -24,10 +24,7 @@ export interface Challenge {
   icon: string;
 }
 
-export type GoalType = 'travel' | 'car' | 'motorcycle' | 'house' | 'wedding' | 'savings' | 'other';
-
 export interface TripConfig {
-  goalType?: GoalType;
   destination: string;
   origin: string;
   goalAmount: number;
@@ -39,10 +36,11 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
+  isPremium?: boolean;
+  premiumTransactionId?: string;
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {
-  goalType: 'travel',
   destination: '',
   origin: '',
   goalAmount: 0,
@@ -54,6 +52,7 @@ export const DEFAULT_TRIP_CONFIG: TripConfig = {
   sharedAlbumUrl: '',
   fcmTokens: [],
   relationshipStartDate: '',
+  isPremium: false,
 };
 
 // ========================================
@@ -64,11 +63,11 @@ export type ToastType = 'info' | 'success' | 'milestone';
 
 export type AddToastFn = (title: string, message: string, type?: ToastType, duration?: number) => void;
 
-export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'lovecards' | 'config';
+export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'config' | 'lovecards';
 
-export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'lovecards', 'config'];
+export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'lovecards', 'mural', 'config'];
 
-export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight' | 'noir';
+export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight';
 
 export interface ThemeOption {
   id: ThemeId;
@@ -76,38 +75,30 @@ export interface ThemeOption {
   colors: [string, string];
 }
 
-// Re-export Firebase User for convenience
-export type AppUser = User;
-
 // ========================================
-// Love Cards Domain Types
+// LoveCards Types
 // ========================================
 
-export type LoveCardCategory =
-  | 'love_romance'
-  | 'mutual_knowledge'
-  | 'spicy'
-  | 'truth_or_dare';
-
-export type LoveCardLevel = 1 | 2 | 3 | 4 | 5;
+export type LoveCardCategory = 'Mapas do Amor' | 'Modo Sexy & Intimidade' | 'Quem é Mais...?' | 'Sonhos e Valores' | 'Top ou Flop?';
 
 export interface LoveCard {
   id: string;
-  title: string;
-  description: string;
   category: LoveCardCategory;
-  level: LoveCardLevel;
-  emoji: string;
+  level: number; // 1-5
+  questionOrChallenge: string;
+  askedByUserId: string;
+  answeredByUserId: string | null;
+  answer: string | null;
+  status: 'locked' | 'unlocked' | 'completed';
 }
 
 export interface CardInteraction {
-  id?: string;
   cardId: string;
-  partnerId: string;
-  partnerName: string;
-  hasResponded: boolean;
-  answer?: string;
-  respondedAt: Timestamp | null;
+  coupleId: string;
+  partner1Response: 'answered' | 'skipped' | null;
+  partner2Response: 'answered' | 'skipped' | null;
+  matchTimestamp: Date | null;
 }
 
-export type LoveCardsProgress = Record<LoveCardCategory, number>;
+// Re-export Firebase User for convenience
+export type AppUser = User;

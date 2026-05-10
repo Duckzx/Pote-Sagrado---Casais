@@ -15,11 +15,8 @@ import {
   Star,
   Share2,
   Target,
-  Crown,
-  ChevronRight,
+  FileText,
 } from "lucide-react";
-import { GOAL_CATEGORIES } from "../data/goalCategories";
-import { GoalType } from "../types";
 import {
   addDoc,
   collection,
@@ -28,8 +25,6 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { PremiumGate } from "./PremiumGate";
-import { openPremiumModal } from "../lib/premium";
 import { db, auth } from "../firebase";
 import confetti from "canvas-confetti";
 import { motion } from "motion/react";
@@ -51,7 +46,6 @@ import { MomentsWidget } from "./MomentsWidget";
 
 interface HomeTabProps {
   currentUser: any;
-  goalType?: GoalType;
   destination: string;
   origin: string;
   goalAmount: number;
@@ -99,17 +93,6 @@ const MilestoneTracker = ({
   goalAmount: number;
   onRewardClick: () => void;
 }) => {
-  const [animatedPct, setAnimatedPct] = useState(0);
-
-  React.useEffect(() => {
-    if (goalAmount <= 0) return;
-    const pct = (totalSaved / goalAmount) * 100;
-    const timer = setTimeout(() => {
-      setAnimatedPct(pct);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [totalSaved, goalAmount]);
-
   if (goalAmount <= 0) return null;
   const pct = (totalSaved / goalAmount) * 100;
   const milestones = [
@@ -122,6 +105,14 @@ const MilestoneTracker = ({
     .slice()
     .reverse()
     .find((m) => pct >= m.threshold);
+  const [animatedPct, setAnimatedPct] = useState(0);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedPct(pct);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [pct]);
 
   if (!activeMilestone || pct >= 100) return null;
   return (
@@ -148,57 +139,19 @@ const MilestoneTracker = ({
         {" "}
         Vocês merecem uma recompensa: {activeMilestone.reward}{" "}
       </p>{" "}
-      <PremiumGate onOpenPremium={openPremiumModal}>
-        <button
-          onClick={onRewardClick}
-          className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
-        >
-          {" "}
-          <Heart size={14} className="fill-white" /> Gerar "Mini Date"
-          Especial{" "}
-        </button>{" "}
-      </PremiumGate>
+      <button
+        onClick={onRewardClick}
+        className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
+      >
+        {" "}
+        <Heart size={14} className="fill-white" /> Gerar "Mini Date"
+        Especial{" "}
+      </button>{" "}
     </div>
-  );
-};
-
-const PremiumBanner = () => {
-  const isPremium = useAppStore(s => s.isPremium);
-  if (isPremium) return null;
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mx-6 mb-8 group cursor-pointer"
-      onClick={() => {
-        useAppStore.getState().setActiveTab('config');
-        localStorage.setItem('pote_configSubTab', 'premium');
-        // Force state update if needed, but the ConfigTab should pick it up on mount
-      }}
-    >
-      <div className="flex items-center justify-between p-1.5 pr-5 bg-cookbook-bg border border-cookbook-border/40 rounded-full hover:border-amber-500/30 transition-all shadow-sm hover:shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20 group-hover:rotate-12 transition-transform">
-            <Crown size={14} fill="white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-sans text-[9px] uppercase tracking-[0.2em] font-bold text-cookbook-text/40">
-              Versão Gratuita
-            </span>
-            <span className="font-serif text-[13px] text-cookbook-text group-hover:text-amber-600 transition-colors">
-              Fazer upgrade para Premium
-            </span>
-          </div>
-        </div>
-        <ChevronRight size={14} className="text-cookbook-text/20 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
-      </div>
-    </motion.div>
   );
 };
 export const HomeTab: React.FC<HomeTabProps> = ({
   currentUser,
-  goalType,
   destination,
   origin,
   goalAmount,
@@ -231,31 +184,16 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [quickType, setQuickType] = useState<"income" | "expense">("income");
   const [quickImage, setQuickImage] = useState<string | null>(null);
   const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
-  /* Daily motivational quote (deterministic based on day of year) */ const currentCategory = useMemo(() => {
-    return GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
-  }, [goalType]);
+  /* Daily motivational quote (deterministic based on day of year) */ const dailyQuote =
+    useMemo(() => {
+      const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+      return MOTIVATIONAL_QUOTES[day % MOTIVATIONAL_QUOTES.length];
+    }, []);
 
-  const motivationalQuotes = useMemo(() => {
-    return currentCategory.motivationalQuotes;
-  }, [currentCategory]);
-
-  const [quote, setQuote] = useState(() => {
-    const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-    return q;
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [motivationalQuotes]);
-
-  const relationshipQuote = useMemo(() => {
-    return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
+  const relationshipMessage = useMemo(() => {
+    const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    return RELATIONSHIP_MESSAGES[day % RELATIONSHIP_MESSAGES.length];
   }, []);
-
-  const Icon = currentCategory.icon;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -426,12 +364,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pb-32 md:pb-12 pt-6 px-6 w-full max-w-md md:max-w-6xl mx-auto relative flex flex-col"
+      className="space-y-8 pb-32 pt-6 px-6 max-w-md mx-auto relative"
     >
       {" "}
       <WaterSpill isSpilling={isPotBroken} />{" "}
-      <PremiumBanner />
-      <div className="text-center space-y-1 relative mb-8">
+      <div className="text-center space-y-1 relative">
         {" "}
         <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
           {" "}
@@ -444,17 +381,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         )}
         <button
           onClick={() => setShowShareWidget(true)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm md:static md:translate-y-0 md:mt-4 md:mx-auto md:block md:w-auto"
+          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm"
           title="Compartilhar Status / PWA"
         >
           {" "}
-          <Share2 size={16} className="md:inline md:mr-2" /> <span className="hidden md:inline font-sans text-[10px] uppercase tracking-widest font-bold">Compartilhar</span>{" "}
+          <Share2 size={16} />{" "}
         </button>{" "}
       </div>{" "}
-
-      <div className="md:grid md:grid-cols-2 lg:grid-cols-2 md:gap-12 lg:gap-16 items-start">
-        {/* Esquerda: Cofre e Estatísticas */}
-        <div className="space-y-8">
       {/* The Animated Pot */}{" "}
       <SacredPot
         totalSaved={totalSaved}
@@ -462,7 +395,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         achievements={achievements}
         isBreaking={isPotBreaking}
         isBroken={isPotBroken}
-        goalType={goalType}
       />{" "}
       <MilestoneTracker
         totalSaved={totalSaved}
@@ -482,12 +414,27 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           </button>{" "}
         </div>
       )}{" "}
-        </div>
 
-        {/* Direita: Interações e Ações */}
-        <div className="space-y-8 mt-8 md:mt-0">
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
+
+      {/* Quick Navigation Links */}
+      <div className="grid grid-cols-2 gap-3 mt-4 mb-4">
+        <button 
+          onClick={() => useAppStore.getState().setActiveTab('missoes')}
+          className="bg-cookbook-bg/80 border border-cookbook-border rounded-2xl p-4 flex flex-col justify-center items-center gap-2 hover:bg-cookbook-primary/10 active:scale-95 transition-all shadow-sm"
+        >
+          <Target className="text-emerald-500" size={24} />
+          <span className="font-sans text-[10px] uppercase font-bold text-cookbook-text tracking-widest">Conquistas</span>
+        </button>
+        <button 
+          onClick={() => useAppStore.getState().setActiveTab('extrato')}
+          className="bg-cookbook-bg/80 border border-cookbook-border rounded-2xl p-4 flex flex-col justify-center items-center gap-2 hover:bg-cookbook-primary/10 active:scale-95 transition-all shadow-sm"
+        >
+          <FileText className="text-cookbook-primary" size={24} />
+          <span className="font-sans text-[10px] uppercase font-bold text-cookbook-text tracking-widest">Extrato</span>
+        </button>
+      </div>
 
       {/* Wrapped Button */}{" "}
       <div className="flex justify-center mt-2 mb-6">
@@ -522,42 +469,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             strokeWidth={2}
           />{" "}
         </button>{" "}
-      </div>{" "}
-
-      {/* Missoes/Conquistas Shortcut Button */}{" "}
-      <div className="flex justify-center mb-6">
-        {" "}
-        <button
-          onClick={() => useAppStore.getState().setActiveTab('missoes')}
-          className="w-full bg-cookbook-bg/80 backdrop-blur-xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-sm transition-all active:scale-[0.98] hover:shadow-md"
-        >
-          {" "}
-          <div className="flex items-center space-x-4">
-            {" "}
-            <div className="w-10 h-10 rounded-full bg-cookbook-text/5 flex items-center justify-center border border-cookbook-border/50">
-              {" "}
-              <Trophy size={18} className="text-cookbook-text/60" />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif italic text-base text-cookbook-text">
-                {" "}
-                Nossas Conquistas{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-medium">
-                {" "}
-                Metas e Desafios{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={18}
-            className="text-cookbook-text/30"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
-      </div>{" "}
-        </div>
       </div>{" "}
       {showDateModal && (
         <CheapDateModal

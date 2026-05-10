@@ -26,7 +26,6 @@ export function useFirebaseSync() {
   const setIsDataReady = useAppStore(s => s.setIsDataReady);
   const setAchievements = useAppStore(s => s.setAchievements);
   const setPinboardLinks = useAppStore(s => s.setPinboardLinks);
-  const setPremium = useAppStore(s => s.setPremium);
 
   // We need addToast here for error and success
   // Currently useAppStore has setToasts, we should add addToast to useAppStore
@@ -57,8 +56,6 @@ export function useFirebaseSync() {
           setShowOnboarding(true);
         }
       } else {
-        // Logged out - clear state
-        useAppStore.getState().resetData();
         setLgpdConsent(!!localStorage.getItem('pote_lgpdConsent'));
         setHasCheckedConsent(true);
       }
@@ -106,14 +103,11 @@ export function useFirebaseSync() {
       applyInvite();
     }
 
-    const lastCasalIdRef = { current: '' as string | null };
     let currentUnsubs: (() => void)[] = [];
 
     // Listen to user profile for theme and casalId
     const unsubUser = onSnapshot(doc(db, 'users', user.uid), async (docSnap) => {
       let currentCasalId = `casal_${user.uid}`; // default
-      let currentTheme: ThemeId = 'cookbook';
-      
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (!data.inviteCode) {
@@ -121,9 +115,9 @@ export function useFirebaseSync() {
            setDoc(doc(db, 'users', user.uid), { inviteCode: newCode }, { merge: true });
         }
         if (data.theme) {
-          currentTheme = data.theme as ThemeId;
-          setTheme(currentTheme);
-          localStorage.setItem('pote_theme', currentTheme);
+          const t = data.theme as ThemeId;
+          setTheme(t);
+          localStorage.setItem('pote_theme', t);
         }
         if (data.casalId) {
           currentCasalId = data.casalId;
@@ -136,77 +130,25 @@ export function useFirebaseSync() {
         setLgpdConsent(false);
         setHasCheckedConsent(true);
       }
-
-      // ONLY if casalId changed, we reset and restart listeners
-      if (lastCasalIdRef.current === currentCasalId) {
-        return;
-      }
-      
-      lastCasalIdRef.current = currentCasalId;
       setCasalId(currentCasalId);
       
-      // Clear previous nested unsubs
+      // Clear previous nested unsubs if casalId changed or on re-run
       currentUnsubs.forEach(unsub => unsub());
       currentUnsubs = [];
-
-      // Reset specific data before loading new couple's data
-      setTripConfig(null);
-      setDeposits([]);
-      setTotalSaved(0);
-      setBingoStats({});
-      setAchievements([]);
-      setPremium(false);
-      setIsDataReady(false); // Reset readiness for new casal
-
-      // Listen to Casal document for premium status
-      const unsubCasal = onSnapshot(doc(db, 'casais', currentCasalId), (casalSnap) => {
-        if (casalSnap.exists()) {
-          const data = casalSnap.data();
-          setPremium(!!data.isPremium);
-        } else {
-          // If casal doc doesn't exist, create it with default free status
-          setDoc(doc(db, 'casais', currentCasalId), { createdAt: new Date().toISOString(), isPremium: false }, { merge: true });
-          setPremium(false);
-        }
-      });
-      currentUnsubs.push(unsubCasal);
 
       // Listen to config
       const unsubConfig = onSnapshot(doc(db, `casais/${currentCasalId}/trip_config`, 'main'), (configSnap) => {
         if (configSnap.exists()) {
-          const data = configSnap.data() as TripConfig;
-          // IMPORTANT: Do NOT merge with prev here, as prev might be from a different user session
-          const newConfig = { 
-            goalType: data.goalType || 'travel',
-            destination: data.destination || '',
-            origin: data.origin || '',
-            goalAmount: data.goalAmount || 0,
-            lat: data.lat || 0,
-            lng: data.lng || 0,
-            customChallenges: data.customChallenges || [],
-            battleChallenges: data.battleChallenges || [],
-            sharedAlbumUrl: data.sharedAlbumUrl || '',
-            monthlyPrize: data.monthlyPrize || '',
-            relationshipStartDate: data.relationshipStartDate || ''
-          };
-          localStorage.setItem(`pote_tripConfig_${currentCasalId}`, JSON.stringify(newConfig));
-          setTripConfig(newConfig);
+          const data = configSnap.data() as Partial<TripConfig>;
+          setTripConfig(prev => {
+            const current = prev || { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' };
+            const newConfig = { ...current, ...data };
+            localStorage.setItem('pote_tripConfig', JSON.stringify(newConfig));
+            return newConfig;
+          });
         } else {
-          // New couple, provide default empty config
-          const defaultConfig: TripConfig = { 
-            goalType: 'travel', 
-            destination: '', 
-            origin: '', 
-            goalAmount: 0, 
-            lat: 0, 
-            lng: 0, 
-            customChallenges: [], 
-            battleChallenges: [], 
-            sharedAlbumUrl: '', 
-            monthlyPrize: '',
-            relationshipStartDate: ''
-          };
-          setTripConfig(defaultConfig);
+          // If config not exist yet, we still need to set it to an empty config so UI won't fail
+          setTripConfig(prev => prev || { destination: '', origin: '', goalAmount: 0, lat: 0, lng: 0, customChallenges: [], battleChallenges: [], sharedAlbumUrl: '', monthlyPrize: '' });
         }
       }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}/trip_config/main`));
       currentUnsubs.push(unsubConfig);

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-/* stylelint-disable-next-line at-rule-no-unknown */
 @plugin "@tailwindcss/typography";
 @import "leaflet/dist/leaflet.css";
 
@@ -15,23 +14,6 @@
   --theme-gold: #C5A059;
   --theme-battle: #F4F1EA;
   --theme-mural: #FFF9E6;
-
-  --font-serif-family: "Cormorant Garamond", "Georgia", serif;
-  --font-sans-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-@theme {
-  --color-cookbook-bg: var(--theme-bg);
-  --color-cookbook-text: var(--theme-text);
-  --color-cookbook-border: var(--theme-border);
-  --color-cookbook-primary: var(--theme-primary);
-  --color-cookbook-primary-hover: var(--theme-primary-hover);
-  --color-cookbook-gold: var(--theme-gold);
-  --color-cookbook-battle: var(--theme-battle);
-  --color-cookbook-mural: var(--theme-mural);
-  
-  --font-serif: var(--font-serif-family);
-  --font-sans: var(--font-sans-family);
 }
 
 [data-theme="mediterranean"] {
@@ -78,17 +60,6 @@
   --theme-mural: #1C1C1C;
 }
 
-[data-theme="noir"] {
-  --theme-bg: #FFFFFF;
-  --theme-text: #000000;
-  --theme-border: #E0E0E0;
-  --theme-primary: #333333;
-  --theme-primary-hover: #000000;
-  --theme-gold: #888888;
-  --theme-battle: #F5F5F5;
-  --theme-mural: #FAFAFA;
-}
-
 /* Dark theme overrides for specific elements */
 [data-theme="midnight"] input,
 [data-theme="midnight"] select,
@@ -119,18 +90,23 @@
   background-color: rgba(239, 68, 68, 0.05);
 }
 
-/* Tailwind v4 theme configuration moved to :root above to avoid 'Unknown at rule @theme' warnings */
+@theme {
+  --color-cookbook-bg: var(--theme-bg);
+  --color-cookbook-text: var(--theme-text);
+  --color-cookbook-border: var(--theme-border);
+  --color-cookbook-primary: var(--theme-primary);
+  --color-cookbook-primary-hover: var(--theme-primary-hover);
+  --color-cookbook-gold: var(--theme-gold);
+  --color-cookbook-battle: var(--theme-battle);
+  --color-cookbook-mural: var(--theme-mural);
+  
+  --font-serif: "Cormorant Garamond", "Georgia", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
 @layer base {
   body {
-    background-color: var(--color-cookbook-bg);
-    color: var(--color-cookbook-text);
-    font-family: var(--font-sans);
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 500ms;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-cookbook-bg text-cookbook-text font-sans transition-colors duration-500 antialiased;
     letter-spacing: -0.01em;
   }
   
@@ -145,8 +121,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
-    letter-spacing: -0.025em; /* tracking-tight */
+    @apply font-serif tracking-tight;
   }
 }
 
@@ -332,89 +307,3 @@ input[type="date"] {
   from { transform: translateX(-100%) rotate(0deg); }
   to { transform: translateX(100%) rotate(0deg); }
 }
-
-/* ===== Love Cards Animations ===== */
-
-@keyframes match-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4);
-    transform: scale(1);
-  }
-  50% { 
-    box-shadow: 0 0 0 12px rgba(197, 160, 89, 0);
-    transform: scale(1.02);
-  }
-}
-
-@keyframes card-shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-@keyframes gold-particle {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-60px) scale(0); opacity: 0; }
-}
-
-.animate-match-pulse {
-  animation: match-pulse 1.5s ease-in-out infinite;
-}
-
-.animate-card-shimmer {
-  background-size: 200% 100%;
-  background-image: linear-gradient(
-    90deg,
-    transparent 30%,
-    rgba(197, 160, 89, 0.08) 50%,
-    transparent 70%
-  );
-  animation: card-shimmer 3s ease-in-out infinite;
-}
-
-/* Premium Glassmorphism & Gold Effects */
-.premium-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.premium-gradient-text {
-  background: linear-gradient(135deg, #C5A059 0%, #E9C46A 50%, #C5A059 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: inline-block;
-}
-
-.premium-shimmer-button {
-  position: relative;
-  overflow: hidden;
-}
-
-.premium-shimmer-button::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 45%,
-    rgba(255, 255, 255, 0.2) 50%,
-    transparent 55%
-  );
-  animation: premium-shimmer 3s infinite;
-}
-
-@keyframes premium-shimmer {
-  0% { transform: translateX(-150%) rotate(25deg); }
-  100% { transform: translateX(150%) rotate(25deg); }
-}
-
-.premium-card-border {
-  background: linear-gradient(var(--theme-bg), var(--theme-bg)) padding-box,
-              linear-gradient(135deg, #C5A059, #E9C46A, #C5A059) border-box;
-  border: 1.5px solid transparent;
-}
-

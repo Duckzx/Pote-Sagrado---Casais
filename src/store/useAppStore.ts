@@ -72,12 +72,6 @@ interface AppState {
   setCanInstall: (v: boolean) => void;
   setInstallPrompt: (v: any) => void;
   clearInstallPrompt: () => void;
-
-  // Premium
-  isPremium: boolean;
-  setPremium: (v: boolean) => void;
-
-  resetData: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -109,12 +103,9 @@ export const useAppStore = create<AppState>((set) => ({
   setIsDataReady: (isDataReady) => set({ isDataReady }),
   setIsAuthReady: (isAuthReady) => set({ isAuthReady }),
 
-  activeTab: (localStorage.getItem('pote_lastTab') as TabId) || 'home',
+  activeTab: 'home',
   tabDirection: 0,
-  setActiveTab: (activeTab) => {
-    localStorage.setItem('pote_lastTab', activeTab);
-    set({ activeTab });
-  },
+  setActiveTab: (activeTab) => set({ activeTab }),
   setTabDirection: (tabDirection) => set({ tabDirection }),
 
   theme: 'cookbook',
@@ -171,21 +162,4 @@ export const useAppStore = create<AppState>((set) => ({
   setCanInstall: (canInstall) => set({ canInstall }),
   setInstallPrompt: (installPrompt) => set({ installPrompt }),
   clearInstallPrompt: () => set({ installPrompt: null, canInstall: false }),
-
-  isPremium: false,
-  setPremium: (isPremium) => set({ isPremium }),
-
-  resetData: () => set({
-    casalId: null,
-    coupleMembers: [],
-    deposits: [],
-    pinboardLinks: [],
-    achievements: [],
-    totalSaved: 0,
-    bingoStats: {},
-    tripConfig: null,
-    isDataReady: false,
-    activeTab: 'home',
-    theme: 'cookbook'
-  }),
 }));

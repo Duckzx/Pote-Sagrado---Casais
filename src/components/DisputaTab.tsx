@@ -221,7 +221,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
   };
 
   return (
-    <div className="pb-24 pt-6 px-6 w-full max-w-md md:max-w-4xl mx-auto space-y-6">
+    <div className="pb-24 pt-6 px-6 max-w-md mx-auto space-y-6">
       {" "}
       <div className="text-center relative">
         <motion.div
@@ -610,7 +610,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/40 font-bold mb-6 flex items-center justify-center gap-2">
             <Trophy size={12} className="text-cookbook-text/30" /> Histórico de Batalhas <Trophy size={12} className="text-cookbook-text/30" />
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {pastStats.map((stat, idx) => (
               <motion.div 
                 whileHover={{ y: -4 }}

@@ -1,13 +1,13 @@
 import React, { Suspense, lazy, ErrorInfo } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { loginWithGoogle, loginWithEmail } from "./firebase";
+import { loginWithGoogle } from "./firebase";
 import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
 import { ToastContainer } from "./components/Toast";
-import { GuidedTutorial } from "./components/GuidedTutorial";
-import { LegalConsentPopup } from "./components/LegalConsentPopup";
+import { OnboardingModal } from "./components/OnboardingModal";
 import { PremiumModal } from "./components/PremiumModal";
 import { useAppStore } from "./store/useAppStore";
+import { LegalConsentPopup } from "./components/LegalConsentPopup";
 
 // ========================================
 // Code Splitting — Lazy loaded tabs (T3)
@@ -24,14 +24,14 @@ const PinboardTab = lazy(() =>
 const DisputaTab = lazy(() =>
   import("./components/DisputaTab").then((m) => ({ default: m.DisputaTab })),
 );
-const ConfigTab = lazy(() =>
-  import("./components/ConfigTab").then((m) => ({ default: m.ConfigTab })),
-);
 const LoveCardsTab = lazy(() =>
   import("./components/LoveCardsTab").then((m) => ({ default: m.LoveCardsTab })),
 );
+const ConfigTab = lazy(() =>
+  import("./components/ConfigTab").then((m) => ({ default: m.ConfigTab })),
+);
 
-const RemotionIntro = React.lazy(() => import("./components/RemotionIntro"));
+import { RemotionIntro } from "./components/RemotionIntro";
 import { SacredJarIcon } from "./components/SacredJarIcon";
 import { useFirebaseSync } from "./hooks/useFirebaseSync";
 
@@ -144,7 +144,14 @@ function AppContent() {
   const addToast = useAppStore(s => s.addToast);
   const removeToast = useAppStore(s => s.removeToast);
   const showOnboarding = useAppStore(s => s.showOnboarding);
-  const handleCompleteOnboarding = useAppStore(s => s.completeOnboarding);
+  const storeCompleteOnboarding = useAppStore(s => s.completeOnboarding);
+  
+  const [showPremiumBanner, setShowPremiumBanner] = React.useState(false);
+
+  const handleCompleteOnboarding = () => {
+    storeCompleteOnboarding();
+    setShowPremiumBanner(true); // Call PremiumBanner after onboarding
+  };
 
   const user = useAppStore(s => s.user);
   const casalId = useAppStore(s => s.casalId);
@@ -158,37 +165,26 @@ function AppContent() {
   const bingoStats = useAppStore(s => s.bingoStats);
   const theme = useAppStore(s => s.theme);
 
-  React.useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme || "cookbook");
-  }, [theme]);
-
-  const [loginError, setLoginError] = React.useState<string | null>(null);
-  const [showPremiumModal, setShowPremiumModal] = React.useState(false);
-  const [showAdminLogin, setShowAdminLogin] = React.useState(false);
-  const [adminEmail, setAdminEmail] = React.useState("");
-  const [adminPass, setAdminPass] = React.useState("");
-  const [isLoggingInAdmin, setIsLoggingInAdmin] = React.useState(false);
-
   const previousDepositsRef = React.useRef(deposits);
-  const prevShowOnboardingRef = React.useRef(showOnboarding);
 
-  React.useEffect(() => {
-    const handleOpenPremium = () => setShowPremiumModal(true);
-    window.addEventListener('open-premium', handleOpenPremium);
-    return () => window.removeEventListener('open-premium', handleOpenPremium);
-  }, []);
-
-  // Trigger Premium Modal after Onboarding
-  React.useEffect(() => {
-    if (prevShowOnboardingRef.current === true && showOnboarding === false) {
-      // Just finished onboarding
-      const timer = setTimeout(() => {
-        setShowPremiumModal(true);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-    prevShowOnboardingRef.current = showOnboarding;
-  }, [showOnboarding]);
+  if (isTermos) {
+    return (
+      <div className="min-h-[100dvh] bg-cookbook-bg p-6 text-cookbook-text font-serif">
+        <h1 className="text-2xl font-bold mb-4">Termos de Uso e LGPD</h1>
+        <div className="space-y-4 text-sm opacity-80 font-sans">
+          <p>Bem-vindo ao Pote Sagrado. Ao utilizar este aplicativo, coletamos apenas dados mínimos necessários (e-mail, nome, e id do dispositivo) para manter o registro de contas do casal em sincronia e enviar notificações básicas de gastos.</p>
+          <p>Garantimos os seguintes direitos amparados pela Lei Geral de Proteção de Dados (LGPD):</p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Transparência:</strong> Seus dados não são vendidos e servem unicamente para uso do aplicativo.</li>
+            <li><strong>Direito de Exclusão (Esquecimento):</strong> Você pode apagar todos os seus dados nas Configurações clicando em "Eliminar Minha Conta". Todos os registros serão removidos permanentemente.</li>
+            <li><strong>Restrição de Acesso:</strong> Seus dados financeiros e fotos só são visíveis pelo seu perfil e o perfil emparelhado.</li>
+          </ul>
+          <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
+        </div>
+        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
+      </div>
+    );
+  }
 
   React.useEffect(() => {
     if (!user || deposits.length === 0) {
@@ -251,24 +247,7 @@ function AppContent() {
     previousDepositsRef.current = deposits;
   }, [deposits, user, addToast]);
 
-  if (isTermos) {
-    return (
-      <div className="min-h-[100dvh] bg-cookbook-bg p-6 text-cookbook-text font-serif">
-        <h1 className="text-2xl font-bold mb-4">Termos de Uso e LGPD</h1>
-        <div className="space-y-4 text-sm opacity-80 font-sans">
-          <p>Bem-vindo ao Pote Sagrado. Ao utilizar este aplicativo, coletamos apenas dados mínimos necessários (e-mail, nome, e id do dispositivo) para manter o registro de contas do casal em sincronia e enviar notificações básicas de gastos.</p>
-          <p>Garantimos os seguintes direitos amparados pela Lei Geral de Proteção de Dados (LGPD):</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Transparência:</strong> Seus dados não são vendidos e servem unicamente para uso do aplicativo.</li>
-            <li><strong>Direito de Exclusão (Esquecimento):</strong> Você pode apagar todos os seus dados nas Configurações clicando em "Eliminar Minha Conta". Todos os registros serão removidos permanentemente.</li>
-            <li><strong>Restrição de Acesso:</strong> Seus dados financeiros e fotos só são visíveis pelo seu perfil e o perfil emparelhado.</li>
-          </ul>
-          <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
-        </div>
-        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
-      </div>
-    );
-  }
+  const [loginError, setLoginError] = React.useState<string | null>(null);
 
   if (!isAuthReady) {
     return (
@@ -312,23 +291,6 @@ function AppContent() {
     }
   };
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminEmail || !adminPass) {
-      addToast("Atenção", "Preencha e-mail e senha", "info");
-      return;
-    }
-    setIsLoggingInAdmin(true);
-    try {
-      await loginWithEmail(adminEmail, adminPass);
-      // loginWithEmail will throw if it fails. If success, user state will update automatically via Firebase auth listener.
-    } catch (e: any) {
-      addToast("Erro", e.message || "Credenciais inválidas", "info");
-    } finally {
-      setIsLoggingInAdmin(false);
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-[100dvh] bg-transparent flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -345,7 +307,7 @@ function AppContent() {
           intensity={1.3}
         />
 
-        <div className="relative z-10 text-center space-y-10 max-w-[85%] md:max-w-md mx-auto w-full pt-12">
+        <div className="relative z-10 text-center space-y-10 max-w-[85%] mx-auto w-full pt-12">
           <div className="space-y-6">
             <SacredJarIcon className="w-28 h-28 mx-auto animate-float drop-shadow-xl text-cookbook-primary" />
             <div className="space-y-4">
@@ -453,57 +415,13 @@ function AppContent() {
               </div>
             )}
           </div>
-          
-          <div className="pt-6 border-t border-cookbook-border/30 max-w-[250px] mx-auto w-full">
-            {!showAdminLogin ? (
-              <button
-                onClick={() => setShowAdminLogin(true)}
-                className="w-full text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40 hover:text-cookbook-text/60 transition-colors flex items-center justify-center gap-2"
-              >
-                Acesso Administrativo
-              </button>
-            ) : (
-              <form onSubmit={handleAdminLogin} className="space-y-3 animate-fade-in text-left">
-                <input
-                  type="email"
-                  placeholder="E-mail"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  className="w-full bg-cookbook-bg/80 border border-cookbook-border px-3 py-2 rounded-xl text-sm font-sans focus:outline-none focus:border-cookbook-primary"
-                />
-                <input
-                  type="password"
-                  placeholder="Senha"
-                  value={adminPass}
-                  onChange={(e) => setAdminPass(e.target.value)}
-                  className="w-full bg-cookbook-bg/80 border border-cookbook-border px-3 py-2 rounded-xl text-sm font-sans focus:outline-none focus:border-cookbook-primary"
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAdminLogin(false)}
-                    className="flex-1 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-cookbook-text/50 bg-cookbook-bg border border-cookbook-border hover:bg-cookbook-border/30"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoggingInAdmin}
-                    className="flex-1 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white bg-cookbook-primary shadow-sm hover:bg-cookbook-primary-hover disabled:opacity-50"
-                  >
-                    {isLoggingInAdmin ? "..." : "Entrar"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent relative flex flex-col md:flex-row">
+    <div className="min-h-[100dvh] bg-transparent relative">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <ColorBends
         color="var(--theme-border)"
@@ -512,8 +430,7 @@ function AppContent() {
         className="opacity-30"
       />
 
-      {/* Main Content Area - Expands on Desktop */}
-      <div className="relative z-10 overflow-hidden pb-28 md:pb-0 w-full md:flex-1 md:ml-24 h-[100dvh] overflow-y-auto">
+      <div className="relative z-10 overflow-hidden pb-28">
         {!isDataReady ? (
           <TabSkeleton />
         ) : (
@@ -527,10 +444,9 @@ function AppContent() {
             >
               <ErrorBoundary>
                 <Suspense fallback={<TabSkeleton />}>
-                  {activeTab === "home" && tripConfig && (
+                  {activeTab === "home" && (
                   <HomeTab
                   currentUser={user}
-                  goalType={tripConfig.goalType}
                   destination={tripConfig.destination}
                   origin={tripConfig.origin}
                   goalAmount={tripConfig.goalAmount}
@@ -542,7 +458,7 @@ function AppContent() {
                   addToast={addToast}
                 />
               )}
-              {activeTab === "missoes" && tripConfig && (
+              {activeTab === "missoes" && (
                 <MissoesTab
                   stats={bingoStats}
                   customChallenges={tripConfig.customChallenges}
@@ -553,17 +469,16 @@ function AppContent() {
                 />
               )}
               {activeTab === "mural" && <PinboardTab addToast={addToast} />}
-              {activeTab === "disputa" && tripConfig && (
+              {activeTab === "lovecards" && <LoveCardsTab currentUser={user} casalId={casalId!} />}
+              {activeTab === "disputa" && (
                 <DisputaTab
                   deposits={deposits}
                   prize={tripConfig.monthlyPrize}
                   addToast={addToast}
                 />
               )}
-              {activeTab === "lovecards" && <LoveCardsTab />}
-              {activeTab === "config" && tripConfig && (
+              {activeTab === "config" && (
                 <ConfigTab
-                  currentGoalType={tripConfig.goalType}
                   currentDestination={tripConfig.destination}
                   currentOrigin={tripConfig.origin}
                   currentGoalAmount={tripConfig.goalAmount}
@@ -584,12 +499,19 @@ function AppContent() {
 
       <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
 
-      <GuidedTutorial />
-      {!hasSeenIntro && (
-        <Suspense fallback={null}>
-          <RemotionIntro onComplete={handleIntroComplete} />
-        </Suspense>
+      {showOnboarding && (
+        <OnboardingModal onComplete={handleCompleteOnboarding} />
       )}
+      {showPremiumBanner && (
+        <PremiumModal 
+          onClose={() => setShowPremiumBanner(false)} 
+          onSubscribe={() => {
+            setShowPremiumBanner(false);
+            addToast("Premium 👑", "No ambiente de homologação a assinatura premium está ativada automaticamente!", "success");
+          }} 
+        />
+      )}
+      {!hasSeenIntro && <RemotionIntro onComplete={handleIntroComplete} />}
       
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />
@@ -625,12 +547,6 @@ function AppContent() {
             </div>
          </div>
       )}
-
-      <AnimatePresence>
-        {showPremiumModal && (
-          <PremiumModal onClose={() => setShowPremiumModal(false)} />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

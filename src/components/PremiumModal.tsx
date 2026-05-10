@@ -1,157 +1,78 @@
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  X, 
-  Crown, 
-  Check, 
-  Sparkles, 
-  Zap, 
-  ShieldCheck, 
-  MessageCircleHeart,
-  Palette,
-  Bot
-} from "lucide-react";
-import { useAppStore } from "../store/useAppStore";
-import { playSuccessSound, vibrate } from "../lib/audio";
+import React from 'react';
+import { motion } from 'motion/react';
+import { Crown, Check, X, Sparkles, Flame, Star } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface PremiumModalProps {
   onClose: () => void;
+  onSubscribe: () => void;
 }
 
-export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose }) => {
-  const setPremium = useAppStore((s) => s.setPremium);
-  const addToast = useAppStore((s) => s.addToast);
-
-  const handleSubscribe = () => {
-    // Simulating subscription success
-    setPremium(true);
-    playSuccessSound();
-    vibrate([50, 100, 50]);
-    addToast("Parabéns!", "Agora vocês são membros Premium! ✨", "success");
-    onClose();
-  };
-
-  const features = [
-    {
-      icon: <Bot className="text-amber-500" />,
-      title: "IA Akinator de Viagens",
-      desc: "Descubra o destino perfeito com inteligência artificial.",
-      premium: true,
-    },
-    {
-      icon: <Palette className="text-purple-500" />,
-      title: "Temas Exclusivos",
-      desc: "Libere todos os estilos visuais para o seu pote.",
-      premium: true,
-    },
-    {
-      icon: <MessageCircleHeart className="text-rose-500" />,
-      title: "LoveCards Nível 4 e 5",
-      desc: "Perguntas profundas e desafios picantes exclusivos.",
-      premium: true,
-    },
-    {
-      icon: <ShieldCheck className="text-emerald-500" />,
-      title: "Sem Limites",
-      desc: "Crie metas ilimitadas e desafios personalizados.",
-      premium: true,
-    },
-  ];
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={onClose}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 1.1, y: -20 }}
-        className="relative w-full max-w-md bg-white rounded-[40px] overflow-hidden shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose, onSubscribe }) => {
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-modal-backdrop">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="w-full max-w-sm bg-cookbook-bg rounded-3xl overflow-hidden shadow-2xl relative"
       >
-        {/* Premium Header */}
-        <div className="relative h-48 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 flex flex-col items-center justify-center text-white overflow-hidden">
-          <motion.div 
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{ duration: 4, repeat: Infinity }}
-            className="mb-4"
-          >
-            <Crown size={64} className="drop-shadow-lg" />
-          </motion.div>
-          
-          <h2 className="text-3xl font-serif font-bold tracking-tight">Pote Premium</h2>
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold opacity-80 mt-1">O ápice da conexão do casal</p>
-
-          {/* Animated Sparkles */}
-          <div className="absolute inset-0 pointer-events-none">
-            <motion.div 
-              animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-              className="absolute top-10 left-10"
-            ><Sparkles size={16} /></motion.div>
-            <motion.div 
-              animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-              className="absolute bottom-10 right-10"
-            ><Sparkles size={12} /></motion.div>
-          </div>
+        {/* Header Background */}
+        <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-white/20 blur-2xl transform scale-150 rounded-full" />
+          <Crown size={48} className="text-white drop-shadow-md mx-auto mb-4 relative z-10" />
+          <h2 className="font-serif text-3xl font-bold text-white relative z-10 tracking-tight">Pote Sagrado<br/><span className="text-amber-100">Premium</span></h2>
+          <p className="font-sans text-xs text-white/90 relative z-10 mt-2 uppercase tracking-widest font-bold">Eleve o nível do relacionamento</p>
         </div>
 
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-all z-10"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="p-8">
-          <div className="space-y-6">
-            <h3 className="font-serif text-xl text-center text-gray-800">
-              Escolha o melhor para vocês
-            </h3>
-
-            <div className="space-y-4">
-              {features.map((f, i) => (
-                <div key={i} className="flex items-start gap-4 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
-                  <div className="p-3 bg-gray-100 rounded-xl">
-                    {f.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-sans text-sm font-bold text-gray-800 flex items-center gap-2">
-                      {f.title}
-                      <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md uppercase tracking-widest font-black">Pro</span>
-                    </h4>
-                    <p className="font-sans text-[11px] text-gray-500 mt-0.5">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-6 space-y-4">
-              <button
-                onClick={handleSubscribe}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-sans text-xs uppercase tracking-[0.2em] font-black py-5 rounded-[20px] shadow-xl shadow-amber-500/20 transition-all active:scale-95 flex items-center justify-center gap-3"
-              >
-                Assinar Agora <Zap size={18} fill="currentColor" />
-              </button>
-              
-              <div className="text-center">
-                <span className="font-sans text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                  Apenas R$ 9,90 / mês
-                </span>
+        {/* Content */}
+        <div className="p-6">
+          <ul className="space-y-4 mb-8">
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                <Flame size={14} />
               </div>
-            </div>
+              <div>
+                <h4 className="font-sans text-sm font-bold text-cookbook-text">Modo Sexy e Intimidade</h4>
+                <p className="font-sans text-xs text-cookbook-text/60 leading-relaxed">Acesso exclusivo aos baralhos picantes do Love Cards.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                <Star size={14} />
+              </div>
+              <div>
+                <h4 className="font-sans text-sm font-bold text-cookbook-text">TopBirdz (Sonhos e Valores)</h4>
+                <p className="font-sans text-xs text-cookbook-text/60 leading-relaxed">Perguntas profundas sobre futuro e expectativas financeiras.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles size={14} />
+              </div>
+              <div>
+                <h4 className="font-sans text-sm font-bold text-cookbook-text">Assinatura Única (Casal)</h4>
+                <p className="font-sans text-xs text-cookbook-text/60 leading-relaxed">Pagou um, os dois viram Premium automaticamente.</p>
+              </div>
+            </li>
+          </ul>
 
-            <div className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              <p className="font-sans text-[10px] text-gray-400 leading-tight">
-                Continuar no <span className="font-bold">Modo Grátis</span>? Algumas funções mágicas permanecerão bloqueadas.
-              </p>
-            </div>
+          <div className="space-y-3">
+            <button
+              onClick={onSubscribe}
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-sans text-xs uppercase tracking-widest font-bold py-4 rounded-xl shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Crown size={16} /> Tornar-se Premium
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full bg-transparent text-cookbook-text/50 hover:text-cookbook-text hover:bg-cookbook-border/30 font-sans text-[10px] uppercase tracking-widest font-bold py-4 rounded-xl transition-all"
+            >
+              Continuar no plano grátis
+            </button>
           </div>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };

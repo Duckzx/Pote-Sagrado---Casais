@@ -1,5 +1,5 @@
 import React from "react";
-import { Target, Swords, Settings, Pin, LayoutGrid, FileText, Heart } from "lucide-react";
+import { Target, Swords, Settings, Pin, LayoutGrid, FileText, HeartPulse } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useAppStore } from "../store/useAppStore";
@@ -39,7 +39,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 }) => {
   const allSecondaryTabs = [
     { id: "mural", icon: LayoutGrid, label: "Feed" },
-    { id: "lovecards", icon: Heart, label: "Cartas" },
+    { id: "lovecards", icon: HeartPulse, label: "Love Cards" },
     { id: "disputa", icon: Swords, label: "Duelos" },
     { id: "config", icon: Settings, label: "Ajustes" },
   ];
@@ -62,18 +62,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const iconPixelSize = totalTabs >= 6 ? 18 : 20;
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-2 md:px-0 pointer-events-none pb-safe md:top-0 md:bottom-0 md:w-24 md:h-[100dvh] md:flex-col md:justify-center md:items-center">
-      <div className={cn("bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/60 rounded-3xl h-16 flex items-center justify-evenly w-full px-1 shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-cookbook-border/50 pointer-events-auto md:h-full md:w-full md:flex-col md:rounded-none md:border-r md:shadow-none md:py-8", maxWidthClass, "md:max-w-none")}>
+    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-2 md:px-4 pointer-events-none pb-safe">
+      <div className={cn("bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/60 rounded-3xl h-16 flex items-center justify-evenly w-full px-1 shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-cookbook-border/50 pointer-events-auto", maxWidthClass)}>
         
         {displayTabs.map((tab: any, index) => {
           
           if (tab.isHome) {
             return (
-              <div key="home-spacer" className="relative flex items-center justify-center w-16 md:h-16 shrink-0 md:my-4">
+              <div key="home-spacer" className="relative flex items-center justify-center w-16 shrink-0">
                 <button
                   onClick={() => setActiveTab("home")}
                   className={cn(
-                    "absolute -top-12 md:static md:-top-0 flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_20px_rgba(40,129,156,0.3)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
+                    "absolute -top-12 flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_20px_rgba(40,129,156,0.3)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
                     activeTab === "home"
                       ? "bg-cookbook-primary scale-105"
                       : "bg-cookbook-primary/90 hover:bg-cookbook-primary hover:scale-105 active:scale-95",

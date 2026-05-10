@@ -2,15 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import { AnimatedNumber } from "./AnimatedNumber";
 import confetti from "canvas-confetti";
 import "./SacredPot.css";
-import { GoalType } from "../types";
-import { GOAL_CATEGORIES } from "../data/goalCategories";
 interface SacredPotProps {
   totalSaved: number;
   goalAmount: number;
   achievements?: any[];
   isBreaking?: boolean;
   isBroken?: boolean;
-  goalType?: GoalType;
 }
 export const SacredPot: React.FC<SacredPotProps> = ({
   totalSaved,
@@ -18,10 +15,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
   achievements = [],
   isBreaking = false,
   isBroken = false,
-  goalType,
 }) => {
-  const currentCategory = GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
-  const Icon = currentCategory.icon;
   const [fillHeight, setFillHeight] = useState(0);
   /* Cap visual fill at 95% to prevent the wave animation from spilling out of the top of the CSS pot */ const calculatedPct =
     goalAmount > 0 ? (totalSaved / goalAmount) * 100 : 0;
@@ -113,22 +107,16 @@ export const SacredPot: React.FC<SacredPotProps> = ({
         className={`sacred-pot relative z-10 transition-transform duration-300 ${isBreaking && !isBroken ? "scale-105 rotate-1" : ""} ${isPulsing ? "scale-110" : ""} ${!isBreaking && !isBroken && !isPulsing ? "animate-float" : ""}`}
       >
         {" "}
-        {/* Visual Identity Logo/Sticker */}
+        {/* Visual Identity Logo/Sticker */}{" "}
         <div
           className={`absolute -left-6 top-8 z-20 bg-[#1A1A1C] text-white px-3 py-1 rounded-full shadow-lg border border-white/10 rotate-[-12deg] pointer-events-none transition-opacity ${isBroken ? "opacity-0" : "opacity-100"}`}
         >
+          {" "}
           <span className="font-serif italic text-sm font-bold tracking-wider">
-            Pote Sagrado
-          </span>
-        </div>
-        {/* Goal Specific Sticker */}
-        {!isBroken && (
-          <div
-            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[5] text-cookbook-primary/20 opacity-40 group-hover:opacity-60 transition-opacity pointer-events-none`}
-          >
-            <Icon size={48} strokeWidth={1.5} />
-          </div>
-        )}
+            {" "}
+            Pote Sagrado{" "}
+          </span>{" "}
+        </div>{" "}
         {/* Dynamic Achievements Badges */}{" "}
         {achievements.length > 0 && (
           <div
