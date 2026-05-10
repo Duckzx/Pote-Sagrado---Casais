@@ -25,6 +25,7 @@ import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
+import { formatBRL } from "../lib/maskUtils";
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -291,10 +292,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     }
   };
-  const formatCurrency = (val: number) =>
-    Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-      val,
-    );
+  const formatCurrency = (val: number) => formatBRL(val);
   const formatTime = (d: any) => {
     const dDate = getDateObj(d?.createdAt);
     if (!dDate) return "";
@@ -860,7 +858,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             </h3>{" "}
             <p className="font-sans text-xs text-cookbook-text/60 mb-6">
               {" "}
-              <strong>{formatCurrency(deleting.amount)}</strong> —{" "}
+              <strong>{formatBRL(deleting.amount)}</strong> —{" "}
               {deleting.action || "Sem descrição"}{" "}
             </p>{" "}
             <div className="flex gap-3">
