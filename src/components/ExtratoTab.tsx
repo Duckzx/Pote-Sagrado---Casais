@@ -25,6 +25,7 @@ import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
+import { formatBRL } from "../lib/maskUtils";
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -167,6 +168,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     });
     return { depositos, gastos, saldo: depositos - gastos };
   }, [filteredDeposits]);
+
+  // Optimized: Using centralized BRL formatter
+  const formatCurrency = (val: number) => formatBRL(val);
+
   /* User Contributions */ const userContributions = useMemo(() => {
     const contributionMap: Record<string, { name: string; amount: number }> = {};
     filteredDeposits.forEach((d) => {
@@ -291,10 +296,6 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/deposits`);
     }
   };
-  const formatCurrency = (val: number) =>
-    Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-      val,
-    );
   const formatTime = (d: any) => {
     const dDate = getDateObj(d?.createdAt);
     if (!dDate) return "";
