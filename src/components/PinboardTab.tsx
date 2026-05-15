@@ -23,6 +23,8 @@ import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
+import { formatBRL } from "../lib/maskUtils";
+
 interface PinboardTabProps {
   addToast: (
     title: string,
@@ -117,10 +119,6 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       handleFirestoreError(error, OperationType.DELETE, `casais/${casalId}/achievements`);
     }
   };
-  const formatCurrency = (val: number) =>
-    Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-      val,
-    );
 
   return (
     <div className="pb-32 pt-6 px-4 w-full max-w-md md:max-w-5xl mx-auto space-y-12 animate-fade-in relative min-h-[100dvh]">
@@ -299,7 +297,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                   <p className="text-white font-serif text-sm truncate">{item.destination}</p>
                   <p className="text-white/70 font-sans text-[9px] uppercase tracking-widest font-bold">
-                    {formatCurrency(item.amount || 0)}
+                    {formatBRL(item.amount || 0)}
                   </p>
                 </div>
               )}

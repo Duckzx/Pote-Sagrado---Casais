@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { X, Trophy, Heart, Sparkles, Coins, Flame, ArrowRight, Share2, Download } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toPng } from "html-to-image";
+import { formatBRL } from "../lib/maskUtils";
 
 interface WrappedModalProps {
   onClose: () => void;
@@ -99,7 +100,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
       try {
         await navigator.share({
           title: "Nosso Sonho ❤️",
-          text: `Já guardamos ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved)} e estamos ${progress.toFixed(0)}% mais perto de ${destination || "nosso destino"}!`,
+          text: `Já guardamos ${formatBRL(totalSaved)} e estamos ${progress.toFixed(0)}% mais perto de ${destination || "nosso destino"}!`,
           url: window.location.href
         });
       } catch (err) {
@@ -231,7 +232,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
               <p className="font-sans text-sm text-white/80 text-balance leading-relaxed max-w-[280px] mx-auto">
                 {user1Total === user2Total || !user1 || !user2
                   ? "A união de vocês é perfeita! Guardaram juntos equilibrando a balança."
-                  : `Carregou o pote com amor, somando ${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(bestAmount)}. Que orgulho!`}
+                  : `Carregou o pote com amor, somando ${formatBRL(bestAmount)}. Que orgulho!`}
               </p>
             </div>
           </motion.div>
@@ -262,10 +263,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 transition={{ type: "spring", bounce: 0.5 }}
                 className="font-serif text-5xl text-white mb-2"
               >
-                {Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(biggestSave)}
+                {formatBRL(biggestSave)}
               </motion.p>
               <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold mb-6">
                 por {biggestSaver}
@@ -421,4 +419,3 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
     </div>
   );
 };
-
