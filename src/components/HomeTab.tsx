@@ -235,26 +235,6 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
   }, [goalType]);
 
-  const motivationalQuotes = useMemo(() => {
-    return currentCategory.motivationalQuotes;
-  }, [currentCategory]);
-
-  const [quote, setQuote] = useState(() => {
-    const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-    return q;
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [motivationalQuotes]);
-
-  const relationshipQuote = useMemo(() => {
-    return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
-  }, []);
-
   const Icon = currentCategory.icon;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
