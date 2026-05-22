@@ -1,5 +1,13 @@
 import express from "express";
 import path from "path";
+import admin from "firebase-admin";
+
+// Initialize Firebase Admin
+if (!admin.apps.length) {
+  admin.initializeApp({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID || "pote-sagrado-casais",
+  });
+}
 
 async function startServer() {
   const app = express();
@@ -13,9 +21,50 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Simple in-memory rate limiting (Replace with Redis for production)
+  const usageLimits: Record<string, { count: number, lastReset: number }> = {};
+  const DAILY_LIMIT = 5;
+
   // Example Gemini proxy route
   app.post("/api/gemini", async (req, res) => {
     try {
+      // 1. App Check Verification (Optional but recommended)
+      const appCheckToken = req.header("X-Firebase-App-Check");
+      if (process.env.NODE_ENV === "production" && !appCheckToken) {
+         // return res.status(401).json({ error: "Unauthorized: Missing App Check token" });
+         // Keeping it relaxed for dev, but ready for production
+      }
+
+      // 2. Verify Firebase ID Token
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Unauthorized: Missing token" });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1];
+      let decodedToken;
+      try {
+        decodedToken = await admin.auth().verifyIdToken(idToken);
+      } catch (authError) {
+        console.error("Auth Error:", authError);
+        return res.status(401).json({ error: "Unauthorized: Invalid token" });
+      }
+
+      // 3. Usage Limits (Rate Limiting)
+      const uid = decodedToken.uid;
+      const now = Date.now();
+      const today = new Date().setHours(0,0,0,0);
+
+      if (!usageLimits[uid] || usageLimits[uid].lastReset < today) {
+        usageLimits[uid] = { count: 0, lastReset: now };
+      }
+
+      if (usageLimits[uid].count >= DAILY_LIMIT) {
+        return res.status(429).json({ error: "Limite diário de uso da I.A. atingido. Tente novamente amanhã!" });
+      }
+
+      usageLimits[uid].count++;
+
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
         return res.status(500).json({ error: "Missing Gemini API Key." });

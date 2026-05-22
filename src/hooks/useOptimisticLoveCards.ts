@@ -152,8 +152,8 @@ export function useOptimisticLoveCards(casalId: string | null) {
 
     try {
       // Create a notification for the partner
-      const partnerId = coupleMembers.find(m => m.uid !== auth.currentUser?.uid)?.uid;
-      if (partnerId) {
+      const partnerId = coupleMembers.find(m => m.id !== auth.currentUser?.uid)?.id;
+      if (partnerId && casalId) {
         await addDoc(collection(db, 'casais', casalId, 'notifications'), {
           type: 'love_card_response',
           cardId,

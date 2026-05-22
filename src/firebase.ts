@@ -14,6 +14,7 @@ import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/anal
 import firebaseConfig from '../firebase-applet-config.json';
 
 import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
+import { getFunctions } from 'firebase/functions';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -22,6 +23,7 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId);
 
 export const storage = getStorage(app);
+export const functions = getFunctions(app);
 
 export let messaging: any = null;
 isMessagingSupported().then((supported) => {

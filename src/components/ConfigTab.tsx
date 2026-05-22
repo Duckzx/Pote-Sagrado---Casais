@@ -128,43 +128,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       addToast("Aviso", "Digite um código de convite.", "info");
       return;
     }
-    const { collection, query, where, getDocs, doc, setDoc, getDoc } = await import("firebase/firestore");
-    const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
-    try {
-      const q = query(collection(db, 'users'), where('inviteCode', '==', inviteCodeInput.trim().toUpperCase()));
-      const snap = await getDocs(q);
-      
-      let newCasalId = "";
-      if (!snap.empty) {
-        const partnerDoc = snap.docs[0];
-        if (partnerDoc.id === auth.currentUser?.uid) {
-           addToast("Aviso", "Este é o seu próprio código.", "info");
-           return;
-        }
-        newCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
-      } else {
-        if (inviteCodeInput.trim().startsWith('casal_')) {
-          newCasalId = inviteCodeInput.trim();
-        } else {
-           addToast("Erro", "Código não encontrado.", "info");
-           return;
-        }
-      }
+    const { httpsCallable } = await import('firebase/functions');
+    const { functions } = await import('../firebase');
+    const joinCouple = httpsCallable(functions, 'joinCouple');
 
-      if (newCasalId) {
-        const myDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
-        const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${auth.currentUser!.uid}`) : `casal_${auth.currentUser!.uid}`;
-        if (newCasalId !== myCurrentCasalId) {
-          await migrateUserToAnotherCouple(auth.currentUser!.uid, myCurrentCasalId, newCasalId);
-          addToast("Sucesso", "Casal conectado com sucesso!", "success");
-          triggerConnectionCelebration();
-        } else {
-          addToast("Aviso", "Você já está conectado a este casal.", "info");
-        }
-        setInviteCodeInput("");
-      }
-    } catch (err) {
-      addToast("Erro", "Falha ao vincular código.", "info");
+    try {
+      await joinCouple({ inviteCode: inviteCodeInput.trim() });
+      addToast("Sucesso", "Casal conectado com sucesso!", "success");
+      triggerConnectionCelebration();
+      setInviteCodeInput("");
+    } catch (err: any) {
+      addToast("Erro", err.message || "Falha ao vincular código.", "info");
       console.error(err);
     }
   };
@@ -932,23 +906,19 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       onClick={async () => {
                         if (window.confirm("Você tem certeza que deseja excluir sua conta e dados permanentemente? Esta ação não pode ser desfeita e excluirá também suas economias salvas!")) {
                           try {
-                            if (auth.currentUser) {
-                              const user = auth.currentUser;
-                              const { deleteDoc, doc } = await import("firebase/firestore");
-                              await deleteDoc(doc(db, "users", user.uid));
-                              
-                              const { deleteUser } = await import("firebase/auth");
-                              await deleteUser(user);
-                              
-                              logout();
-                            }
+                            const { httpsCallable } = await import('firebase/functions');
+                            const { functions } = await import('../firebase');
+                            const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+
+                            await deleteUserAccount();
+                            logout();
                           } catch (e: any) {
                             console.error("Erro ao deletar", e);
-                            if (e.code === 'auth/requires-recent-login') {
+                            if (e.code === 'functions/auth-requires-recent-login' || e.code === 'auth/requires-recent-login') {
                                alert("Para sua segurança, faça login novamente para excluir a conta.");
                                logout();
                             } else {
-                               alert("Erro ao excluir conta");
+                               alert("Erro ao excluir conta: " + (e.message || "Tente novamente mais tarde."));
                             }
                           }
                         }

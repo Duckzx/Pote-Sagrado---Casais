@@ -10,9 +10,15 @@ Por favor, baseando-se nestas preferências, sugira EXATAMENTE UM destino incrí
 
 Retorne SOMENTE o JSON puro.`;
 
+    const { auth } = await import('../firebase');
+    const token = await auth.currentUser?.getIdToken();
+
     const response = await fetch('/api/gemini', {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ prompt })
     });
     const dataGen = await response.json();

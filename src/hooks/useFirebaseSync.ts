@@ -74,30 +74,14 @@ export function useFirebaseSync() {
     if (pendingInvite) {
       const applyInvite = async () => {
         try {
-          const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
+          const { httpsCallable } = await import('firebase/functions');
+          const { functions } = await import('../firebase');
+          const joinCouple = httpsCallable(functions, 'joinCouple');
           
-          let resolvedCasalId = pendingInvite;
-          if (!pendingInvite.startsWith('casal_')) {
-            const q = query(collection(db, 'users'), where('inviteCode', '==', pendingInvite));
-            const snap = await getDocs(q);
-            if (!snap.empty) {
-              const partnerDoc = snap.docs[0];
-              if (partnerDoc.id === user.uid) {
-                localStorage.removeItem('pote_invite_code');
-                return;
-              }
-              resolvedCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
-            }
-          }
+          await joinCouple({ inviteCode: pendingInvite });
           
-          const myDoc = await getDoc(doc(db, 'users', user.uid));
-          const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${user.uid}`) : `casal_${user.uid}`;
-
-          if (resolvedCasalId !== myCurrentCasalId) {
-            await migrateUserToAnotherCouple(user.uid, myCurrentCasalId, resolvedCasalId);
-            if (addToast) addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
-            triggerConnectionCelebration();
-          }
+          if (addToast) addToast("Casal Conectado!", "Seus perfis foram vinculados.", "success");
+          triggerConnectionCelebration();
           localStorage.removeItem('pote_invite_code');
         } catch (e) {
           console.error("Error setting pending invite", e);
@@ -299,7 +283,7 @@ export function useFirebaseSync() {
       currentUnsubs.push(unsubDeposits);
 
       // Listen to achievements
-      const qArchived = query(collection(db, `casais/${currentCasalId}/achievements`), orderBy('createdAt', 'desc'));
+      const qArchived = query(collection(db, 'casais', currentCasalId, 'achievements'), orderBy('createdAt', 'desc'));
       const unsubAchievements = onSnapshot(qArchived, (querySnapshot) => {
         const arch: any[] = [];
         querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data() }));
@@ -308,7 +292,7 @@ export function useFirebaseSync() {
       currentUnsubs.push(unsubAchievements);
 
       // Listen to pinboard links
-      const qLinks = query(collection(db, `casais/${currentCasalId}/pinboard_links`), orderBy('createdAt', 'desc'));
+      const qLinks = query(collection(db, 'casais', currentCasalId, 'pinboard_links'), orderBy('createdAt', 'desc'));
       const unsubLinks = onSnapshot(qLinks, (querySnapshot) => {
         const linksData: any[] = [];
         querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data() }));

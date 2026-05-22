@@ -31,23 +31,8 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose }) => {
   const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleSubscribe = async () => {
-    setIsProcessing(true);
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 2000));
-    
-    try {
-      if (casalId) {
-        await setDoc(doc(db, 'casais', casalId), { isPremium: true }, { merge: true });
-      }
-      setPremium(true);
-      setStep('success');
-      playSuccessSound();
-      vibrate([50, 100, 50]);
-    } catch (err) {
-      addToast("Erro", "Falha ao processar assinatura.", "info");
-    } finally {
-      setIsProcessing(false);
-    }
+    // Premium feature is coming soon - simulated payment disabled for security
+    addToast("Em breve!", "O sistema de pagamentos reais está sendo implementado.", "info");
   };
 
   const features = [
@@ -202,11 +187,10 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose }) => {
 
               <button 
                 onClick={handleSubscribe}
-                disabled={isProcessing}
-                className="w-full py-5 bg-amber-500 text-white rounded-2xl font-sans text-xs uppercase tracking-widest font-black shadow-xl shadow-amber-200 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                disabled={true}
+                className="w-full py-5 bg-gray-400 text-white rounded-2xl font-sans text-xs uppercase tracking-widest font-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-3 opacity-50 cursor-not-allowed"
               >
-                {isProcessing ? 'Processando...' : `Pagar ${plan === 'monthly' ? 'R$ 9,90' : 'R$ 94,80'}`}
-                {!isProcessing && <Check size={18} />}
+                Em breve
               </button>
             </div>
           </motion.div>
