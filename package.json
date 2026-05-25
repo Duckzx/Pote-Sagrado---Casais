@@ -9,7 +9,11 @@
     "build": "vite build && esbuild server.ts --bundle --platform=node --target=node18 --outfile=dist/server.cjs --format=cjs --packages=external",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "remotion:studio": "remotion studio src/remotion/index.tsx",
+    "remotion:render": "remotion render src/remotion/index.tsx PoteSagradoCommercial out/pote-sagrado-comercial.mp4 --codec=h264 --jpeg-quality=95 --crf=18",
+    "remotion:render:preview": "remotion render src/remotion/index.tsx PoteSagradoPreview out/pote-sagrado-preview.mp4 --codec=h264 --scale=0.5",
+    "remotion:render:frames": "remotion render src/remotion/index.tsx PoteSagradoCommercial out/frames/ --sequence"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -54,6 +58,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.451",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^4.17.25",
