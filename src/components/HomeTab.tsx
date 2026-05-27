@@ -231,29 +231,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [quickType, setQuickType] = useState<"income" | "expense">("income");
   const [quickImage, setQuickImage] = useState<string | null>(null);
   const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
-  /* Daily motivational quote (deterministic based on day of year) */ const currentCategory = useMemo(() => {
+  const currentCategory = useMemo(() => {
     return GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
   }, [goalType]);
-
-  const motivationalQuotes = useMemo(() => {
-    return currentCategory.motivationalQuotes;
-  }, [currentCategory]);
-
-  const [quote, setQuote] = useState(() => {
-    const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-    return q;
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [motivationalQuotes]);
-
-  const relationshipQuote = useMemo(() => {
-    return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
-  }, []);
 
   const Icon = currentCategory.icon;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
