@@ -1,0 +1,3 @@
+## 2026-05-21 - Optimization of Currency Formatting and HomeTab re-renders
+**Learning:** Found that `Intl.NumberFormat` was being instantiated on every frame of an animation in `AnimatedNumber.tsx` and repeatedly in list components like `ExtratoTab.tsx`. Additionally, `HomeTab.tsx` had a 10s `setInterval` updating state (`quote`, `relationshipQuote`) that was completely unused in the component's JSX, causing unnecessary full-tab re-renders.
+**Action:** Centralized BRL formatting into a singleton in `maskUtils.ts`. Removed dead state and intervals from `HomeTab.tsx`. Always check if state variables are actually consumed in JSX before allowing them to trigger re-render cycles.
