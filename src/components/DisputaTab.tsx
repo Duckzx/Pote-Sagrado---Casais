@@ -1,7 +1,8 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
+import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
+import { BRL } from "../lib/maskUtils";
 
 interface DisputaTabProps {
   deposits: any[];
@@ -271,7 +272,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               {users[0].name}
             </span>
             <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
-              {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[0].total)}
+              {BRL.format(users[0].total)}
             </span>
           </div>
           
@@ -302,7 +303,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               {users[1].name}
             </span>
             <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
-              {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(users[1].total)}
+              {BRL.format(users[1].total)}
             </span>
           </div>
         </div>
@@ -450,10 +451,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
               Vantagem Atual:{" "}
               <span className="text-cookbook-primary font-bold">
-                {Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(users[0].total - users[1].total)}
+                {BRL.format(users[0].total - users[1].total)}
               </span>
             </span>
           </div>
@@ -476,10 +474,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                 <span>{week.label}</span>
                 <span className="flex gap-4">
                   <span className="text-cookbook-primary">
-                    {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(week.p1)}
+                    {BRL.format(week.p1)}
                   </span>
                   <span className="text-emerald-500">
-                    {Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(week.p2)}
+                    {BRL.format(week.p2)}
                   </span>
                 </span>
               </div>
@@ -530,12 +528,12 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               {users[0].maxHit >= users[1].maxHit && users[0].maxHit > 0 ? (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
-                  <p className="font-serif text-sm text-cookbook-primary">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].maxHit)}</p>
+                  <p className="font-serif text-sm text-cookbook-primary">{BRL.format(users[0].maxHit)}</p>
                 </>
               ) : users[1].maxHit > 0 ? (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
-                  <p className="font-serif text-sm text-emerald-500">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].maxHit)}</p>
+                  <p className="font-serif text-sm text-emerald-500">{BRL.format(users[1].maxHit)}</p>
                 </>
               ) : (
                 <span className="font-serif text-xs text-cookbook-text/40">--</span>
@@ -586,12 +584,12 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
               {users[0].expenses <= users[1].expenses ? (
                  <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
-                  <p className="font-serif text-sm text-cookbook-primary">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].expenses)}</p>
+                  <p className="font-serif text-sm text-cookbook-primary">- {BRL.format(users[0].expenses)}</p>
                  </>
               ) : (
                 <>
                   <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
-                  <p className="font-serif text-sm text-emerald-500">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
+                  <p className="font-serif text-sm text-emerald-500">- {BRL.format(users[1].expenses)}</p>
                  </>
               )}
             </div>
@@ -635,7 +633,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                         {stat.winner.name} 
                       </div>
                       <div className="font-serif text-sm text-cookbook-text/80 tracking-tight">
-                         {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
+                         {BRL.format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
                       </div>
                    </div>
                  ) : (
