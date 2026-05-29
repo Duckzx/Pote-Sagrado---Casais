@@ -4,6 +4,8 @@ import confetti from "canvas-confetti";
 import "./SacredPot.css";
 import { GoalType } from "../types";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
+import { BRL } from "../lib/maskUtils";
+
 interface SacredPotProps {
   totalSaved: number;
   goalAmount: number;
@@ -86,11 +88,11 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           <tbody>
             <tr>
               <th scope="row">Meta</th>
-              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(goalAmount)}</td>
+              <td>{BRL.format(goalAmount)}</td>
             </tr>
             <tr>
               <th scope="row">Valor Guardado</th>
-              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved)}</td>
+              <td>{BRL.format(totalSaved)}</td>
             </tr>
             <tr>
               <th scope="row">Progresso</th>
@@ -221,11 +223,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           </div>{" "}
           <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-primary/80 mt-2 font-bold bg-cookbook-primary/10 inline-block px-3 py-1 rounded-full">
             {" "}
-            de{" "}
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(goalAmount)}{" "}
+            de {BRL.format(goalAmount)}{" "}
           </p>{" "}
         </div>{" "}
       </div>{" "}
