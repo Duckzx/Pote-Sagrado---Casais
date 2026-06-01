@@ -66,27 +66,6 @@ interface HomeTabProps {
     type: "info" | "success" | "milestone",
   ) => void;
 }
-const MOTIVATIONAL_QUOTES = [
-  { text: "Quem economiza hoje, viaja amanhã.", emoji: "✈️" },
-  { text: "Cada centavo é um passo mais perto do destino.", emoji: "👣" },
-  { text: "Pequenas escolhas, grandes viagens.", emoji: "🌍" },
-  { text: "O paraíso está a um depósito de distância.", emoji: "🏝️" },
-  { text: "Juntos, até o impossível fica perto.", emoji: "💑" },
-  { text: "O pote de hoje é a passagem de amanhã.", emoji: "🎫" },
-  { text: "Disciplina é o combustível das aventuras.", emoji: "⛽" },
-  { text: "Economizar a dois é dobrar a felicidade.", emoji: "💛" },
-  { text: "Sua próxima memória inesquecível começa agora.", emoji: "📸" },
-  { text: "Não é sobre gastar menos, é sobre viver mais.", emoji: "🌅" },
-];
-
-const RELATIONSHIP_MESSAGES = [
-  "Vocês são um time incrível! Continuem cuidando um do outro.",
-  "O amor cresce nos pequenos detalhes compartilhados.",
-  "Guardar dinheiro juntos é investir na história de vocês.",
-  "Um relacionamento forte se constrói com conversas honestas e sonhos malucos.",
-  "O melhor lugar do mundo é ao lado de quem se ama.",
-  "Mantenham acesa a chama: planejem o próximo date!",
-];
 import { WaterSpill } from "./WaterSpill";
 import { compressImage } from "../lib/imageUtils";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
@@ -231,31 +210,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const [quickType, setQuickType] = useState<"income" | "expense">("income");
   const [quickImage, setQuickImage] = useState<string | null>(null);
   const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
-  /* Daily motivational quote (deterministic based on day of year) */ const currentCategory = useMemo(() => {
-    return GOAL_CATEGORIES.find(c => c.id === goalType) || GOAL_CATEGORIES[0];
-  }, [goalType]);
 
-  const motivationalQuotes = useMemo(() => {
-    return currentCategory.motivationalQuotes;
-  }, [currentCategory]);
-
-  const [quote, setQuote] = useState(() => {
-    const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-    return q;
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [motivationalQuotes]);
-
-  const relationshipQuote = useMemo(() => {
-    return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
-  }, []);
-
-  const Icon = currentCategory.icon;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
