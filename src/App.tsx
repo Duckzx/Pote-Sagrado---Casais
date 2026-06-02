@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { loginWithGoogle, loginWithEmail } from "./firebase";
 import { ColorBends } from "./components/ColorBends";
 import { BottomNav } from "./components/BottomNav";
-import { ToastContainer } from "./components/Toast";
+import { ConnectedToastContainer } from "./components/Toast";
 import { GuidedTutorial } from "./components/GuidedTutorial";
 import { LegalConsentPopup } from "./components/LegalConsentPopup";
 import { PremiumModal } from "./components/PremiumModal";
@@ -142,9 +142,7 @@ function AppContent() {
 
   const tabDirection = useAppStore(s => s.tabDirection);
   const handleTabChange = useAppStore(s => s.setActiveTab);
-  const toasts = useAppStore(s => s.toasts);
   const addToast = useAppStore(s => s.addToast);
-  const removeToast = useAppStore(s => s.removeToast);
   const showOnboarding = useAppStore(s => s.showOnboarding);
   const handleCompleteOnboarding = useAppStore(s => s.completeOnboarding);
 
@@ -334,7 +332,7 @@ function AppContent() {
   if (!user) {
     return (
       <div className="min-h-[100dvh] bg-transparent flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <ConnectedToastContainer />
         <ColorBends
           color="#8E7F6D"
           speed={0.2}
@@ -506,7 +504,7 @@ function AppContent() {
 
   return (
     <div className="min-h-[100dvh] bg-transparent relative flex flex-col md:flex-row">
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <ConnectedToastContainer />
       <ColorBends
         color="var(--theme-border)"
         speed={0.1}
