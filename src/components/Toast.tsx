@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Bell, X } from "lucide-react";
+import { useAppStore } from "../store/useAppStore";
+
 export interface ToastMessage {
   id: string;
   title: string;
@@ -11,6 +13,19 @@ interface ToastContainerProps {
   toasts: ToastMessage[];
   removeToast: (id: string) => void;
 }
+
+/**
+ * ⚡ Bolt: Performance Optimization
+ * A connected version of the ToastContainer that manages its own store subscription.
+ * This prevents the main App component from re-rendering every time a toast is added or removed.
+ */
+export const ConnectedToastContainer: React.FC = () => {
+  const toasts = useAppStore((s) => s.toasts);
+  const removeToast = useAppStore((s) => s.removeToast);
+
+  return <ToastContainer toasts={toasts} removeToast={removeToast} />;
+};
+
 export const ToastContainer: React.FC<ToastContainerProps> = ({
   toasts,
   removeToast,
