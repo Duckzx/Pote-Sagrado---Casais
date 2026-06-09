@@ -1,13 +1,23 @@
+/**
+ * Centralized BRL currency formatter.
+ * Reusing a single Intl.NumberFormat instance is significantly faster than
+ * instantiating it on every render, especially in high-frequency animation paths
+ * like AnimatedNumber.tsx.
+ */
+export const BRL = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+export const formatBRL = (value: number): string => BRL.format(value);
+
 export const maskCurrency = (value: string): string => {
   const digits = value.replace(/\D/g, '');
   if (!digits) return '';
   const numberValue = Number(digits) / 100;
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(numberValue);
+  return BRL.format(numberValue);
 };
 
 export const parseCurrencyString = (value: string): number => {
