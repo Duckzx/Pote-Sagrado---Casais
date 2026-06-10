@@ -1,0 +1,3 @@
+## 2026-06-12 - Centralized Currency Formatting
+**Learning:** Instantiating `Intl.NumberFormat` is a computationally expensive operation. In this codebase, it was being called inside high-frequency paths like `AnimatedNumber.tsx` (which runs on every animation frame via `useTransform`) and in several tab render functions. This lead to unnecessary CPU overhead and memory allocation.
+**Action:** Centralized BRL formatting into a singleton instance in `src/lib/maskUtils.ts`. Exported a `formatBRL` utility to be reused across all components. This ensures O(1) instantiation cost for the entire application lifecycle and smoother animations.
