@@ -1,0 +1,3 @@
+## 2026-06-25 - Optimized Deposit Monitoring Complexity
+**Learning:** Found a critical performance bottleneck in `src/App.tsx` where deposits were monitored for new comments/reactions using a nested $O(N \cdot M)$ double-loop (`deposits.forEach` inside which was a `previous.find`). This logic ran on every deposit update, scaling poorly as the number of deposits grew.
+**Action:** Replaced the nested search with an $O(N + M)$ approach by indexing the previous state into a `Map` for $O(1)$ lookups. Additionally, optimized comment comparison by using a `Set` for previous IDs, reducing that sub-check from $O(C^2)$ to $O(C)$.
