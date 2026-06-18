@@ -89,7 +89,7 @@ const RELATIONSHIP_MESSAGES = [
 ];
 import { WaterSpill } from "./WaterSpill";
 import { compressImage } from "../lib/imageUtils";
-import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
+import { maskCurrency, parseCurrencyString, formatBRL } from "../lib/maskUtils";
 const MilestoneTracker = ({
   totalSaved,
   goalAmount,
@@ -299,13 +299,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         });
         addToast(
           "Booooooooa!",
-          `+R$ ${parsedAmount.toFixed(2)} no pote. Um passo mais perto da viagem!`,
+          `+${formatBRL(parsedAmount)} no pote. Um passo mais perto da viagem!`,
           "success",
         );
       } else {
         addToast(
           "Tudo bem, acontece...",
-          `-R$ ${parsedAmount.toFixed(2)}. Da próxima a gente pensa duas vezes!`,
+          `-${formatBRL(parsedAmount)}. Da próxima a gente pensa duas vezes!`,
           "info",
         );
       }
