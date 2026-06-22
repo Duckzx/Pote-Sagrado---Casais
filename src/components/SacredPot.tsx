@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { formatBRL } from "../lib/maskUtils";
 import { AnimatedNumber } from "./AnimatedNumber";
 import confetti from "canvas-confetti";
 import "./SacredPot.css";
@@ -86,11 +87,11 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           <tbody>
             <tr>
               <th scope="row">Meta</th>
-              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(goalAmount)}</td>
+              <td>{formatBRL(goalAmount)}</td>
             </tr>
             <tr>
               <th scope="row">Valor Guardado</th>
-              <td>{Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved)}</td>
+              <td>{formatBRL(totalSaved)}</td>
             </tr>
             <tr>
               <th scope="row">Progresso</th>
@@ -221,11 +222,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
           </div>{" "}
           <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-primary/80 mt-2 font-bold bg-cookbook-primary/10 inline-block px-3 py-1 rounded-full">
             {" "}
-            de{" "}
-            {Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(goalAmount)}{" "}
+            de {formatBRL(goalAmount)}{" "}
           </p>{" "}
         </div>{" "}
       </div>{" "}
