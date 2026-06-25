@@ -16,6 +16,7 @@
 import React from 'react';
 import { useCurrentFrame, interpolate, spring, useVideoConfig } from 'remotion';
 import { COLORS, DEMO } from '../data/timing';
+import { formatBRL as realFormatBRL } from '../../lib/maskUtils';
 
 // =====================================================
 // Tokens
@@ -914,7 +915,7 @@ const PotVisualization: React.FC<PotVisualizationProps> = ({ fillPercent, totalS
 
   const floatOffset = Math.sin(frame / (fps * 0.8) * Math.PI * 2) * 6;
 
-  const formatBRL = (v: number) => Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const formatBRL = (v: number) => realFormatBRL(v);
 
   return (
     <div style={{
