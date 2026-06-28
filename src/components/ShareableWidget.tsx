@@ -3,6 +3,7 @@ import { Sparkles, Copy, Heart, Instagram, Facebook, ArrowUpRight } from "lucide
 import html2canvas from "html2canvas";
 import { useAppStore } from "../store/useAppStore";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { formatBRL } from "../lib/maskUtils";
 import { db, auth } from "../firebase";
 
 interface ShareableWidgetProps {
@@ -159,8 +160,8 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
 
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
   
-  const formattedTotal = Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved);
-  const formattedGoal = Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(goalAmount);
+  const formattedTotal = formatBRL(totalSaved);
+  const formattedGoal = formatBRL(goalAmount);
   
   const handleShare = async () => {
     try {
