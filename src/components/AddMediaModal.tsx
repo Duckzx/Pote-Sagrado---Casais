@@ -30,7 +30,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      addToast("Erro", "Falha ao processar imagem.", "error");
+      addToast("Erro", "Falha ao processar imagem.", "info");
     } finally {
       setIsLoading(false);
     }
