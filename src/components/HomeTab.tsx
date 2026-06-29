@@ -239,17 +239,12 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     return currentCategory.motivationalQuotes;
   }, [currentCategory]);
 
-  const [quote, setQuote] = useState(() => {
+  // motivationalQuotes are stored but not used in current JSX to avoid re-renders
+  // Previously had a setInterval here that caused full-component re-renders every 10s
+  const [quote] = useState(() => {
     const q = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
     return q;
   });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [motivationalQuotes]);
 
   const relationshipQuote = useMemo(() => {
     return RELATIONSHIP_MESSAGES[Math.floor(Math.random() * RELATIONSHIP_MESSAGES.length)];
