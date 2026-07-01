@@ -245,10 +245,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
-    }, 10000);
-    return () => clearInterval(interval);
+    setQuote(motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]);
   }, [motivationalQuotes]);
 
   const relationshipQuote = useMemo(() => {
