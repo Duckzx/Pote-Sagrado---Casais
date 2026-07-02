@@ -200,16 +200,22 @@ function AppContent() {
 
     const previous = previousDepositsRef.current;
     if (previous && previous.length > 0) {
+      // BOLT: Optimize deposit lookup from O(N*M) to O(N+M) using a Map
+      const prevMap = new Map(previous.map(p => [p.id, p]));
+
       deposits.forEach((currentDep) => {
-        const prevDep = previous.find((p) => p.id === currentDep.id);
+        const prevDep = prevMap.get(currentDep.id);
         if (prevDep) {
           if (
             currentDep.comments &&
             (!prevDep.comments || currentDep.comments.length > prevDep.comments.length)
           ) {
+            // BOLT: Optimize comment filtering using a Set for O(1) lookups
+            const prevCommentIds = new Set(prevDep.comments?.map((pc: any) => pc.id) || []);
             const newComments = currentDep.comments.filter(
-              (c: any) => !prevDep.comments?.some((pc: any) => pc.id === c.id)
+              (nc: any) => !prevCommentIds.has(nc.id)
             );
+
             newComments.forEach((nc: any) => {
               if (nc.who !== user.uid) {
                 const messages = [
