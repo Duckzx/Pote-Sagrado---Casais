@@ -200,17 +200,22 @@ function AppContent() {
 
     const previous = previousDepositsRef.current;
     if (previous && previous.length > 0) {
+      // ⚡ Bolt Optimization: Use Map for O(1) lookup of previous deposits (from O(N*M) to O(N+M))
+      const prevMap = new Map(previous.map(p => [p.id, p]));
+
       deposits.forEach((currentDep) => {
-        const prevDep = previous.find((p) => p.id === currentDep.id);
+        const prevDep = prevMap.get(currentDep.id);
         if (prevDep) {
           if (
             currentDep.comments &&
             (!prevDep.comments || currentDep.comments.length > prevDep.comments.length)
           ) {
+            // ⚡ Bolt Optimization: Use Set for O(1) lookup of comment IDs
+            const prevCommentIds = new Set(prevDep.comments?.map(pc => pc.id) || []);
             const newComments = currentDep.comments.filter(
-              (c: any) => !prevDep.comments?.some((pc: any) => pc.id === c.id)
+              c => !prevCommentIds.has(c.id)
             );
-            newComments.forEach((nc: any) => {
+            newComments.forEach((nc) => {
               if (nc.who !== user.uid) {
                 const messages = [
                   "Como é bom ler isso! 🥰",
