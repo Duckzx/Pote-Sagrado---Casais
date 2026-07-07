@@ -1,0 +1,3 @@
+## 2026-07-20 - Centralized Formatting and Indexed Lookups
+**Learning:** Instantiating `Intl.NumberFormat` repeatedly in high-frequency components like `AnimatedNumber` (which updates during animations) or within list renders is a significant performance bottleneck due to the overhead of the `Intl` API. Additionally, (N \cdot M)$ nested loops in `useEffect` hooks for monitoring changes in large data arrays (like `deposits`) lead to noticeable main-thread blocking as data grows.
+**Action:** Always centralize `Intl` formatters as singletons and use `Map` or `Set` for linear-time complexity ((N+M)$) when comparing or processing large lists.

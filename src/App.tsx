@@ -200,16 +200,22 @@ function AppContent() {
 
     const previous = previousDepositsRef.current;
     if (previous && previous.length > 0) {
+      // Index previous deposits by ID for O(1) lookup
+      const prevMap = new Map(previous.map(p => [p.id, p]));
+
       deposits.forEach((currentDep) => {
-        const prevDep = previous.find((p) => p.id === currentDep.id);
+        const prevDep = prevMap.get(currentDep.id);
         if (prevDep) {
+          // Check for new comments
           if (
             currentDep.comments &&
             (!prevDep.comments || currentDep.comments.length > prevDep.comments.length)
           ) {
+            const prevCommentIds = new Set(prevDep.comments?.map((pc: any) => pc.id) || []);
             const newComments = currentDep.comments.filter(
-              (c: any) => !prevDep.comments?.some((pc: any) => pc.id === c.id)
+              (c: any) => !prevCommentIds.has(c.id)
             );
+
             newComments.forEach((nc: any) => {
               if (nc.who !== user.uid) {
                 const messages = [
@@ -228,6 +234,7 @@ function AppContent() {
             });
           }
 
+          // Check for new reactions
           if (currentDep.reactions) {
             Object.keys(currentDep.reactions).forEach((uid) => {
               if (uid !== user.uid && (!prevDep.reactions || !prevDep.reactions[uid])) {
