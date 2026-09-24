@@ -21,7 +21,7 @@ import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
-import { GoalType } from "../types";
+import { GoalType, PREMIUM_THEMES, ThemeId } from "../types";
 import { PremiumGate } from "./PremiumGate";
 import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
@@ -48,9 +48,11 @@ interface ConfigTabProps {
   ) => void;
 }
 const THEMES = [
+  { id: "rose", label: "Rosé Champagne", colors: ["#FFF7F8", "#C9677F"] },
+  { id: "lavanda", label: "Lavanda", colors: ["#FAF7FF", "#8B72BE"] },
   {
     id: "cookbook",
-    label: "Cookbook (Padrão)",
+    label: "Cookbook Clássico",
     colors: ["#FDFBF7", "#8E7F6D"],
   },
   {
@@ -62,6 +64,7 @@ const THEMES = [
   { id: "tropical", label: "Tropical Breeze", colors: ["#F2FAF5", "#2A9D8F"] },
   { id: "midnight", label: "🌙 Midnight", colors: ["#1A1A2E", "#C5A059"] },
   { id: "noir", label: "Noir (P&B)", colors: ["#FFFFFF", "#000000"] },
+  { id: "cereja", label: "🍒 Cereja Noir", colors: ["#170D10", "#E28CA0"] },
 ];
 export const ConfigTab: React.FC<ConfigTabProps> = ({
   currentGoalType,
@@ -723,7 +726,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
               <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
                 {THEMES.map((t) => {
-                  const isPremiumTheme = t.id === 'midnight' || t.id === 'noir';
+                  const isPremiumTheme = PREMIUM_THEMES.includes(t.id as ThemeId);
                   const themeContent = (
                     <div
                       onClick={() => {
@@ -953,7 +956,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 
                 <ul className="space-y-4 mb-8">
                   {[
-                    "Temas Exclusivos (Midnight, Noir)",
+                    "Temas Exclusivos (Cereja Noir, Midnight, Noir)",
                     "Álbum do Casal e Cápsula do Tempo",
                     "Upload de Fotos Ilimitado",
                     "Métricas de Economia Avançadas",

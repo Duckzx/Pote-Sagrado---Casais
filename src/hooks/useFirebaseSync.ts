@@ -369,11 +369,10 @@ export function useFirebaseSync() {
 
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.theme) {
-          const currentTheme = data.theme as ThemeId;
-          setTheme(currentTheme);
-          localStorage.setItem('pote_theme', currentTheme);
-        }
+        // Accounts created before the Rosé theme keep the classic look
+        const currentTheme = (data.theme as ThemeId) || 'cookbook';
+        setTheme(currentTheme);
+        localStorage.setItem('pote_theme', currentTheme);
         if (data.casalId) {
           currentCasalId = data.casalId;
         }
@@ -401,6 +400,9 @@ export function useFirebaseSync() {
         }
       } else if (!fromCache) {
         profileUpdates.lgpdConsent = false;
+        profileUpdates.theme = 'rose';
+        setTheme('rose');
+        localStorage.setItem('pote_theme', 'rose');
         profileUpdates.inviteCode = generateInviteCode();
         profileUpdates.casalId = currentCasalId;
         if (user.displayName || user.email) profileUpdates.displayName = user.displayName || user.email?.split('@')[0];

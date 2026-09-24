@@ -336,7 +336,7 @@ function AppContent() {
       <div className="min-h-[100dvh] bg-transparent flex flex-col items-center justify-center p-6 relative overflow-hidden">
         <ToastContainer toasts={toasts} removeToast={removeToast} />
         <ColorBends
-          color="#8E7F6D"
+          color="var(--theme-primary)"
           speed={0.2}
           frequency={1.0}
           noise={0.15}

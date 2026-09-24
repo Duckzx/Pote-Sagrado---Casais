@@ -16,6 +16,7 @@ service cloud.firestore {
     // casais/{casalId}/love_interactions/{id}
     // casais/{casalId}/love_progress/main
     // casais/{casalId}/notifications/{id}
+    // casais/{casalId}/capsules/{id}          time capsule letters
     //
     // deposits/{id}, gallery/{id} (root)     legacy data from old versions,
     //                                        readable by its owner so the app
@@ -176,6 +177,20 @@ service cloud.firestore {
 
       match /love_progress/{docId} {
         allow read, write: if isCasalMember(casalId);
+      }
+
+      match /capsules/{capsuleId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId)
+                      && request.resource.data.from == request.auth.uid
+                      && request.resource.data.message is string
+                      && request.resource.data.message.size() <= 2000
+                      && request.resource.data.openAt is timestamp;
+        // Anyone in the couple may mark it as opened once the date arrives
+        allow update: if isCasalMember(casalId)
+                      && resource.data.openAt <= request.time
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['openedAt']);
+        allow delete: if isCasalMember(casalId) && resource.data.from == request.auth.uid;
       }
 
       match /notifications/{notificationId} {

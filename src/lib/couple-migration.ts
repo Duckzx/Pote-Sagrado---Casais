@@ -24,6 +24,7 @@ const OWNED_COLLECTIONS: { name: string; ownerField: string }[] = [
   { name: 'achievements', ownerField: 'who' },
   { name: 'pinboard_links', ownerField: 'addedBy' },
   { name: 'gallery', ownerField: 'addedBy' },
+  { name: 'capsules', ownerField: 'from' },
 ];
 
 /**
