@@ -8,18 +8,43 @@ import {
   signOut,
   signInWithEmailAndPassword
 } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  memoryLocalCache,
+  Firestore,
+} from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import firebaseConfig from '../firebase-applet-config.json';
 
 import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
 
-const app = initializeApp(firebaseConfig);
+// Optional: serve the auth handler from the app's own domain (see README).
+const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain;
+
+const app = initializeApp({ ...firebaseConfig, authDomain });
 export const auth = getAuth(app);
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-}, firebaseConfig.firestoreDatabaseId);
+
+// Offline cache shared between tabs: data opens instantly and writes made
+// offline are synced when the connection returns. Falls back to memory
+// cache where IndexedDB is unavailable (private mode, some in-app browsers).
+function createFirestore(): Firestore {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+      ignoreUndefinedProperties: true,
+    }, firebaseConfig.firestoreDatabaseId);
+  } catch (e) {
+    console.warn('Persistent cache unavailable, using memory cache', e);
+    return initializeFirestore(app, {
+      localCache: memoryLocalCache(),
+      ignoreUndefinedProperties: true,
+    }, firebaseConfig.firestoreDatabaseId);
+  }
+}
+export const db = createFirestore();
 
 export const storage = getStorage(app);
 
@@ -44,38 +69,32 @@ isAnalyticsSupported().then((supported) => {
  */
 export const loginWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   try {
     await signInWithPopup(auth, provider);
   } catch (error: any) {
-    console.warn('Popup login failed.', error.code, error.message);
-    
-    if (error?.code === 'auth/unauthorized-domain') {
+    console.warn('Popup login failed.', error?.code, error?.message);
+
+    // User closed the popup on purpose: nothing to do
+    if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+      return;
+    }
+
+    // Popup not possible (blocked / in-app browser): use redirect
+    if (
+      error?.code === 'auth/popup-blocked' ||
+      error?.code === 'auth/operation-not-supported-in-this-environment' ||
+      error?.code === 'auth/web-storage-unsupported'
+    ) {
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+
+    if (error?.code === 'auth/unauthorized-domain' || error?.code === 'auth/network-request-failed') {
       throw error;
     }
-    
-    // Catch popup blocked errors and fallback to redirect
-    if (error?.code === 'auth/popup-blocked' || 
-        error?.code === 'auth/popup-closed-by-user' ||
-        error.message?.toLowerCase().includes('popup')) {
-      console.log('Popup blocked or closed, falling back to redirect...');
-      await signInWithRedirect(auth, provider);
-      return; // Stop execution here since we're redirecting
-    }
 
-    // Try redirect anyway as a last resort if it's some other weird auth error related to domains/iframes
-    if (error?.code?.startsWith('auth/') && error?.code !== 'auth/cancelled-popup-request') {
-      console.log('Unknown error, attempting redirect fallback...', error.code);
-      try {
-        await signInWithRedirect(auth, provider);
-        return;
-      } catch (redirectError: any) {
-        if (redirectError?.code === 'auth/unauthorized-domain') {
-          throw redirectError;
-        }
-      }
-    }
-
-    throw new Error('Erro ao tentar login com Google: ' + (error.message || 'Erro desconhecido'));
+    throw new Error('Erro ao tentar login com Google: ' + (error?.message || 'Erro desconhecido'));
   }
 };
 

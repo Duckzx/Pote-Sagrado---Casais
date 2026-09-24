@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc, arrayUnion } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
 import { db, auth, logout, messaging } from "../firebase";
 import {
@@ -27,6 +27,7 @@ import { PremiumGate } from "./PremiumGate";
 import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
+import { compressImage } from "../lib/imageUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
@@ -83,22 +84,21 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !auth.currentUser) return;
     const file = e.target.files[0];
-    const { updateProfile } = await import("firebase/auth");
-    
-    // Convert to base64 using FileReader
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      try {
-        await updateProfile(auth.currentUser!, { photoURL: base64String });
-        await setDoc(doc(db, "users", auth.currentUser!.uid), { photoURL: base64String }, { merge: true });
-        addToast("Sucesso", "Foto de perfil atualizada!", "success");
-      } catch (err) {
-        console.error(err);
-        addToast("Erro", "Falha ao atualizar foto", "info");
+    const user = auth.currentUser;
+    try {
+      // Upload (or compressed base64 fallback) keeps the profile doc small
+      const photoURL = await compressImage(file, 400, 0.7);
+      await setDoc(doc(db, "users", user.uid), { photoURL }, { merge: true });
+      // Firebase Auth only accepts short http(s) URLs
+      if (photoURL.startsWith("http")) {
+        const { updateProfile } = await import("firebase/auth");
+        await updateProfile(user, { photoURL }).catch(() => {});
       }
-    };
-    reader.readAsDataURL(file);
+      addToast("Sucesso", "Foto de perfil atualizada!", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Erro", "Falha ao atualizar foto", "info");
+    }
   };
 
   // Custom sub-tabs state
@@ -128,41 +128,31 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       addToast("Aviso", "Digite um código de convite.", "info");
       return;
     }
-    const { collection, query, where, getDocs, doc, setDoc, getDoc } = await import("firebase/firestore");
-    const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
+    if (!auth.currentUser) return;
+    const uid = auth.currentUser.uid;
+    const { resolveInviteCasalId, migrateUserToAnotherCouple } = await import('../lib/couple-migration');
     try {
-      const q = query(collection(db, 'users'), where('inviteCode', '==', inviteCodeInput.trim().toUpperCase()));
-      const snap = await getDocs(q);
-      
-      let newCasalId = "";
-      if (!snap.empty) {
-        const partnerDoc = snap.docs[0];
-        if (partnerDoc.id === auth.currentUser?.uid) {
-           addToast("Aviso", "Este é o seu próprio código.", "info");
-           return;
-        }
-        newCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
-      } else {
-        if (inviteCodeInput.trim().startsWith('casal_')) {
-          newCasalId = inviteCodeInput.trim();
-        } else {
-           addToast("Erro", "Código não encontrado.", "info");
-           return;
-        }
+      const code = inviteCodeInput.trim();
+      if (code.toUpperCase() === me?.inviteCode) {
+        addToast("Aviso", "Este é o seu próprio código.", "info");
+        return;
+      }
+      const newCasalId = await resolveInviteCasalId(code, uid);
+      if (!newCasalId) {
+        addToast("Erro", "Código não encontrado.", "info");
+        return;
       }
 
-      if (newCasalId) {
-        const myDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
-        const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${auth.currentUser!.uid}`) : `casal_${auth.currentUser!.uid}`;
-        if (newCasalId !== myCurrentCasalId) {
-          await migrateUserToAnotherCouple(auth.currentUser!.uid, myCurrentCasalId, newCasalId);
-          addToast("Sucesso", "Casal conectado com sucesso!", "success");
-          triggerConnectionCelebration();
-        } else {
-          addToast("Aviso", "Você já está conectado a este casal.", "info");
-        }
-        setInviteCodeInput("");
+      const myDoc = await getDoc(doc(db, 'users', uid));
+      const myCurrentCasalId = (myDoc.exists() && myDoc.data().casalId) || `casal_${uid}`;
+      if (newCasalId !== myCurrentCasalId) {
+        await migrateUserToAnotherCouple(uid, myCurrentCasalId, newCasalId);
+        addToast("Sucesso", "Casal conectado com sucesso!", "success");
+        triggerConnectionCelebration();
+      } else {
+        addToast("Aviso", "Você já está conectado a este casal.", "info");
       }
+      setInviteCodeInput("");
     } catch (err) {
       addToast("Erro", "Falha ao vincular código.", "info");
       console.error(err);
@@ -320,20 +310,20 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
       if (permission === "granted") {
+        const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+        const swRegistration = await navigator.serviceWorker
+          ?.register("/firebase-messaging-sw.js", { scope: "/firebase-cloud-messaging-push-scope" })
+          .catch(() => undefined);
         const token = await getToken(messaging, {
-          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
+          ...(vapidKey ? { vapidKey } : {}),
+          ...(swRegistration ? { serviceWorkerRegistration: swRegistration } : {}),
         });
         if (token && casalId) {
-          const tripRef = doc(db, `casais/${casalId}/trip_config`, "main");
-          const tDoc = await getDoc(tripRef);
-          let fcmTokens: string[] = [];
-          if (tDoc.exists()) {
-            fcmTokens = tDoc.data().fcmTokens || [];
-          }
-          if (!fcmTokens.includes(token)) {
-            fcmTokens.push(token);
-            await setDoc(tripRef, { fcmTokens }, { merge: true });
-          }
+          await setDoc(
+            doc(db, `casais/${casalId}/trip_config`, "main"),
+            { fcmTokens: arrayUnion(token) },
+            { merge: true },
+          );
           addToast(
             "Sucesso",
             "Notificações Push nativas ativadas neste dispositivo!",

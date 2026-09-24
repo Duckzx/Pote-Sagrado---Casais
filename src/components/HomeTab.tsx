@@ -378,10 +378,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }, 600);
     setTimeout(async () => {
       try {
-        await addDoc(collection(db, "achievements"), {
+        await addDoc(collection(db, `casais/${casalId}/achievements`), {
           destination: destination || "Nossa Viagem",
           amount: Number(totalSaved),
           goalAmount: Number(goalAmount),
+          who: auth.currentUser?.uid || "",
           createdAt: serverTimestamp(),
         });
         for (const deposit of deposits) {

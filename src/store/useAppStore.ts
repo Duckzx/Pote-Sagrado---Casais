@@ -195,6 +195,7 @@ export const useAppStore = create<AppState>((set) => ({
     isDataReady: false,
     activeTab: 'home',
     theme: 'cookbook',
+    isPremium: false,
     hasUnreadNotifications: false
   }),
 }));
