@@ -22,7 +22,6 @@ import { triggerConnectionCelebration } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
 import { GoalType } from "../types";
-import { AIAkinatorModal } from "./AIAkinatorModal";
 import { PremiumGate } from "./PremiumGate";
 import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
@@ -162,7 +161,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
   const [isSaving, setIsSaving] = useState(false);
-  const [showAkinator, setShowAkinator] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<string>("default");
 
@@ -530,21 +528,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       placeholder={GOAL_CATEGORIES.find(c => c.id === goalType)?.placeholder || "Descreva aqui..."}
                       className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
                     />
-                    <button
-                      title="Ajuda com I.A."
-                      onClick={() => {
-                        const isPremium = useAppStore.getState().isPremium;
-                        if (!isPremium) {
-                          openPremiumModal();
-                        } else {
-                          setShowAkinator(true);
-                        }
-                      }}
-                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100 flex items-center gap-1 group"
-                    >
-                      <span className="text-[8px] bg-amber-500 text-white px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity font-bold">PRO</span>
-                      <Sparkles size={16} />
-                    </button>
+                    
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -970,7 +954,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <ul className="space-y-4 mb-8">
                   {[
                     "Temas Exclusivos (Midnight, Noir)",
-                    "Akinator I.A. para Objetivos",
+                    "Álbum do Casal e Cápsula do Tempo",
                     "Upload de Fotos Ilimitado",
                     "Métricas de Economia Avançadas",
                     "Selos de Casal Premium",
@@ -1023,16 +1007,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       </section>
       </Tabs>
 
-      {showAkinator && (
-        <AIAkinatorModal
-          onClose={() => setShowAkinator(false)}
-          onSelectDestination={(dest) => {
-            setDestination(dest);
-            setSaveTrigger((prev) => prev + 1);
-            setShowAkinator(false);
-          }}
-        />
-      )}
     </div>
   );
 };

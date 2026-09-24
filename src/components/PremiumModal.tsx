@@ -1,7 +1,7 @@
 import React from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   X, 
   Crown, 
@@ -11,7 +11,7 @@ import {
   ShieldCheck, 
   MessageCircleHeart,
   Palette,
-  Bot
+  Mail
 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 import { playSuccessSound, vibrate } from "../lib/audio";
@@ -52,9 +52,9 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose }) => {
 
   const features = [
     {
-      icon: <Bot className="text-amber-500" />,
-      title: "IA Akinator de Viagens",
-      desc: "Destinos perfeitos com I.A.",
+      icon: <Mail className="text-amber-500" />,
+      title: "Cápsula do Tempo",
+      desc: "Cartas para abrir no futuro",
     },
     {
       icon: <Palette className="text-purple-500" />,

@@ -1,9 +1,6 @@
 @import "tailwindcss";
 /* stylelint-disable-next-line at-rule-no-unknown */
 @plugin "@tailwindcss/typography";
-@import "leaflet/dist/leaflet.css";
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   /* Default Cookbook - Warm Organic Recipe */
@@ -161,23 +158,6 @@
 
 .bg-dotted {
   background-image: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="1" cy="1" r="0.5" fill="%23E8E4D9"/></svg>');
-}
-
-/* Leaflet Customizations */
-.leaflet-container {
-  font-family: var(--font-sans);
-  z-index: 1;
-}
-.leaflet-popup-content-wrapper {
-  background: var(--theme-bg);
-  color: var(--theme-text);
-  border: 1px solid var(--theme-border);
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-.leaflet-popup-tip {
-  background: var(--theme-bg);
-  border: 1px solid var(--theme-border);
 }
 
 /* Custom Date Input */
