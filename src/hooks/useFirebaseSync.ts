@@ -45,6 +45,7 @@ function normalizeTripConfig(data: Partial<TripConfig> | undefined): TripConfig 
     monthlyPrize: data?.monthlyPrize || '',
     relationshipStartDate: data?.relationshipStartDate || '',
     fcmTokens: Array.isArray(data?.fcmTokens) ? data!.fcmTokens : [],
+    targetDate: typeof data?.targetDate === 'string' ? data.targetDate : '',
     envelopes: Array.isArray(data?.envelopes) ? data!.envelopes.filter((n) => typeof n === 'number') : [],
   };
 }

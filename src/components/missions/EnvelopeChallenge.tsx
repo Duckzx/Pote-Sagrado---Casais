@@ -8,6 +8,8 @@ import { Portal } from "../ui/portal";
 import { handleFirestoreError, OperationType } from "../../lib/firestore-errors";
 import { playCoinSound, vibrate } from "../../lib/audio";
 import { BorderBeam } from "../magicui/border-beam";
+import { ShareableWidget } from "../ShareableWidget";
+import { Share2 } from "lucide-react";
 
 const TOTAL = 100;
 const EMPTY: number[] = [];
@@ -26,6 +28,8 @@ export const EnvelopeChallenge: React.FC = () => {
   const [confirming, setConfirming] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const mode = useAppStore((s) => s.mode);
 
   const openedSet = useMemo(() => new Set(opened), [opened]);
   const saved = useMemo(() => opened.reduce((sum, n) => sum + n, 0), [opened]);
@@ -127,6 +131,14 @@ export const EnvelopeChallenge: React.FC = () => {
           {expanded ? "Ver menos" : "Ver todos"}
         </button>
         <button
+          onClick={() => setSharing(true)}
+          disabled={opened.length === 0}
+          className="w-12 shrink-0 rounded-full border border-cookbook-border flex items-center justify-center text-cookbook-primary disabled:opacity-30"
+          aria-label="Compartilhar desafio"
+        >
+          <Share2 size={16} />
+        </button>
+        <button
           onClick={surprise}
           disabled={opened.length >= TOTAL}
           className="flex-[1.4] py-3 rounded-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold shadow-md disabled:opacity-40"
@@ -134,6 +146,23 @@ export const EnvelopeChallenge: React.FC = () => {
           🎲 Sortear envelope
         </button>
       </div>
+
+      {sharing && (
+        <Portal>
+          <ShareableWidget
+            goalAmount={GOAL}
+            totalSaved={saved}
+            destination="Desafio dos 100 Envelopes"
+            celebration="Mostre o seu desafio 💌"
+            override={{
+              headline: `${opened.length}/100 envelopes abertos 💌`,
+              subline: "Desafio dos 100 Envelopes",
+              message: `${mode === "solo" ? "Estou fazendo" : "Estamos fazendo"} o Desafio dos 100 Envelopes no Pote Sagrado: ${opened.length}/100 envelopes e ${brl(saved)} guardados 💌 Faça o seu:`,
+            }}
+            onClose={() => setSharing(false)}
+          />
+        </Portal>
+      )}
 
       <Portal>
       <AnimatePresence>

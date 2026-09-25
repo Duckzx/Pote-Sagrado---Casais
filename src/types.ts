@@ -39,6 +39,8 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
+  /** Date the goal should be reached (YYYY-MM-DD) */
+  targetDate?: string;
   /** "100 envelopes" challenge: numbers already opened */
   envelopes?: number[];
 }

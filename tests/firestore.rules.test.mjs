@@ -37,6 +37,7 @@ await t('save config full', setDoc(doc(A, `casais/${C}/trip_config/main`), { goa
 await t('config lat/lng', setDoc(doc(A, `casais/${C}/trip_config/main`), { lat: 1.2, lng: 3.4 }, { merge: true }));
 await t('config battle', setDoc(doc(B, `casais/${C}/trip_config/main`), { battleChallenges: [{ id: 'x' }] }, { merge: true }));
 await t('envelope challenge', setDoc(doc(B, `casais/${C}/trip_config/main`), { envelopes: arrayUnion(7) }, { merge: true }));
+await t('target date', setDoc(doc(A, `casais/${C}/trip_config/main`), { targetDate: '2027-06-01' }, { merge: true }));
 await t('diagnostics writes', setDoc(doc(A, `casais/${C}`), { lastActiveAt: 'x' }, { merge: true }));
 await t('config fcm', setDoc(doc(B, `casais/${C}/trip_config/main`), { fcmTokens: arrayUnion('tok') }, { merge: true }));
 await t('list deposits', getDocs(query(collection(A, `casais/${C}/deposits`), orderBy('createdAt', 'desc'), limit(500))));
