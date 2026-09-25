@@ -38,6 +38,18 @@ export default defineConfig(({mode}) => {
         }
       })
     ],
+    build: {
+      rollupOptions: {
+        output: {
+          // Stable vendor chunks: app updates don't force users to re-download them
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            'firebase-core': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+            motion: ['motion/react'],
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

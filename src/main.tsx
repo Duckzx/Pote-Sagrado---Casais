@@ -5,14 +5,13 @@ import './index.css';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 import { registerSW } from 'virtual:pwa-register';
 
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
-
-// Analytics only when a real key is configured
+// Analytics only when a real key is configured (loaded on demand)
 if (import.meta.env.VITE_POSTHOG_KEY) {
-  posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com',
-    autocapture: false, // best practice for enterprise tracking (manual tracking)
+  import('posthog-js').then(({ default: posthog }) => {
+    posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+      api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com',
+      autocapture: false,
+    });
   });
 }
 
@@ -22,9 +21,7 @@ registerSW({ immediate: true });
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <PostHogProvider client={posthog}>
-        <App />
-      </PostHogProvider>
+      <App />
     </ErrorBoundary>
   </StrictMode>,
 );

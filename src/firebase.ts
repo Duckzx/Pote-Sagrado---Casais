@@ -22,16 +22,13 @@ import {
   doc,
   setDoc,
 } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import firebaseConfig from '../firebase-applet-config.json';
 
-import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
 
 // Optional: serve the auth handler from the app's own domain (see README).
 const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain;
 
-const app = initializeApp({ ...firebaseConfig, authDomain });
+export const app = initializeApp({ ...firebaseConfig, authDomain });
 export const auth = getAuth(app);
 
 // Offline cache shared between tabs: data opens instantly and writes made
@@ -59,21 +56,28 @@ if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectFirestoreEmulator(db, '127.0.0.1', 8085);
 }
 
-export const storage = getStorage(app);
+/** Firebase Storage, loaded only when a photo is uploaded. */
+export const getStorageLazy = async () => {
+  const { getStorage } = await import('firebase/storage');
+  return getStorage(app);
+};
 
-export let messaging: any = null;
-isMessagingSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-});
+/** Firebase Messaging (push), loaded only when the user enables notifications. */
+export const getMessagingLazy = async () => {
+  const { getMessaging, isSupported } = await import('firebase/messaging');
+  return (await isSupported()) ? getMessaging(app) : null;
+};
 
-export let analytics: any = null;
-isAnalyticsSupported().then((supported) => {
-  if (supported) {
-    analytics = getAnalytics(app);
-  }
-});
+// Analytics after the app is interactive
+if (typeof window !== 'undefined' && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    import('firebase/analytics')
+      .then(async ({ getAnalytics, isSupported }) => {
+        if (await isSupported()) getAnalytics(app);
+      })
+      .catch(() => {});
+  });
+}
 
 /**
  * Attempts Google login via popup first.

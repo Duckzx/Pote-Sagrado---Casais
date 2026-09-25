@@ -173,6 +173,11 @@ function AppContent() {
   const needsModeChoice = useAppStore(s => s.needsModeChoice);
   const lgpdConsent = useAppStore(s => s.lgpdConsent);
 
+  // Each tab starts at the top
+  React.useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [activeTab]);
+
   // A tab that doesn't exist in the current mode (or a stale saved tab) falls back to Home
   React.useEffect(() => {
     if (!MODE_TABS[mode].includes(activeTab)) handleTabChange("home");
@@ -292,7 +297,7 @@ function AppContent() {
       />
 
       {/* Main Content Area - Expands on Desktop */}
-      <div className="relative z-10 overflow-hidden pb-28 md:pb-0 w-full md:flex-1 md:ml-24 h-[100dvh] overflow-y-auto">
+      <main className="relative z-10 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0 w-full md:flex-1 md:ml-24 min-h-[100dvh]">
         {!isDataReady ? (
           <TabSkeleton />
         ) : (
@@ -364,7 +369,7 @@ function AppContent() {
             </motion.div>
           </AnimatePresence>
         )}
-      </div>
+      </main>
 
       <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
 

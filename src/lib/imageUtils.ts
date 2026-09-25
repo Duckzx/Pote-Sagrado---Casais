@@ -1,5 +1,4 @@
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase';
+import { getStorageLazy } from '../firebase';
 
 export const compressImage = (file: File, maxWidth = 600, maxQuality = 0.5): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -36,6 +35,8 @@ export const compressImage = (file: File, maxWidth = 600, maxQuality = 0.5): Pro
           const res = await fetch(compressedBase64);
           const blob = await res.blob();
           const fileName = `images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+          const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+          const storage = await getStorageLazy();
           const storageRef = ref(storage, fileName);
           await uploadBytes(storageRef, blob);
           const downloadUrl = await getDownloadURL(storageRef);
