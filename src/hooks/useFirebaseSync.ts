@@ -25,6 +25,9 @@ import { Deposit, TripConfig, ThemeId, PoteMode, DEFAULT_TRIP_CONFIG } from '../
 // from the balance when they go past this limit.
 const DEPOSITS_LIVE_LIMIT = 500;
 
+// Accounts created from this date on start with the Rosé theme
+const ROSE_THEME_RELEASE = Date.UTC(2026, 8, 24);
+
 const generateInviteCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
 function normalizeTripConfig(data: Partial<TripConfig> | undefined): TripConfig {
@@ -378,7 +381,8 @@ export function useFirebaseSync() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         // Accounts created before the Rosé theme keep the classic look
-        const currentTheme = (data.theme as ThemeId) || 'cookbook';
+        const createdAt = user.metadata?.creationTime ? new Date(user.metadata.creationTime).getTime() : Date.now();
+        const currentTheme = (data.theme as ThemeId) || (createdAt >= ROSE_THEME_RELEASE ? 'rose' : 'cookbook');
         setTheme(currentTheme);
         localStorage.setItem('pote_theme', currentTheme);
         if (data.casalId) {

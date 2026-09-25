@@ -7,6 +7,9 @@ import {
   getRedirectResult,
   signOut,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
   connectAuthEmulator,
 } from 'firebase/auth';
 import {
@@ -16,6 +19,8 @@ import {
   memoryLocalCache,
   connectFirestoreEmulator,
   Firestore,
+  doc,
+  setDoc,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
@@ -106,15 +111,53 @@ export const loginWithGoogle = async () => {
   }
 };
 
-/**
- * Handles Admin login via Email and Password.
- */
+const AUTH_ERRORS: Record<string, string> = {
+  'auth/invalid-credential': 'E-mail ou senha incorretos.',
+  'auth/wrong-password': 'E-mail ou senha incorretos.',
+  'auth/user-not-found': 'Não encontramos uma conta com esse e-mail.',
+  'auth/invalid-email': 'Esse e-mail não parece válido.',
+  'auth/email-already-in-use': 'Já existe uma conta com esse e-mail. Tente entrar.',
+  'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+  'auth/too-many-requests': 'Muitas tentativas. Espere um pouco e tente de novo.',
+  'auth/network-request-failed': 'Sem conexão com a internet.',
+  'auth/operation-not-allowed': 'Login por e-mail ainda não está ativado no Firebase.',
+};
+
+export const authErrorMessage = (error: any) =>
+  AUTH_ERRORS[error?.code] || 'Não foi possível continuar. Tente novamente.';
+
+/** Sign in with e-mail and password. */
 export const loginWithEmail = async (email: string, pass: string) => {
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    await signInWithEmailAndPassword(auth, email.trim(), pass);
   } catch (error: any) {
-    console.error('Email login failed.', error.code, error.message);
-    throw new Error('Falha no login Administrativo: Verifique suas credenciais.');
+    console.error('Email login failed.', error?.code);
+    throw new Error(authErrorMessage(error));
+  }
+};
+
+/** Create an account with e-mail and password. */
+export const signUpWithEmail = async (name: string, email: string, pass: string) => {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+    if (name.trim()) {
+      await updateProfile(cred.user, { displayName: name.trim() });
+      // onAuthStateChanged fired before the name existed: save it on the profile too
+      await cred.user.reload();
+      await setDoc(doc(db, 'users', cred.user.uid), { displayName: name.trim().slice(0, 60) }, { merge: true }).catch(() => {});
+    }
+    return cred.user;
+  } catch (error: any) {
+    console.error('Sign up failed.', error?.code);
+    throw new Error(authErrorMessage(error));
+  }
+};
+
+export const resetPassword = async (email: string) => {
+  try {
+    await sendPasswordResetEmail(auth, email.trim());
+  } catch (error: any) {
+    throw new Error(authErrorMessage(error));
   }
 };
 

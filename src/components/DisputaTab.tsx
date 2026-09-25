@@ -438,7 +438,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </div>
         </motion.div>
       )}
-      {/* Weekly breakdown */}
+      {/* Weekly breakdown (two-person comparison) */}
+      {mode !== "grupo" && (
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -482,6 +483,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           ))}
         </div>
       </motion.div>
+      )}
       {/* Advanced Stats */}
       <motion.div 
          initial={{ y: 20, opacity: 0 }}
