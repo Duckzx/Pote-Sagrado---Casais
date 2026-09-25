@@ -1,9 +1,6 @@
 @import "tailwindcss";
 /* stylelint-disable-next-line at-rule-no-unknown */
 @plugin "@tailwindcss/typography";
-@import "leaflet/dist/leaflet.css";
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   /* Default Cookbook - Warm Organic Recipe */
@@ -78,6 +75,39 @@
   --theme-mural: #1C1C1C;
 }
 
+[data-theme="rose"] {
+  --theme-bg: #FFF7F8;
+  --theme-text: #3D2229;
+  --theme-border: #F5DDE2;
+  --theme-primary: #C9677F;
+  --theme-primary-hover: #B4546C;
+  --theme-gold: #D4A574;
+  --theme-battle: #FDEEF1;
+  --theme-mural: #FFFAFB;
+}
+
+[data-theme="lavanda"] {
+  --theme-bg: #FAF7FF;
+  --theme-text: #2E2540;
+  --theme-border: #E6DDF5;
+  --theme-primary: #8B72BE;
+  --theme-primary-hover: #7760AA;
+  --theme-gold: #D9A6C4;
+  --theme-battle: #F2ECFB;
+  --theme-mural: #FCFAFF;
+}
+
+[data-theme="cereja"] {
+  --theme-bg: #170D10;
+  --theme-text: #F7E9EC;
+  --theme-border: #3A2228;
+  --theme-primary: #E28CA0;
+  --theme-primary-hover: #EDA2B3;
+  --theme-gold: #E6BE8A;
+  --theme-battle: #21141A;
+  --theme-mural: #1E1216;
+}
+
 [data-theme="noir"] {
   --theme-bg: #FFFFFF;
   --theme-text: #000000;
@@ -92,7 +122,10 @@
 /* Dark theme overrides for specific elements */
 [data-theme="midnight"] input,
 [data-theme="midnight"] select,
-[data-theme="midnight"] textarea {
+[data-theme="midnight"] textarea,
+[data-theme="cereja"] input,
+[data-theme="cereja"] select,
+[data-theme="cereja"] textarea {
   background-color: #1A1A1A;
   border-color: #333333;
   color: #F3F3F3;
@@ -103,11 +136,13 @@
   color: #666666;
 }
 
-[data-theme="midnight"] input[type="date"] {
+[data-theme="midnight"] input[type="date"],
+[data-theme="cereja"] input[type="date"] {
   color-scheme: dark;
 }
 
-[data-theme="midnight"] .bg-white {
+[data-theme="midnight"] .bg-white,
+[data-theme="cereja"] .bg-white {
   background-color: #161616 !important;
 }
 
@@ -161,23 +196,6 @@
 
 .bg-dotted {
   background-image: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="1" cy="1" r="0.5" fill="%23E8E4D9"/></svg>');
-}
-
-/* Leaflet Customizations */
-.leaflet-container {
-  font-family: var(--font-sans);
-  z-index: 1;
-}
-.leaflet-popup-content-wrapper {
-  background: var(--theme-bg);
-  color: var(--theme-text);
-  border: 1px solid var(--theme-border);
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-.leaflet-popup-tip {
-  background: var(--theme-bg);
-  border: 1px solid var(--theme-border);
 }
 
 /* Custom Date Input */

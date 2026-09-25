@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({ 
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+        includeAssets: ['icon.svg'],
         manifest: {
           name: 'Pote Sagrado',
           short_name: 'Pote',
@@ -20,18 +20,21 @@ export default defineConfig(({mode}) => {
           theme_color: '#FDF6E3',
           background_color: '#FDF6E3',
           display: 'standalone',
+          start_url: '/',
+          lang: 'pt-BR',
           icons: [
             {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png'
+              src: 'icon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'any'
             }
           ]
+        },
+        workbox: {
+          // Firebase handles its own offline cache; never intercept its APIs
+          navigateFallbackDenylist: [/^\/api\//, /^\/__\//],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         }
       })
     ],
@@ -42,7 +45,7 @@ export default defineConfig(({mode}) => {
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modify: file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };

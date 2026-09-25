@@ -68,7 +68,9 @@ export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'love
 
 export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'lovecards', 'config'];
 
-export type ThemeId = 'cookbook' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight' | 'noir';
+export type ThemeId = 'cookbook' | 'rose' | 'lavanda' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight' | 'noir' | 'cereja';
+
+export const PREMIUM_THEMES: ThemeId[] = ['midnight', 'noir', 'cereja'];
 
 export interface ThemeOption {
   id: ThemeId;

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/__/auth/:path*",
+      "destination": "https://potesagrado-34c79.firebaseapp.com/__/auth/:path*"
+    },
+    {
+      "source": "/((?!api/|assets/|__/|.*\\.[a-zA-Z0-9]+$).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

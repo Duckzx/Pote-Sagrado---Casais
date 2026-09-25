@@ -243,7 +243,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
     setEditAction(deposit.action || "");
     const dDate = getDateObj(deposit.createdAt);
     if (dDate) {
-      const dateStr = dDate.toISOString().split('T')[0];
+      // Local date (toISOString would shift late-night records to the next day)
+      const dateStr = `${dDate.getFullYear()}-${String(dDate.getMonth() + 1).padStart(2, "0")}-${String(dDate.getDate()).padStart(2, "0")}`;
       setEditDate(dateStr);
     } else {
       setEditDate("");
@@ -262,7 +263,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       const dDate = getDateObj(editing.createdAt);
       if (editDate && dDate) {
         const currentRef = dDate;
-        const newDate = new Date(editDate);
+        const newDate = new Date(`${editDate}T00:00:00`);
         // keep the original time
         newDate.setHours(currentRef.getHours(), currentRef.getMinutes(), currentRef.getSeconds());
         updateData.createdAt = newDate;

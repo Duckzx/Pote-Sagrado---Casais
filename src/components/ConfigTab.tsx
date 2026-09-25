@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc, arrayUnion } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
 import { db, auth, logout, messaging } from "../firebase";
 import {
@@ -21,12 +21,12 @@ import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { triggerConnectionCelebration } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
 import { GOAL_CATEGORIES } from "../data/goalCategories";
-import { GoalType } from "../types";
-import { AIAkinatorModal } from "./AIAkinatorModal";
+import { GoalType, PREMIUM_THEMES, ThemeId } from "../types";
 import { PremiumGate } from "./PremiumGate";
 import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
+import { compressImage } from "../lib/imageUtils";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
@@ -48,9 +48,11 @@ interface ConfigTabProps {
   ) => void;
 }
 const THEMES = [
+  { id: "rose", label: "Rosé Champagne", colors: ["#FFF7F8", "#C9677F"] },
+  { id: "lavanda", label: "Lavanda", colors: ["#FAF7FF", "#8B72BE"] },
   {
     id: "cookbook",
-    label: "Cookbook (Padrão)",
+    label: "Cookbook Clássico",
     colors: ["#FDFBF7", "#8E7F6D"],
   },
   {
@@ -62,6 +64,7 @@ const THEMES = [
   { id: "tropical", label: "Tropical Breeze", colors: ["#F2FAF5", "#2A9D8F"] },
   { id: "midnight", label: "🌙 Midnight", colors: ["#1A1A2E", "#C5A059"] },
   { id: "noir", label: "Noir (P&B)", colors: ["#FFFFFF", "#000000"] },
+  { id: "cereja", label: "🍒 Cereja Noir", colors: ["#170D10", "#E28CA0"] },
 ];
 export const ConfigTab: React.FC<ConfigTabProps> = ({
   currentGoalType,
@@ -83,22 +86,21 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !auth.currentUser) return;
     const file = e.target.files[0];
-    const { updateProfile } = await import("firebase/auth");
-    
-    // Convert to base64 using FileReader
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      try {
-        await updateProfile(auth.currentUser!, { photoURL: base64String });
-        await setDoc(doc(db, "users", auth.currentUser!.uid), { photoURL: base64String }, { merge: true });
-        addToast("Sucesso", "Foto de perfil atualizada!", "success");
-      } catch (err) {
-        console.error(err);
-        addToast("Erro", "Falha ao atualizar foto", "info");
+    const user = auth.currentUser;
+    try {
+      // Upload (or compressed base64 fallback) keeps the profile doc small
+      const photoURL = await compressImage(file, 400, 0.7);
+      await setDoc(doc(db, "users", user.uid), { photoURL }, { merge: true });
+      // Firebase Auth only accepts short http(s) URLs
+      if (photoURL.startsWith("http")) {
+        const { updateProfile } = await import("firebase/auth");
+        await updateProfile(user, { photoURL }).catch(() => {});
       }
-    };
-    reader.readAsDataURL(file);
+      addToast("Sucesso", "Foto de perfil atualizada!", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Erro", "Falha ao atualizar foto", "info");
+    }
   };
 
   // Custom sub-tabs state
@@ -128,41 +130,31 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       addToast("Aviso", "Digite um código de convite.", "info");
       return;
     }
-    const { collection, query, where, getDocs, doc, setDoc, getDoc } = await import("firebase/firestore");
-    const { migrateUserToAnotherCouple } = await import('../lib/couple-migration');
+    if (!auth.currentUser) return;
+    const uid = auth.currentUser.uid;
+    const { resolveInviteCasalId, migrateUserToAnotherCouple } = await import('../lib/couple-migration');
     try {
-      const q = query(collection(db, 'users'), where('inviteCode', '==', inviteCodeInput.trim().toUpperCase()));
-      const snap = await getDocs(q);
-      
-      let newCasalId = "";
-      if (!snap.empty) {
-        const partnerDoc = snap.docs[0];
-        if (partnerDoc.id === auth.currentUser?.uid) {
-           addToast("Aviso", "Este é o seu próprio código.", "info");
-           return;
-        }
-        newCasalId = partnerDoc.data().casalId || `casal_${partnerDoc.id}`;
-      } else {
-        if (inviteCodeInput.trim().startsWith('casal_')) {
-          newCasalId = inviteCodeInput.trim();
-        } else {
-           addToast("Erro", "Código não encontrado.", "info");
-           return;
-        }
+      const code = inviteCodeInput.trim();
+      if (code.toUpperCase() === me?.inviteCode) {
+        addToast("Aviso", "Este é o seu próprio código.", "info");
+        return;
+      }
+      const newCasalId = await resolveInviteCasalId(code, uid);
+      if (!newCasalId) {
+        addToast("Erro", "Código não encontrado.", "info");
+        return;
       }
 
-      if (newCasalId) {
-        const myDoc = await getDoc(doc(db, 'users', auth.currentUser!.uid));
-        const myCurrentCasalId = myDoc.exists() ? (myDoc.data().casalId || `casal_${auth.currentUser!.uid}`) : `casal_${auth.currentUser!.uid}`;
-        if (newCasalId !== myCurrentCasalId) {
-          await migrateUserToAnotherCouple(auth.currentUser!.uid, myCurrentCasalId, newCasalId);
-          addToast("Sucesso", "Casal conectado com sucesso!", "success");
-          triggerConnectionCelebration();
-        } else {
-          addToast("Aviso", "Você já está conectado a este casal.", "info");
-        }
-        setInviteCodeInput("");
+      const myDoc = await getDoc(doc(db, 'users', uid));
+      const myCurrentCasalId = (myDoc.exists() && myDoc.data().casalId) || `casal_${uid}`;
+      if (newCasalId !== myCurrentCasalId) {
+        await migrateUserToAnotherCouple(uid, myCurrentCasalId, newCasalId);
+        addToast("Sucesso", "Casal conectado com sucesso!", "success");
+        triggerConnectionCelebration();
+      } else {
+        addToast("Aviso", "Você já está conectado a este casal.", "info");
       }
+      setInviteCodeInput("");
     } catch (err) {
       addToast("Erro", "Falha ao vincular código.", "info");
       console.error(err);
@@ -172,7 +164,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
   const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
   const [isSaving, setIsSaving] = useState(false);
-  const [showAkinator, setShowAkinator] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<string>("default");
 
@@ -320,20 +311,20 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
       if (permission === "granted") {
+        const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+        const swRegistration = await navigator.serviceWorker
+          ?.register("/firebase-messaging-sw.js", { scope: "/firebase-cloud-messaging-push-scope" })
+          .catch(() => undefined);
         const token = await getToken(messaging, {
-          vapidKey: (import.meta as any).env.VITE_FIREBASE_VAPID_KEY || 'BNd0c8KkPz2SjR_QhE6pA9X6-yD9Qz6XoYvN7gN8P_U' // VAPID de teste / mock se vazio
+          ...(vapidKey ? { vapidKey } : {}),
+          ...(swRegistration ? { serviceWorkerRegistration: swRegistration } : {}),
         });
         if (token && casalId) {
-          const tripRef = doc(db, `casais/${casalId}/trip_config`, "main");
-          const tDoc = await getDoc(tripRef);
-          let fcmTokens: string[] = [];
-          if (tDoc.exists()) {
-            fcmTokens = tDoc.data().fcmTokens || [];
-          }
-          if (!fcmTokens.includes(token)) {
-            fcmTokens.push(token);
-            await setDoc(tripRef, { fcmTokens }, { merge: true });
-          }
+          await setDoc(
+            doc(db, `casais/${casalId}/trip_config`, "main"),
+            { fcmTokens: arrayUnion(token) },
+            { merge: true },
+          );
           addToast(
             "Sucesso",
             "Notificações Push nativas ativadas neste dispositivo!",
@@ -540,21 +531,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       placeholder={GOAL_CATEGORIES.find(c => c.id === goalType)?.placeholder || "Descreva aqui..."}
                       className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
                     />
-                    <button
-                      title="Ajuda com I.A."
-                      onClick={() => {
-                        const isPremium = useAppStore.getState().isPremium;
-                        if (!isPremium) {
-                          openPremiumModal();
-                        } else {
-                          setShowAkinator(true);
-                        }
-                      }}
-                      className="absolute right-0 bottom-2 p-1 text-cookbook-gold hover:text-cookbook-primary transition-colors opacity-70 hover:opacity-100 flex items-center gap-1 group"
-                    >
-                      <span className="text-[8px] bg-amber-500 text-white px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity font-bold">PRO</span>
-                      <Sparkles size={16} />
-                    </button>
+                    
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -749,7 +726,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
               <div className="flex gap-6 overflow-x-auto pb-6 pt-4 snap-x hide-scrollbar">
                 {THEMES.map((t) => {
-                  const isPremiumTheme = t.id === 'midnight' || t.id === 'noir';
+                  const isPremiumTheme = PREMIUM_THEMES.includes(t.id as ThemeId);
                   const themeContent = (
                     <div
                       onClick={() => {
@@ -979,8 +956,8 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 
                 <ul className="space-y-4 mb-8">
                   {[
-                    "Temas Exclusivos (Midnight, Noir)",
-                    "Akinator I.A. para Objetivos",
+                    "Temas Exclusivos (Cereja Noir, Midnight, Noir)",
+                    "Álbum do Casal e Cápsula do Tempo",
                     "Upload de Fotos Ilimitado",
                     "Métricas de Economia Avançadas",
                     "Selos de Casal Premium",
@@ -1033,16 +1010,6 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       </section>
       </Tabs>
 
-      {showAkinator && (
-        <AIAkinatorModal
-          onClose={() => setShowAkinator(false)}
-          onSelectDestination={(dest) => {
-            setDestination(dest);
-            setSaveTrigger((prev) => prev + 1);
-            setShowAkinator(false);
-          }}
-        />
-      )}
     </div>
   );
 };

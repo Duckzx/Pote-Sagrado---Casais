@@ -3,7 +3,7 @@ import path from "path";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // JSON Body parser
   app.use(express.json());
@@ -11,37 +11,6 @@ async function startServer() {
   // API routes FIRST
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
-  });
-
-  // Example Gemini proxy route
-  app.post("/api/gemini", async (req, res) => {
-    try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(500).json({ error: "Missing Gemini API Key." });
-      }
-      
-      const { prompt } = req.body;
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
-        })
-      });
-      
-      const data = await response.json();
-      res.json(data);
-    } catch (e: any) {
-      console.error(e);
-      res.status(500).json({ error: e.message });
-    }
   });
 
   // Vite middleware for development

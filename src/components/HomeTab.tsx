@@ -48,6 +48,9 @@ import { WrappedModal } from "./WrappedModal";
 import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
+import { MoodCheckIn } from "./couple/MoodCheckIn";
+import { AnniversaryCountdown } from "./couple/AnniversaryCountdown";
+import { DailyAffirmation } from "./couple/DailyAffirmation";
 
 interface HomeTabProps {
   currentUser: any;
@@ -378,10 +381,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     }, 600);
     setTimeout(async () => {
       try {
-        await addDoc(collection(db, "achievements"), {
+        await addDoc(collection(db, `casais/${casalId}/achievements`), {
           destination: destination || "Nossa Viagem",
           amount: Number(totalSaved),
           goalAmount: Number(goalAmount),
+          who: auth.currentUser?.uid || "",
           createdAt: serverTimestamp(),
         });
         for (const deposit of deposits) {
@@ -452,6 +456,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </button>{" "}
       </div>{" "}
 
+      <div className="-mt-4 mb-6">
+        <DailyAffirmation />
+      </div>
+
       <div className="md:grid md:grid-cols-2 lg:grid-cols-2 md:gap-12 lg:gap-16 items-start">
         {/* Esquerda: Cofre e Estatísticas */}
         <div className="space-y-8">
@@ -486,6 +494,10 @@ export const HomeTab: React.FC<HomeTabProps> = ({
 
         {/* Direita: Interações e Ações */}
         <div className="space-y-8 mt-8 md:mt-0">
+      {/* Couple rituals: mood of the day + mêsversário */}
+      <MoodCheckIn />
+      <AnniversaryCountdown />
+
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
 

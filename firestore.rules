@@ -2,50 +2,46 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // ===============================================================
-    // Assumed Data Model
+    // Data model
     // ===============================================================
     //
-    // Collection: users
-    // Document ID: {userId}
-    // Fields:
-    //   - theme: string (required) - App theme preference
-    //   - displayName: string (optional) - User's display name
+    // users/{userId}                         profile, theme, casalId, inviteCode
+    // users/{userId}/customDates/{id}        private date ideas
+    // casais/{casalId}                       couple doc (isPremium)
+    // casais/{casalId}/trip_config/main      goal / trip configuration
+    // casais/{casalId}/deposits/{id}         deposits and expenses
+    // casais/{casalId}/achievements/{id}     broken pots / photo achievements
+    // casais/{casalId}/pinboard_links/{id}   dream board
+    // casais/{casalId}/gallery/{id}          shared album
+    // casais/{casalId}/love_interactions/{id}
+    // casais/{casalId}/love_progress/main
+    // casais/{casalId}/notifications/{id}
+    // casais/{casalId}/capsules/{id}          time capsule letters
     //
-    // Collection: trip_config
-    // Document ID: main
-    // Fields:
-    //   - destination: string (required) - Trip destination
-    //   - goalAmount: number (required) - Financial goal
-    //   - lat: number (optional) - Latitude
-    //   - lng: number (optional) - Longitude
-    //   - customChallenges: list (optional) - Bingo custom challenges
-    //   - battleChallenges: list (optional) - Battle/Disputa challenges
-    //   - targetDate: string (optional) - Target trip date
-    //   - monthlyPrize: string (optional) - Monthly battle prize
-    //   - origin: string (optional) - Departure city
-    //   - updatedAt: timestamp (optional) - Last update
-    //
-    // Collection: deposits
-    // Document ID: {depositId}
-    // Fields:
-    //   - amount: number (required) - Saved amount
-    //   - action: string (optional) - Action description
-    //   - who: string (required) - User UID
-    //   - whoName: string (optional) - User display name
-    //   - type: string (optional) - 'income' or 'expense'
-    //   - createdAt: timestamp (required) - Entry creation time
-    //
+    // deposits/{id}, gallery/{id} (root)     legacy data from old versions,
+    //                                        readable by its owner so the app
+    //                                        can migrate it into the couple.
     // ===============================================================
 
-    // ===============================================================
-    // Helper Functions
-    // ===============================================================
-    
-    // Helpers
     function isAuthenticated() { return request.auth != null; }
     function isOwner(userId) { return isAuthenticated() && request.auth.uid == userId; }
-    
-    // Validate User
+
+    // A user belongs to their implicit couple (casal_<uid>) or to the couple
+    // stored in their profile.
+    function isCasalMember(casalId) {
+      return isAuthenticated() && (
+        casalId == 'casal_' + request.auth.uid ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('casalId', '') == casalId)
+      );
+    }
+
+    // createdAt: server time for new records, or an older timestamp when a
+    // record is being moved (couple link / legacy migration).
+    function isValidCreatedAt(data) {
+      return data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
     function isValidUser(data) {
       return (!('theme' in data) || (data.theme is string && data.theme.size() < 50)) &&
              (!('casalId' in data) || (data.casalId is string && data.casalId.size() < 100)) &&
@@ -56,30 +52,31 @@ service cloud.firestore {
              (!('lgpdConsentDate' in data) || (data.lgpdConsentDate is string && data.lgpdConsentDate.size() < 50));
     }
 
+    // Writes are merges, so the goal may be saved field by field
+    // (missions, push tokens, coordinates...).
     function isValidTripConfig(data) {
-      return data.keys().hasAll(['destination', 'goalAmount']) &&
-             data.destination is string && data.destination.size() < 200 &&
-             data.goalAmount is number && data.goalAmount >= 0 &&
+      return (!('destination' in data) || (data.destination is string && data.destination.size() < 200)) &&
+             (!('goalAmount' in data) || (data.goalAmount is number && data.goalAmount >= 0)) &&
              (!('lat' in data) || data.lat is number) &&
              (!('lng' in data) || data.lng is number) &&
-             (!('origin' in data) || (data.origin is string && data.origin.size() < 100)) &&
-             (!('targetDate' in data) || (data.targetDate is string && data.targetDate.size() <= 15)) &&
+             (!('origin' in data) || (data.origin is string && data.origin.size() < 200)) &&
              (!('customChallenges' in data) || data.customChallenges is list) &&
              (!('battleChallenges' in data) || data.battleChallenges is list) &&
-             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 150));
+             (!('fcmTokens' in data) || data.fcmTokens is list) &&
+             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 300));
     }
 
     function isValidDeposit(data) {
       return data.keys().hasAll(['amount', 'who', 'createdAt']) &&
-             data.amount is number && data.amount > 0 &&
-             data.who == request.auth.uid &&
-             data.createdAt == request.time &&
-             (!('type' in data) || data.type in ['income', 'expense']);
-    }
-
-    function isValidDepositUpdate(diff, existing) {
-      // Allow any update for now, we will handle specific affectedKeys in the match block
-      return true;
+             data.amount is number &&
+             isValidCreatedAt(data) &&
+             (!('type' in data) || data.type in ['income', 'expense']) &&
+             (
+               // Deposit/expense made (or moved between couples) by its author
+               (data.who == request.auth.uid && data.amount >= 0) ||
+               // XP bonus (amount 0) given to the partner when sharing
+               (data.get('isXpBonus', false) == true && data.amount == 0)
+             );
     }
 
     function isValidAchievement(data) {
@@ -88,88 +85,133 @@ service cloud.firestore {
              data.amount is number &&
              data.goalAmount is number &&
              (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
-             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
-             data.createdAt == request.time;
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1048576)) &&
+             isValidCreatedAt(data);
     }
 
     function isValidPinboardLink(data) {
       return data.keys().hasAll(['url', 'title', 'createdAt']) &&
-             data.url is string && data.url.size() <= 1024 &&
+             data.url is string && data.url.size() <= 2048 &&
              data.title is string && data.title.size() <= 200 &&
-             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
-             (!('addedBy' in data) || (data.addedBy is string)) &&
-             data.createdAt == request.time;
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1048576)) &&
+             (!('addedBy' in data) || data.addedBy is string) &&
+             isValidCreatedAt(data);
     }
 
     function isValidGalleryPhoto(data) {
-      return data.keys().hasAll(['imageBase64', 'addedBy', 'createdAt']) &&
-             data.imageBase64 is string && data.imageBase64.size() <= 1048576 &&
+      return data.keys().hasAll(['addedBy', 'createdAt']) &&
+             (data.keys().hasAny(['imageBase64', 'imageUrl'])) &&
+             (!('imageBase64' in data) || (data.imageBase64 is string && data.imageBase64.size() < 1048576)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1048576)) &&
              data.addedBy == request.auth.uid &&
-             data.createdAt == request.time;
+             isValidCreatedAt(data);
     }
 
-    // Role-based for casalId
-    function isCasalMember(casalId) {
-      // Allow if the user has a matching casalId in their profile,
-      // Or if their casalId defaults to `casal_${uid}`. 
-      // Because we can't easily query without cost, we check if the requested casalId matches either default or their profile if we used get().
-      // For a perfectly secure app, users must be verified to have this casalId.
-      return isAuthenticated() && (
-        casalId == 'casal_' + request.auth.uid ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.casalId == casalId)
-      );
-    }
-
+    // ===============================================================
+    // Users
+    // ===============================================================
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow delete: if isOwner(userId);
 
       match /customDates/{dateId} {
         allow read, write: if isOwner(userId);
       }
     }
 
+    // ===============================================================
+    // Couples
+    // ===============================================================
     match /casais/{casalId} {
-      allow read: if isCasalMember(casalId);
-      // Wait, there's no main 'casais' document written in the app. Let's allow write just in case.
-      allow write: if isCasalMember(casalId);
-      
+      allow read, write: if isCasalMember(casalId);
+
       match /trip_config/{docId} {
-         allow read: if isCasalMember(casalId);
-         allow create, update: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
+        allow read: if isCasalMember(casalId);
+        allow create, update: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
       }
-      
+
       match /deposits/{depositId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidDeposit(request.resource.data);
         allow delete: if isCasalMember(casalId);
-        allow update: if isCasalMember(casalId) 
-                      && (
-                        (resource.data.who == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasAny(['amount', 'action', 'type'])) ||
-                        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions']))
-                      )
+        allow update: if isCasalMember(casalId)
                       && request.resource.data.who == resource.data.who
-                      && request.resource.data.createdAt == resource.data.createdAt;
+                      && request.resource.data.amount is number
+                      && (
+                        // The author may edit value, description, type, date and photo
+                        (resource.data.who == request.auth.uid &&
+                         request.resource.data.createdAt is timestamp) ||
+                        // Partner may only comment / react
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions'])
+                      );
       }
 
       match /achievements/{achievementId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidAchievement(request.resource.data);
+        allow update: if isCasalMember(casalId) && isValidAchievement(request.resource.data);
         allow delete: if isCasalMember(casalId);
       }
 
       match /pinboard_links/{linkId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidPinboardLink(request.resource.data);
+        allow update: if isCasalMember(casalId) && isValidPinboardLink(request.resource.data);
         allow delete: if isCasalMember(casalId);
       }
 
       match /gallery/{photoId} {
         allow read: if isCasalMember(casalId);
-        allow create: if isCasalMember(casalId) && isValidGalleryPhoto(request.resource.data);
+        allow create, update: if isCasalMember(casalId) && isValidGalleryPhoto(request.resource.data);
         allow delete: if isCasalMember(casalId);
       }
+
+      match /love_interactions/{interactionId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId)
+                      && request.resource.data.partnerId == request.auth.uid
+                      && request.resource.data.cardId is string;
+        allow update, delete: if isCasalMember(casalId) && resource.data.partnerId == request.auth.uid;
+      }
+
+      match /love_progress/{docId} {
+        allow read, write: if isCasalMember(casalId);
+      }
+
+      match /capsules/{capsuleId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId)
+                      && request.resource.data.from == request.auth.uid
+                      && request.resource.data.message is string
+                      && request.resource.data.message.size() <= 2000
+                      && request.resource.data.openAt is timestamp;
+        // Anyone in the couple may mark it as opened once the date arrives
+        allow update: if isCasalMember(casalId)
+                      && resource.data.openAt <= request.time
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['openedAt']);
+        allow delete: if isCasalMember(casalId) && resource.data.from == request.auth.uid;
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if isCasalMember(casalId);
+        allow create: if isCasalMember(casalId) && request.resource.data.from == request.auth.uid;
+        allow update: if isCasalMember(casalId)
+                      && resource.data.to == request.auth.uid
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow delete: if isCasalMember(casalId) && resource.data.to == request.auth.uid;
+      }
+    }
+
+    // ===============================================================
+    // Legacy (pre-couple) data: owner can read it to migrate it.
+    // ===============================================================
+    match /deposits/{depositId} {
+      allow read: if isAuthenticated() && resource.data.who == request.auth.uid;
+    }
+
+    match /gallery/{photoId} {
+      allow read: if isAuthenticated() && resource.data.addedBy == request.auth.uid;
     }
   }
 }

@@ -169,7 +169,6 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
 ];
 /* Component */ import { compressImage } from "../lib/imageUtils";
 import { Camera, Plane, ArrowRight, Heart, Sparkles } from "lucide-react";
-import { AIAssistantModal } from "./AIAssistantModal";
 import { CheapDateModal } from "./CheapDateModal";
 export const MissoesTab: React.FC<MissoesTabProps> = ({
   stats,
@@ -181,7 +180,6 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
 }) => {
   const casalId = useAppStore(s => s.casalId);
   const tripConfig = useAppStore(s => s.tripConfig);
-  const [showAIModal, setShowAIModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
 
   const destination = tripConfig?.destination || "";
@@ -555,35 +553,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       {/* AI Assistant Triggers */}{" "}
       <div className="space-y-4 max-w-xl mx-auto w-full">
         {" "}
-        <button
-          onClick={() => setShowAIModal(true)}
-          className="w-full bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all active:scale-[0.98] hover:border-cookbook-gold/30 group"
-        >
-          {" "}
-          <div className="flex items-center space-x-4 text-cookbook-text">
-            {" "}
-            <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors text-cookbook-gold bg-cookbook-gold/10 group-hover:bg-cookbook-gold/20">
-              {" "}
-              <Sparkles size={16} />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif text-base text-cookbook-text font-medium">
-                {" "}
-                Consultor de Viagem{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
-                {" "}
-                Roteiro e Dicas com IA{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={14}
-            className="text-cookbook-text/30"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
+        
         <div className="w-full grid grid-cols-2 gap-3">
           <a
             href={flightsUrl}
@@ -710,8 +680,8 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             </p>{" "}
             <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-6">
               {" "}
-              Crie desafios personalizados ou use a IA para gerar novas
-              aventuras!{" "}
+              Crie desafios personalizados e transformem a rotina em
+              aventura!{" "}
             </p>{" "}
             <button
               onClick={() => setShowAddForm(true)}
@@ -1169,13 +1139,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           </div>{" "}
         </div>
       )}{" "}
-      {showAIModal && (
-        <AIAssistantModal
-          destination={destination}
-          origin={origin}
-          onClose={() => setShowAIModal(false)}
-        />
-      )}{" "}
+      
       {showDateModal && (
         <CheapDateModal
           onClose={() => setShowDateModal(false)}

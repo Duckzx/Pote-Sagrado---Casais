@@ -8,10 +8,13 @@ import { registerSW } from 'virtual:pwa-register';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 
-posthog.init(import.meta.env.VITE_POSTHOG_KEY || 'phc_mock_key', {
-  api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com',
-  autocapture: false, // best practice for enterprise tracking (manual tracking)
-});
+// Analytics only when a real key is configured
+if (import.meta.env.VITE_POSTHOG_KEY) {
+  posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+    api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com',
+    autocapture: false, // best practice for enterprise tracking (manual tracking)
+  });
+}
 
 // Register service worker for offline support
 registerSW({ immediate: true });

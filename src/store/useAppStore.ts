@@ -84,6 +84,15 @@ interface AppState {
   resetData: () => void;
 }
 
+// Last theme used on this device (instant paint), Rosé for newcomers
+function getInitialTheme(): ThemeId {
+  try {
+    return (localStorage.getItem('pote_theme') as ThemeId) || 'rose';
+  } catch {
+    return 'rose';
+  }
+}
+
 export const useAppStore = create<AppState>((set) => ({
   user: null,
   casalId: null,
@@ -121,7 +130,7 @@ export const useAppStore = create<AppState>((set) => ({
   },
   setTabDirection: (tabDirection) => set({ tabDirection }),
 
-  theme: 'cookbook',
+  theme: getInitialTheme(),
   setTheme: (theme) => set({ theme }),
 
   lgpdConsent: null,
@@ -194,7 +203,8 @@ export const useAppStore = create<AppState>((set) => ({
     tripConfig: null,
     isDataReady: false,
     activeTab: 'home',
-    theme: 'cookbook',
+    theme: getInitialTheme(),
+    isPremium: false,
     hasUnreadNotifications: false
   }),
 }));

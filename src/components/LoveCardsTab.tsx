@@ -173,7 +173,7 @@ const AnswerDrawer: React.FC<{
 
 export const LoveCardsTab: React.FC = () => {
   const casalId = useAppStore(s => s.casalId);
-  const { markNotificationsAsRead } = useNotifications();
+  const { markNotificationsAsRead } = useNotifications({ listen: false });
 
   useEffect(() => {
     markNotificationsAsRead();

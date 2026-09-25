@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { collection, getDocs, addDoc, doc, getDoc, setDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
+import { useState, useCallback, useEffect } from 'react';
+import { collection, addDoc, doc, setDoc, onSnapshot, Timestamp, serverTimestamp, increment } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { CardInteraction, LoveCardCategory, LoveCardsProgress } from '../types';
 import { ALL_LOVE_CARDS, getCardsByLevel } from '../data/loveCards';
@@ -23,7 +23,7 @@ interface LoveCardsState {
  * Custom hook for optimistic Love Cards state management.
  * 
  * Architecture:
- * - One-shot getDocs() on mount (no onSnapshot — intermittent use)
+ * - Real-time onSnapshot listeners (sync between the partners' devices)
  * - Optimistic UI: state updates instantly, Firestore writes in background
  * - On failure: silent rollback to previous state
  * - Match detection: when both partners respond → reward
@@ -39,83 +39,54 @@ export function useOptimisticLoveCards(casalId: string | null) {
     isLoading: true,
   });
 
-  // Ref to prevent double-loading
-  const hasLoaded = useRef(false);
-
   /**
-   * Load initial data from Firestore (one-shot, no listener).
+   * Real-time listeners: both partners see answers, matches and unlocked
+   * levels immediately, on every device.
    */
-  const loadInitial = useCallback(async () => {
-    if (!casalId || hasLoaded.current) return;
-    hasLoaded.current = true;
-
-    try {
-      // Load interactions
-      const interSnap = await getDocs(
-        collection(db, `casais/${casalId}/love_interactions`)
-      );
-      const interactions: Record<string, CardInteraction[]> = {};
-      interSnap.docs.forEach(d => {
-        const data = { id: d.id, ...d.data() } as CardInteraction;
-        if (!interactions[data.cardId]) interactions[data.cardId] = [];
-        interactions[data.cardId].push(data);
-      });
-
-      // Load progress
-      const progressDoc = await getDoc(
-        doc(db, `casais/${casalId}/love_progress`, 'main')
-      );
-      const progressData = progressDoc.exists()
-        ? (progressDoc.data() as { progress: LoveCardsProgress; goldDust: number })
-        : { progress: DEFAULT_PROGRESS, goldDust: 0 };
-
-      setState({
-        interactions,
-        progress: progressData.progress || DEFAULT_PROGRESS,
-        goldDust: progressData.goldDust || 0,
-        isLoading: false,
-      });
-    } catch (e) {
-      console.error('Failed to load love cards data:', e);
-      setState(s => ({ ...s, isLoading: false }));
-    }
-  }, [casalId]);
-
-  /**
-   * Refresh interactions (manual pull — e.g. when tab becomes active).
-   */
-  const refreshInteractions = useCallback(async () => {
+  useEffect(() => {
     if (!casalId) return;
-    try {
-      const interSnap = await getDocs(
-        collection(db, `casais/${casalId}/love_interactions`)
-      );
-      const interactions: Record<string, CardInteraction[]> = {};
-      interSnap.docs.forEach(d => {
-        const data = { id: d.id, ...d.data() } as CardInteraction;
-        if (!interactions[data.cardId]) interactions[data.cardId] = [];
-        interactions[data.cardId].push(data);
-      });
+    setState(s => ({ ...s, isLoading: true }));
 
-      // Also refresh progress
-      const progressDoc = await getDoc(
-        doc(db, `casais/${casalId}/love_progress`, 'main')
-      );
-      if (progressDoc.exists()) {
-        const data = progressDoc.data() as { progress: LoveCardsProgress; goldDust: number };
+    const unsubInteractions = onSnapshot(
+      collection(db, `casais/${casalId}/love_interactions`),
+      (interSnap) => {
+        const interactions: Record<string, CardInteraction[]> = {};
+        interSnap.docs.forEach(d => {
+          const data = { id: d.id, ...d.data() } as CardInteraction;
+          if (!interactions[data.cardId]) interactions[data.cardId] = [];
+          interactions[data.cardId].push(data);
+        });
+        setState(s => ({ ...s, interactions, isLoading: false }));
+      },
+      (e) => {
+        console.error('Failed to load love cards data:', e);
+        setState(s => ({ ...s, isLoading: false }));
+      }
+    );
+
+    const unsubProgress = onSnapshot(
+      doc(db, `casais/${casalId}/love_progress`, 'main'),
+      (progressDoc) => {
+        if (!progressDoc.exists()) return;
+        const data = progressDoc.data() as { progress?: LoveCardsProgress; goldDust?: number };
         setState(s => ({
           ...s,
-          interactions,
-          progress: data.progress || s.progress,
+          progress: { ...DEFAULT_PROGRESS, ...(data.progress || {}) },
           goldDust: data.goldDust ?? s.goldDust,
         }));
-      } else {
-        setState(s => ({ ...s, interactions }));
-      }
-    } catch (e) {
-      console.error('Failed to refresh interactions:', e);
-    }
+      },
+      (e) => console.error('Failed to load love cards progress:', e)
+    );
+
+    return () => {
+      unsubInteractions();
+      unsubProgress();
+    };
   }, [casalId]);
+
+  // Kept for API compatibility: data now arrives through the listeners above.
+  const loadInitial = useCallback(async () => {}, []);
+  const refreshInteractions = useCallback(async () => {}, []);
 
   /**
    * Respond to a card — optimistic update with rollback on failure.
@@ -152,7 +123,8 @@ export function useOptimisticLoveCards(casalId: string | null) {
 
     try {
       // Create a notification for the partner
-      const partnerId = coupleMembers.find(m => m.uid !== auth.currentUser?.uid)?.uid;
+      const partner = coupleMembers.find(m => (m.uid || m.id) !== user.uid);
+      const partnerId = partner ? (partner.uid || partner.id) : undefined;
       if (partnerId) {
         await addDoc(collection(db, 'casais', casalId, 'notifications'), {
           type: 'love_card_response',
@@ -184,13 +156,11 @@ export function useOptimisticLoveCards(casalId: string | null) {
       if (uniquePartners.size >= 2) {
         // 🎉 MATCH! Award gold dust
         const GOLD_REWARD = 10;
-        const newGold = state.goldDust + GOLD_REWARD;
-
-        setState(s => ({ ...s, goldDust: newGold }));
+        setState(s => ({ ...s, goldDust: s.goldDust + GOLD_REWARD }));
 
         await setDoc(
           doc(db, `casais/${casalId}/love_progress`, 'main'),
-          { goldDust: newGold, progress: state.progress },
+          { goldDust: increment(GOLD_REWARD), progress: state.progress },
           { merge: true }
         );
 
@@ -220,7 +190,7 @@ export function useOptimisticLoveCards(casalId: string | null) {
       console.error('Optimistic update failed, rolling back:', e);
       setState(previousState);
     }
-  }, [casalId, state, addToast]);
+  }, [casalId, state, addToast, coupleMembers]);
 
   /**
    * Check if all cards in the current level have been completed (both partners)

@@ -16,13 +16,14 @@ import {
   Trophy,
 } from "lucide-react";
 import { doc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { db, auth, storage } from "../firebase";
+import { compressImage } from "../lib/imageUtils";
+import { db, auth } from "../firebase";
 import { useAppStore } from "../store/useAppStore";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
+import { TimeCapsule } from "./couple/TimeCapsule";
 interface PinboardTabProps {
   addToast: (
     title: string,
@@ -89,15 +90,15 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       setIsUploadingPhoto(true);
 
       try {
-        const storageRef = ref(storage, `conquistas/${Date.now()}_${file.name}`);
-        const uploadTask = await uploadBytesResumable(storageRef, file);
-        const downloadUrl = await getDownloadURL(uploadTask.ref);
+        // Uploads to Storage, falling back to a compressed inline image
+        const imageUrl = await compressImage(file, 900, 0.7);
 
         await addDoc(collection(db, `casais/${casalId}/achievements`), {
           destination: "Nossa Conquista",
           amount: 0,
           goalAmount: 0,
-          imageUrl: downloadUrl,
+          imageUrl,
+          who: auth.currentUser?.uid || "",
           createdAt: serverTimestamp(),
         });
         
@@ -345,6 +346,9 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
 
       <section className="space-y-4">
         {" "}
+        <div className="mb-8 w-full max-w-md mx-auto relative z-10">
+          <TimeCapsule />
+        </div>
         <CoupleGalleryWidget addToast={addToast} />{" "}
       </section>{" "}
 
