@@ -45,6 +45,7 @@ function normalizeTripConfig(data: Partial<TripConfig> | undefined): TripConfig 
     monthlyPrize: data?.monthlyPrize || '',
     relationshipStartDate: data?.relationshipStartDate || '',
     fcmTokens: Array.isArray(data?.fcmTokens) ? data!.fcmTokens : [],
+    envelopes: Array.isArray(data?.envelopes) ? data!.envelopes.filter((n) => typeof n === 'number') : [],
   };
 }
 
@@ -261,7 +262,7 @@ export function useFirebaseSync() {
           setPremium(false);
           useAppStore.getState().setModeInfo({ mode: 'casal', groupName: '', needsModeChoice: true });
         }
-      }, (error) => console.warn('Couple doc listener error', error));
+      }, (error) => handleFirestoreError(error, OperationType.GET, `casais/${currentCasalId}`));
       currentUnsubs.push(unsubCasal);
 
       // Goal / trip config
@@ -285,7 +286,7 @@ export function useFirebaseSync() {
         const members: any[] = [];
         membersSnap.forEach(m => members.push({ id: m.id, uid: m.id, ...m.data() }));
         setCoupleMembers(members);
-      }, (error) => console.warn('Members listener error', error));
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'users'));
       currentUnsubs.push(unsubMembers);
 
       // Deposits
@@ -359,7 +360,7 @@ export function useFirebaseSync() {
         const arch: any[] = [];
         querySnapshot.forEach(docSnap => arch.push({ id: docSnap.id, ...docSnap.data({ serverTimestamps: 'estimate' }) }));
         setAchievements(arch);
-      }, (error) => console.warn('Achievements listener error', error));
+      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/achievements`));
       currentUnsubs.push(unsubAchievements);
 
       // Pinboard links
@@ -368,7 +369,7 @@ export function useFirebaseSync() {
         const linksData: any[] = [];
         querySnapshot.forEach(docSnap => linksData.push({ id: docSnap.id, ...docSnap.data({ serverTimestamps: 'estimate' }) }));
         setPinboardLinks(linksData);
-      }, (error) => console.warn('Pinboard listener error', error));
+      }, (error) => handleFirestoreError(error, OperationType.LIST, `casais/${currentCasalId}/pinboard_links`));
       currentUnsubs.push(unsubLinks);
     };
 

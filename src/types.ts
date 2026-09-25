@@ -39,6 +39,8 @@ export interface TripConfig {
   sharedAlbumUrl?: string;
   fcmTokens?: string[];
   relationshipStartDate?: string;
+  /** "100 envelopes" challenge: numbers already opened */
+  envelopes?: number[];
 }
 
 export const DEFAULT_TRIP_CONFIG: TripConfig = {

@@ -11,6 +11,12 @@ export interface ToastMessage {
   type: 'info' | 'success' | 'milestone';
 }
 
+export interface SyncIssue {
+  path: string;
+  code: string;
+  at: number;
+}
+
 export type AddToastFn = (title: string, message: string, type?: 'info' | 'success' | 'milestone', duration?: number) => void;
 
 interface AppState {
@@ -85,6 +91,11 @@ interface AppState {
 
   // Notifications
   hasUnreadNotifications: boolean;
+
+  // Background sync problems (permission / network), shown as one banner
+  syncIssues: SyncIssue[];
+  reportSyncIssue: (issue: SyncIssue) => void;
+  clearSyncIssues: () => void;
   setHasUnreadNotifications: (v: boolean) => void;
 
   resetData: () => void;
@@ -200,6 +211,12 @@ export const useAppStore = create<AppState>((set) => ({
   isPremium: false,
   setPremium: (isPremium) => set({ isPremium }),
 
+  syncIssues: [],
+  reportSyncIssue: (issue) => set((state) => ({
+    syncIssues: [...state.syncIssues.filter((i) => i.path !== issue.path), issue].slice(-10),
+  })),
+  clearSyncIssues: () => set({ syncIssues: [] }),
+
   hasUnreadNotifications: false,
   setHasUnreadNotifications: (hasUnreadNotifications) => set({ hasUnreadNotifications }),
 
@@ -219,6 +236,7 @@ export const useAppStore = create<AppState>((set) => ({
     mode: 'casal',
     groupName: '',
     needsModeChoice: false,
+    syncIssues: [],
     hasUnreadNotifications: false
   }),
 }));

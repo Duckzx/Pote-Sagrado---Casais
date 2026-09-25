@@ -10,6 +10,7 @@ import { BlurFade } from "./magicui/blur-fade";
 import { ShimmerButton } from "./magicui/shimmer-button";
 import { BorderBeam } from "./magicui/border-beam";
 import { vibrate } from "../lib/audio";
+import { Portal } from "./ui/portal";
 
 interface ModePickerProps {
   /** When opened from Settings it can be dismissed */
@@ -52,6 +53,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
   };
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-[240] bg-cookbook-bg/95 backdrop-blur-xl overflow-y-auto">
       <div className="min-h-full flex flex-col justify-center px-6 py-10 max-w-md mx-auto">
         <BlurFade delay={0.05}>
@@ -153,5 +155,6 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
         </div>
       </div>
     </div>
+    </Portal>
   );
 };

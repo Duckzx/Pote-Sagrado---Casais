@@ -9,6 +9,7 @@ import { PremiumModal } from "./components/PremiumModal";
 import { useAppStore } from "./store/useAppStore";
 import { ModePicker } from "./components/ModePicker";
 import { LoginScreen } from "./components/LoginScreen";
+import { SyncIssueBanner } from "./components/Diagnostics";
 import { MODE_TABS } from "./lib/mode";
 
 // ========================================
@@ -297,7 +298,7 @@ function AppContent() {
       />
 
       {/* Main Content Area - Expands on Desktop */}
-      <main className="relative z-10 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0 w-full md:flex-1 md:ml-24 min-h-[100dvh]">
+      <main className="relative pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0 w-full md:flex-1 md:ml-24 min-h-[100dvh]">
         {!isDataReady ? (
           <TabSkeleton />
         ) : (
@@ -380,6 +381,8 @@ function AppContent() {
         </Suspense>
       )}
       
+      <SyncIssueBanner />
+
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />
 

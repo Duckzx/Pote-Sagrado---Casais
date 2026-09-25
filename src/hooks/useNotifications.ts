@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { collection, query, where, onSnapshot, writeBatch, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAppStore } from '../store/useAppStore';
+import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 
 /**
  * Real-time partner notifications.
@@ -44,7 +45,7 @@ export const useNotifications = ({ listen = true }: { listen?: boolean } = {}) =
       }
       isInitialLoad = false;
     }, (error) => {
-      console.error("Error listening to notifications:", error);
+      handleFirestoreError(error, OperationType.LIST, `casais/${casalId}/notifications`);
     });
 
     return () => unsubscribe();

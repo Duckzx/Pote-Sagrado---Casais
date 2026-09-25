@@ -41,6 +41,8 @@ export const LoginScreen: React.FC = () => {
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [googleBlocked, setGoogleBlocked] = useState(false);
+  // Arrived from a shared progress card (organic growth loop)
+  const [fromShare] = useState(() => new URLSearchParams(window.location.search).get("ref") === "share");
 
   const handleGoogle = async () => {
     setError(null);
@@ -85,6 +87,13 @@ export const LoginScreen: React.FC = () => {
       <ColorBends color="var(--theme-primary)" />
 
       <div className="relative z-10 w-full max-w-sm mx-auto text-center">
+        {fromShare && (
+          <BlurFade delay={0}>
+            <p className="inline-block mb-4 font-sans text-xs font-semibold text-cookbook-primary bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-full px-4 py-1.5">
+              💌 Viu o progresso de alguém? Crie o seu em 30 segundos
+            </p>
+          </BlurFade>
+        )}
         <BlurFade delay={0.05}>
           <SacredJarIcon className="w-24 h-24 mx-auto animate-float drop-shadow-xl text-cookbook-primary" />
         </BlurFade>

@@ -169,6 +169,7 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
 ];
 /* Component */ import { compressImage } from "../lib/imageUtils";
 import { Camera, Plane, ArrowRight, Heart, Sparkles } from "lucide-react";
+import { EnvelopeChallenge } from "./missions/EnvelopeChallenge";
 import { CheapDateModal } from "./CheapDateModal";
 export const MissoesTab: React.FC<MissoesTabProps> = ({
   stats,
@@ -550,7 +551,11 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         </p>{" "}
       </div>{" "}
 
-      {/* AI Assistant Triggers */}{" "}
+      <div className="max-w-xl mx-auto w-full">
+        <EnvelopeChallenge />
+      </div>
+
+      {/* Tools */}{" "}
       <div className="space-y-4 max-w-xl mx-auto w-full">
         {" "}
         
