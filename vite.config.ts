@@ -38,6 +38,11 @@ export default defineConfig(({mode}) => {
         }
       })
     ],
+    define: {
+      __APP_VERSION__: JSON.stringify(
+        `${(process.env.VERCEL_GIT_COMMIT_SHA || 'local').slice(0, 7)} · ${new Date().toISOString().slice(0, 16)}`,
+      ),
+    },
     build: {
       rollupOptions: {
         output: {

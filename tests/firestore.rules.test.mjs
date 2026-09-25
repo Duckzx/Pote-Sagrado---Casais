@@ -36,6 +36,8 @@ await t('read config', getDoc(doc(B, `casais/${C}/trip_config/main`)));
 await t('save config full', setDoc(doc(A, `casais/${C}/trip_config/main`), { goalType: 'travel', destination: 'Roma', origin: 'SP', goalAmount: 5000, customChallenges: [], sharedAlbumUrl: '', relationshipStartDate: '2025-01-01', monthlyPrize: 'jantar', theme: 'rose', updatedAt: serverTimestamp() }, { merge: true }));
 await t('config lat/lng', setDoc(doc(A, `casais/${C}/trip_config/main`), { lat: 1.2, lng: 3.4 }, { merge: true }));
 await t('config battle', setDoc(doc(B, `casais/${C}/trip_config/main`), { battleChallenges: [{ id: 'x' }] }, { merge: true }));
+await t('envelope challenge', setDoc(doc(B, `casais/${C}/trip_config/main`), { envelopes: arrayUnion(7) }, { merge: true }));
+await t('diagnostics writes', setDoc(doc(A, `casais/${C}`), { lastActiveAt: 'x' }, { merge: true }));
 await t('config fcm', setDoc(doc(B, `casais/${C}/trip_config/main`), { fcmTokens: arrayUnion('tok') }, { merge: true }));
 await t('list deposits', getDocs(query(collection(A, `casais/${C}/deposits`), orderBy('createdAt', 'desc'), limit(500))));
 await t('aggregate', getAggregateFromServer(collection(A, `casais/${C}/deposits`), { total: sum('amount') }));

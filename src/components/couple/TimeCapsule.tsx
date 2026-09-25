@@ -15,8 +15,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useAppStore } from "../../store/useAppStore";
+import { Portal } from "../ui/portal";
 import { openPremiumModal } from "../../lib/premium";
 import { useModeCopy } from "../../lib/mode";
+import { handleFirestoreError, OperationType } from "../../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../../lib/audio";
 
 interface Capsule {
@@ -75,7 +77,7 @@ export const TimeCapsule: React.FC = () => {
     return onSnapshot(
       q,
       (snap) => setCapsules(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Capsule))),
-      (e) => console.error("Capsules listener error", e),
+      (e) => handleFirestoreError(e, OperationType.LIST, `casais/${casalId}/capsules`),
     );
   }, [casalId]);
 
@@ -266,6 +268,7 @@ export const TimeCapsule: React.FC = () => {
         )}
       </AnimatePresence>
 
+      <Portal>
       <AnimatePresence>
         {reading && (
           <motion.div
@@ -297,6 +300,7 @@ export const TimeCapsule: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
     </section>
   );
 };

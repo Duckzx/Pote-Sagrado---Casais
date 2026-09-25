@@ -1,334 +1,235 @@
-import React, { useRef, useState } from "react";
-import { Sparkles, Copy, Heart, Instagram, Facebook, ArrowUpRight } from "lucide-react";
-import html2canvas from "html2canvas";
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { Download, Link2, Share2, X, Loader2 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { renderShareCard, ShareFormat } from "../lib/shareCard";
+import { ShimmerButton } from "./magicui/shimmer-button";
+import { vibrate } from "../lib/audio";
 
 interface ShareableWidgetProps {
   goalAmount: number;
   totalSaved: number;
   destination: string;
+  /** Optional title when opened by a milestone (e.g. "Vocês chegaram a 50%!") */
+  celebration?: string;
   onClose: () => void;
 }
 
 const WhatsappIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.88-.788-1.482-1.761-1.655-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.88-.788-1.482-1.761-1.655-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.052 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
   </svg>
-)
+);
 
-const ShareButton = ({ icon, label, onClick, active }: any) => (
-  <button 
-    onClick={(e) => { e.stopPropagation(); onClick(); }}
-    className={`flex flex-col items-center justify-center gap-[6px] w-[56px] h-[64px] rounded-xl border transition-colors
-      ${active 
-        ? "bg-[#C5A059] border-[#C5A059] text-[#1A1A1A]" 
-        : "bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
-      }`}
-  >
-    <div className={`${active ? 'text-[#1A1A1A]' : ''}`}>
-      {icon}
-    </div>
-    <span className="font-sans leading-tight font-medium" style={{ fontSize: '8px' }}>{label}</span>
-  </button>
-)
-
-const PotDrawing = ({ percentage }: { percentage: number }) => {
-  const fillHeight = (percentage / 100) * 80;
-  return (
-    <div className="relative w-32 h-44 mx-auto mb-6 flex justify-center items-center isolate">
-      {/* Background radial glow */}
-      <div className="absolute w-28 h-28 bg-[#C5A059]/30 blur-[40px] rounded-full z-0 pointer-events-none" />
-      
-      <svg
-        viewBox="0 -10 100 130"
-        className="w-full h-full relative z-10 drop-shadow-[0_0_15px_rgba(253,246,227,0.3)] pointer-events-none"
-        overflow="visible"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <clipPath id="potClipWidget2">
-            <path d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z" />
-          </clipPath>
-        </defs>
-        
-        {/* Fill Area with glow */}
-        <g clipPath="url(#potClipWidget2)">
-          <rect
-            x="0"
-            y={105 - fillHeight}
-            width="100"
-            height={fillHeight + 20}
-            fill="#C5A059"
-          />
-        </g>
-        
-        {/* Outline */}
-        <path
-          d="M35 15h30"
-          stroke="#FDF6E3"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-        <path
-          d="M32 25h36"
-          stroke="#FDF6E3"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray="4 4"
-        />
-        <path
-          d="M35 25v10C35 45 20 50 20 65v30a10 10 0 0 0 10 10h40a10 10 0 0 0 10-10V65c0-15-15-20-15-30V25Z"
-          fill="none"
-          stroke="#FDF6E3"
-          strokeWidth="4"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        
-        {/* Shine */}
-        <path
-          d="M45 40v30"
-          stroke="#fff"
-          strokeWidth="4"
-          strokeOpacity="0.8"
-          strokeLinecap="round"
-        />
-      </svg>
-      {/* Text inside the jar */}
-      <div className="absolute inset-0 flex items-center justify-center translate-y-6 z-20 pointer-events-none">
-        <span className="font-serif text-[42px] font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-none">
-          {percentage.toFixed(0)}%
-        </span>
-      </div>
-    </div>
-  );
-};
+/** Link used in every share: brings new people to the app (not an invite to this pot). */
+const shareUrl = () => `${window.location.origin}/?ref=share`;
 
 export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   goalAmount,
   totalSaved,
   destination,
+  celebration,
   onClose,
 }) => {
-  const casalId = useAppStore(s => s.casalId);
-  const deposits = useAppStore(s => s.deposits);
-  const addToast = useAppStore(s => s.addToast);
-  const [isExporting, setIsExporting] = useState(false);
-  const widgetRef = useRef<HTMLDivElement>(null);
-  
-  const giveXpToPartner = async (platform: string) => {
-    try {
-      const user = auth.currentUser;
-      if (!user || !casalId) return;
-      
-      const partnerDeposit = deposits.find(d => d.who && d.who !== user.uid);
-      if (!partnerDeposit) return;
-      
-      const partnerUid = partnerDeposit.who;
-      const partnerName = partnerDeposit.whoName;
+  const addToast = useAppStore((s) => s.addToast);
+  const mode = useAppStore((s) => s.mode);
+  const groupName = useAppStore((s) => s.groupName);
+  const theme = useAppStore((s) => s.theme);
 
-      // Ensure user doesn't spam for XP (max 1 bonus per day per platform)
-      const todayString = new Date().toISOString().split('T')[0];
-      const alreadyGained = deposits.some(d => 
-        d.who === partnerUid && 
-        d.isXpBonus === true &&
-        d.createdAt && 
-        d.createdAt.toDate && 
-        new Date(d.createdAt.toDate()).toISOString().split('T')[0] === todayString
-      );
-      
-      if (alreadyGained) return;
-
-      await addDoc(collection(db, `casais/${casalId}/deposits`), {
-        amount: 0,
-        type: "income",
-        action: `Seu parceiro(a) compartilhou no ${platform}! ✨`,
-        who: partnerUid,
-        whoName: partnerName,
-        createdAt: serverTimestamp(),
-        isXpBonus: true
-      });
-      
-      addToast("Gamificação", `Seu parceiro ganhou +50 XP pelo seu compartilhamento no ${platform}! 🎁`, "success");
-    } catch(e) {
-      console.error("XP Error", e);
-    }
-  };
+  const [format, setFormat] = useState<ShareFormat>("story");
+  const [blob, setBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   const percentage = goalAmount > 0 ? Math.min((totalSaved / goalAmount) * 100, 100) : 0;
-  
-  const formattedTotal = Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaved);
-  const formattedGoal = Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(goalAmount);
-  
-  const handleShare = async () => {
-    try {
-      setIsExporting(true);
-      await new Promise((resolve) => setTimeout(resolve, 100)); // wait for layout
-      if (!widgetRef.current) return;
-      
-      const canvas = await html2canvas(widgetRef.current, {
-        backgroundColor: '#151515',
-        scale: 3,
-        useCORS: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          // Remove unsupported filters like drop-shadow that bug out html2canvas
-          const svgs = clonedDoc.querySelectorAll('svg.drop-shadow-\\[0_0_15px_rgba\\(253\\,246\\,227\\,0\\.3\\)\\]');
-          svgs.forEach(el => {
-             el.classList.remove('drop-shadow-[0_0_15px_rgba(253,246,227,0.3)]');
-          });
-        }
-      });
+  const pct = Math.round(percentage);
+  const goalText = destination?.trim() || "o nosso sonho";
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setIsExporting(false);
-          return;
-        }
-
-        const file = new File([blob], "pote-sagrado-status.png", { type: "image/png" });
-        let shared = false;
-        try {
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: "Pote Sagrado",
-              text: "Olha nosso progresso na viagem! ✈️",
-            });
-            shared = true;
-          }
-        } catch (shareErr) {
-          console.error("Share API failed:", shareErr);
-        }
-        
-        if (!shared) {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.download = "pote-sagrado-status.png";
-          link.href = url;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }
-        setIsExporting(false);
-        giveXpToPartner('Native Share / Download');
-      }, 'image/png', 1.0);
-    } catch (err: any) {
-      console.error(err);
-      setIsExporting(false);
+  const { headline, subline, message } = useMemo(() => {
+    const done = pct >= 100;
+    if (mode === "solo") {
+      return {
+        headline: done ? "Meta batida! Eu consegui 🎉" : `Já juntei ${pct}% do meu sonho`,
+        subline: `rumo a: ${goalText}`,
+        message: `${done ? "Bati minha meta" : `Já juntei ${pct}% para ${goalText}`} no Pote Sagrado 🍯✨ Crie o seu pote grátis:`,
+      };
     }
+    if (mode === "grupo") {
+      const who = groupName ? `A turma ${groupName}` : "A turma";
+      return {
+        headline: done ? `${who} bateu a meta! 🎉` : `${who} já juntou ${pct}%`,
+        subline: `rumo a: ${goalText}`,
+        message: `${done ? "Batemos a meta" : `Já juntamos ${pct}% para ${goalText}`} com a turma no Pote Sagrado 🫶 Monte o pote da sua turma:`,
+      };
+    }
+    return {
+      headline: done ? "Conseguimos! Meta batida 🎉" : `Já juntamos ${pct}% do nosso sonho`,
+      subline: `rumo a: ${goalText}`,
+      message: `${done ? "Batemos nossa meta" : `Já juntamos ${pct}% para ${goalText}`} no Pote Sagrado 💞 Crie o pote de vocês:`,
+    };
+  }, [mode, groupName, pct, goalText]);
+
+  // Render the card as soon as the modal opens (and when the format changes),
+  // so tapping "share" can call the native sheet immediately.
+  useEffect(() => {
+    let cancelled = false;
+    let url: string | null = null;
+    setBlob(null);
+    setFailed(false);
+    renderShareCard({
+      percentage,
+      totalSaved,
+      goalAmount,
+      goalLabel: goalText,
+      headline,
+      subline,
+      siteUrl: window.location.origin,
+      format,
+    })
+      .then((b) => {
+        if (cancelled) return;
+        url = URL.createObjectURL(b);
+        setBlob(b);
+        setPreviewUrl(url);
+      })
+      .catch((e) => {
+        console.error("Share card failed", e);
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+    // theme: colors come from CSS variables
+  }, [format, percentage, totalSaved, goalAmount, goalText, headline, subline, theme]);
+
+  const fileName = `pote-sagrado-${pct}.png`;
+
+  const download = () => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    addToast("Imagem salva 📸", "Agora é só postar nos Stories!", "success");
   };
 
-  const copyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    addToast("Link copiado!", "Você pode colar esse link para seus amigos.", "success");
-    giveXpToPartner('Link Copiado');
+  const shareNative = async () => {
+    if (!blob) return;
+    vibrate(15);
+    const file = new File([blob], fileName, { type: "image/png" });
+    const text = `${message} ${shareUrl()}`;
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], text, title: "Pote Sagrado" });
+        return;
+      }
+      if (navigator.share) {
+        await navigator.share({ text, url: shareUrl(), title: "Pote Sagrado" });
+        download();
+        return;
+      }
+    } catch (e: any) {
+      if (e?.name === "AbortError") return; // user closed the sheet
+      console.warn("Native share failed, downloading instead", e);
+    }
+    download();
   };
 
   const shareWhatsApp = () => {
-    const text = encodeURIComponent(`Acompanhe nossa meta para ${destination || "nossa viagem"}! Já conseguimos ${percentage.toFixed(0)}% do valor. Acesse: ${window.location.href}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-    giveXpToPartner('WhatsApp');
+    const text = encodeURIComponent(`${message} ${shareUrl()}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
-  const shareFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    giveXpToPartner('Facebook');
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${message} ${shareUrl()}`);
+      addToast("Copiado!", "Cole onde quiser compartilhar.", "success");
+    } catch {
+      addToast("Ops!", "Não foi possível copiar.", "info");
+    }
   };
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      style={{
-        background: "rgba(0,0,0,0.85)",
-        backdropFilter: "blur(12px)",
-      }}
+      className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md"
       onClick={onClose}
     >
-      <div className="w-full max-w-[360px] animate-scale-up" onClick={(e) => e.stopPropagation()}>
-        <div
-          ref={widgetRef}
-          className="rounded-[32px] p-6 shadow-2xl relative overflow-hidden"
-          style={{ backgroundColor: "#151515" }}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", damping: 24, stiffness: 260 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-[400px] max-h-[100dvh] overflow-y-auto bg-[#1B0F14] text-white rounded-t-[32px] sm:rounded-[32px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="font-sans text-[10px] uppercase tracking-[0.25em] font-bold text-white/50">Compartilhar</p>
+            <h3 className="font-serif text-2xl leading-tight">{celebration || "Mostre sua conquista ✨"}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full bg-white/10" aria-label="Fechar">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Format toggle */}
+        <div className="flex p-1 rounded-full bg-white/10 mb-4">
+          {(["story", "feed"] as ShareFormat[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFormat(f)}
+              className={`flex-1 py-2 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold transition-colors ${
+                format === f ? "bg-white text-[#1B0F14]" : "text-white/60"
+              }`}
+            >
+              {f === "story" ? "Stories 9:16" : "Feed 4:5"}
+            </button>
+          ))}
+        </div>
+
+        {/* Preview */}
+        <div className={`relative mx-auto rounded-2xl overflow-hidden bg-white/5 ${format === "story" ? "w-[56%] aspect-[9/16]" : "w-[72%] aspect-[4/5]"}`}>
+          {previewUrl && !failed ? (
+            <img src={previewUrl} alt="Prévia da imagem para compartilhar" className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/50">
+              {failed ? <span className="font-sans text-xs px-4 text-center">Não foi possível gerar a imagem.</span> : <Loader2 className="animate-spin" />}
+            </div>
+          )}
+        </div>
+
+        <ShimmerButton
+          onClick={shareNative}
+          disabled={!blob}
+          background="var(--theme-primary)"
+          className="w-full mt-5 py-4 gap-2 font-sans text-xs uppercase tracking-[0.2em] font-bold disabled:opacity-50"
         >
-          {/* Custom Sparkle Background Element */}
-          <div className="absolute top-8 right-6 text-[#3A362D] opacity-40 pointer-events-none">
-            <svg width="80" height="80" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M 50 10 Q 50 50 90 50 Q 50 50 50 90 Q 50 50 10 50 Q 50 50 50 10 Z" />
-              <circle cx="20" cy="80" r="6" fill="currentColor" />
-              <path d="M 80 15 Q 80 25 90 25 Q 80 25 80 35 Q 80 25 70 25 Q 80 25 80 15 Z" />
-            </svg>
-          </div>
+          <Share2 size={16} /> Compartilhar imagem
+        </ShimmerButton>
 
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Header: -- POTE SAGRADO -- */}
-            <div className="flex items-center gap-4 mb-8 relative z-20">
-              <div className="w-6 h-[1px] bg-[#C5A059] opacity-60" />
-              <span className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-[#C5A059]">
-                Pote Sagrado
-              </span>
-              <div className="w-6 h-[1px] bg-[#C5A059] opacity-60" />
-            </div>
-
-            <PotDrawing percentage={percentage} />
-
-            <h2 className="font-serif text-[28px] leading-tight text-white mb-6 text-center relative z-20">
-              <span className="italic text-[#C5A059]">Destino:</span>{" "}
-              <span className="italic">{destination || "Nossa Viagem"}</span>
-            </h2>
-
-            {/* Progress Box */}
-            <div className="w-full bg-[#1F1F1F] rounded-2xl p-4 mb-4 shadow-inner relative z-20">
-              <div className="flex justify-between items-center mb-3">
-                <span className="font-sans text-[9px] uppercase tracking-[0.1em] text-white/60 font-bold">
-                  Progresso Guardado
-                </span>
-                <span className="font-sans text-[14px] font-bold text-[#C5A059]">
-                  {formattedTotal}
-                </span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-[#111] overflow-hidden mb-3 border border-white/5">
-                <div 
-                  className="h-full bg-[linear-gradient(90deg,#967332,#C5A059)] rounded-full"
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-              <div className="text-[10px] text-white/40 font-sans tracking-wide">
-                Meta: {formattedGoal} • {percentage.toFixed(0)}% concluído
-              </div>
-            </div>
-
-            {/* Footer heart text */}
-            <div className="flex items-center justify-center gap-2 text-white/30 text-[9px] font-bold relative z-20 mt-4 mb-2">
-              <Heart size={10} className="text-white/30" />
-              Obrigado por apoiar essa jornada!
-            </div>
-
-          </div>
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          <button onClick={download} disabled={!blob} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white/10 active:scale-95 disabled:opacity-40">
+            <Download size={18} />
+            <span className="font-sans text-[10px] font-bold">Salvar</span>
+          </button>
+          <button onClick={shareWhatsApp} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-[#25D366]/20 text-[#7CF0A8] active:scale-95">
+            <WhatsappIcon />
+            <span className="font-sans text-[10px] font-bold">WhatsApp</span>
+          </button>
+          <button onClick={copyLink} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white/10 active:scale-95">
+            <Link2 size={18} />
+            <span className="font-sans text-[10px] font-bold">Copiar texto</span>
+          </button>
         </div>
 
-        {/* Share action box - OUTSIDE the exportable ref */}
-        <div className="w-full bg-[#151515] rounded-[32px] p-6 shadow-2xl mt-4 border border-white/5">
-          <h4 className="font-sans text-[9px] uppercase tracking-[0.1em] font-bold text-white/60 mb-1">
-            Compartilhe e ajude
-          </h4>
-          <p className="font-sans text-[10px] text-white/40 mb-4 tracking-wide">
-            Juntos, transformando rotina em passagem.
-          </p>
-          <div className="flex justify-between gap-1">
-            <ShareButton icon={<WhatsappIcon />} label="WhatsApp" onClick={shareWhatsApp} />
-            <ShareButton icon={<Instagram size={18} />} label="Instagram" onClick={() => handleShare()} />
-            <ShareButton icon={<Facebook size={18} />} label="Facebook" onClick={shareFacebook} />
-            <ShareButton icon={<Copy size={18} />} label="Copiar link" onClick={copyLink} />
-            <ShareButton icon={<ArrowUpRight size={18} />} label="Salvar Imagem" onClick={handleShare} active={isExporting} />
-          </div>
-        </div>
-      </div>
+        <p className="font-sans text-[10px] text-white/40 text-center mt-4 leading-relaxed">
+          Dica: poste nos Stories e marque quem está juntando com você 💞
+        </p>
+      </motion.div>
     </div>
   );
 };

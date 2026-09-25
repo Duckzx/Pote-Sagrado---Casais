@@ -57,8 +57,40 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   if (code === 'unavailable' && READ_OPERATIONS.has(operationType)) return;
 
   try {
-    useAppStore.getState().addToast('Ops!', friendlyMessage(code, operationType), 'info');
+    const store = useAppStore.getState();
+    if (READ_OPERATIONS.has(operationType)) {
+      // Background loads: one discreet banner instead of a toast per listener
+      store.reportSyncIssue({ path: path || '', code: code || 'unknown', at: Date.now() });
+      return;
+    }
+    const message = friendlyMessage(code, operationType);
+    const area = describePath(path);
+    const now = Date.now();
+    if (lastToast.message === message && now - lastToast.at < 8000) return; // no repeated toasts
+    lastToast = { message, at: now };
+    store.addToast('Ops!', area ? `${message} (${area})` : message, 'info');
   } catch {
     /* store not ready */
   }
+}
+
+let lastToast = { message: '', at: 0 };
+
+const AREAS: [RegExp, string][] = [
+  [/deposits/, 'depósitos'],
+  [/trip_config/, 'meta'],
+  [/gallery/, 'álbum'],
+  [/achievements/, 'conquistas'],
+  [/pinboard_links/, 'mural'],
+  [/capsules/, 'cápsula do tempo'],
+  [/love_/, 'cartas'],
+  [/notifications/, 'notificações'],
+  [/^users/, 'perfil'],
+  [/^casais\/[^/]+$/, 'pote'],
+];
+
+/** Human name of the data area, shown in error messages. */
+export function describePath(path: string | null) {
+  if (!path) return '';
+  return AREAS.find(([re]) => re.test(path))?.[1] || '';
 }

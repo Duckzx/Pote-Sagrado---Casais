@@ -28,6 +28,7 @@ import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { compressImage } from "../lib/imageUtils";
 import { MODE_OPTIONS } from "../lib/mode";
 import { ModePicker } from "./ModePicker";
+import { Diagnostics } from "./Diagnostics";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
@@ -133,6 +134,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [prize, setPrize] = useState(currentPrize || "");
   const [inviteCodeInput, setInviteCodeInput] = useState("");
   const [showModePicker, setShowModePicker] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const mode = useAppStore(s => s.mode);
   const groupName = useAppStore(s => s.groupName);
 
@@ -854,6 +856,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         {/* ======================= AVANÇADO TAB ======================= */}
         <TabsContent value="avancado">
           <div className="space-y-6 animate-fade-in">
+            {/* Sync diagnostics */}
+            <button
+              onClick={() => setShowDiagnostics(true)}
+              className="w-full text-left bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 active:scale-[0.98] transition-transform"
+            >
+              <span className="text-2xl">🩺</span>
+              <div className="flex-1">
+                <p className="font-serif text-xl text-cookbook-text leading-tight">Diagnóstico de sincronização</p>
+                <p className="font-sans text-xs text-cookbook-text/50 mt-0.5">Algo não salva ou não aparece? Teste o acesso a cada função.</p>
+              </div>
+            </button>
             {/* Support & Legal */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col transition-all">
               <div className="flex items-center gap-2 text-cookbook-text mb-6">
@@ -1047,6 +1060,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       </Tabs>
 
       {showModePicker && <ModePicker onClose={() => setShowModePicker(false)} />}
+      {showDiagnostics && <Diagnostics onClose={() => setShowDiagnostics(false)} />}
     </div>
   );
 };

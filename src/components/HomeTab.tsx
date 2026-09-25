@@ -423,6 +423,26 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     setShowBreakConfirm(true);
   };
   const { mode, ...copy } = useModeCopy();
+
+  // Milestone celebration: crossing 25/50/75/100% opens the share card
+  const [shareCelebration, setShareCelebration] = useState<string | null>(null);
+  useEffect(() => {
+    if (!casalId || goalAmount <= 0) return;
+    const pct = (totalSaved / goalAmount) * 100;
+    const reached = [100, 75, 50, 25].find((m) => pct >= m) || 0;
+    const key = `pote_lastMilestone_${casalId}_${goalAmount}`;
+    const stored = Number(localStorage.getItem(key) ?? -1);
+    if (stored < 0) {
+      localStorage.setItem(key, String(reached)); // first visit: just remember
+      return;
+    }
+    if (reached > stored) {
+      localStorage.setItem(key, String(reached));
+      const who = mode === "solo" ? "Você chegou" : mode === "grupo" ? "A turma chegou" : "Vocês chegaram";
+      setShareCelebration(reached === 100 ? "Meta batida! 🎉" : `${who} a ${reached}%! 🎉`);
+      setTimeout(() => setShowShareWidget(true), 1200);
+    }
+  }, [casalId, totalSaved, goalAmount, mode]);
   const daysTogether = useMemo(() => {
     if (!relationshipStartDate) return null;
     const start = new Date(relationshipStartDate + 'T00:00:00');
@@ -482,6 +502,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         goalAmount={goalAmount}
         onRewardClick={() => setShowDateModal(true)}
       />{" "}
+      {goalAmount > 0 && (
+        <button
+          onClick={() => setShowShareWidget(true)}
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full border border-cookbook-primary/30 bg-cookbook-primary/10 text-cookbook-primary font-sans text-[11px] uppercase tracking-[0.15em] font-bold active:scale-[0.98] transition-transform"
+        >
+          <Share2 size={15} /> Mostrar {mode === "solo" ? "meu" : "nosso"} progresso nos Stories
+        </button>
+      )}
       {/* Break Pot Button if reached goal */}{" "}
       {totalSaved >= goalAmount && goalAmount > 0 && (
         <div className="animate-pulse-slow">
@@ -866,7 +894,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             goalAmount={goalAmount}
             totalSaved={totalSaved}
             destination={destination}
-            onClose={() => setShowShareWidget(false)}
+            celebration={shareCelebration || undefined}
+            onClose={() => {
+              setShowShareWidget(false);
+              setShareCelebration(null);
+            }}
           />,
           document.body,
         )}{" "}

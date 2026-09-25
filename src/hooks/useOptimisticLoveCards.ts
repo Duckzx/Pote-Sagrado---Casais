@@ -4,6 +4,7 @@ import { db, auth } from '../firebase';
 import { CardInteraction, LoveCardCategory, LoveCardsProgress } from '../types';
 import { ALL_LOVE_CARDS, getCardsByLevel } from '../data/loveCards';
 import { useAppStore } from '../store/useAppStore';
+import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 
 const DEFAULT_PROGRESS: LoveCardsProgress = {
   love_romance: 1,
@@ -59,7 +60,7 @@ export function useOptimisticLoveCards(casalId: string | null) {
         setState(s => ({ ...s, interactions, isLoading: false }));
       },
       (e) => {
-        console.error('Failed to load love cards data:', e);
+        handleFirestoreError(e, OperationType.LIST, `casais/${casalId}/love_interactions`);
         setState(s => ({ ...s, isLoading: false }));
       }
     );
@@ -75,7 +76,7 @@ export function useOptimisticLoveCards(casalId: string | null) {
           goldDust: data.goldDust ?? s.goldDust,
         }));
       },
-      (e) => console.error('Failed to load love cards progress:', e)
+      (e) => handleFirestoreError(e, OperationType.GET, `casais/${casalId}/love_progress/main`)
     );
 
     return () => {
