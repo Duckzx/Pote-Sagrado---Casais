@@ -16,6 +16,8 @@ export interface Deposit {
   comments?: { id: string; text: string; who: string; whoName: string; createdAt: number }[];
   reactions?: Record<string, string>;
   isXpBonus?: boolean;
+  /** Envelope number when the deposit came from the 100 envelopes challenge */
+  envelope?: number;
 }
 
 export interface Challenge {

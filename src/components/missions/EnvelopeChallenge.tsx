@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
-import { addDoc, arrayUnion, collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { useAppStore } from "../../store/useAppStore";
 import { Portal } from "../ui/portal";
@@ -12,25 +12,38 @@ import { ShareableWidget } from "../ShareableWidget";
 import { Share2 } from "lucide-react";
 
 const TOTAL = 100;
-const EMPTY: number[] = [];
 const GOAL = (TOTAL * (TOTAL + 1)) / 2; // R$ 5.050
 const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
 
+const ENVELOPE_ACTION = /Desafio dos Envelopes #(\d+)/;
+
 /**
  * "Desafio dos 100 envelopes": each envelope N adds R$ N to the pot.
- * Opened envelopes live on the shared goal document, so everyone in the
- * pot sees the grid update in real time.
+ * An envelope is open while its deposit exists: deleting the deposit from
+ * the history (or tapping "Desfazer") reopens it for everyone in the pot.
  */
 export const EnvelopeChallenge: React.FC = () => {
   const casalId = useAppStore((s) => s.casalId);
-  const opened = useAppStore((s) => s.tripConfig?.envelopes) || EMPTY;
+  const deposits = useAppStore((s) => s.deposits);
   const addToast = useAppStore((s) => s.addToast);
   const [confirming, setConfirming] = useState<number | null>(null);
+  const [undoing, setUndoing] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [sharing, setSharing] = useState(false);
   const mode = useAppStore((s) => s.mode);
 
+  // envelope number -> deposit id (derived from the history)
+  const depositByEnvelope = useMemo(() => {
+    const map = new Map<number, string>();
+    deposits.forEach((d: any) => {
+      if (d.type === "expense") return;
+      const n = typeof d.envelope === "number" ? d.envelope : Number(ENVELOPE_ACTION.exec(d.action || "")?.[1]);
+      if (n >= 1 && n <= TOTAL && !map.has(n)) map.set(n, d.id);
+    });
+    return map;
+  }, [deposits]);
+  const opened = useMemo(() => [...depositByEnvelope.keys()], [depositByEnvelope]);
   const openedSet = useMemo(() => new Set(opened), [opened]);
   const saved = useMemo(() => opened.reduce((sum, n) => sum + n, 0), [opened]);
   const pct = Math.round((saved / GOAL) * 100);
@@ -47,10 +60,10 @@ export const EnvelopeChallenge: React.FC = () => {
     if (!user || !casalId || openedSet.has(n)) return;
     setBusy(true);
     try {
-      await setDoc(doc(db, `casais/${casalId}/trip_config`, "main"), { envelopes: arrayUnion(n) }, { merge: true });
       await addDoc(collection(db, `casais/${casalId}/deposits`), {
         amount: n,
         type: "income",
+        envelope: n,
         action: `Desafio dos Envelopes #${n}`,
         who: user.uid,
         whoName: user.displayName || user.email?.split("@")[0] || "Alguém",
@@ -67,7 +80,24 @@ export const EnvelopeChallenge: React.FC = () => {
       );
       setConfirming(null);
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `casais/${casalId}/trip_config`);
+      handleFirestoreError(e, OperationType.WRITE, `casais/${casalId}/deposits`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Undo: removes the envelope's deposit, which reopens the envelope. */
+  const undoEnvelope = async (n: number) => {
+    const depositId = depositByEnvelope.get(n);
+    if (!casalId || !depositId) return;
+    setBusy(true);
+    try {
+      await deleteDoc(doc(db, `casais/${casalId}/deposits`, depositId));
+      vibrate(20);
+      addToast("Envelope desfeito", `#${n} voltou para a grade e -${brl(n)} saiu do pote.`, "info");
+      setUndoing(null);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `casais/${casalId}/deposits`);
     } finally {
       setBusy(false);
     }
@@ -108,9 +138,8 @@ export const EnvelopeChallenge: React.FC = () => {
           return (
             <button
               key={n}
-              onClick={() => (done ? null : setConfirming(n))}
-              disabled={done}
-              aria-label={done ? `Envelope ${n} aberto` : `Abrir envelope ${n}`}
+              onClick={() => (done ? setUndoing(n) : setConfirming(n))}
+              aria-label={done ? `Envelope ${n} aberto (tocar para desfazer)` : `Abrir envelope ${n}`}
               className={`aspect-square rounded-xl font-sans text-xs font-bold transition-all active:scale-90 ${
                 done
                   ? "bg-gradient-to-br from-cookbook-primary to-cookbook-gold text-white shadow-inner"
@@ -197,6 +226,41 @@ export const EnvelopeChallenge: React.FC = () => {
                 Agora não
               </button>
               <BorderBeam size={90} duration={5} colorFrom="var(--theme-primary)" colorTo="var(--theme-gold)" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {undoing !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6"
+            onClick={() => !busy && setUndoing(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-xs rounded-[28px] bg-cookbook-bg p-6 text-center shadow-2xl"
+            >
+              <p className="text-4xl">↩️</p>
+              <p className="font-serif text-2xl text-cookbook-text mt-2">Desfazer envelope #{undoing}?</p>
+              <p className="font-sans text-xs text-cookbook-text/60 mt-2">
+                O depósito de {brl(undoing)} sai do histórico e o envelope volta para a grade.
+              </p>
+              <button
+                onClick={() => undoEnvelope(undoing)}
+                disabled={busy}
+                className="w-full mt-5 py-3.5 rounded-full bg-red-500 text-white font-sans text-xs uppercase tracking-widest font-bold disabled:opacity-50"
+              >
+                {busy ? "Desfazendo..." : "Desfazer"}
+              </button>
+              <button onClick={() => setUndoing(null)} className="mt-2 py-2 font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">
+                Manter
+              </button>
             </motion.div>
           </motion.div>
         )}
