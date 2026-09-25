@@ -1,0 +1,53 @@
+# Publica as regras do Firebase (Firestore + Storage) automaticamente.
+# Roda quando as regras mudam no branch main, ou manualmente em Actions.
+# Requer o segredo FIREBASE_SERVICE_ACCOUNT (JSON de uma conta de serviço
+# com o papel "Firebase Rules Admin") em Settings > Secrets and variables > Actions.
+name: Publicar regras do Firebase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - firestore.indexes.json
+      - storage.rules
+      - firebase.json
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-rules
+  cancel-in-progress: false
+
+jobs:
+  deploy-rules:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: potesagrado-34c79
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Credenciais
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "::error::Falta o segredo FIREBASE_SERVICE_ACCOUNT (veja o README)."
+            exit 1
+          fi
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
+
+      - name: Publicar regras do Firestore
+        run: npx --yes firebase-tools@14 deploy --only firestore:rules --project "$PROJECT_ID" --non-interactive
+
+      - name: Publicar índices do Firestore
+        continue-on-error: true
+        run: npx --yes firebase-tools@14 deploy --only firestore:indexes --project "$PROJECT_ID" --non-interactive
+
+      - name: Publicar regras do Storage
+        continue-on-error: true
+        run: npx --yes firebase-tools@14 deploy --only storage --project "$PROJECT_ID" --non-interactive

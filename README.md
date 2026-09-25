@@ -44,7 +44,10 @@
 ## ☁️ Publicação
 
 - **Site (Vercel)**: `npm run build` gera `dist/`. O `vercel.json` já cuida das rotas do app (ex: `/termos`).
-- **Firebase (obrigatório após atualizar)**: publique regras, índices e a função de push:
+- **Regras do Firebase automáticas (GitHub Actions)**: o fluxo `.github/workflows/firebase-rules.yml` publica `firestore.rules` e `storage.rules` sempre que mudam no `main` (ou manualmente em *Actions → Publicar regras do Firebase → Run workflow*). Configure uma vez:
+  1. Google Cloud Console → IAM → Contas de serviço (projeto `potesagrado-34c79`) → criar conta com os papéis **Firebase Rules Admin** e **Service Usage Consumer** → Chaves → Adicionar chave → JSON.
+  2. GitHub → Settings → Secrets and variables → Actions → *New repository secret* `FIREBASE_SERVICE_ACCOUNT` com o conteúdo do JSON.
+- **Firebase manual (alternativa)**: publique regras, índices e a função de push:
   ```bash
   npx firebase-tools deploy --only firestore,storage,functions
   ```
