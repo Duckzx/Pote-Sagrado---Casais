@@ -27,6 +27,8 @@ import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { compressImage } from "../lib/imageUtils";
+import { MODE_OPTIONS } from "../lib/mode";
+import { ModePicker } from "./ModePicker";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
@@ -124,6 +126,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
   const [inviteCodeInput, setInviteCodeInput] = useState("");
+  const [showModePicker, setShowModePicker] = useState(false);
+  const mode = useAppStore(s => s.mode);
+  const groupName = useAppStore(s => s.groupName);
 
   const handleApplyInviteCode = async () => {
     if (!inviteCodeInput) {
@@ -272,14 +277,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const me = coupleMembers.find(m => m.id === auth.currentUser?.uid);
 
   const handleShare = async () => {
-    const inviteUrl = new URL(window.location.href);
+    const inviteUrl = new URL(window.location.origin);
     const code = me?.inviteCode || casalId;
     if (code) {
       inviteUrl.searchParams.set("invite", code);
     }
     const shareData = {
       title: "Pote Sagrado",
-      text: "Vem economizar comigo para a nossa próxima viagem no Pote Sagrado!",
+      text:
+        mode === "grupo"
+          ? `Entra no nosso pote${groupName ? ` "${groupName}"` : ""} no Pote Sagrado! Bora juntar pro nosso plano 🫶`
+          : "Vem economizar comigo no Pote Sagrado! 💞",
       url: inviteUrl.toString(),
     };
     if (navigator.share) {
@@ -289,7 +297,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         console.error("Error sharing:", err);
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(inviteUrl.toString());
       addToast(
         "Copiado",
         "Link copiado para a área de transferência!",
@@ -483,6 +491,22 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       <section className="relative z-10 space-y-6 mt-6">
         <TabsContent value="geral">
           <div className="space-y-6 animate-fade-in">
+            {/* Modo de uso */}
+            <button
+              onClick={() => setShowModePicker(true)}
+              className="w-full text-left bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 active:scale-[0.98] transition-transform"
+            >
+              <span className="text-3xl">{MODE_OPTIONS.find((o) => o.id === mode)?.emoji}</span>
+              <div className="flex-1">
+                <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">Modo de uso</p>
+                <p className="font-serif text-xl text-cookbook-text leading-tight">
+                  {MODE_OPTIONS.find((o) => o.id === mode)?.title}
+                  {mode === "grupo" && groupName ? ` · ${groupName}` : ""}
+                </p>
+              </div>
+              <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">Mudar</span>
+            </button>
+
             {/* Card 1: Destino e Meta */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
               <div className="flex items-center gap-2 text-cookbook-text mb-6">
@@ -643,7 +667,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               <div className="flex items-center gap-2 text-cookbook-text mb-4">
                 <Bell size={18} className="text-cookbook-primary opacity-80" />
                 <h3 className="font-serif text-xl font-medium">
-                  Notificações e Parceria
+                  {mode === "solo" ? "Notificações e Convites" : mode === "grupo" ? "Notificações e Turma" : "Notificações e Parceria"}
                 </h3>
               </div>
               <div className="flex flex-col gap-3 mt-2">
@@ -676,7 +700,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     )}
                   </div>
                   <div className="font-sans text-[11px] text-cookbook-text/40 mb-3 leading-tight">
-                    Compartilhe este código ou o link abaixo com seu par para conectarem as contas.
+                    {mode === "grupo"
+                      ? "Compartilhe o código ou o link com a turma. Todo mundo que entrar vê o mesmo pote."
+                      : mode === "solo"
+                        ? "Quer dividir o pote com alguém? Compartilhe o código ou o link."
+                        : "Compartilhe este código ou o link abaixo com seu par para conectarem as contas."}
                   </div>
                   
                   <button
@@ -1010,6 +1038,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       </section>
       </Tabs>
 
+      {showModePicker && <ModePicker onClose={() => setShowModePicker(false)} />}
     </div>
   );
 };

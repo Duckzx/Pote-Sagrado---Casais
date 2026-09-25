@@ -8,6 +8,8 @@ import { GuidedTutorial } from "./components/GuidedTutorial";
 import { LegalConsentPopup } from "./components/LegalConsentPopup";
 import { PremiumModal } from "./components/PremiumModal";
 import { useAppStore } from "./store/useAppStore";
+import { ModePicker } from "./components/ModePicker";
+import { MODE_TABS } from "./lib/mode";
 
 // ========================================
 // Code Splitting — Lazy loaded tabs (T3)
@@ -26,6 +28,9 @@ const DisputaTab = lazy(() =>
 );
 const ConfigTab = lazy(() =>
   import("./components/ConfigTab").then((m) => ({ default: m.ConfigTab })),
+);
+const ExtratoTab = lazy(() =>
+  import("./components/ExtratoTab").then((m) => ({ default: m.ExtratoTab })),
 );
 const LoveCardsTab = lazy(() =>
   import("./components/LoveCardsTab").then((m) => ({ default: m.LoveCardsTab })),
@@ -163,6 +168,15 @@ function AppContent() {
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme || "cookbook");
   }, [theme]);
+
+  const mode = useAppStore(s => s.mode);
+  const needsModeChoice = useAppStore(s => s.needsModeChoice);
+  const lgpdConsent = useAppStore(s => s.lgpdConsent);
+
+  // A tab that doesn't exist in the current mode (or a stale saved tab) falls back to Home
+  React.useEffect(() => {
+    if (!MODE_TABS[mode].includes(activeTab)) handleTabChange("home");
+  }, [mode, activeTab, handleTabChange]);
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const [showPremiumModal, setShowPremiumModal] = React.useState(false);
@@ -563,6 +577,11 @@ function AppContent() {
                 />
               )}
               {activeTab === "lovecards" && <LoveCardsTab />}
+              {activeTab === "extrato" && (
+                <div className="pb-32 md:pb-12 pt-6 px-4 w-full max-w-md md:max-w-3xl mx-auto">
+                  <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />
+                </div>
+              )}
               {activeTab === "config" && tripConfig && (
                 <ConfigTab
                   currentGoalType={tripConfig?.goalType || 'travel'}
@@ -595,6 +614,9 @@ function AppContent() {
       
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />
+
+      {/* First choice: solo, couple or group */}
+      {needsModeChoice && lgpdConsent && casalId && <ModePicker />}
 
       {/* Cookie Consent Banner */}
       {!localStorage.getItem("pote_cookies_accepted") && (

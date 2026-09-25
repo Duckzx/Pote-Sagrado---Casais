@@ -26,6 +26,10 @@ async function t(name, p, expectOk = true) {
   try { await (expectOk ? assertSucceeds(p) : assertFails(p)); results.push(['OK  ', name]); }
   catch (e) { results.push(['FAIL', name + ' :: ' + (e.message || e).toString().slice(0, 160)]); }
 }
+await t('set group mode', setDoc(doc(A, `casais/${C}`), { mode: 'grupo', groupName: 'Viagem Bahia' }, { merge: true }));
+await t('invalid mode rejected', setDoc(doc(A, `casais/${C}`), { mode: 'trisal' }, { merge: true }), false);
+await t('group third member joins', setDoc(doc(env.authenticatedContext('G').firestore(), 'users/G'), { casalId: C }, { merge: true }));
+await t('group third member deposits', addDoc(collection(env.authenticatedContext('G').firestore(), `casais/${C}/deposits`), { amount: 3, who: 'G', whoName: 'Gabi', createdAt: serverTimestamp() }));
 await t('read couple doc', getDoc(doc(A, `casais/${C}`)));
 await t('premium activate', setDoc(doc(A, `casais/${C}`), { isPremium: true }, { merge: true }));
 await t('read config', getDoc(doc(B, `casais/${C}/trip_config/main`)));

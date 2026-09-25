@@ -16,6 +16,7 @@ import {
 import { db } from "../../firebase";
 import { useAppStore } from "../../store/useAppStore";
 import { openPremiumModal } from "../../lib/premium";
+import { useModeCopy } from "../../lib/mode";
 import { playSuccessSound, vibrate } from "../../lib/audio";
 
 interface Capsule {
@@ -58,6 +59,7 @@ export const TimeCapsule: React.FC = () => {
   const user = useAppStore((s) => s.user);
   const isPremium = useAppStore((s) => s.isPremium);
   const addToast = useAppStore((s) => s.addToast);
+  const { mode, ...copy } = useModeCopy();
 
   const [capsules, setCapsules] = useState<Capsule[]>([]);
   const [isWriting, setIsWriting] = useState(false);
@@ -149,7 +151,7 @@ export const TimeCapsule: React.FC = () => {
         <div>
           <h3 className="font-serif text-2xl text-cookbook-text leading-tight">Cápsula do Tempo</h3>
           <p className="font-sans text-xs text-cookbook-text/50 mt-1">
-            Cartas lacradas para abrir no futuro.
+            {copy.capsuleHint}
           </p>
         </div>
         <button
@@ -162,7 +164,7 @@ export const TimeCapsule: React.FC = () => {
 
       {capsules.length === 0 && !isWriting && (
         <p className="font-serif italic text-cookbook-text/40 text-center py-6">
-          Escreva algo para o seu par ler daqui a um tempo 💌
+          {mode === "solo" ? "Escreva para você mesma(o) ler daqui a um tempo 💌" : mode === "grupo" ? "Deixe um recado para a turma abrir no futuro 💌" : "Escreva algo para o seu par ler daqui a um tempo 💌"}
         </p>
       )}
 
@@ -223,7 +225,7 @@ export const TimeCapsule: React.FC = () => {
                 onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE))}
                 rows={5}
                 autoFocus
-                placeholder="Meu amor, quando você ler isso..."
+                placeholder={copy.capsulePlaceholder}
                 className="w-full bg-cookbook-mural border border-cookbook-border rounded-2xl p-4 font-serif text-lg text-cookbook-text leading-relaxed focus:outline-none focus:border-cookbook-primary resize-none placeholder:text-cookbook-text/25"
               />
               <div className="flex flex-wrap gap-2">

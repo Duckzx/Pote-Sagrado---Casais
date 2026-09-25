@@ -18,7 +18,7 @@ import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { useAppStore } from '../store/useAppStore';
 import { triggerConnectionCelebration } from '../lib/utils';
-import { Deposit, TripConfig, ThemeId, DEFAULT_TRIP_CONFIG } from '../types';
+import { Deposit, TripConfig, ThemeId, PoteMode, DEFAULT_TRIP_CONFIG } from '../types';
 
 // Deposits kept live in memory (history, charts, missions). The pot total is
 // computed over ALL deposits, so couples with a long history don't lose money
@@ -244,11 +244,19 @@ export function useFirebaseSync() {
       const unsubCasal = onSnapshot(doc(db, 'casais', currentCasalId), (casalSnap) => {
         const fromCache = casalSnap.metadata.fromCache;
         if (casalSnap.exists()) {
-          setPremium(!!casalSnap.data().isPremium);
+          const data = casalSnap.data();
+          setPremium(!!data.isPremium);
+          // Pots created before modes existed behave as a couple until someone chooses
+          useAppStore.getState().setModeInfo({
+            mode: (data.mode as PoteMode) || 'casal',
+            groupName: data.groupName || '',
+            needsModeChoice: !data.mode && !fromCache,
+          });
         } else if (!fromCache) {
           setDoc(doc(db, 'casais', currentCasalId), { createdAt: new Date().toISOString(), isPremium: false }, { merge: true })
             .catch(e => console.warn('Could not create couple doc', e));
           setPremium(false);
+          useAppStore.getState().setModeInfo({ mode: 'casal', groupName: '', needsModeChoice: true });
         }
       }, (error) => console.warn('Couple doc listener error', error));
       currentUnsubs.push(unsubCasal);

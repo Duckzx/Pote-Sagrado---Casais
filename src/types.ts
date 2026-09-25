@@ -66,6 +66,9 @@ export type AddToastFn = (title: string, message: string, type?: ToastType, dura
 
 export type TabId = 'home' | 'missoes' | 'extrato' | 'disputa' | 'mural' | 'lovecards' | 'config';
 
+/** How the pot is used: alone, as a couple, or with a group of friends/family. */
+export type PoteMode = 'solo' | 'casal' | 'grupo';
+
 export const TAB_ORDER: TabId[] = ['home', 'missoes', 'extrato', 'disputa', 'mural', 'lovecards', 'config'];
 
 export type ThemeId = 'cookbook' | 'rose' | 'lavanda' | 'mediterranean' | 'nordic' | 'tropical' | 'midnight' | 'noir' | 'cereja';

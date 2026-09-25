@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import confetti from "canvas-confetti";
+import { useAppStore } from "../store/useAppStore";
 
 interface UserBadgesProps {
   deposits: any[];
@@ -129,6 +130,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
   currentUser,
   goalAmount,
 }) => {
+  const mode = useAppStore((st) => st.mode);
   const [newlyUnlocked, setNewlyUnlocked] = useState<
     (typeof ALL_BADGES)[0] | null
   >(null);
@@ -296,7 +298,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
           <div className="relative z-10 flex flex-col mb-4">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">
-                Nível do Casal
+                {mode === "solo" ? "Seu Nível" : mode === "grupo" ? "Nível do Grupo" : "Nível do Casal"}
               </span>
               <div className="bg-cookbook-primary/20 text-cookbook-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
                 Lvl {currentLevelInfo.level}

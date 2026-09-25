@@ -6,13 +6,15 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  connectAuthEmulator,
 } from 'firebase/auth';
 import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
   memoryLocalCache,
+  connectFirestoreEmulator,
   Firestore,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -45,6 +47,12 @@ function createFirestore(): Firestore {
   }
 }
 export const db = createFirestore();
+
+// Local development/testing against the Firebase emulators (npm run dev:emulators)
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8085);
+}
 
 export const storage = getStorage(app);
 

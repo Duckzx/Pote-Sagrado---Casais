@@ -136,7 +136,11 @@ service cloud.firestore {
     // Couples
     // ===============================================================
     match /casais/{casalId} {
-      allow read, write: if isCasalMember(casalId);
+      allow read: if isCasalMember(casalId);
+      // mode: 'solo' | 'casal' | 'grupo'; groupName shown in group pots
+      allow create, update: if isCasalMember(casalId)
+                            && (!('mode' in changed()) || request.resource.data.mode in ['solo', 'casal', 'grupo'])
+                            && (!('groupName' in changed()) || (request.resource.data.groupName is string && request.resource.data.groupName.size() <= 60));
 
       match /trip_config/{docId} {
         allow read: if isCasalMember(casalId);

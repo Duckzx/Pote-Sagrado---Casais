@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppStore } from "../store/useAppStore";
+import { MODE_TABS } from "../lib/mode";
 import { 
   ArrowRight, 
   Check, 
@@ -31,20 +32,28 @@ export const GuidedTutorial: React.FC = () => {
   const setActiveTab = useAppStore((s) => s.setActiveTab);
   
   const [currentStep, setCurrentStep] = useState(0);
+  const mode = useAppStore((s) => s.mode);
+  const needsModeChoice = useAppStore((s) => s.needsModeChoice);
+  const together = mode === "solo" ? "você" : "vocês";
 
-  const steps: Step[] = [
+  const allSteps: Step[] = [
     {
       id: 0,
       tab: "home",
-      title: "Bem-vindos ao Pote Sagrado!",
-      description: "Este é o cofrinho digital do casal. Aqui vocês vão transformar sonhos em realidade, poupando juntos de um jeito divertido.",
+      title: mode === "solo" ? "Bem-vinda(o) ao Pote Sagrado!" : "Bem-vindos ao Pote Sagrado!",
+      description:
+        mode === "solo"
+          ? "Seu cofrinho digital. Aqui você transforma sonhos em realidade, guardando dinheiro de um jeito leve e divertido."
+          : mode === "grupo"
+            ? "O cofrinho digital da turma. Juntem dinheiro para a viagem, a festa ou qualquer plano, cada um no seu ritmo."
+            : "Este é o cofrinho digital do casal. Aqui vocês vão transformar sonhos em realidade, poupando juntos de um jeito divertido.",
       icon: <SacredJarIcon className="w-16 h-16 text-cookbook-primary" />,
     },
     {
       id: 1,
       tab: "home",
       title: "Defina sua Meta",
-      description: "Seja uma viagem, um carro novo ou o sonho da casa própria. Vocês definem o objetivo e veem o pote crescer conforme guardam.",
+      description: `Seja uma viagem, um carro novo ou o sonho da casa própria. ${together === "você" ? "Você define" : "Vocês definem"} o objetivo e acompanha o pote crescer a cada depósito.`,
       icon: <Target size={48} className="text-cookbook-primary" />,
     },
     {
@@ -58,14 +67,16 @@ export const GuidedTutorial: React.FC = () => {
       id: 3,
       tab: "disputa",
       title: "Arena de Disputas",
-      description: "Quem é o mestre da economia do mês? Acompanhem o ranking e vejam quem está contribuindo mais para o sonho comum.",
+      description: mode === "grupo"
+        ? "Quem mais contribuiu no mês? O ranking da turma mostra cada pessoa e deixa a vaquinha divertida."
+        : "Quem é o mestre da economia do mês? Acompanhem o duelo e vejam quem está contribuindo mais para o sonho comum.",
       icon: <Trophy size={48} className="text-cookbook-primary" />,
     },
     {
       id: 4,
       tab: "mural",
       title: "Mural de Sonhos",
-      description: "Visualizem o futuro! Guardem fotos, links e vejam as medalhas que conquistaram ao longo da jornada.",
+      description: "Fotos, links, medalhas e a Cápsula do Tempo: cartas lacradas para abrir no futuro.",
       icon: <Pin size={48} className="text-cookbook-primary" />,
     },
     {
@@ -77,13 +88,16 @@ export const GuidedTutorial: React.FC = () => {
     },
   ];
 
+  const steps = allSteps.filter((step) => MODE_TABS[mode].includes(step.tab));
+  const isVisible = showOnboarding && !needsModeChoice;
+
   useEffect(() => {
-    if (showOnboarding) {
+    if (isVisible && steps[currentStep]) {
       setActiveTab(steps[currentStep].tab);
     }
-  }, [currentStep, showOnboarding, setActiveTab]);
+  }, [currentStep, isVisible, setActiveTab, steps.length]);
 
-  if (!showOnboarding) return null;
+  if (!isVisible || !steps[currentStep]) return null;
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {

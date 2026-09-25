@@ -20,10 +20,10 @@ import { compressImage } from "../lib/imageUtils";
 import { db, auth } from "../firebase";
 import { useAppStore } from "../store/useAppStore";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
-import { ExtratoTab } from "./ExtratoTab";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 import { TimeCapsule } from "./couple/TimeCapsule";
+import { useModeCopy } from "../lib/mode";
 interface PinboardTabProps {
   addToast: (
     title: string,
@@ -35,6 +35,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
   const currentUser = useAppStore(s => s.user);
   const deposits = useAppStore(s => s.deposits);
   const pinboardLinks = useAppStore(s => s.pinboardLinks);
+  const copy = useModeCopy();
   const achievements = useAppStore(s => s.achievements);
   const casalId = useAppStore(s => s.casalId);
   const tripConfig = useAppStore(s => s.tripConfig);
@@ -135,11 +136,11 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         />{" "}
         <h2 className="font-serif text-2xl font-medium text-cookbook-text">
           {" "}
-          Mural de Casal{" "}
+          {copy.muralTitle}{" "}
         </h2>{" "}
         <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
           {" "}
-          Inspirações, Memórias e Histórico{" "}
+          {copy.muralSubtitle}{" "}
         </p>{" "}
       </div>{" "}
 
@@ -340,7 +341,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
         />{" "}
         <p className="font-sans text-[10px] text-cookbook-text/40 italic px-2 text-center">
           {" "}
-          Você pode fixar até 6 memórias dos potes que já quebrou juntos.{" "}
+          Você pode fixar até 6 memórias dos potes já quebrados.{" "}
         </p>{" "}
       </section>{" "}
 
@@ -353,7 +354,6 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
       </section>{" "}
 
       <div className="pt-8">
-        <ExtratoTab deposits={deposits} addToast={addToast} casalId={casalId} />
       </div>
     </div>
   );

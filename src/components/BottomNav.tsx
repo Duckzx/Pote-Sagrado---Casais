@@ -1,8 +1,9 @@
 import React from "react";
-import { Target, Swords, Settings, Pin, LayoutGrid, FileText, Heart } from "lucide-react";
+import { Target, Settings, LayoutGrid, Heart, Trophy, ReceiptText } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
 import { useAppStore } from "../store/useAppStore";
+import { PoteMode, TabId } from "../types";
 
 /* Custom SVG matching the theme format, designed to perfectly resemble the animated Safe Pot */ const SacredPotIcon =
   ({ size = 24, strokeWidth = 2, className = "" }) => (
@@ -19,7 +20,7 @@ import { useAppStore } from "../store/useAppStore";
       className={className}
     >
       {" "}
-      {/* Tampa do Pote (Lid) - Narrower than body */} */{" "}
+      {/* Tampa do Pote (Lid) - Narrower than body */}{" "}
       <path d="M8 2h8a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />{" "}
       {/* Detalhe de amarrilho da tampa opcional */}{" "}
       <path d="M7 8h10" strokeOpacity={0.7} />{" "}
@@ -33,100 +34,89 @@ interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
+
+type NavTab = { id: TabId; icon: React.ComponentType<any>; label: string };
+
+const MURAL: NavTab = { id: "mural", icon: LayoutGrid, label: "Mural" };
+const MISSOES: NavTab = { id: "missoes", icon: Target, label: "Missões" };
+const AJUSTES: NavTab = { id: "config", icon: Settings, label: "Ajustes" };
+
+/** Four side tabs around the central pot button, per usage mode. */
+const NAV_BY_MODE: Record<PoteMode, NavTab[]> = {
+  casal: [MURAL, MISSOES, { id: "lovecards", icon: Heart, label: "Cartas" }, AJUSTES],
+  grupo: [MURAL, MISSOES, { id: "disputa", icon: Trophy, label: "Ranking" }, AJUSTES],
+  solo: [MURAL, MISSOES, { id: "extrato", icon: ReceiptText, label: "Extrato" }, AJUSTES],
+};
+
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   setActiveTab,
 }) => {
   const hasUnreadNotifications = useAppStore(s => s.hasUnreadNotifications);
-  const allSecondaryTabs = [
-    { id: "mural", icon: LayoutGrid, label: "Feed" },
-    { id: "lovecards", icon: Heart, label: "Cartas" },
-    { id: "disputa", icon: Swords, label: "Duelos" },
-    { id: "config", icon: Settings, label: "Ajustes" },
-  ];
-  
-  // Encontrar o meio para inserir o botão Home
-  const halfMatch = Math.ceil(allSecondaryTabs.length / 2);
-  const leftTabs = allSecondaryTabs.slice(0, halfMatch);
-  const rightTabs = allSecondaryTabs.slice(halfMatch);
-
-  const displayTabs = [
-    ...leftTabs.map(t => ({ ...t, isHome: false })),
-    { id: "home", isHome: true, icon: SacredPotIcon },
-    ...rightTabs.map(t => ({ ...t, isHome: false }))
-  ];
-
-  const totalTabs = displayTabs.length;
-  // Make the bottom nav slightly wider if there are many tabs, and adjust icon bounds
-  const maxWidthClass = totalTabs >= 6 ? "max-w-[420px]" : "max-w-[360px]";
-  const iconSizeClass = totalTabs >= 6 ? "w-10 h-10" : "w-12 h-12";
-  const iconPixelSize = totalTabs >= 6 ? 18 : 20;
+  const mode = useAppStore(s => s.mode);
+  const tabs = NAV_BY_MODE[mode];
+  const displayTabs: (NavTab | "home")[] = [tabs[0], tabs[1], "home", tabs[2], tabs[3]];
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center w-full px-2 md:px-0 pointer-events-none pb-safe md:top-0 md:bottom-0 md:w-24 md:h-[100dvh] md:flex-col md:justify-center md:items-center">
-      <div className={cn("bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/60 rounded-3xl h-16 flex items-center justify-evenly w-full px-1 shadow-[0_20px_40px_rgba(0,0,0,0.1)] border border-cookbook-border/50 pointer-events-auto md:h-full md:w-full md:flex-col md:rounded-none md:border-r md:shadow-none md:py-8", maxWidthClass, "md:max-w-none")}>
-        
-        {displayTabs.map((tab: any, index) => {
-          
-          if (tab.isHome) {
+    <nav
+      aria-label="Navegação principal"
+      className="fixed left-0 right-0 z-50 flex justify-center w-full px-3 pointer-events-none bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:top-0 md:bottom-0 md:w-24 md:h-[100dvh] md:px-0 md:flex-col md:justify-center md:items-center"
+    >
+      <div className="bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/55 rounded-[28px] h-[68px] flex items-center justify-around w-full max-w-[400px] px-1 shadow-[0_20px_40px_rgba(0,0,0,0.12)] border border-cookbook-border/60 pointer-events-auto md:h-full md:max-w-none md:flex-col md:justify-center md:gap-3 md:rounded-none md:border-r md:border-y-0 md:border-l-0 md:shadow-none md:py-8">
+        {displayTabs.map((tab) => {
+          if (tab === "home") {
+            const isHome = activeTab === "home";
             return (
-              <div key="home-spacer" className="relative flex items-center justify-center w-16 md:h-16 shrink-0 md:my-4">
+              <div key="home" className="relative flex items-center justify-center w-16 shrink-0 md:h-16 md:my-4">
                 <button
                   onClick={() => setActiveTab("home")}
+                  aria-label="Início"
+                  aria-current={isHome ? "page" : undefined}
                   className={cn(
-                    "absolute -top-12 md:static md:-top-0 flex flex-col items-center justify-center w-16 h-16 rounded-full shadow-[0_8px_20px_rgba(40,129,156,0.3)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
-                    activeTab === "home"
-                      ? "bg-cookbook-primary scale-105"
-                      : "bg-cookbook-primary/90 hover:bg-cookbook-primary hover:scale-105 active:scale-95",
+                    "absolute -top-11 md:static flex items-center justify-center w-16 h-16 rounded-full shadow-[0_10px_24px_color-mix(in_srgb,var(--theme-primary)_45%,transparent)] border-4 border-cookbook-bg transition-transform duration-300 z-20",
+                    isHome ? "bg-cookbook-primary scale-105" : "bg-cookbook-primary/90 active:scale-95",
                   )}
                 >
                   <SacredPotIcon
                     size={24}
-                    strokeWidth={activeTab === "home" ? 2.5 : 2}
-                    className={cn(
-                      "transition-colors",
-                      activeTab === "home" ? "text-cookbook-gold" : "text-white",
-                    )}
+                    strokeWidth={isHome ? 2.5 : 2}
+                    className={cn("transition-colors", isHome ? "text-cookbook-gold" : "text-white")}
                   />
                 </button>
               </div>
-            )
+            );
           }
 
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "relative flex flex-col items-center justify-center rounded-full transition-all duration-400 ease-out z-10",
-                iconSizeClass,
-                isActive
-                  ? "text-cookbook-primary"
-                  : "hover:text-cookbook-text active:scale-95",
+                "relative flex flex-col items-center justify-center gap-0.5 w-16 h-14 rounded-2xl transition-colors z-10",
+                isActive ? "text-cookbook-primary" : "active:scale-95",
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-0 bg-cookbook-text/5 rounded-full"
+                  className="absolute inset-0 bg-cookbook-primary/10 rounded-2xl"
                   transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                 />
               )}
-              <Icon
-                size={iconPixelSize}
-                strokeWidth={isActive ? 2.5 : 2}
-                className="relative z-10"
-              />
-              {tab.id === 'lovecards' && hasUnreadNotifications && (
-                <div className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white z-20" />
+              <Icon size={20} strokeWidth={isActive ? 2.4 : 1.9} className="relative z-10" />
+              <span className={cn("relative z-10 font-sans text-[10px] leading-none", isActive ? "font-bold" : "font-medium")}>
+                {tab.label}
+              </span>
+              {tab.id === "lovecards" && hasUnreadNotifications && (
+                <span className="absolute top-1.5 right-3 w-2 h-2 bg-red-500 rounded-full border border-white z-20" />
               )}
             </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };

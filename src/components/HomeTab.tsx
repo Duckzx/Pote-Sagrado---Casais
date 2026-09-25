@@ -49,6 +49,9 @@ import { SacredPot } from "./SacredPot";
 import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
 import { MoodCheckIn } from "./couple/MoodCheckIn";
+import { QuickActions } from "./home/QuickActions";
+import { RecentActivity } from "./home/RecentActivity";
+import { useModeCopy } from "../lib/mode";
 import { AnniversaryCountdown } from "./couple/AnniversaryCountdown";
 import { DailyAffirmation } from "./couple/DailyAffirmation";
 
@@ -418,6 +421,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
   const handleBreakPotClick = () => {
     setShowBreakConfirm(true);
   };
+  const { mode, ...copy } = useModeCopy();
   const daysTogether = useMemo(() => {
     if (!relationshipStartDate) return null;
     const start = new Date(relationshipStartDate + 'T00:00:00');
@@ -439,9 +443,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         {" "}
         <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
           {" "}
-          Reserva de Casal{" "}
+          {copy.reserveTitle}{" "}
         </h2>{" "}
-        {daysTogether !== null && daysTogether >= 0 && (
+        {mode === "casal" && daysTogether !== null && daysTogether >= 0 && (
           <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1">
             {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
           </p>
@@ -496,7 +500,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         <div className="space-y-8 mt-8 md:mt-0">
       {/* Couple rituals: mood of the day + mêsversário */}
       <MoodCheckIn />
-      <AnniversaryCountdown />
+      {mode === "casal" && <AnniversaryCountdown />}
 
       {/* Moments Widget (Dopamine Events) */}
       <MomentsWidget deposits={deposits} goalAmount={goalAmount} totalSaved={totalSaved} destination={destination} />
@@ -520,11 +524,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {" "}
               <p className="font-serif italic text-base text-white">
                 {" "}
-                Nosso Momento Wrapped{" "}
+                {mode === "solo" ? "Meu Momento Wrapped" : "Nosso Momento Wrapped"}{" "}
               </p>{" "}
               <p className="font-sans text-[10px] uppercase tracking-widest text-white/80 font-medium">
                 {" "}
-                Resumo do Casal{" "}
+                {mode === "solo" ? "Meu resumo" : mode === "grupo" ? "Resumo do grupo" : "Resumo do casal"}{" "}
               </p>{" "}
             </div>{" "}
           </div>{" "}
@@ -536,39 +540,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         </button>{" "}
       </div>{" "}
 
-      {/* Missoes/Conquistas Shortcut Button */}{" "}
-      <div className="flex justify-center mb-6">
-        {" "}
-        <button
-          onClick={() => useAppStore.getState().setActiveTab('missoes')}
-          className="w-full bg-cookbook-bg/80 backdrop-blur-xl border border-cookbook-border rounded-3xl p-5 flex items-center justify-between shadow-sm transition-all active:scale-[0.98] hover:shadow-md"
-        >
-          {" "}
-          <div className="flex items-center space-x-4">
-            {" "}
-            <div className="w-10 h-10 rounded-full bg-cookbook-text/5 flex items-center justify-center border border-cookbook-border/50">
-              {" "}
-              <Trophy size={18} className="text-cookbook-text/60" />{" "}
-            </div>{" "}
-            <div className="text-left">
-              {" "}
-              <p className="font-serif italic text-base text-cookbook-text">
-                {" "}
-                Nossas Conquistas{" "}
-              </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-medium">
-                {" "}
-                Metas e Desafios{" "}
-              </p>{" "}
-            </div>{" "}
-          </div>{" "}
-          <ArrowRight
-            size={18}
-            className="text-cookbook-text/30"
-            strokeWidth={2}
-          />{" "}
-        </button>{" "}
-      </div>{" "}
+      <QuickActions />
+      <RecentActivity />
         </div>
       </div>{" "}
       {showDateModal && (
