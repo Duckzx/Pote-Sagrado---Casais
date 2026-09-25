@@ -12,6 +12,8 @@ interface ShareableWidgetProps {
   destination: string;
   /** Optional title when opened by a milestone (e.g. "Vocês chegaram a 50%!") */
   celebration?: string;
+  /** Custom texts (e.g. the envelopes challenge) instead of the pot progress */
+  override?: { headline: string; subline: string; message: string };
   onClose: () => void;
 }
 
@@ -29,6 +31,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   totalSaved,
   destination,
   celebration,
+  override,
   onClose,
 }) => {
   const addToast = useAppStore((s) => s.addToast);
@@ -46,6 +49,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
   const goalText = destination?.trim() || "o nosso sonho";
 
   const { headline, subline, message } = useMemo(() => {
+    if (override) return override;
     const done = pct >= 100;
     if (mode === "solo") {
       return {
@@ -67,7 +71,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
       subline: `rumo a: ${goalText}`,
       message: `${done ? "Batemos nossa meta" : `Já juntamos ${pct}% para ${goalText}`} no Pote Sagrado 💞 Crie o pote de vocês:`,
     };
-  }, [mode, groupName, pct, goalText]);
+  }, [mode, groupName, pct, goalText, override]);
 
   // Render the card as soon as the modal opens (and when the format changes),
   // so tapping "share" can call the native sheet immediately.

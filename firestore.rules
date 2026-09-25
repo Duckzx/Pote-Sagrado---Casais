@@ -75,6 +75,7 @@ service cloud.firestore {
              (!('customChallenges' in keys) || data.customChallenges is list) &&
              (!('battleChallenges' in keys) || data.battleChallenges is list) &&
              (!('fcmTokens' in keys) || data.fcmTokens is list) &&
+             (!('targetDate' in keys) || (data.targetDate is string && data.targetDate.size() <= 30)) &&
              (!('envelopes' in keys) || (data.envelopes is list && data.envelopes.size() <= 100)) &&
              (!('monthlyPrize' in keys) || (data.monthlyPrize is string && data.monthlyPrize.size() < 300));
     }

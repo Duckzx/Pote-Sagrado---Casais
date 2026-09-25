@@ -50,6 +50,8 @@ import { ShareableWidget } from "./ShareableWidget";
 import { MomentsWidget } from "./MomentsWidget";
 import { MoodCheckIn } from "./couple/MoodCheckIn";
 import { QuickActions } from "./home/QuickActions";
+import { StreakCard } from "./home/StreakCard";
+import { GoalPlanCard } from "./home/GoalPlanCard";
 import { RecentActivity } from "./home/RecentActivity";
 import { useModeCopy } from "../lib/mode";
 import { BorderBeam } from "./magicui/border-beam";
@@ -543,6 +545,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       )}
 
       {/* Couple rituals: mood of the day + mêsversário */}
+      <StreakCard />
+      <GoalPlanCard />
       <MoodCheckIn />
       {mode === "casal" && <AnniversaryCountdown />}
 
