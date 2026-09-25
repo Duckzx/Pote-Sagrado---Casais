@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { auth } from '../firebase';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Lock, Sparkles, ChevronLeft, ChevronRight, Check, CheckCheck, Send, RefreshCw, X, Share2 } from 'lucide-react';
+import { Heart, Lock, Sparkles, ChevronLeft, ChevronRight, Check, CheckCheck, Send, X, Share2 } from 'lucide-react';
 import { useOptimisticLoveCards } from '../hooks/useOptimisticLoveCards';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAppStore } from '../store/useAppStore';
@@ -185,7 +185,6 @@ export const LoveCardsTab: React.FC = () => {
     goldDust,
     isLoading,
     loadInitial,
-    refreshInteractions,
     respondToCard,
     hasUserResponded,
     isMatch,
@@ -320,7 +319,7 @@ export const LoveCardsTab: React.FC = () => {
       >
         <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cookbook-gold/10 to-cookbook-mural/30 rounded-full border border-cookbook-gold/20">
           <Sparkles size={14} className="text-cookbook-gold" />
-          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold">
+          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold whitespace-nowrap">
             {goldDust} Pó de Ouro
           </span>
         </div>
@@ -330,14 +329,7 @@ export const LoveCardsTab: React.FC = () => {
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95 text-cookbook-primary"
           >
             <Share2 size={12} />
-            <span className="font-sans text-[9px] uppercase tracking-widest font-bold">Convidar Parceiro(a)</span>
-          </button>
-          <button
-            onClick={refreshInteractions}
-            className="p-2 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95"
-            title="Atualizar dados"
-          >
-            <RefreshCw size={14} className="text-cookbook-text/40" />
+            <span className="font-sans text-[9px] uppercase tracking-widest font-bold whitespace-nowrap">Convidar</span>
           </button>
         </div>
       </motion.div>
@@ -560,27 +552,29 @@ export const LoveCardsTab: React.FC = () => {
           <h3 className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/30 font-bold text-center flex items-center justify-center gap-2">
             <Lock size={10} /> Próximos Níveis <Lock size={10} />
           </h3>
-          <div className="flex gap-2 justify-center">
-            {lockedLevels.map(lvl => (
-              <PremiumGate 
-                key={lvl}
-                onOpenPremium={openPremiumModal}
-                className={lvl >= 4 ? "" : "pointer-events-none"} // Only show gate for 4+
-              >
+          <div className="grid grid-cols-2 gap-2">
+            {lockedLevels.map(lvl => {
+              const chip = (
                 <div
                   className={cn(
-                    "px-4 py-3 bg-cookbook-text/3 border border-cookbook-border/50 rounded-2xl flex items-center gap-2 opacity-40",
+                    "px-3 py-3 bg-cookbook-text/[0.03] border border-cookbook-border/50 rounded-2xl flex items-center justify-center gap-2",
                     lvl >= 4 && "bg-amber-500/5 border-amber-500/20"
                   )}
                 >
                   <Lock size={10} className="text-cookbook-text/30" />
-                  <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+                  <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold">
                     Nível {lvl}
                   </span>
-                  <span className="text-xs">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
+                  <span className="text-[10px] text-cookbook-text/50">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
                 </div>
-              </PremiumGate>
-            ))}
+              );
+              // Levels 2-3 unlock by playing; 4-5 are Premium
+              return lvl >= 4 ? (
+                <PremiumGate key={lvl} onOpenPremium={openPremiumModal}>{chip}</PremiumGate>
+              ) : (
+                <div key={lvl} className="opacity-60">{chip}</div>
+              );
+            })}
           </div>
         </motion.div>
       )}

@@ -18,12 +18,15 @@ import { auth, db, handleRedirectResult } from '../firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { useAppStore } from '../store/useAppStore';
 import { triggerConnectionCelebration } from '../lib/utils';
-import { Deposit, TripConfig, ThemeId, DEFAULT_TRIP_CONFIG } from '../types';
+import { Deposit, TripConfig, ThemeId, PoteMode, DEFAULT_TRIP_CONFIG } from '../types';
 
 // Deposits kept live in memory (history, charts, missions). The pot total is
 // computed over ALL deposits, so couples with a long history don't lose money
 // from the balance when they go past this limit.
 const DEPOSITS_LIVE_LIMIT = 500;
+
+// Accounts created from this date on start with the Rosé theme
+const ROSE_THEME_RELEASE = Date.UTC(2026, 8, 24);
 
 const generateInviteCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -244,11 +247,19 @@ export function useFirebaseSync() {
       const unsubCasal = onSnapshot(doc(db, 'casais', currentCasalId), (casalSnap) => {
         const fromCache = casalSnap.metadata.fromCache;
         if (casalSnap.exists()) {
-          setPremium(!!casalSnap.data().isPremium);
+          const data = casalSnap.data();
+          setPremium(!!data.isPremium);
+          // Pots created before modes existed behave as a couple until someone chooses
+          useAppStore.getState().setModeInfo({
+            mode: (data.mode as PoteMode) || 'casal',
+            groupName: data.groupName || '',
+            needsModeChoice: !data.mode && !fromCache,
+          });
         } else if (!fromCache) {
           setDoc(doc(db, 'casais', currentCasalId), { createdAt: new Date().toISOString(), isPremium: false }, { merge: true })
             .catch(e => console.warn('Could not create couple doc', e));
           setPremium(false);
+          useAppStore.getState().setModeInfo({ mode: 'casal', groupName: '', needsModeChoice: true });
         }
       }, (error) => console.warn('Couple doc listener error', error));
       currentUnsubs.push(unsubCasal);
@@ -370,7 +381,8 @@ export function useFirebaseSync() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         // Accounts created before the Rosé theme keep the classic look
-        const currentTheme = (data.theme as ThemeId) || 'cookbook';
+        const createdAt = user.metadata?.creationTime ? new Date(user.metadata.creationTime).getTime() : Date.now();
+        const currentTheme = (data.theme as ThemeId) || (createdAt >= ROSE_THEME_RELEASE ? 'rose' : 'cookbook');
         setTheme(currentTheme);
         localStorage.setItem('pote_theme', currentTheme);
         if (data.casalId) {

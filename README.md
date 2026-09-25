@@ -4,11 +4,13 @@
 
 # Pote Sagrado - Casais 🍯❤️
 
-**Pote Sagrado** é uma plataforma exclusiva para casais que desejam transformar sua gestão financeira em uma jornada de conexão e conquistas. Combinando tecnologia, gamificação e um design premium, o app permite que casais economizem juntos para seus maiores sonhos.
+**Pote Sagrado** transforma guardar dinheiro em uma jornada de conexão e conquistas — sozinha(o), em casal ou com a turma. Combinando tecnologia, gamificação e um design premium, o app permite que casais economizem juntos para seus maiores sonhos.
 
 ## ✨ Funcionalidades Principais
 
-- **Pote e Metas Compartilhadas**: economizem para viagens, casa, carro, casamento ou qualquer sonho do casal.
+- **Três modos**: *Só eu* (metas pessoais), *Em casal* (cartas, mêsversário, duelos) e *Com amigos* (vaquinha, ranking da turma, qualquer número de pessoas).
+- **Entrar como quiser**: Google ou e-mail e senha (com recuperação de senha).
+- **Pote e Metas Compartilhadas**: economizem para viagens, casa, carro, casamento ou qualquer sonho.
 - **Sincronia entre aparelhos**: tudo em tempo real e offline-first (as alterações feitas sem internet sobem quando a conexão volta).
 - **Humor do dia 🥰**: cada pessoa conta como está e o par recebe uma dica de carinho.
 - **Mêsversário 💐**: contagem regressiva para o próximo mêsversário e aniversário de namoro.
@@ -33,6 +35,12 @@
    npm run dev
    ```
 
+4. **Testar sem tocar na produção** (emuladores do Firebase, precisa de Java):
+   ```bash
+   npm run dev:emulators   # app em http://localhost:5173 com Auth/Firestore locais
+   npm run test:rules      # testa as regras do Firestore contra todas as operações do app
+   ```
+
 ## ☁️ Publicação
 
 - **Site (Vercel)**: `npm run build` gera `dist/`. O `vercel.json` já cuida das rotas do app (ex: `/termos`).
@@ -44,7 +52,7 @@
 
 ## 🛠️ Tecnologias
 
-- **Frontend**: React 19, Vite, Tailwind CSS 4, Lucide Icons, Motion.
+- **Frontend**: React 19, Vite, Tailwind CSS 4, Lucide Icons, Motion, componentes [Magic UI](https://magicui.design) (MIT).
 - **Backend/DB**: Firebase (Auth, Firestore com cache offline, Storage, Cloud Functions, Messaging).
 - **Estado**: Zustand.
 

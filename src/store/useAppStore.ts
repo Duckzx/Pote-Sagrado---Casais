@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppUser, Deposit, TripConfig, TabId, ThemeId } from '../types';
+import { AppUser, Deposit, TripConfig, TabId, ThemeId, PoteMode } from '../types';
 import { vibrate, playSuccessSound } from '../lib/audio';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -72,6 +72,12 @@ interface AppState {
   setCanInstall: (v: boolean) => void;
   setInstallPrompt: (v: any) => void;
   clearInstallPrompt: () => void;
+
+  // Usage mode (solo / casal / grupo) stored on the shared pot document
+  mode: PoteMode;
+  groupName: string;
+  needsModeChoice: boolean;
+  setModeInfo: (info: { mode: PoteMode; groupName: string; needsModeChoice: boolean }) => void;
 
   // Premium
   isPremium: boolean;
@@ -186,6 +192,11 @@ export const useAppStore = create<AppState>((set) => ({
   setInstallPrompt: (installPrompt) => set({ installPrompt }),
   clearInstallPrompt: () => set({ installPrompt: null, canInstall: false }),
 
+  mode: 'casal',
+  groupName: '',
+  needsModeChoice: false,
+  setModeInfo: (info) => set(info),
+
   isPremium: false,
   setPremium: (isPremium) => set({ isPremium }),
 
@@ -205,6 +216,9 @@ export const useAppStore = create<AppState>((set) => ({
     activeTab: 'home',
     theme: getInitialTheme(),
     isPremium: false,
+    mode: 'casal',
+    groupName: '',
+    needsModeChoice: false,
     hasUnreadNotifications: false
   }),
 }));

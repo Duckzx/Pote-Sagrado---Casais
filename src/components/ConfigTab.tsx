@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { doc, setDoc, serverTimestamp, getDoc, arrayUnion } from "firebase/firestore";
-import { getToken } from "firebase/messaging";
-import { db, auth, logout, messaging } from "../firebase";
+import { db, auth, logout, getMessagingLazy } from "../firebase";
 import {
   LogOut,
   Save,
@@ -27,6 +26,8 @@ import { openPremiumModal } from "../lib/premium";
 import { InstallPrompt } from "./InstallPrompt";
 import { maskCurrency, parseCurrencyString } from "../lib/maskUtils";
 import { compressImage } from "../lib/imageUtils";
+import { MODE_OPTIONS } from "../lib/mode";
+import { ModePicker } from "./ModePicker";
 import { ORGANIC_PUNISHMENTS } from "../data/punishments";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/animated-tabs";
 import { AvatarGroup } from "./ui/avatar-group";
@@ -47,6 +48,13 @@ interface ConfigTabProps {
     type: "info" | "success" | "milestone",
   ) => void;
 }
+/** Soft circle with the person's initial, used when there is no photo. */
+const initialsAvatar = (name: string) => {
+  const letter = (name.trim()[0] || "?").toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="#F5DDE2"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Georgia,serif" font-size="96" fill="#C9677F">${letter}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+
 const THEMES = [
   { id: "rose", label: "Rosé Champagne", colors: ["#FFF7F8", "#C9677F"] },
   { id: "lavanda", label: "Lavanda", colors: ["#FAF7FF", "#8B72BE"] },
@@ -124,6 +132,9 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const [relationshipStartDate, setRelationshipStartDate] = useState(currentRelationshipStartDate || "");
   const [prize, setPrize] = useState(currentPrize || "");
   const [inviteCodeInput, setInviteCodeInput] = useState("");
+  const [showModePicker, setShowModePicker] = useState(false);
+  const mode = useAppStore(s => s.mode);
+  const groupName = useAppStore(s => s.groupName);
 
   const handleApplyInviteCode = async () => {
     if (!inviteCodeInput) {
@@ -272,14 +283,17 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   const me = coupleMembers.find(m => m.id === auth.currentUser?.uid);
 
   const handleShare = async () => {
-    const inviteUrl = new URL(window.location.href);
+    const inviteUrl = new URL(window.location.origin);
     const code = me?.inviteCode || casalId;
     if (code) {
       inviteUrl.searchParams.set("invite", code);
     }
     const shareData = {
       title: "Pote Sagrado",
-      text: "Vem economizar comigo para a nossa próxima viagem no Pote Sagrado!",
+      text:
+        mode === "grupo"
+          ? `Entra no nosso pote${groupName ? ` "${groupName}"` : ""} no Pote Sagrado! Bora juntar pro nosso plano 🫶`
+          : "Vem economizar comigo no Pote Sagrado! 💞",
       url: inviteUrl.toString(),
     };
     if (navigator.share) {
@@ -289,7 +303,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         console.error("Error sharing:", err);
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(inviteUrl.toString());
       addToast(
         "Copiado",
         "Link copiado para a área de transferência!",
@@ -298,6 +312,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     }
   };
   const handleEnablePush = async () => {
+    const messaging = await getMessagingLazy().catch(() => null);
     if (!messaging) {
       addToast(
         "Erro",
@@ -315,6 +330,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
         const swRegistration = await navigator.serviceWorker
           ?.register("/firebase-messaging-sw.js", { scope: "/firebase-cloud-messaging-push-scope" })
           .catch(() => undefined);
+        const { getToken } = await import("firebase/messaging");
         const token = await getToken(messaging, {
           ...(vapidKey ? { vapidKey } : {}),
           ...(swRegistration ? { serviceWorkerRegistration: swRegistration } : {}),
@@ -436,14 +452,14 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           {coupleMembers.length > 1 ? (
             <AvatarGroup 
               avatarUrls={coupleMembers.map(m => ({
-                imageUrl: m.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop",
+                imageUrl: m.photoURL || initialsAvatar(m.displayName || m.email || "?"),
                 name: m.displayName || m.email?.split("@")[0] || "Profile",
               }))}
             />
           ) : (
             <Avatar variant="app" className="w-20 h-20 md:w-28 md:h-28 shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:scale-[1.02] transition-transform duration-300">
               <AvatarImage 
-                src={auth.currentUser?.photoURL || "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=200&h=200&auto=format&fit=crop"} 
+                src={me?.photoURL || auth.currentUser?.photoURL || initialsAvatar(auth.currentUser?.displayName || auth.currentUser?.email || "?")} 
                 alt="Profile" 
               />
               <AvatarFallback className="bg-cookbook-primary/20 text-cookbook-primary text-xl">
@@ -483,6 +499,22 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       <section className="relative z-10 space-y-6 mt-6">
         <TabsContent value="geral">
           <div className="space-y-6 animate-fade-in">
+            {/* Modo de uso */}
+            <button
+              onClick={() => setShowModePicker(true)}
+              className="w-full text-left bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 active:scale-[0.98] transition-transform"
+            >
+              <span className="text-3xl">{MODE_OPTIONS.find((o) => o.id === mode)?.emoji}</span>
+              <div className="flex-1">
+                <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">Modo de uso</p>
+                <p className="font-serif text-xl text-cookbook-text leading-tight">
+                  {MODE_OPTIONS.find((o) => o.id === mode)?.title}
+                  {mode === "grupo" && groupName ? ` · ${groupName}` : ""}
+                </p>
+              </div>
+              <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">Mudar</span>
+            </button>
+
             {/* Card 1: Destino e Meta */}
             <div className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col relative overflow-hidden transition-all">
               <div className="flex items-center gap-2 text-cookbook-text mb-6">
@@ -580,7 +612,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   />
                 </div>
 
-                <div className="space-y-1">
+                {mode === "casal" && <div className="space-y-1">
                   <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
                     Nossa Data de Início do Relacionamento
                   </label>
@@ -591,7 +623,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     onBlur={handleSaveLocal}
                     className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors text-cookbook-text/80"
                   />
-                </div>
+                </div>}
 
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
@@ -610,7 +642,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
-                      Aposta da Batalha (Duelo)
+                      {mode === "grupo" ? "Prêmio do mês (ranking)" : mode === "solo" ? "Recompensa do mês" : "Aposta da Batalha (Duelo)"}
                     </label>
                     <button
                       onClick={() => {
@@ -643,7 +675,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               <div className="flex items-center gap-2 text-cookbook-text mb-4">
                 <Bell size={18} className="text-cookbook-primary opacity-80" />
                 <h3 className="font-serif text-xl font-medium">
-                  Notificações e Parceria
+                  {mode === "solo" ? "Notificações e Convites" : mode === "grupo" ? "Notificações e Turma" : "Notificações e Parceria"}
                 </h3>
               </div>
               <div className="flex flex-col gap-3 mt-2">
@@ -676,7 +708,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     )}
                   </div>
                   <div className="font-sans text-[11px] text-cookbook-text/40 mb-3 leading-tight">
-                    Compartilhe este código ou o link abaixo com seu par para conectarem as contas.
+                    {mode === "grupo"
+                      ? "Compartilhe o código ou o link com a turma. Todo mundo que entrar vê o mesmo pote."
+                      : mode === "solo"
+                        ? "Quer dividir o pote com alguém? Compartilhe o código ou o link."
+                        : "Compartilhe este código ou o link abaixo com seu par para conectarem as contas."}
                   </div>
                   
                   <button
@@ -1010,6 +1046,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
       </section>
       </Tabs>
 
+      {showModePicker && <ModePicker onClose={() => setShowModePicker(false)} />}
     </div>
   );
 };

@@ -6,25 +6,29 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+  connectAuthEmulator,
 } from 'firebase/auth';
 import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
   memoryLocalCache,
+  connectFirestoreEmulator,
   Firestore,
+  doc,
+  setDoc,
 } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAnalytics, isSupported as isAnalyticsSupported } from 'firebase/analytics';
 import firebaseConfig from '../firebase-applet-config.json';
 
-import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
 
 // Optional: serve the auth handler from the app's own domain (see README).
 const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain;
 
-const app = initializeApp({ ...firebaseConfig, authDomain });
+export const app = initializeApp({ ...firebaseConfig, authDomain });
 export const auth = getAuth(app);
 
 // Offline cache shared between tabs: data opens instantly and writes made
@@ -46,21 +50,34 @@ function createFirestore(): Firestore {
 }
 export const db = createFirestore();
 
-export const storage = getStorage(app);
+// Local development/testing against the Firebase emulators (npm run dev:emulators)
+if (import.meta.env.VITE_USE_EMULATORS === 'true') {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  connectFirestoreEmulator(db, '127.0.0.1', 8085);
+}
 
-export let messaging: any = null;
-isMessagingSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-});
+/** Firebase Storage, loaded only when a photo is uploaded. */
+export const getStorageLazy = async () => {
+  const { getStorage } = await import('firebase/storage');
+  return getStorage(app);
+};
 
-export let analytics: any = null;
-isAnalyticsSupported().then((supported) => {
-  if (supported) {
-    analytics = getAnalytics(app);
-  }
-});
+/** Firebase Messaging (push), loaded only when the user enables notifications. */
+export const getMessagingLazy = async () => {
+  const { getMessaging, isSupported } = await import('firebase/messaging');
+  return (await isSupported()) ? getMessaging(app) : null;
+};
+
+// Analytics after the app is interactive
+if (typeof window !== 'undefined' && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    import('firebase/analytics')
+      .then(async ({ getAnalytics, isSupported }) => {
+        if (await isSupported()) getAnalytics(app);
+      })
+      .catch(() => {});
+  });
+}
 
 /**
  * Attempts Google login via popup first.
@@ -98,15 +115,53 @@ export const loginWithGoogle = async () => {
   }
 };
 
-/**
- * Handles Admin login via Email and Password.
- */
+const AUTH_ERRORS: Record<string, string> = {
+  'auth/invalid-credential': 'E-mail ou senha incorretos.',
+  'auth/wrong-password': 'E-mail ou senha incorretos.',
+  'auth/user-not-found': 'Não encontramos uma conta com esse e-mail.',
+  'auth/invalid-email': 'Esse e-mail não parece válido.',
+  'auth/email-already-in-use': 'Já existe uma conta com esse e-mail. Tente entrar.',
+  'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+  'auth/too-many-requests': 'Muitas tentativas. Espere um pouco e tente de novo.',
+  'auth/network-request-failed': 'Sem conexão com a internet.',
+  'auth/operation-not-allowed': 'Login por e-mail ainda não está ativado no Firebase.',
+};
+
+export const authErrorMessage = (error: any) =>
+  AUTH_ERRORS[error?.code] || 'Não foi possível continuar. Tente novamente.';
+
+/** Sign in with e-mail and password. */
 export const loginWithEmail = async (email: string, pass: string) => {
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    await signInWithEmailAndPassword(auth, email.trim(), pass);
   } catch (error: any) {
-    console.error('Email login failed.', error.code, error.message);
-    throw new Error('Falha no login Administrativo: Verifique suas credenciais.');
+    console.error('Email login failed.', error?.code);
+    throw new Error(authErrorMessage(error));
+  }
+};
+
+/** Create an account with e-mail and password. */
+export const signUpWithEmail = async (name: string, email: string, pass: string) => {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+    if (name.trim()) {
+      await updateProfile(cred.user, { displayName: name.trim() });
+      // onAuthStateChanged fired before the name existed: save it on the profile too
+      await cred.user.reload();
+      await setDoc(doc(db, 'users', cred.user.uid), { displayName: name.trim().slice(0, 60) }, { merge: true }).catch(() => {});
+    }
+    return cred.user;
+  } catch (error: any) {
+    console.error('Sign up failed.', error?.code);
+    throw new Error(authErrorMessage(error));
+  }
+};
+
+export const resetPassword = async (email: string) => {
+  try {
+    await sendPasswordResetEmail(auth, email.trim());
+  } catch (error: any) {
+    throw new Error(authErrorMessage(error));
   }
 };
 

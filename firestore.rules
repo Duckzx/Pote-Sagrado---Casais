@@ -42,28 +42,40 @@ service cloud.firestore {
       return data.createdAt is timestamp && data.createdAt <= request.time;
     }
 
-    function isValidUser(data) {
-      return (!('theme' in data) || (data.theme is string && data.theme.size() < 50)) &&
-             (!('casalId' in data) || (data.casalId is string && data.casalId.size() < 100)) &&
-             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
-             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() < 1048576)) &&
-             (!('inviteCode' in data) || (data.inviteCode is string && data.inviteCode.size() < 20)) &&
-             (!('lgpdConsent' in data) || data.lgpdConsent is bool) &&
-             (!('lgpdConsentDate' in data) || (data.lgpdConsentDate is string && data.lgpdConsentDate.size() < 50));
+    // Only the keys touched by this write are validated, so records written by
+    // older versions (with fields outside today's format) can still be updated.
+    function changed() {
+      return resource == null
+        ? request.resource.data.keys()
+        : request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function isValidUser() {
+      let data = request.resource.data;
+      let keys = changed();
+      return (!('theme' in keys) || (data.theme is string && data.theme.size() < 50)) &&
+             (!('casalId' in keys) || (data.casalId is string && data.casalId.size() < 100)) &&
+             (!('displayName' in keys) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('photoURL' in keys) || (data.photoURL is string && data.photoURL.size() < 1048576)) &&
+             (!('inviteCode' in keys) || (data.inviteCode is string && data.inviteCode.size() < 20)) &&
+             (!('lgpdConsent' in keys) || data.lgpdConsent is bool) &&
+             (!('lgpdConsentDate' in keys) || (data.lgpdConsentDate is string && data.lgpdConsentDate.size() < 50));
     }
 
     // Writes are merges, so the goal may be saved field by field
     // (missions, push tokens, coordinates...).
-    function isValidTripConfig(data) {
-      return (!('destination' in data) || (data.destination is string && data.destination.size() < 200)) &&
-             (!('goalAmount' in data) || (data.goalAmount is number && data.goalAmount >= 0)) &&
-             (!('lat' in data) || data.lat is number) &&
-             (!('lng' in data) || data.lng is number) &&
-             (!('origin' in data) || (data.origin is string && data.origin.size() < 200)) &&
-             (!('customChallenges' in data) || data.customChallenges is list) &&
-             (!('battleChallenges' in data) || data.battleChallenges is list) &&
-             (!('fcmTokens' in data) || data.fcmTokens is list) &&
-             (!('monthlyPrize' in data) || (data.monthlyPrize is string && data.monthlyPrize.size() < 300));
+    function isValidTripConfig() {
+      let data = request.resource.data;
+      let keys = changed();
+      return (!('destination' in keys) || (data.destination is string && data.destination.size() < 200)) &&
+             (!('goalAmount' in keys) || (data.goalAmount is number && data.goalAmount >= 0)) &&
+             (!('lat' in keys) || data.lat is number) &&
+             (!('lng' in keys) || data.lng is number) &&
+             (!('origin' in keys) || (data.origin is string && data.origin.size() < 200)) &&
+             (!('customChallenges' in keys) || data.customChallenges is list) &&
+             (!('battleChallenges' in keys) || data.battleChallenges is list) &&
+             (!('fcmTokens' in keys) || data.fcmTokens is list) &&
+             (!('monthlyPrize' in keys) || (data.monthlyPrize is string && data.monthlyPrize.size() < 300));
     }
 
     function isValidDeposit(data) {
@@ -112,7 +124,7 @@ service cloud.firestore {
     // ===============================================================
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow create, update: if isOwner(userId) && isValidUser();
       allow delete: if isOwner(userId);
 
       match /customDates/{dateId} {
@@ -124,27 +136,28 @@ service cloud.firestore {
     // Couples
     // ===============================================================
     match /casais/{casalId} {
-      allow read, write: if isCasalMember(casalId);
+      allow read: if isCasalMember(casalId);
+      // mode: 'solo' | 'casal' | 'grupo'; groupName shown in group pots
+      allow create, update: if isCasalMember(casalId)
+                            && (!('mode' in changed()) || request.resource.data.mode in ['solo', 'casal', 'grupo'])
+                            && (!('groupName' in changed()) || (request.resource.data.groupName is string && request.resource.data.groupName.size() <= 60));
 
       match /trip_config/{docId} {
         allow read: if isCasalMember(casalId);
-        allow create, update: if isCasalMember(casalId) && isValidTripConfig(request.resource.data);
+        allow create, update: if isCasalMember(casalId) && isValidTripConfig();
       }
 
       match /deposits/{depositId} {
         allow read: if isCasalMember(casalId);
         allow create: if isCasalMember(casalId) && isValidDeposit(request.resource.data);
         allow delete: if isCasalMember(casalId);
+        // Anyone in the couple/group may fix a record (value, description,
+        // date, comments, reactions); the author (`who`) never changes.
         allow update: if isCasalMember(casalId)
-                      && request.resource.data.who == resource.data.who
-                      && request.resource.data.amount is number
-                      && (
-                        // The author may edit value, description, type, date and photo
-                        (resource.data.who == request.auth.uid &&
-                         request.resource.data.createdAt is timestamp) ||
-                        // Partner may only comment / react
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['comments', 'reactions'])
-                      );
+                      && request.resource.data.get('who', null) == resource.data.get('who', null)
+                      && (!('amount' in changed()) || request.resource.data.amount is number)
+                      && (!('createdAt' in changed()) || request.resource.data.createdAt is timestamp)
+                      && (!('type' in changed()) || request.resource.data.type in ['income', 'expense']);
       }
 
       match /achievements/{achievementId} {

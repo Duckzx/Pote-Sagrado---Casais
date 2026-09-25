@@ -11,17 +11,19 @@ export interface MoodOption {
   label: string;
   /** Tip shown to the partner */
   tip: string;
+  /** Tip for yourself (solo mode) */
+  selfTip: string;
 }
 
 export const MOODS: MoodOption[] = [
-  { id: "radiante", emoji: "✨", label: "Radiante", tip: "Aproveitem a energia boa e planejem algo juntos hoje." },
-  { id: "apaixonada", emoji: "🥰", label: "No clima", tip: "Um elogio sincero agora vai fazer o dia valer." },
-  { id: "tranquila", emoji: "🌿", label: "Em paz", tip: "Um café a dois sem celular combina com hoje." },
-  { id: "saudade", emoji: "💭", label: "Com saudade", tip: "Mande uma foto ou um áudio só para dizer oi." },
-  { id: "cansada", emoji: "🌙", label: "Cansaço", tip: "Que tal assumir o jantar ou a louça hoje?" },
-  { id: "colo", emoji: "🥺", label: "Querendo colo", tip: "Abraço demorado e zero cobranças. Só presença." },
-  { id: "estressada", emoji: "🌧️", label: "Dia difícil", tip: "Escute sem tentar resolver. Pergunte como pode ajudar." },
-  { id: "fome", emoji: "🍓", label: "Com fome", tip: "Surpreenda com o lanche favorito. Vale ponto extra." },
+  { id: "radiante", emoji: "✨", label: "Radiante", tip: "Aproveitem a energia boa e planejem algo juntos hoje.", selfTip: "Anote um sonho novo no mural enquanto a energia está alta." },
+  { id: "apaixonada", emoji: "🥰", label: "No clima", tip: "Um elogio sincero agora vai fazer o dia valer.", selfTip: "Registre esse momento: uma foto no álbum vale ouro." },
+  { id: "tranquila", emoji: "🌿", label: "Em paz", tip: "Um café a dois sem celular combina com hoje.", selfTip: "Dia perfeito para revisar suas metas com calma." },
+  { id: "saudade", emoji: "💭", label: "Com saudade", tip: "Mande uma foto ou um áudio só para dizer oi.", selfTip: "Mande uma mensagem para quem você ama. Custa zero." },
+  { id: "cansada", emoji: "🌙", label: "Cansaço", tip: "Que tal assumir o jantar ou a louça hoje?", selfTip: "Descanso também é investimento. Pausa sem culpa hoje." },
+  { id: "colo", emoji: "🥺", label: "Querendo colo", tip: "Abraço demorado e zero cobranças. Só presença.", selfTip: "Faça algo gentil por você que não custe nada: banho demorado, playlist favorita." },
+  { id: "estressada", emoji: "🌧️", label: "Dia difícil", tip: "Escute sem tentar resolver. Pergunte como pode ajudar.", selfTip: "Respire. Evite compras por impulso hoje: amanhã você decide melhor." },
+  { id: "fome", emoji: "🍓", label: "Com fome", tip: "Surpreenda com o lanche favorito. Vale ponto extra.", selfTip: "Cozinhar em casa hoje já é uma economia para o pote." },
 ];
 
 const MOOD_TTL_MS = 24 * 60 * 60 * 1000;
@@ -62,6 +64,8 @@ export const MoodCheckIn: React.FC = () => {
     return activeMood(useLocal ? { mood: optimistic } : me);
   }, [optimistic, me]);
   const partnerMood = activeMood(partner);
+  const others = coupleMembers.filter((m) => m.id !== user?.uid);
+  const mode = useAppStore((s) => s.mode);
 
   const chooseMood = async (mood: MoodOption) => {
     if (!user) return;
@@ -82,49 +86,82 @@ export const MoodCheckIn: React.FC = () => {
     <section className="bg-cookbook-bg/80 backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50">
-          Como estamos hoje
+          {mode === "solo" ? "Como estou hoje" : "Como estamos hoje"}
         </h3>
         <span className="text-[10px] font-sans text-cookbook-text/30">atualiza a cada 24h</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {/* Me */}
-        <button
-          onClick={() => setIsPicking((v) => !v)}
-          className="text-left rounded-2xl p-4 bg-cookbook-primary/[0.06] border border-cookbook-primary/15 hover:border-cookbook-primary/40 transition-all active:scale-[0.98]"
-        >
-          <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2">Você</p>
-          {myMood ? (
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{myMood.emoji}</span>
-              <span className="font-serif text-lg text-cookbook-text leading-tight">{myMood.label}</span>
-            </div>
-          ) : (
-            <p className="font-serif italic text-cookbook-primary text-base leading-tight">Toque para contar ✨</p>
-          )}
-        </button>
-
-        {/* Partner */}
-        <div className="rounded-2xl p-4 bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
-          <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2 truncate">
-            {partner ? firstName(partner) : "Seu par"}
-          </p>
-          {partnerMood ? (
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{partnerMood.emoji}</span>
-              <span className="font-serif text-lg text-cookbook-text leading-tight">{partnerMood.label}</span>
-            </div>
-          ) : (
-            <p className="font-serif italic text-cookbook-text/40 text-base leading-tight">
-              {partner ? "Ainda não contou" : "Convide nas configurações"}
-            </p>
+      {mode === "grupo" ? (
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1 pb-1">
+          <button
+            onClick={() => setIsPicking((v) => !v)}
+            className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-primary/[0.06] border border-cookbook-primary/20 active:scale-95"
+          >
+            <span className="block text-2xl">{myMood ? myMood.emoji : "➕"}</span>
+            <span className="block font-sans text-[10px] font-bold text-cookbook-text/70 mt-1 truncate">Você</span>
+            <span className="block font-serif text-sm text-cookbook-text leading-tight truncate">{myMood ? myMood.label : "Contar"}</span>
+          </button>
+          {others.map((m) => {
+            const mood = activeMood(m);
+            return (
+              <div key={m.id} className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
+                <span className="block text-2xl">{mood ? mood.emoji : "💤"}</span>
+                <span className="block font-sans text-[10px] font-bold text-cookbook-text/70 mt-1 truncate">{firstName(m)}</span>
+                <span className="block font-serif text-sm text-cookbook-text/70 leading-tight truncate">{mood ? mood.label : "—"}</span>
+              </div>
+            );
+          })}
+          {others.length === 0 && (
+            <p className="self-center font-serif italic text-cookbook-text/40 text-sm px-2">Convide a turma em Ajustes</p>
           )}
         </div>
-      </div>
+      ) : (
+        <div className={mode === "solo" ? "" : "grid grid-cols-2 gap-3"}>
+          {/* Me */}
+          <button
+            onClick={() => setIsPicking((v) => !v)}
+            className="w-full text-left rounded-2xl p-4 bg-cookbook-primary/[0.06] border border-cookbook-primary/15 hover:border-cookbook-primary/40 transition-all active:scale-[0.98]"
+          >
+            <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2">Você</p>
+            {myMood ? (
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{myMood.emoji}</span>
+                <span className="font-serif text-lg text-cookbook-text leading-tight">{myMood.label}</span>
+              </div>
+            ) : (
+              <p className="font-serif italic text-cookbook-primary text-base leading-tight">Toque para contar ✨</p>
+            )}
+          </button>
 
-      {partnerMood && (
+          {/* Partner */}
+          {mode === "casal" && (
+            <div className="rounded-2xl p-4 bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
+              <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2 truncate">
+                {partner ? firstName(partner) : "Seu par"}
+              </p>
+              {partnerMood ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{partnerMood.emoji}</span>
+                  <span className="font-serif text-lg text-cookbook-text leading-tight">{partnerMood.label}</span>
+                </div>
+              ) : (
+                <p className="font-serif italic text-cookbook-text/40 text-base leading-tight">
+                  {partner ? "Ainda não contou" : "Convide nas configurações"}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {mode === "casal" && partnerMood && (
         <p className="mt-3 font-sans text-xs text-cookbook-text/60 leading-relaxed">
           <span className="font-bold text-cookbook-primary">Dica:</span> {partnerMood.tip}
+        </p>
+      )}
+      {mode === "solo" && myMood && (
+        <p className="mt-3 font-sans text-xs text-cookbook-text/60 leading-relaxed">
+          <span className="font-bold text-cookbook-primary">Para você:</span> {myMood.selfTip}
         </p>
       )}
 

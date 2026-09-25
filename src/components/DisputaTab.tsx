@@ -2,6 +2,8 @@ import React, { useMemo, useRef, useState } from "react";
 import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
 import { motion, AnimatePresence } from "motion/react";
+import { useAppStore } from "../store/useAppStore";
+import { GroupRanking } from "./home/GroupRanking";
 
 interface DisputaTabProps {
   deposits: any[];
@@ -10,6 +12,8 @@ interface DisputaTabProps {
 }
 export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToast }) => {
   const leaderBannerRef = useRef<HTMLDivElement>(null);
+  const coupleMembers = useAppStore((s) => s.coupleMembers);
+  const mode = useAppStore((s) => s.mode);
   const [isExporting, setIsExporting] = useState(false);
   const getDateObj = (val: any) => {
     if (!val) return null;
@@ -31,10 +35,15 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
     });
     
     const userTotals: Record<string, { name: string; total: number; count: number; maxHit: number; expenses: number }> = {};
+    // Everyone in the pot shows up with their real name, even before depositing
+    coupleMembers.forEach((m) => {
+      const name = (m.displayName || m.email?.split("@")[0] || "Alguém").split(" ")[0];
+      userTotals[m.id] = { name, total: 0, count: 0, maxHit: 0, expenses: 0 };
+    });
     
     monthlyDeposits.forEach((d) => {
       if (!userTotals[d.who]) {
-        userTotals[d.who] = { name: d.whoName, total: 0, count: 0, maxHit: 0, expenses: 0 };
+        userTotals[d.who] = { name: (d.whoName || "Alguém").split(" ")[0], total: 0, count: 0, maxHit: 0, expenses: 0 };
       }
       
       if (d.type === "expense") {
@@ -65,8 +74,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       total > 0 ? (Math.max(0, users[0].total) / total) * 100 : 50;
     const p2Percentage =
       total > 0 ? (Math.max(0, users[1].total) / total) * 100 : 50;
-    return { users, total, p1Percentage, p2Percentage };
-  }, [deposits]);
+    const ranking = Object.values(userTotals).sort((a, b) => b.total - a.total);
+    return { users, total, p1Percentage, p2Percentage, ranking };
+  }, [deposits, coupleMembers]);
+  const groupRanking = stats.ranking;
   const { users, p1Percentage, p2Percentage } = stats;
   /* Monthly breakdown for chart-like display */ const weeklyData =
     useMemo(() => {
@@ -231,14 +242,16 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         >
           <div className="inline-flex items-center justify-center gap-2 mb-2">
             <Swords size={20} className="text-cookbook-primary/80" />
-            <h2 className="font-serif text-2xl text-cookbook-text">A Grande Batalha</h2>
+            <h2 className="font-serif text-2xl text-cookbook-text">{mode === "grupo" ? "Ranking da Turma" : "A Grande Batalha"}</h2>
             <Swords size={20} className="text-cookbook-primary/80" />
           </div>
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">Quem domina o mês?</p>
+          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">{mode === "grupo" ? "Quem mais contribuiu no mês?" : "Quem domina o mês?"}</p>
         </motion.div>
       </div>
       
-      {/* Dynamic Battle Arena */}
+      {mode === "grupo" ? (
+        <GroupRanking ranking={groupRanking} />
+      ) : (
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -344,6 +357,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </div>
         </div>
       </motion.div>
+      )}
       {/* Prize */}{" "}
       <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
         {" "}
@@ -357,41 +371,6 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         </p>{" "}
       </div>{" "}
 
-      {/* Invite Friends Challenge (Viral Loop) */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.25 }}
-        className="bg-gradient-to-br from-cookbook-primary/5 to-emerald-500/5 rounded-3xl p-6 border border-cookbook-primary/10 shadow-sm relative overflow-hidden group"
-      >
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Share2 size={64} className="text-cookbook-primary transform rotate-12 group-hover:rotate-45 transition-transform duration-700" />
-        </div>
-        <h3 className="font-serif text-lg text-cookbook-text mb-2 flex items-center gap-2">
-          <Swords size={18} className="text-cookbook-primary" />
-          Batalha de Casais (2v2)
-        </h3>
-        <p className="font-sans text-xs text-cookbook-text/60 mb-5 relative z-10">
-          Acha que vocês economizam mais? Desafie outro casal amigo e veja quem junta mais dinheiro no Pote Sagrado!
-        </p>
-        <button
-          onClick={() => {
-             if (navigator.share) {
-               navigator.share({
-                 title: "Desafio do Pote Sagrado",
-                 text: "Nosso casal desafiou vocês para uma batalha de economia! Quem juntar mais em 15 dias ganha. Entrem na arena:",
-                 url: window.location.origin + "?invite=" + Math.random().toString(36).substring(2,8)
-               }).catch(e => console.error(e));
-             } else {
-               navigator.clipboard.writeText(window.location.origin + "?invite=" + Math.random().toString(36).substring(2,8));
-               addToast("Link Copiado!", "Envie para o casal amigo via WhatsApp", "success");
-             }
-          }}
-          className="w-full bg-cookbook-bg text-cookbook-primary hover:bg-cookbook-primary hover:text-white border border-cookbook-primary transition-colors font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold shadow-sm relative z-10 active:scale-95 flex items-center justify-center gap-2"
-        >
-           <Share2 size={16} /> Desafiar Casal Amigo
-        </button>
-      </motion.div>
 
       {/* Leader Banner */}
       {users[0].total > 0 && users[0].total > users[1].total && (
@@ -459,7 +438,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </div>
         </motion.div>
       )}
-      {/* Weekly breakdown */}
+      {/* Weekly breakdown (two-person comparison) */}
+      {mode !== "grupo" && (
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -503,6 +483,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           ))}
         </div>
       </motion.div>
+      )}
       {/* Advanced Stats */}
       <motion.div 
          initial={{ y: 20, opacity: 0 }}
