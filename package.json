@@ -15,7 +15,8 @@
     "remotion:render:preview": "remotion render src/remotion/index.tsx PoteSagradoPreview out/pote-sagrado-preview.mp4 --codec=h264 --scale=0.5",
     "remotion:render:frames": "remotion render src/remotion/index.tsx PoteSagradoCommercial out/frames/ --sequence",
     "test:rules": "firebase emulators:exec --only firestore --project demo-pote \"node tests/firestore.rules.test.mjs\"",
-    "dev:emulators": "firebase emulators:exec --only auth,firestore --project potesagrado-34c79 \"VITE_USE_EMULATORS=true vite --port 5173\""
+    "dev:emulators": "firebase emulators:exec --only auth,firestore --project potesagrado-34c79 \"VITE_USE_EMULATORS=true vite --port 5173\"",
+    "firebase:enable-email-auth": "node scripts/enable-email-auth.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -54,6 +55,7 @@
     "esbuild": "^0.28.0",
     "eslint": "^10.3.0",
     "firebase-tools": "^14.27.0",
+    "google-auth-library": "^10.9.1",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
