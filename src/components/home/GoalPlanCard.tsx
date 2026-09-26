@@ -5,8 +5,8 @@ import { db } from "../../firebase";
 import { useAppStore } from "../../store/useAppStore";
 import { computePlan } from "../../lib/progress";
 import { handleFirestoreError, OperationType } from "../../lib/firestore-errors";
+import { formatBRL } from "../../lib/maskUtils";
 
-const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const fmtDate = (d: Date) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).replace(".", "");
 const inputDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -88,11 +88,11 @@ export const GoalPlanCard: React.FC = () => {
       ) : (
         <>
           <div className="flex items-end gap-2 mt-2">
-            <span className="font-serif text-4xl text-cookbook-primary leading-none">{brl(plan.perWeek)}</span>
+            <span className="font-serif text-4xl text-cookbook-primary leading-none">{formatBRL(plan.perWeek)}</span>
             <span className="font-sans text-xs text-cookbook-text/60 pb-1">por semana</span>
           </div>
           <p className="font-sans text-xs text-cookbook-text/60 mt-1">
-            ≈ {brl(plan.perDay)} por dia · faltam {brl(plan.remaining)} em {plan.daysLeft} {plan.daysLeft === 1 ? "dia" : "dias"}
+            ≈ {formatBRL(plan.perDay)} por dia · faltam {formatBRL(plan.remaining)} em {plan.daysLeft} {plan.daysLeft === 1 ? "dia" : "dias"}
           </p>
           <div
             className={`mt-3 rounded-2xl px-3 py-2.5 font-sans text-xs leading-snug ${
@@ -101,8 +101,8 @@ export const GoalPlanCard: React.FC = () => {
           >
             {plan.etaAtCurrentPace
               ? plan.onTrack
-                ? `No ritmo atual (${brl(plan.currentWeeklyPace)}/semana) ${arrive} em ${fmtDate(plan.etaAtCurrentPace)}. Dentro do prazo! 🙌`
-                : `No ritmo atual (${brl(plan.currentWeeklyPace)}/semana) a meta chega só em ${fmtDate(plan.etaAtCurrentPace)}. Bora acelerar!`
+                ? `No ritmo atual (${formatBRL(plan.currentWeeklyPace)}/semana) ${arrive} em ${fmtDate(plan.etaAtCurrentPace)}. Dentro do prazo! 🙌`
+                : `No ritmo atual (${formatBRL(plan.currentWeeklyPace)}/semana) a meta chega só em ${fmtDate(plan.etaAtCurrentPace)}. Bora acelerar!`
               : "Ainda sem depósitos nos últimos 30 dias. O primeiro passo conta muito!"}
           </div>
         </>
