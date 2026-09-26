@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { Crown } from "lucide-react";
 import { BorderBeam } from "../magicui/border-beam";
+import { formatBRL } from "../../lib/maskUtils";
 
 interface RankEntry {
   name: string;
@@ -9,7 +10,6 @@ interface RankEntry {
   count: number;
 }
 
-const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const MEDALS = ["🥇", "🥈", "🥉"];
 
 /** Monthly contribution ranking for group pots: podium + list. */
@@ -27,7 +27,7 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
           </div>
           <p className="font-serif text-2xl text-cookbook-text mt-2">{leader.name}</p>
           <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">
-            lidera com {brl(leader.total)}
+            lidera com {formatBRL(leader.total)}
           </p>
         </div>
       )}
@@ -39,7 +39,7 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-sans text-sm font-bold text-cookbook-text truncate">{r.name}</span>
-                <span className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{brl(r.total)}</span>
+                <span className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{formatBRL(r.total)}</span>
               </div>
               <div className="h-2 mt-1.5 rounded-full bg-cookbook-border/50 overflow-hidden">
                 <motion.div
