@@ -53,6 +53,29 @@
   ```
   Sem publicar as novas regras, recursos como Love Cards, notificações, álbum e Cápsula do Tempo ficam bloqueados.
 
+## Login por e-mail no Firebase
+
+O erro `auth/operation-not-allowed` exige ativar o provedor no projeto Firebase.
+O workflow **Configurar login por e-mail** faz isso após estas alterações entrarem
+no `main`, ou manualmente em **Actions → Configurar login por e-mail → Run workflow**.
+Ele usa o segredo `FIREBASE_SERVICE_ACCOUNT`, cuja conta precisa também do papel
+**Firebase Authentication Admin** (`roles/firebaseauth.admin`) no projeto
+`potesagrado-34c79`. O papel Firebase Rules Admin sozinho não permite alterar Auth.
+
+Para executar localmente, configure `GOOGLE_APPLICATION_CREDENTIALS` com o caminho
+do JSON da conta de serviço, fora do repositório, e execute:
+
+```bash
+npm run firebase:enable-email-auth -- --dry-run
+npm run firebase:enable-email-auth
+```
+
+O dry-run não acessa nem altera o Firebase. A execução real lê a configuração,
+ativa somente o provedor de e-mail quando necessário e confirma por uma nova leitura.
+Outros provedores e a configuração de login por link são preservados.
+Alternativamente, ative **E-mail/senha** em **Firebase Console → Authentication →
+Sign-in method**. Nunca publique o JSON da conta de serviço no repositório.
+
 ## 🛠️ Tecnologias
 
 - **Frontend**: React 19, Vite, Tailwind CSS 4, Lucide Icons, Motion, componentes [Magic UI](https://magicui.design) (MIT).
