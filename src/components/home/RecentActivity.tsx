@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
 import { useAppStore } from "../../store/useAppStore";
 import { AnimatedList } from "../magicui/animated-list";
-
-const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+import { formatBRL } from "../../lib/maskUtils";
 
 function timeAgo(date: Date | null) {
   if (!date) return "agora";
@@ -67,7 +66,7 @@ export const RecentActivity: React.FC = () => {
               </div>
               <span className={`font-sans text-sm font-bold tabular-nums ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
                 {isExpense ? "-" : "+"}
-                {brl(Number(d.amount) || 0)}
+                {formatBRL(Number(d.amount) || 0)}
               </span>
             </div>
           );
