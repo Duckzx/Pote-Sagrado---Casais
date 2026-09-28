@@ -16,6 +16,9 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) => {
   const max = Math.max(1, ...ranking.map((r) => r.total));
   const leader = ranking[0];
+  // Fair share of the "vaquinha": what each person would have put in equally
+  const groupTotal = ranking.reduce((sum, r) => sum + Math.max(0, r.total), 0);
+  const fairShare = ranking.length > 0 ? groupTotal / ranking.length : 0;
 
   return (
     <div className="relative bg-cookbook-bg/80 backdrop-blur-3xl border border-cookbook-border rounded-[2rem] p-6 shadow-2xl overflow-hidden">
@@ -41,6 +44,13 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
                 <span className="font-sans text-sm font-bold text-cookbook-text truncate">{r.name}</span>
                 <span data-money className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{brl(r.total)}</span>
               </div>
+              {ranking.length > 1 && groupTotal > 0 && (
+                <p data-money className={`font-sans text-[10px] mt-0.5 ${r.total >= fairShare ? "text-emerald-600" : "text-amber-700"}`}>
+                  {r.total >= fairShare
+                    ? `+${brl(r.total - fairShare)} acima da parte justa`
+                    : `faltam ${brl(fairShare - r.total)} para a parte justa`}
+                </p>
+              )}
               <div className="h-2 mt-1.5 rounded-full bg-cookbook-border/50 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
@@ -53,6 +63,12 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
           </li>
         ))}
       </ol>
+
+      {ranking.length > 1 && groupTotal > 0 && (
+        <p data-money className="font-sans text-[11px] text-cookbook-text/50 text-center mt-5">
+          Total do mês: {brl(groupTotal)} · parte justa: {brl(fairShare)} por pessoa
+        </p>
+      )}
 
       {ranking.length === 0 && (
         <p className="font-serif italic text-center text-cookbook-text/40 py-6">Convide a turma para começar o ranking</p>
