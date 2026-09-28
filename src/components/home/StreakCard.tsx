@@ -1,4 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { Share2 } from "lucide-react";
+import { ReminderButton } from "./ReminderButton";
+import { ShareableWidget } from "../ShareableWidget";
+import { Portal } from "../ui/portal";
 import { motion } from "motion/react";
 import { useAppStore } from "../../store/useAppStore";
 import { computeStreak } from "../../lib/progress";
@@ -8,6 +12,10 @@ export const StreakCard: React.FC = () => {
   const deposits = useAppStore((s) => s.deposits);
   const mode = useAppStore((s) => s.mode);
   const streak = useMemo(() => computeStreak(deposits), [deposits]);
+  const totalSaved = useAppStore((s) => s.totalSaved);
+  const goalAmount = useAppStore((s) => s.tripConfig?.goalAmount || 0);
+  const destination = useAppStore((s) => s.tripConfig?.destination || "");
+  const [sharing, setSharing] = useState(false);
 
   const alive = streak.current > 0;
   const hint = streak.savedToday
@@ -60,8 +68,37 @@ export const StreakCard: React.FC = () => {
         ))}
       </div>
 
-      {streak.best > 1 && (
-        <p className="font-sans text-[10px] text-cookbook-text/40 mt-3 text-right">Recorde: {streak.best} dias</p>
+      <div className="flex items-center justify-between mt-3">
+        {streak.current >= 2 ? (
+          <button
+            onClick={() => setSharing(true)}
+            className="flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary"
+          >
+            <Share2 size={12} /> Mostrar ofensiva
+          </button>
+        ) : (
+          <span />
+        )}
+        {streak.best > 1 && <p className="font-sans text-[10px] text-cookbook-text/40">Recorde: {streak.best} dias</p>}
+      </div>
+
+      <ReminderButton />
+
+      {sharing && (
+        <Portal>
+          <ShareableWidget
+            goalAmount={goalAmount}
+            totalSaved={totalSaved}
+            destination={destination}
+            celebration="Mostre sua ofensiva 🔥"
+            override={{
+              headline: `${streak.current} dias seguidos guardando 🔥`,
+              subline: destination ? `rumo a: ${destination}` : "Ofensiva no Pote Sagrado",
+              message: `${streak.current} dias seguidos guardando dinheiro no Pote Sagrado 🔥 Bora criar o hábito também?`,
+            }}
+            onClose={() => setSharing(false)}
+          />
+        </Portal>
       )}
     </section>
   );

@@ -20,6 +20,15 @@ export interface Deposit {
   envelope?: number;
 }
 
+export interface Wish {
+  id: string;
+  name: string;
+  price: number;
+  emoji: string;
+  bought: boolean;
+  addedBy?: string;
+}
+
 export interface Challenge {
   id: string;
   label: string;
@@ -43,6 +52,8 @@ export interface TripConfig {
   relationshipStartDate?: string;
   /** Date the goal should be reached (YYYY-MM-DD) */
   targetDate?: string;
+  /** Wishlist: things to buy with the pot */
+  wishes?: Wish[];
   /** "100 envelopes" challenge: numbers already opened */
   envelopes?: number[];
 }
