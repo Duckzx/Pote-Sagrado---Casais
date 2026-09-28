@@ -170,6 +170,11 @@ function AppContent() {
     document.documentElement.setAttribute("data-theme", theme || "cookbook");
   }, [theme]);
 
+  const hideValues = useAppStore(s => s.hideValues);
+  React.useEffect(() => {
+    document.documentElement.classList.toggle("privacy-on", hideValues);
+  }, [hideValues]);
+
   const mode = useAppStore(s => s.mode);
   const needsModeChoice = useAppStore(s => s.needsModeChoice);
   const lgpdConsent = useAppStore(s => s.lgpdConsent);

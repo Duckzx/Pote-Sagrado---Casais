@@ -383,7 +383,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
           <ArrowUpCircle size={18} className="text-emerald-500 mx-auto mb-2 opacity-80" />
           <div className="font-serif text-sm text-emerald-700 font-medium">
-             {formatCurrency(totals.depositos)}
+             <span data-money>{formatCurrency(totals.depositos)}</span>
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
              Entradas
@@ -393,7 +393,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
           <ArrowDownCircle size={18} className="text-red-500 mx-auto mb-2 opacity-80" />
           <div className="font-serif text-sm text-red-700 font-medium">
-             {formatCurrency(totals.gastos)}
+             <span data-money>{formatCurrency(totals.gastos)}</span>
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
              Saídas
@@ -402,7 +402,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         <div className="bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-2xl p-4 text-center shadow-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-cookbook-primary/5 to-transparent"></div>
           <div className={`font-serif text-base mb-1 ${totals.saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}>
-             {formatCurrency(totals.saldo)}
+             <span data-money>{formatCurrency(totals.saldo)}</span>
           </div>
           <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-2">
              Saldo Atual
@@ -418,7 +418,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {userContributions[0].name}
             </span>
             <span className="font-serif text-sm text-cookbook-text font-medium">
-              {formatCurrency(userContributions[0].amount)}
+              <span data-money>{formatCurrency(userContributions[0].amount)}</span>
             </span>
           </div>
           
@@ -434,7 +434,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {userContributions[1].name}
             </span>
             <span className="font-serif text-sm text-cookbook-text font-medium">
-              {formatCurrency(userContributions[1].amount)}
+              <span data-money>{formatCurrency(userContributions[1].amount)}</span>
             </span>
           </div>
           
@@ -541,7 +541,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                  <ArrowUpCircle size={10} /> Maior Entrada
                </div>
                <div className="font-serif text-sm text-cookbook-text font-medium">
-                 {formatCurrency(insights.biggestDeposit.amount)}
+                 <span data-money>{formatCurrency(insights.biggestDeposit.amount)}</span>
                </div>
                <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
                  {insights.biggestDeposit.whoName}
@@ -555,7 +555,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                  <ArrowDownCircle size={10} /> Maior Saída
                </div>
                <div className="font-serif text-sm text-cookbook-text font-medium">
-                 {formatCurrency(insights.biggestExpense.amount)}
+                 <span data-money>{formatCurrency(insights.biggestExpense.amount)}</span>
                </div>
                <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
                  {insights.biggestExpense.action || "Sem descrição"}
@@ -603,7 +603,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                       Saldo do Dia
                     </span>
                     <span className={`font-serif text-xs font-medium ${dailyBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                      {dailyBalance >= 0 ? "+" : ""}{formatCurrency(dailyBalance)}
+                      {dailyBalance >= 0 ? "+" : ""}<span data-money>{formatCurrency(dailyBalance)}</span>
                     </span>
                   </div>
                 </div>
@@ -652,7 +652,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                           <div className="text-right shrink-0 flex items-center gap-2">
                             <span className={`font-serif text-lg font-medium tracking-tight whitespace-nowrap ${isExpense ? "text-red-500" : "text-emerald-500"}`}>
                               {isExpense ? "−" : "+"}
-                              {formatCurrency(deposit.amount).replace('R$', '').trim()}
+                              <span data-money>{formatCurrency(deposit.amount).replace('R$', '').trim()}</span>
                             </span>
                           </div>
                         </div>
@@ -861,7 +861,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             </h3>{" "}
             <p className="font-sans text-xs text-cookbook-text/60 mb-6">
               {" "}
-              <strong>{formatCurrency(deleting.amount)}</strong> —{" "}
+              <strong><span data-money>{formatCurrency(deleting.amount)}</span></strong> —{" "}
               {deleting.action || "Sem descrição"}{" "}
             </p>{" "}
             <div className="flex gap-3">

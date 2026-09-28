@@ -85,6 +85,10 @@ interface AppState {
   needsModeChoice: boolean;
   setModeInfo: (info: { mode: PoteMode; groupName: string; needsModeChoice: boolean }) => void;
 
+  // Modo discreto (hide money values)
+  hideValues: boolean;
+  toggleHideValues: () => void;
+
   // Premium
   isPremium: boolean;
   setPremium: (v: boolean) => void;
@@ -207,6 +211,15 @@ export const useAppStore = create<AppState>((set) => ({
   groupName: '',
   needsModeChoice: false,
   setModeInfo: (info) => set(info),
+
+  hideValues: (() => {
+    try { return localStorage.getItem('pote_hideValues') === 'true'; } catch { return false; }
+  })(),
+  toggleHideValues: () => set((state) => {
+    const hideValues = !state.hideValues;
+    try { localStorage.setItem('pote_hideValues', String(hideValues)); } catch { /* ignore */ }
+    return { hideValues };
+  }),
 
   isPremium: false,
   setPremium: (isPremium) => set({ isPremium }),

@@ -65,7 +65,7 @@ export const RecentActivity: React.FC = () => {
                 </p>
                 <p className="font-sans text-[10px] text-cookbook-text/40">{timeAgo(date)}</p>
               </div>
-              <span className={`font-sans text-sm font-bold tabular-nums ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
+              <span data-money className={`font-sans text-sm font-bold tabular-nums ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
                 {isExpense ? "-" : "+"}
                 {brl(Number(d.amount) || 0)}
               </span>

@@ -88,10 +88,10 @@ export const GoalPlanCard: React.FC = () => {
       ) : (
         <>
           <div className="flex items-end gap-2 mt-2">
-            <span className="font-serif text-4xl text-cookbook-primary leading-none">{brl(plan.perWeek)}</span>
+            <span data-money className="font-serif text-4xl text-cookbook-primary leading-none">{brl(plan.perWeek)}</span>
             <span className="font-sans text-xs text-cookbook-text/60 pb-1">por semana</span>
           </div>
-          <p className="font-sans text-xs text-cookbook-text/60 mt-1">
+          <p data-money className="font-sans text-xs text-cookbook-text/60 mt-1">
             ≈ {brl(plan.perDay)} por dia · faltam {brl(plan.remaining)} em {plan.daysLeft} {plan.daysLeft === 1 ? "dia" : "dias"}
           </p>
           <div
