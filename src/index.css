@@ -7,11 +7,15 @@
   --theme-bg: #F9F8F6;
   --theme-text: #2C2A26;
   --theme-border: #E6E2D8;
-  --theme-primary: #8E7F6D;
-  --theme-primary-hover: #7A6C5C;
+  --theme-primary: #807262;
+  --theme-primary-hover: #6E6355;
   --theme-gold: #C5A059;
   --theme-battle: #F4F1EA;
   --theme-mural: #FFF9E6;
+  /* Label color on primary surfaces (buttons, active chips) */
+  --theme-on-primary: #FFFFFF;
+  /* Gold is light in every theme: labels on it stay dark */
+  --theme-on-gold: #2B1D14;
 
   --font-serif-family: "Cormorant Garamond", "Georgia", serif;
   --font-sans-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,6 +27,8 @@
   --color-cookbook-border: var(--theme-border);
   --color-cookbook-primary: var(--theme-primary);
   --color-cookbook-primary-hover: var(--theme-primary-hover);
+  --color-cookbook-on-primary: var(--theme-on-primary);
+  --color-cookbook-on-gold: var(--theme-on-gold);
   --color-cookbook-gold: var(--theme-gold);
   --color-cookbook-battle: var(--theme-battle);
   --color-cookbook-mural: var(--theme-mural);
@@ -55,6 +61,65 @@
   }
 }
 
+/* ===== UI/UX Pro Max foundations (see design-system/pote-sagrado/MASTER.md) ===== */
+
+/* Dark themes: light primary needs dark labels */
+[data-theme="midnight"] .bg-cookbook-primary.text-white,
+[data-theme="cereja"] .bg-cookbook-primary.text-white {
+  color: var(--theme-on-primary);
+}
+
+/* Base layer so Tailwind utilities (absolute, fixed...) still win */
+@layer base {
+  /* Touch: instant feedback, no double-tap zoom delay, pointer on anything tappable */
+  button, [role="button"], a, label[for], summary, select {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
+
+  /* Icon-only buttons (they carry aria-label; dense grids opt out with .no-hit-expand): invisible 44x44 hit area without
+     changing the drawn size. :where keeps it overridable by utilities
+     (absolute/fixed buttons keep their positioning). */
+  :where(button[aria-label]:not(.no-hit-expand)) { position: relative; }
+  :where(button[aria-label]:not(.no-hit-expand))::after {
+    content: "";
+    position: absolute;
+    top: min(0px, calc((100% - 44px) / 2));
+    bottom: min(0px, calc((100% - 44px) / 2));
+    left: min(0px, calc((100% - 44px) / 2));
+    right: min(0px, calc((100% - 44px) / 2));
+  }
+
+  /* Visible keyboard focus in every theme */
+  :focus-visible {
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+  }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline-offset: 0; }
+}
+
+/* iOS zooms into inputs under 16px: keep small inputs at 16px on phones */
+@media (max-width: 640px) {
+  input.text-xs, input.text-sm, textarea.text-xs, textarea.text-sm, select.text-xs, select.text-sm {
+    font-size: 16px;
+  }
+}
+
+/* Readable numbers that don't jump while counting */
+[data-money], .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Respect reduced motion (JS animations follow via MotionConfig) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Never scroll sideways on phones */
 html, body {
   overflow-x: clip;
@@ -65,8 +130,8 @@ html, body {
   --theme-bg: #FFF5EE;
   --theme-text: #4A2E2B;
   --theme-border: #F4D5CB;
-  --theme-primary: #E07A5F;
-  --theme-primary-hover: #D06A4F;
+  --theme-primary: #CB4A27;
+  --theme-primary-hover: #B24022;
   --theme-gold: #F2CC8F;
   --theme-battle: #FDF0EA;
   --theme-mural: #FFFDF9;
@@ -76,8 +141,8 @@ html, body {
   --theme-bg: #F0F4F8;
   --theme-text: #1A2B3C;
   --theme-border: #D9E2EC;
-  --theme-primary: #5C7C8A;
-  --theme-primary-hover: #4A6A78;
+  --theme-primary: #5A7987;
+  --theme-primary-hover: #4E6975;
   --theme-gold: #829AB1;
   --theme-battle: #E1E8F0;
   --theme-mural: #F8FAFC;
@@ -87,8 +152,8 @@ html, body {
   --theme-bg: #F2FAF5;
   --theme-text: #1E392A;
   --theme-border: #CDEBDB;
-  --theme-primary: #2A9D8F;
-  --theme-primary-hover: #21867A;
+  --theme-primary: #228175;
+  --theme-primary-hover: #1C695F;
   --theme-gold: #E9C46A;
   --theme-battle: #E6F5EC;
   --theme-mural: #FAFDFA;
@@ -103,14 +168,15 @@ html, body {
   --theme-gold: #E9C46A;
   --theme-battle: #1A1A1A;
   --theme-mural: #1C1C1C;
+  --theme-on-primary: #111111;
 }
 
 [data-theme="rose"] {
   --theme-bg: #FFF7F8;
   --theme-text: #3D2229;
   --theme-border: #F5DDE2;
-  --theme-primary: #C9677F;
-  --theme-primary-hover: #B4546C;
+  --theme-primary: #C04F6A;
+  --theme-primary-hover: #B13F5B;
   --theme-gold: #D4A574;
   --theme-battle: #FDEEF1;
   --theme-mural: #FFFAFB;
@@ -120,8 +186,8 @@ html, body {
   --theme-bg: #FAF7FF;
   --theme-text: #2E2540;
   --theme-border: #E6DDF5;
-  --theme-primary: #8B72BE;
-  --theme-primary-hover: #7760AA;
+  --theme-primary: #8166B8;
+  --theme-primary-hover: #7051AF;
   --theme-gold: #D9A6C4;
   --theme-battle: #F2ECFB;
   --theme-mural: #FCFAFF;
@@ -136,6 +202,7 @@ html, body {
   --theme-gold: #E6BE8A;
   --theme-battle: #21141A;
   --theme-mural: #1E1216;
+  --theme-on-primary: #170D10;
 }
 
 [data-theme="noir"] {

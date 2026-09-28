@@ -32,10 +32,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({ type, onClose }) => {
             </div>
             <div>
               <h2 className="font-serif text-xl font-bold text-cookbook-text">{title}</h2>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60">Pote Sagrado App</p>
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70">Pote Sagrado App</p>
             </div>
           </div>
-          <button 
+          <button aria-label="Fechar" 
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center bg-cookbook-border/50 text-cookbook-text rounded-full hover:bg-cookbook-border active:scale-95 transition-all"
           >
@@ -65,7 +65,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ type, onClose }) => {
         <div className="p-4 border-t border-cookbook-border bg-cookbook-bg/80 backdrop-blur-md">
            <button 
              onClick={onClose}
-             className="w-full bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg transition-transform hover:bg-cookbook-primary-hover active:scale-95 font-bold"
+             className="w-full bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-lg transition-transform hover:bg-cookbook-primary-hover active:scale-95 font-bold"
            >
              Fechar e Retornar
            </button>

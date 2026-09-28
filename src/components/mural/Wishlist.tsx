@@ -77,7 +77,7 @@ export const Wishlist: React.FC = () => {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-serif text-2xl text-cookbook-text leading-tight">Lista de desejos 🎀</h3>
-          <p className="font-sans text-xs text-cookbook-text/50 mt-1">O que o pote já consegue comprar.</p>
+          <p className="font-sans text-xs text-cookbook-text/70 mt-1">O que o pote já consegue comprar.</p>
         </div>
         <button
           onClick={() => setAdding((v) => !v)}
@@ -121,7 +121,7 @@ export const Wishlist: React.FC = () => {
                 <button
                   onClick={add}
                   disabled={!name.trim() || !(parseCurrencyString(price) > 0)}
-                  className="px-5 rounded-2xl bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold disabled:opacity-40"
+                  className="px-5 rounded-2xl bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold disabled:opacity-40"
                 >
                   Salvar
                 </button>
@@ -132,7 +132,7 @@ export const Wishlist: React.FC = () => {
       </AnimatePresence>
 
       {sorted.length === 0 && !adding && (
-        <p className="font-serif italic text-cookbook-text/40 text-center py-6">Adicione o primeiro desejo ✨</p>
+        <p className="font-serif italic text-cookbook-text/70 text-center py-6">Adicione o primeiro desejo ✨</p>
       )}
 
       <ul className="mt-4 space-y-2">
@@ -150,7 +150,7 @@ export const Wishlist: React.FC = () => {
                 <span className="text-2xl">{w.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <p className={`font-sans text-sm font-bold text-cookbook-text truncate ${w.bought ? "line-through" : ""}`}>{w.name}</p>
-                  <p data-money className="font-sans text-[11px] text-cookbook-text/50">
+                  <p data-money className="font-sans text-[11px] text-cookbook-text/70">
                     {brl(w.price)}
                     {!w.bought && (affordable ? " · já dá para comprar! 🎉" : ` · ${Math.floor(pct)}%`)}
                   </p>
@@ -158,13 +158,13 @@ export const Wishlist: React.FC = () => {
                 <button
                   onClick={() => toggleBought(w)}
                   className={`w-8 h-8 rounded-full flex items-center justify-center border ${
-                    w.bought ? "bg-emerald-500 border-emerald-500 text-white" : "border-cookbook-border text-cookbook-text/40"
+                    w.bought ? "bg-emerald-500 border-emerald-500 text-white" : "border-cookbook-border text-cookbook-text/70"
                   }`}
                   aria-label={w.bought ? "Desmarcar comprado" : "Marcar como comprado"}
                 >
                   <Check size={14} />
                 </button>
-                <button onClick={() => remove(w)} className="p-1.5 text-cookbook-text/30" aria-label="Remover desejo">
+                <button onClick={() => remove(w)} className="p-1.5 text-cookbook-text/70" aria-label="Remover desejo">
                   <Trash2 size={14} />
                 </button>
               </div>

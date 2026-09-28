@@ -165,7 +165,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
             </h3>{" "}
             <button
               onClick={() => setIsAdding(false)}
-              className="text-cookbook-text/40 hover:text-cookbook-text"
+              className="text-cookbook-text/70 hover:text-cookbook-text"
             >
               {" "}
               <X size={20} />{" "}
@@ -175,7 +175,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
             {" "}
             <div>
               {" "}
-              <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-1">
+              <label className="block font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">
                 {" "}
                 Categoria (Budget){" "}
               </label>{" "}
@@ -185,7 +185,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                   <button
                     key={tier.id}
                     onClick={() => setSelectedTier(tier.id)}
-                    className={`px-3 py-1.5 rounded-full font-sans text-[9px] uppercase tracking-widest font-bold transition-colors border ${selectedTier === tier.id ? "bg-cookbook-primary text-white border-cookbook-primary shadow-sm" : "bg-cookbook-bg text-cookbook-text/60 border-cookbook-border"}`}
+                    className={`px-3 py-1.5 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold transition-colors border ${selectedTier === tier.id ? "bg-cookbook-primary text-white border-cookbook-primary shadow-sm" : "bg-cookbook-bg text-cookbook-text/70 border-cookbook-border"}`}
                   >
                     {" "}
                     {tier.label}{" "}
@@ -195,7 +195,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
             </div>{" "}
             <div>
               {" "}
-              <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-1">
+              <label className="block font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">
                 {" "}
                 Título do Encontro{" "}
               </label>{" "}
@@ -210,7 +210,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
             </div>{" "}
             <div>
               {" "}
-              <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-1">
+              <label className="block font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">
                 {" "}
                 Descrição{" "}
               </label>{" "}
@@ -226,7 +226,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
               {" "}
               <div>
                 {" "}
-                <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-1">
+                <label className="block font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">
                   {" "}
                   Ícone{" "}
                 </label>{" "}
@@ -237,7 +237,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                       key={i.id}
                       onClick={() => setNewIconId(i.id)}
                       title={i.id}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${newIconId === i.id ? "bg-cookbook-primary/20 text-cookbook-primary border-[1.5px] border-cookbook-primary shadow-sm scale-110" : "bg-cookbook-bg text-cookbook-text/40 border border-cookbook-border hover:bg-cookbook-border/30 hover:text-cookbook-text"}`}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${newIconId === i.id ? "bg-cookbook-primary/20 text-cookbook-primary border-[1.5px] border-cookbook-primary shadow-sm scale-110" : "bg-cookbook-bg text-cookbook-text/70 border border-cookbook-border hover:bg-cookbook-border/30 hover:text-cookbook-text"}`}
                     >
                       {" "}
                       {i.icon}{" "}
@@ -247,7 +247,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
               </div>{" "}
               <div>
                 {" "}
-                <label className="block font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-1">
+                <label className="block font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">
                   {" "}
                   Custo (Opcional){" "}
                 </label>{" "}
@@ -268,7 +268,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
               disabled={
                 isLoadingCustom || !newTitle || !newIdea || !currentUser
               }
-              className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-3.5 rounded-2xl font-bold transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-3.5 rounded-2xl font-bold transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {" "}
               {isLoadingCustom ? (
@@ -279,7 +279,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
               <span>Salvar Ideia</span>{" "}
             </button>{" "}
             {!currentUser && (
-              <p className="text-[10px] text-center text-red-400 mt-2">
+              <p className="text-[11px] text-center text-red-400 mt-2">
                 {" "}
                 Você precisa estar logado para criar encontros.{" "}
               </p>
@@ -301,9 +301,9 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
       >
         {" "}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cookbook-primary via-cookbook-gold to-cookbook-primary opacity-50" />{" "}
-        <button
+        <button aria-label="Fechar"
           onClick={onClose}
-          className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text z-10"
+          className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-text z-10"
         >
           {" "}
           <X size={20} />{" "}
@@ -316,7 +316,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
           >
             {" "}
             <Heart size={24} className="text-cookbook-primary" />{" "}
-            <div className="absolute inset-0 bg-cookbook-primary rounded-full text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity shadow-lg">
+            <div className="absolute inset-0 bg-cookbook-primary rounded-full text-cookbook-on-primary opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity shadow-lg">
               {" "}
               <Plus size={20} />{" "}
             </div>{" "}
@@ -325,7 +325,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
             {" "}
             Roleta de Encontros{" "}
           </h3>{" "}
-          <p className="font-sans text-xs text-cookbook-text/60 mb-5">
+          <p className="font-sans text-xs text-cookbook-text/70 mb-5">
             {" "}
             A viagem é prioridade, mas não precisamos deixar de viver! Qual o
             limite (budget) para o deite de hoje?{" "}
@@ -340,7 +340,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                   <button
                     key={tier.id}
                     onClick={() => setSelectedTier(tier.id)}
-                    className={`px-3 py-1.5 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold transition-colors border ${selectedTier === tier.id ? "bg-cookbook-primary text-white border-cookbook-primary shadow-md" : "bg-cookbook-bg/90 backdrop-blur-md text-cookbook-text/60 border-cookbook-border hover:border-cookbook-primary/50"}`}
+                    className={`px-3 py-1.5 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold transition-colors border ${selectedTier === tier.id ? "bg-cookbook-primary text-white border-cookbook-primary shadow-md" : "bg-cookbook-bg/90 backdrop-blur-md text-cookbook-text/70 border-cookbook-border hover:border-cookbook-primary/50"}`}
                   >
                     {" "}
                     {tier.label}{" "}
@@ -351,14 +351,14 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                 {" "}
                 <button
                   onClick={handleGenerate}
-                  className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full bg-cookbook-primary hover:bg-cookbook-primary-hover text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-4 rounded-2xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
                 >
                   {" "}
                   <Dice5 size={16} /> <span>Sortear Ideia</span>{" "}
                 </button>{" "}
                 <button
                   onClick={() => setIsAdding(true)}
-                  className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border hover:border-cookbook-primary/30 hover:bg-cookbook-primary/5 text-cookbook-text/80 hover:text-cookbook-primary font-sans text-[9px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border hover:border-cookbook-primary/30 hover:bg-cookbook-primary/5 text-cookbook-text/80 hover:text-cookbook-primary font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors flex items-center justify-center gap-2"
                 >
                   {" "}
                   <Plus size={14} /> <span>Adicionar Personalizado</span>{" "}
@@ -373,7 +373,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                 size={32}
                 className="text-cookbook-primary animate-spin mx-auto"
               />{" "}
-              <p className="font-serif italic text-cookbook-text/60 animate-pulse">
+              <p className="font-serif italic text-cookbook-text/70 animate-pulse">
                 {" "}
                 Girando a roleta mágica...{" "}
               </p>{" "}
@@ -386,7 +386,7 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                 {" "}
                 {result.icon}{" "}
               </div>{" "}
-              <div className="inline-block bg-cookbook-primary/10 text-cookbook-primary border border-cookbook-primary/20 px-3 py-1 rounded-full text-[9px] uppercase tracking-widest font-bold mb-2">
+              <div className="inline-block bg-cookbook-primary/10 text-cookbook-primary border border-cookbook-primary/20 px-3 py-1 rounded-full text-[11px] uppercase tracking-widest font-bold mb-2">
                 {" "}
                 Budget: {result.cost}{" "}
               </div>{" "}
@@ -402,14 +402,14 @@ export const CheapDateModal: React.FC<CheapDateModalProps> = ({
                 {" "}
                 <button
                   onClick={() => setResult(null)}
-                  className="flex-1 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text hover:bg-cookbook-border/30 font-sans text-[9px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-sm"
+                  className="flex-1 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text hover:bg-cookbook-border/30 font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-sm"
                 >
                   {" "}
                   Voltar{" "}
                 </button>{" "}
                 <button
                   onClick={handleGenerate}
-                  className="flex-1 bg-cookbook-primary/10 border border-cookbook-primary/20 text-cookbook-primary hover:bg-cookbook-primary/20 font-sans text-[9px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-sm"
+                  className="flex-1 bg-cookbook-primary/10 border border-cookbook-primary/20 text-cookbook-primary hover:bg-cookbook-primary/20 font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold transition-colors shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-sm"
                 >
                   {" "}
                   Sortear Outro{" "}

@@ -39,7 +39,7 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div className="bg-cookbook-surface w-full max-w-sm rounded-[32px] p-6 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-cookbook-text/50 hover:text-cookbook-text">
+        <button aria-label="Fechar" onClick={onClose} className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-text">
           <X size={20} />
         </button>
         
@@ -52,10 +52,10 @@ export const AddMediaModal: React.FC<AddMediaModalProps> = ({
             ) : (
               <UploadCloud size={32} className="text-cookbook-primary mb-2 group-hover:scale-110 transition-transform" />
             )}
-            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold">
+            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
               {isLoading ? "Enviando..." : "Selecionar Fotos"}
             </span>
-            <span className="font-sans text-[10px] text-cookbook-text/40 mt-1">
+            <span className="font-sans text-[11px] text-cookbook-text/70 mt-1">
               .jpg, .png (várias suportadas)
             </span>
             <input 

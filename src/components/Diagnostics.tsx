@@ -130,11 +130,11 @@ export const Diagnostics: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       >
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-serif text-2xl text-cookbook-text">Diagnóstico</h3>
-          <button onClick={onClose} className="p-2 text-cookbook-text/50" aria-label="Fechar">
+          <button onClick={onClose} className="p-2 text-cookbook-text/70" aria-label="Fechar">
             <X size={18} />
           </button>
         </div>
-        <p className="font-sans text-xs text-cookbook-text/60 mb-4">
+        <p className="font-sans text-xs text-cookbook-text/70 mb-4">
           {running
             ? "Testando o acesso a cada parte do app…"
             : failed.length === 0
@@ -152,14 +152,14 @@ export const Diagnostics: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {results.map((r) => (
             <li key={r.label} className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-cookbook-text/[0.03]">
               {r.ok === null ? (
-                <Loader2 size={16} className="animate-spin text-cookbook-text/40" />
+                <Loader2 size={16} className="animate-spin text-cookbook-text/70" />
               ) : r.ok ? (
                 <CheckCircle2 size={16} className="text-emerald-500" />
               ) : (
                 <XCircle size={16} className="text-red-500" />
               )}
               <span className="flex-1 font-sans text-sm text-cookbook-text">{r.label}</span>
-              {r.detail && <span className="font-mono text-[10px] text-red-500">{r.detail}</span>}
+              {r.detail && <span className="font-mono text-[11px] text-red-500">{r.detail}</span>}
             </li>
           ))}
         </ul>
@@ -171,7 +171,7 @@ export const Diagnostics: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               run();
             }}
             disabled={running}
-            className="flex items-center justify-center gap-2 py-3 rounded-full border border-cookbook-border font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text disabled:opacity-40"
+            className="flex items-center justify-center gap-2 py-3 rounded-full border border-cookbook-border font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text disabled:opacity-40"
           >
             <RotateCw size={14} /> Testar de novo
           </button>
@@ -180,12 +180,12 @@ export const Diagnostics: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               await navigator.clipboard.writeText(report).catch(() => {});
               addToast("Relatório copiado", "Cole na conversa com o suporte.", "success");
             }}
-            className="flex items-center justify-center gap-2 py-3 rounded-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold"
+            className="flex items-center justify-center gap-2 py-3 rounded-full bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold"
           >
             <Copy size={14} /> Copiar relatório
           </button>
         </div>
-        <p className="font-mono text-[9px] text-cookbook-text/30 text-center mt-3 break-all">
+        <p className="font-mono text-[11px] text-cookbook-text/70 text-center mt-3 break-all">
           {typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev"} · {casalId}
         </p>
       </div>

@@ -42,7 +42,7 @@ export const UndoSnackbar: React.FC = () => {
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
-          className="fixed left-1/2 -translate-x-1/2 z-[130] bottom-[calc(6.5rem+env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-sm"
+          role="status" aria-live="polite" className="fixed left-1/2 -translate-x-1/2 z-[130] bottom-[calc(6.5rem+env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-sm"
         >
           <div className="relative overflow-hidden flex items-center gap-3 rounded-2xl bg-cookbook-text text-cookbook-bg px-4 py-3 shadow-2xl">
             <span className="flex-1 font-sans text-sm truncate">{undo.label}</span>

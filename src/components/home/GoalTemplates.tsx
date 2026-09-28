@@ -55,11 +55,11 @@ export const GoalTemplates: React.FC = () => {
 
   return (
     <section className="relative w-full overflow-hidden rounded-3xl p-5 border border-cookbook-primary/30 bg-gradient-to-br from-cookbook-primary/15 via-cookbook-bg to-cookbook-gold/15 shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
-      <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Primeiro passo</p>
+      <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Primeiro passo</p>
       <p className="font-serif text-2xl text-cookbook-text leading-tight mt-1">
         {mode === "solo" ? "Qual é o seu sonho?" : mode === "grupo" ? "Qual é o plano da turma?" : "Qual é o sonho de vocês?"} ✨
       </p>
-      <p className="font-sans text-xs text-cookbook-text/60 mt-1">Escolha um para começar. Dá para mudar quando quiser.</p>
+      <p className="font-sans text-xs text-cookbook-text/70 mt-1">Escolha um para começar. Dá para mudar quando quiser.</p>
 
       <div className="grid grid-cols-2 gap-2 mt-4">
         {TEMPLATES.map((t) => (
@@ -71,13 +71,13 @@ export const GoalTemplates: React.FC = () => {
           >
             <span className="text-xl">{t.emoji}</span>
             <p className="font-sans text-xs font-bold text-cookbook-text leading-tight mt-1">{saving === t.label ? "Criando..." : t.label}</p>
-            <p className="font-sans text-[10px] text-cookbook-text/50">{brl(t.amount)}</p>
+            <p className="font-sans text-[11px] text-cookbook-text/70">{brl(t.amount)}</p>
           </button>
         ))}
       </div>
       <button
         onClick={() => setActiveTab("config")}
-        className="w-full mt-3 py-2.5 font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary"
+        className="w-full mt-3 py-2.5 font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-primary"
       >
         Criar a minha do zero →
       </button>

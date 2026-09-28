@@ -37,7 +37,7 @@ export const RecentActivity: React.FC = () => {
 
   return (
     <section>
-      <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50 mb-3 px-1">
+      <h3 className="font-sans tracking-[0.2em] uppercase text-[11px] font-bold text-cookbook-text/70 mb-3 px-1">
         Atividade recente
       </h3>
       <AnimatedList delay={450} className="gap-2">
@@ -63,7 +63,7 @@ export const RecentActivity: React.FC = () => {
                   <span className="font-bold">{mode === "solo" ? "" : `${name} · `}</span>
                   {d.action || (isExpense ? "Gasto" : "Depósito")}
                 </p>
-                <p className="font-sans text-[10px] text-cookbook-text/40">{timeAgo(date)}</p>
+                <p className="font-sans text-[11px] text-cookbook-text/70">{timeAgo(date)}</p>
               </div>
               <span data-money className={`font-sans text-sm font-bold tabular-nums ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
                 {isExpense ? "-" : "+"}

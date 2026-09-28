@@ -109,15 +109,15 @@ export const EnvelopeChallenge: React.FC = () => {
     <section className="relative overflow-hidden rounded-3xl p-5 border border-cookbook-border bg-cookbook-bg/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Desafio viral</p>
+          <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Desafio viral</p>
           <h3 className="font-serif text-2xl text-cookbook-text leading-tight">100 Envelopes 💌</h3>
-          <p className="font-sans text-xs text-cookbook-text/60 mt-1">
+          <p className="font-sans text-xs text-cookbook-text/70 mt-1">
             Abra um envelope e guarde o valor dele. No fim: {brl(GOAL)}.
           </p>
         </div>
         <div className="text-right shrink-0">
           <p className="font-serif text-3xl text-cookbook-primary leading-none">{pct}%</p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 mt-1">{opened.length}/{TOTAL}</p>
+          <p className="font-sans text-[11px] text-cookbook-text/70 mt-1">{opened.length}/{TOTAL}</p>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export const EnvelopeChallenge: React.FC = () => {
           transition={{ duration: 0.8 }}
         />
       </div>
-      <p className="font-sans text-[11px] text-cookbook-text/50 mt-1.5">
+      <p className="font-sans text-[11px] text-cookbook-text/70 mt-1.5">
         {brl(saved)} guardados · faltam {brl(GOAL - saved)}
       </p>
 
@@ -140,7 +140,7 @@ export const EnvelopeChallenge: React.FC = () => {
               key={n}
               onClick={() => (done ? setUndoing(n) : setConfirming(n))}
               aria-label={done ? `Envelope ${n} aberto (tocar para desfazer)` : `Abrir envelope ${n}`}
-              className={`aspect-square rounded-xl font-sans text-xs font-bold transition-all active:scale-90 ${
+              className={`no-hit-expand aspect-square rounded-xl font-sans text-xs font-bold transition-all active:scale-90 ${
                 done
                   ? "bg-gradient-to-br from-cookbook-primary to-cookbook-gold text-white shadow-inner"
                   : "bg-cookbook-primary/[0.06] border border-cookbook-primary/15 text-cookbook-text/70"
@@ -155,7 +155,7 @@ export const EnvelopeChallenge: React.FC = () => {
       <div className="flex gap-2 mt-4">
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="flex-1 py-3 rounded-full border border-cookbook-border font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/60"
+          className="flex-1 py-3 rounded-full border border-cookbook-border font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70"
         >
           {expanded ? "Ver menos" : "Ver todos"}
         </button>
@@ -170,7 +170,7 @@ export const EnvelopeChallenge: React.FC = () => {
         <button
           onClick={surprise}
           disabled={opened.length >= TOTAL}
-          className="flex-[1.4] py-3 rounded-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold shadow-md disabled:opacity-40"
+          className="flex-[1.4] py-3 rounded-full bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold shadow-md disabled:opacity-40"
         >
           🎲 Sortear envelope
         </button>
@@ -212,17 +212,17 @@ export const EnvelopeChallenge: React.FC = () => {
               className="relative w-full max-w-xs rounded-[28px] bg-cookbook-mural p-6 text-center overflow-hidden shadow-2xl"
             >
               <p className="text-5xl">💌</p>
-              <p className="font-sans text-[10px] uppercase tracking-[0.25em] font-bold text-cookbook-text/50 mt-3">Envelope #{confirming}</p>
+              <p className="font-sans text-[11px] uppercase tracking-[0.25em] font-bold text-cookbook-text/70 mt-3">Envelope #{confirming}</p>
               <p className="font-serif text-5xl text-cookbook-primary mt-1">{brl(confirming)}</p>
-              <p className="font-sans text-xs text-cookbook-text/60 mt-2">Guarde esse valor e registre no pote.</p>
+              <p className="font-sans text-xs text-cookbook-text/70 mt-2">Guarde esse valor e registre no pote.</p>
               <button
                 onClick={() => openEnvelope(confirming)}
                 disabled={busy}
-                className="w-full mt-5 py-3.5 rounded-full bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest font-bold disabled:opacity-50"
+                className="w-full mt-5 py-3.5 rounded-full bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest font-bold disabled:opacity-50"
               >
                 {busy ? "Guardando..." : "Guardei! Abrir envelope"}
               </button>
-              <button onClick={() => setConfirming(null)} className="mt-2 py-2 font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">
+              <button onClick={() => setConfirming(null)} className="mt-2 py-2 font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">
                 Agora não
               </button>
               <BorderBeam size={90} duration={5} colorFrom="var(--theme-primary)" colorTo="var(--theme-gold)" />
@@ -248,7 +248,7 @@ export const EnvelopeChallenge: React.FC = () => {
             >
               <p className="text-4xl">↩️</p>
               <p className="font-serif text-2xl text-cookbook-text mt-2">Desfazer envelope #{undoing}?</p>
-              <p className="font-sans text-xs text-cookbook-text/60 mt-2">
+              <p className="font-sans text-xs text-cookbook-text/70 mt-2">
                 O depósito de {brl(undoing)} sai do histórico e o envelope volta para a grade.
               </p>
               <button
@@ -258,7 +258,7 @@ export const EnvelopeChallenge: React.FC = () => {
               >
                 {busy ? "Desfazendo..." : "Desfazer"}
               </button>
-              <button onClick={() => setUndoing(null)} className="mt-2 py-2 font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">
+              <button onClick={() => setUndoing(null)} className="mt-2 py-2 font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">
                 Manter
               </button>
             </motion.div>

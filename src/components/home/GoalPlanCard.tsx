@@ -55,7 +55,7 @@ export const GoalPlanCard: React.FC = () => {
           </div>
           <div className="flex-1">
             <p className="font-serif text-xl text-cookbook-text leading-tight">Até quando?</p>
-            <p className="font-sans text-[11px] text-cookbook-text/55">Escolha a data e veja quanto guardar por semana.</p>
+            <p className="font-sans text-[11px] text-cookbook-text/70">Escolha a data e veja quanto guardar por semana.</p>
           </div>
         </div>
         <input
@@ -76,8 +76,8 @@ export const GoalPlanCard: React.FC = () => {
   return (
     <section className="rounded-3xl p-5 border border-cookbook-border bg-cookbook-bg/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
       <div className="flex items-center justify-between">
-        <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-text/50">Plano até a data</p>
-        <button onClick={() => setEditing(true)} className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">
+        <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">Plano até a data</p>
+        <button onClick={() => setEditing(true)} className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-primary">
           {fmtDate(new Date(`${targetDate}T12:00:00`))}
         </button>
       </div>
@@ -90,9 +90,9 @@ export const GoalPlanCard: React.FC = () => {
         <>
           <div className="flex items-end gap-2 mt-2">
             <span data-money className="font-serif text-4xl text-cookbook-primary leading-none">{brl(plan.perWeek)}</span>
-            <span className="font-sans text-xs text-cookbook-text/60 pb-1">por semana</span>
+            <span className="font-sans text-xs text-cookbook-text/70 pb-1">por semana</span>
           </div>
-          <p data-money className="font-sans text-xs text-cookbook-text/60 mt-1">
+          <p data-money className="font-sans text-xs text-cookbook-text/70 mt-1">
             ≈ {brl(plan.perDay)} por dia · faltam {brl(plan.remaining)} em {plan.daysLeft} {plan.daysLeft === 1 ? "dia" : "dias"}
           </p>
           <div
@@ -115,7 +115,7 @@ export const GoalPlanCard: React.FC = () => {
             const eta = new Date(Date.now() + weeks * 7 * 24 * 60 * 60 * 1000);
             return (
               <div className="mt-4 pt-4 border-t border-cookbook-border/60">
-                <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-text/50">E se guardar…</p>
+                <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">E se guardar…</p>
                 <input
                   type="range"
                   min={10}
@@ -129,7 +129,7 @@ export const GoalPlanCard: React.FC = () => {
                 <p className="font-sans text-sm text-cookbook-text mt-1">
                   <span data-money className="font-bold text-cookbook-primary">{brl(weekly)}</span> por semana →{" "}
                   <span className="font-bold">{fmtDate(eta)}</span>{" "}
-                  <span className="text-cookbook-text/50">({weeks} {weeks === 1 ? "semana" : "semanas"})</span>
+                  <span className="text-cookbook-text/70">({weeks} {weeks === 1 ? "semana" : "semanas"})</span>
                 </p>
               </div>
             );

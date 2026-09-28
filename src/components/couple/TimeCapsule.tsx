@@ -152,20 +152,20 @@ export const TimeCapsule: React.FC = () => {
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="font-serif text-2xl text-cookbook-text leading-tight">Cápsula do Tempo</h3>
-          <p className="font-sans text-xs text-cookbook-text/50 mt-1">
+          <p className="font-sans text-xs text-cookbook-text/70 mt-1">
             {copy.capsuleHint}
           </p>
         </div>
         <button
           onClick={startWriting}
-          className="shrink-0 flex items-center gap-2 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold px-4 py-2.5 rounded-full shadow-md active:scale-95 transition-transform"
+          className="shrink-0 flex items-center gap-2 bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold px-4 py-2.5 rounded-full shadow-md active:scale-95 transition-transform"
         >
           <PenLine size={12} /> Escrever
         </button>
       </div>
 
       {capsules.length === 0 && !isWriting && (
-        <p className="font-serif italic text-cookbook-text/40 text-center py-6">
+        <p className="font-serif italic text-cookbook-text/70 text-center py-6">
           {mode === "solo" ? "Escreva para você mesma(o) ler daqui a um tempo 💌" : mode === "grupo" ? "Deixe um recado para a turma abrir no futuro 💌" : "Escreva algo para o seu par ler daqui a um tempo 💌"}
         </p>
       )}
@@ -178,13 +178,13 @@ export const TimeCapsule: React.FC = () => {
               <p className="font-serif text-base text-cookbook-text truncate">
                 {c.from === user?.uid ? "Sua carta" : `Carta de ${c.fromName}`}
               </p>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
                 {c.openedAt ? "já aberta" : "pronta para abrir"}
               </p>
             </div>
             <button
               onClick={() => open(c)}
-              className="flex items-center gap-1.5 text-cookbook-primary font-sans text-[10px] uppercase tracking-widest font-bold px-3 py-2 rounded-full bg-cookbook-primary/10 active:scale-95"
+              className="flex items-center gap-1.5 text-cookbook-primary font-sans text-[11px] uppercase tracking-widest font-bold px-3 py-2 rounded-full bg-cookbook-primary/10 active:scale-95"
             >
               <MailOpen size={12} /> Abrir
             </button>
@@ -200,12 +200,12 @@ export const TimeCapsule: React.FC = () => {
               <p className="font-serif text-base text-cookbook-text truncate">
                 {c.from === user?.uid ? "Sua carta lacrada" : `${c.fromName} deixou uma carta`}
               </p>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
                 {timeLeft(c.openAt.toDate())} · {c.openAt.toDate().toLocaleDateString("pt-BR")}
               </p>
             </div>
             {c.from === user?.uid && (
-              <button onClick={() => remove(c)} className="p-2 text-cookbook-text/30 hover:text-red-500" title="Apagar">
+              <button onClick={() => remove(c)} className="p-2 text-cookbook-text/70 hover:text-red-500" title="Apagar">
                 <Trash2 size={14} />
               </button>
             )}
@@ -228,14 +228,14 @@ export const TimeCapsule: React.FC = () => {
                 rows={5}
                 autoFocus
                 placeholder={copy.capsulePlaceholder}
-                className="w-full bg-cookbook-mural border border-cookbook-border rounded-2xl p-4 font-serif text-lg text-cookbook-text leading-relaxed focus:outline-none focus:border-cookbook-primary resize-none placeholder:text-cookbook-text/25"
+                className="w-full bg-cookbook-mural border border-cookbook-border rounded-2xl p-4 font-serif text-lg text-cookbook-text leading-relaxed focus:outline-none focus:border-cookbook-primary resize-none placeholder:text-cookbook-text/50"
               />
               <div className="flex flex-wrap gap-2">
                 {PRESETS.map((p) => (
                   <button
                     key={p.label}
                     onClick={() => setOpenDate(toInputDate(new Date(Date.now() + p.days * DAY_MS)))}
-                    className="font-sans text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full border border-cookbook-border text-cookbook-text/60 hover:border-cookbook-primary/50 hover:text-cookbook-primary"
+                    className="font-sans text-[11px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full border border-cookbook-border text-cookbook-text/70 hover:border-cookbook-primary/50 hover:text-cookbook-primary"
                   >
                     {p.label}
                   </button>
@@ -251,14 +251,14 @@ export const TimeCapsule: React.FC = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsWriting(false)}
-                  className="flex-1 font-sans text-[10px] uppercase tracking-widest font-bold py-3 rounded-full border border-cookbook-border text-cookbook-text/50"
+                  className="flex-1 font-sans text-[11px] uppercase tracking-widest font-bold py-3 rounded-full border border-cookbook-border text-cookbook-text/70"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={seal}
                   disabled={isSaving || !message.trim()}
-                  className="flex-[2] font-sans text-[10px] uppercase tracking-widest font-bold py-3 rounded-full bg-cookbook-primary text-white shadow-md disabled:opacity-40"
+                  className="flex-[2] font-sans text-[11px] uppercase tracking-widest font-bold py-3 rounded-full bg-cookbook-primary text-cookbook-on-primary shadow-md disabled:opacity-40"
                 >
                   {isSaving ? "Lacrando..." : "Lacrar carta 💌"}
                 </button>
@@ -286,10 +286,10 @@ export const TimeCapsule: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-sm max-h-[80vh] overflow-y-auto bg-cookbook-mural rounded-[28px] p-7 shadow-2xl border border-cookbook-gold/30"
             >
-              <button onClick={() => setReading(null)} className="absolute top-4 right-4 text-cookbook-text/40">
+              <button onClick={() => setReading(null)} className="absolute top-4 right-4 text-cookbook-text/70">
                 <X size={18} />
               </button>
-              <p className="font-sans text-[9px] uppercase tracking-[0.25em] font-bold text-cookbook-gold mb-4">
+              <p className="font-sans text-[11px] uppercase tracking-[0.25em] font-bold text-cookbook-gold mb-4">
                 {reading.from === user?.uid ? "Você escreveu" : `De ${reading.fromName}`}
               </p>
               <p className="font-serif text-xl text-cookbook-text leading-relaxed whitespace-pre-wrap">

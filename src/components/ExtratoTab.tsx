@@ -341,7 +341,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           {" "}
           Extrato{" "}
         </h2>{" "}
-        <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
+        <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
           {" "}
           Todo o histórico do pote{" "}
         </p>{" "}
@@ -351,7 +351,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         {" "}
         <button
           onClick={() => goMonth(-1)}
-          className="text-cookbook-text/40 hover:text-cookbook-text transition-colors p-1"
+          className="text-cookbook-text/70 hover:text-cookbook-text transition-colors p-1"
         >
           {" "}
           ←{" "}
@@ -363,7 +363,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             {selectedMonth === -1 ? "Todos os Meses" : MONTHS_PT[selectedMonth]}{" "}
           </span>{" "}
           {selectedMonth !== -1 && (
-            <span className="font-sans text-[9px] text-cookbook-text/40 ml-2">
+            <span className="font-sans text-[11px] text-cookbook-text/70 ml-2">
               {" "}
               {selectedYear}{" "}
             </span>
@@ -371,7 +371,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         </div>{" "}
         <button
           onClick={() => goMonth(1)}
-          className="text-cookbook-text/40 hover:text-cookbook-text transition-colors p-1"
+          className="text-cookbook-text/70 hover:text-cookbook-text transition-colors p-1"
         >
           {" "}
           →{" "}
@@ -385,7 +385,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className="font-serif text-sm text-emerald-700 font-medium">
              <span data-money>{formatCurrency(totals.depositos)}</span>
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
              Entradas
           </div>
         </div>
@@ -395,7 +395,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className="font-serif text-sm text-red-700 font-medium">
              <span data-money>{formatCurrency(totals.gastos)}</span>
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
              Saídas
           </div>
         </div>
@@ -404,7 +404,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <div className={`font-serif text-base mb-1 ${totals.saldo >= 0 ? "text-emerald-700" : "text-red-700"}`}>
              <span data-money>{formatCurrency(totals.saldo)}</span>
           </div>
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-2">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mt-2">
              Saldo Atual
           </div>
         </div>
@@ -414,7 +414,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       {userContributions.length >= 2 && (
         <div className="bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-2xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] relative overflow-hidden flex items-center justify-between mx-1">
           <div className="text-center flex-1 z-10">
-            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
+            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
               {userContributions[0].name}
             </span>
             <span className="font-serif text-sm text-cookbook-text font-medium">
@@ -424,13 +424,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           
           <div className="shrink-0 px-4 text-center z-10">
             <div className="bg-red-500/10 text-red-500 rounded-full w-9 h-9 flex items-center justify-center relative mx-auto group">
-               <span className="font-sans text-[10px] font-bold italic absolute group-hover:opacity-0 transition-opacity">VS</span>
+               <span className="font-sans text-[11px] font-bold italic absolute group-hover:opacity-0 transition-opacity">VS</span>
                <Heart size={16} className="opacity-0 group-hover:opacity-100 transition-opacity absolute" fill="currentColor" />
             </div>
           </div>
 
           <div className="text-center flex-1 z-10">
-            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
+            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold block mb-1">
               {userContributions[1].name}
             </span>
             <span className="font-serif text-sm text-cookbook-text font-medium">
@@ -447,7 +447,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         {/* Search & Actions */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cookbook-text/40">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cookbook-text/70">
               <span className="text-sm">🔎</span>
             </div>
             <input
@@ -455,10 +455,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar histórico..."
-              className="w-full bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl pl-10 pr-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:ring-2 focus:ring-cookbook-primary/20 focus:border-cookbook-primary transition-all placeholder:text-cookbook-text/30 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+              className="w-full bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl pl-10 pr-4 py-3 font-serif text-sm text-cookbook-text focus:outline-none focus:ring-2 focus:ring-cookbook-primary/20 focus:border-cookbook-primary transition-all placeholder:text-cookbook-text/50 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
             />
             {searchQuery && (
-               <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-cookbook-text/30 hover:text-cookbook-text">
+               <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-cookbook-text/70 hover:text-cookbook-text">
                  <X size={14} />
                </button>
             )}
@@ -466,7 +466,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)] gap-1 text-xs font-bold uppercase tracking-wider ${showFilters ? 'bg-cookbook-primary/10 text-cookbook-primary' : 'text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5'}`}
+            className={`bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)] gap-1 text-xs font-bold uppercase tracking-wider ${showFilters ? 'bg-cookbook-primary/10 text-cookbook-primary' : 'text-cookbook-text/70 hover:text-cookbook-primary hover:bg-cookbook-primary/5'}`}
           >
             <Filter size={14} />
             <span className="hidden sm:inline">Filtros</span>
@@ -475,7 +475,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           <button 
             onClick={() => setSortAsc(!sortAsc)}
             title={sortAsc ? "Mais antigos primeiro" : "Mais recentes primeiro"}
-            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 text-cookbook-text/60 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+            className="bg-white/60 backdrop-blur-md border border-cookbook-border rounded-xl h-[46px] px-3 text-cookbook-text/70 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-all flex items-center justify-center shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
           >
              <ArrowUpCircle size={18} className={`transform transition-transform ${sortAsc ? 'rotate-0' : 'rotate-180'}`} />
           </button>
@@ -502,7 +502,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               <button
                 key={f.id}
                 onClick={() => setFilter(f.id)}
-                className={`px-4 py-1.5 rounded-lg font-sans text-[10px] uppercase tracking-wider font-bold transition-all whitespace-nowrap ${filter === f.id ? "bg-cookbook-primary text-white shadow-sm" : "text-cookbook-text/50 hover:text-cookbook-text"}`}
+                className={`px-4 py-1.5 rounded-lg font-sans text-[11px] uppercase tracking-wider font-bold transition-all whitespace-nowrap ${filter === f.id ? "bg-cookbook-primary text-white shadow-sm" : "text-cookbook-text/70 hover:text-cookbook-text"}`}
               >
                 {f.label}
               </button>
@@ -514,7 +514,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             <select
               value={filterUser}
               onChange={(e) => setFilterUser(e.target.value)}
-              className="appearance-none bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl pl-4 pr-8 py-2 font-sans text-[10px] uppercase tracking-wider text-cookbook-text/70 font-bold focus:outline-none focus:border-cookbook-primary h-[34px]"
+              className="appearance-none bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl pl-4 pr-8 py-2 font-sans text-[11px] uppercase tracking-wider text-cookbook-text/70 font-bold focus:outline-none focus:border-cookbook-primary h-[34px]"
             >
               <option value="todos">👥 Ambos</option>
               {users.map(([uid, name]) => (
@@ -523,8 +523,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cookbook-text/40">
-              <ChevronDown size={14} className="text-cookbook-text/40"/>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cookbook-text/70">
+              <ChevronDown size={14} className="text-cookbook-text/70"/>
             </div>
           </div>
         </div>
@@ -537,13 +537,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           {insights.biggestDeposit && (
             <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
                <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-               <div className="font-sans text-[8px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
+               <div className="font-sans text-[11px] uppercase tracking-widest text-emerald-500/80 mb-1 flex items-center gap-1">
                  <ArrowUpCircle size={10} /> Maior Entrada
                </div>
                <div className="font-serif text-sm text-cookbook-text font-medium">
                  <span data-money>{formatCurrency(insights.biggestDeposit.amount)}</span>
                </div>
-               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5">
+               <div className="font-sans text-[11px] text-cookbook-text/70 truncate mt-0.5">
                  {insights.biggestDeposit.whoName}
                </div>
             </div>
@@ -551,13 +551,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           {insights.biggestExpense && (
             <div className="flex-1 bg-cookbook-bg/60 backdrop-blur-md border border-cookbook-border rounded-xl p-3 shadow-sm relative overflow-hidden group">
                <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/4"></div>
-               <div className="font-sans text-[8px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
+               <div className="font-sans text-[11px] uppercase tracking-widest text-red-500/80 mb-1 flex items-center gap-1">
                  <ArrowDownCircle size={10} /> Maior Saída
                </div>
                <div className="font-serif text-sm text-cookbook-text font-medium">
                  <span data-money>{formatCurrency(insights.biggestExpense.amount)}</span>
                </div>
-               <div className="font-sans text-[9px] text-cookbook-text/50 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
+               <div className="font-sans text-[11px] text-cookbook-text/70 truncate mt-0.5" title={insights.biggestExpense.action || "Sem descrição"}>
                  {insights.biggestExpense.action || "Sem descrição"}
                </div>
             </div>
@@ -570,10 +570,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         {Object.keys(groupedByDate).length === 0 ? (
           <div className="text-center py-12 px-4 bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border rounded-3xl">
             <span className="text-3xl block mb-3 grayscale opacity-50">📭</span>
-            <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
+            <p className="font-serif italic text-cookbook-text/70 text-sm mb-1">
               Nada por aqui ainda
             </p>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
               As transações deste mês aparecerão aqui
             </p>
           </div>
@@ -594,12 +594,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                 
                 {/* Date header */}
                 <div className="bg-cookbook-bg border-b border-dashed border-cookbook-border py-4 px-5 rounded-t-3xl flex items-center justify-between">
-                  <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold flex items-center gap-2">
-                    <Calendar size={12} className="text-cookbook-text/40" />
+                  <span className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold flex items-center gap-2">
+                    <Calendar size={12} className="text-cookbook-text/70" />
                     {dateLabel}
                   </span>
                   <div className="text-right">
-                    <span className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/40 font-bold block leading-tight">
+                    <span className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/70 font-bold block leading-tight">
                       Saldo do Dia
                     </span>
                     <span className={`font-serif text-xs font-medium ${dailyBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
@@ -639,10 +639,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                                 {deposit.action || (isExpense ? "Saída" : "Entrada")}
                               </div>
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                                <span className="font-sans text-[8px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[100px] shadow-sm">
+                                <span className="font-sans text-[11px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/70 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[100px] shadow-sm">
                                   {deposit.whoName.split(' ')[0]}
                                 </span>
-                                <span className="font-sans text-[9px] text-cookbook-text/40 font-medium">
+                                <span className="font-sans text-[11px] text-cookbook-text/70 font-medium">
                                   {formatTime(deposit)}
                                 </span>
                               </div>
@@ -663,14 +663,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                             <div className="flex items-center gap-4">
                               <button 
                                 onClick={() => handleToggleReaction(deposit.id, deposit.reactions)}
-                                className={`flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold transition-colors ${deposit.reactions && deposit.reactions[currentUser?.uid || ''] ? 'text-red-400' : 'text-cookbook-text/40 hover:text-cookbook-text/60'}`}
+                                className={`flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold transition-colors ${deposit.reactions && deposit.reactions[currentUser?.uid || ''] ? 'text-red-400' : 'text-cookbook-text/70 hover:text-cookbook-text/70'}`}
                               >
                                 <Heart size={14} className={deposit.reactions && deposit.reactions[currentUser?.uid || ''] ? 'fill-current' : ''} />
                                 {deposit.reactions ? Object.keys(deposit.reactions).length || 'Amor' : 'Amor'}
                               </button>
                               <button 
                                 onClick={() => setCommentingOn(commentingOn === deposit.id ? null : deposit.id)}
-                                className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40 hover:text-cookbook-text/60 transition-colors"
+                                className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 hover:text-cookbook-text/70 transition-colors"
                               >
                                 <MessageCircle size={14} />
                                 {deposit.comments?.length ? deposit.comments.length : 'Comentar'}
@@ -681,13 +681,13 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                               <div className="flex items-center gap-3">
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleEdit(deposit); }}
-                                  className="text-[10px] uppercase font-bold tracking-widest text-cookbook-text/30 hover:text-cookbook-primary transition-colors"
+                                  className="text-[11px] uppercase font-bold tracking-widest text-cookbook-text/70 hover:text-cookbook-primary transition-colors"
                                 >
                                   <Pencil size={12} />
                                 </button>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setDeleting(deposit); }}
-                                  className="text-[10px] uppercase font-bold tracking-widest text-cookbook-text/30 hover:text-red-500 transition-colors"
+                                  className="text-[11px] uppercase font-bold tracking-widest text-cookbook-text/70 hover:text-red-500 transition-colors"
                                 >
                                   <Trash2 size={12} />
                                 </button>
@@ -700,11 +700,11 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                             <div className="px-4 pb-3 space-y-2">
                               {deposit.comments.map((comment: any) => (
                                 <div key={comment.id} className="flex gap-2">
-                                  <div className="w-5 h-5 rounded-full bg-cookbook-border/50 flex items-center justify-center font-bold text-[8px] text-cookbook-text/70 shrink-0 mt-0.5">
+                                  <div className="w-5 h-5 rounded-full bg-cookbook-border/50 flex items-center justify-center font-bold text-[11px] text-cookbook-text/70 shrink-0 mt-0.5">
                                     {comment.whoName.charAt(0).toUpperCase()}
                                   </div>
                                   <div className="bg-cookbook-bg border border-cookbook-border/50 rounded-2xl rounded-tl-none p-2 flex-1">
-                                    <p className="text-[10px] font-bold text-cookbook-text/90 mb-0.5">{comment.whoName}</p>
+                                    <p className="text-[11px] font-bold text-cookbook-text/90 mb-0.5">{comment.whoName}</p>
                                     <p className="text-[11px] text-cookbook-text/70 leading-tight">{comment.text}</p>
                                   </div>
                                 </div>
@@ -730,7 +730,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                                 <button 
                                   onClick={() => handleAddComment(deposit.id)}
                                   disabled={!commentText.trim()}
-                                  className="w-7 h-7 rounded-full bg-cookbook-primary flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
+                                  className="w-7 h-7 rounded-full bg-cookbook-primary flex items-center justify-center text-cookbook-on-primary disabled:opacity-50 transition-opacity"
                                 >
                                   <Send size={10} />
                                 </button>
@@ -753,12 +753,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
           {displayLimit < filteredDeposits.length && (
             <button
               onClick={() => setDisplayLimit((prev) => prev + 10)}
-              className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl px-6 py-2.5 font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold hover:bg-cookbook-primary/5 transition-all shadow-sm"
+              className="bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl px-6 py-2.5 font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold hover:bg-cookbook-primary/5 transition-all shadow-sm"
             >
               Ver mais ({filteredDeposits.length - displayLimit} restantes)
             </button>
           )}
-          <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/30 font-bold">
+          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
             Mostrando {Math.min(displayLimit, filteredDeposits.length)} de {filteredDeposits.length} transaç
             {filteredDeposits.length === 1 ? "ão" : "ões"}
           </span>
@@ -778,7 +778,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             {" "}
             <button
               onClick={() => setEditing(null)}
-              className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-primary transition-colors"
+              className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-primary transition-colors"
             >
               {" "}
               <X size={20} />{" "}
@@ -806,7 +806,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               )}{" "}
               <div className="relative">
                 {" "}
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/70 text-lg">
                   {" "}
                   R${" "}
                 </span>{" "}
@@ -834,7 +834,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                   isNaN(Number(editAmount.replace(",", "."))) ||
                   Number(editAmount.replace(",", ".")) <= 0
                 }
-                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+                className="flex-1 bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
               >
                 Salvar
               </button>
@@ -859,7 +859,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {" "}
               Excluir Transação?{" "}
             </h3>{" "}
-            <p className="font-sans text-xs text-cookbook-text/60 mb-6">
+            <p className="font-sans text-xs text-cookbook-text/70 mb-6">
               {" "}
               <strong><span data-money>{formatCurrency(deleting.amount)}</span></strong> —{" "}
               {deleting.action || "Sem descrição"}{" "}
@@ -868,14 +868,14 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               {" "}
               <button
                 onClick={() => setDeleting(null)}
-                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
               >
                 {" "}
                 Cancelar{" "}
               </button>{" "}
               <button
                 onClick={confirmDelete}
-                className="flex-1 bg-red-500 text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-xl font-bold"
+                className="flex-1 bg-red-500 text-white font-sans text-[11px] uppercase tracking-widest py-3 rounded-xl font-bold"
               >
                 {" "}
                 Excluir{" "}

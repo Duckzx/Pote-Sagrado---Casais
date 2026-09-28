@@ -34,7 +34,7 @@ export const InviteNudge: React.FC = () => {
           <p className="font-serif text-xl text-cookbook-text leading-tight">
             {mode === "grupo" ? "Chame a turma" : "Falta o seu par"} {mode === "grupo" ? "🫶" : "💞"}
           </p>
-          <p className="font-sans text-[11px] text-cookbook-text/55">
+          <p className="font-sans text-[11px] text-cookbook-text/70">
             Quem entrar pelo link vê e guarda no mesmo pote, em tempo real.
           </p>
         </div>

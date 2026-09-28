@@ -482,7 +482,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
           <h2 className="font-serif text-xl font-medium text-cookbook-text">
             {auth.currentUser?.displayName || "Casal Sonhador"}
           </h2>
-          <p className="font-sans text-[10px] text-cookbook-text/40 mt-1 uppercase tracking-widest">
+          <p className="font-sans text-[11px] text-cookbook-text/70 mt-1 uppercase tracking-widest">
             {auth.currentUser?.email}
           </p>
         </div>
@@ -508,13 +508,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
             >
               <span className="text-3xl">{MODE_OPTIONS.find((o) => o.id === mode)?.emoji}</span>
               <div className="flex-1">
-                <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40">Modo de uso</p>
+                <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">Modo de uso</p>
                 <p className="font-serif text-xl text-cookbook-text leading-tight">
                   {MODE_OPTIONS.find((o) => o.id === mode)?.title}
                   {mode === "grupo" && groupName ? ` · ${groupName}` : ""}
                 </p>
               </div>
-              <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">Mudar</span>
+              <span className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-primary">Mudar</span>
             </button>
 
             {/* Card 1: Destino e Meta */}
@@ -525,7 +525,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               </div>
               <div className="space-y-6 relative z-10 flex-1">
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                  <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                     Tipo de Conquista
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -542,7 +542,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                           className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-medium transition-all ${
                             goalType === cat.id
                               ? "bg-cookbook-primary text-white border-cookbook-primary shadow-sm"
-                              : "bg-cookbook-bg/50 border-cookbook-border text-cookbook-text/60 hover:border-cookbook-primary/50"
+                              : "bg-cookbook-bg/50 border-cookbook-border text-cookbook-text/70 hover:border-cookbook-primary/50"
                           }`}
                         >
                           <Icon size={14} /> {cat.label}
@@ -553,7 +553,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                  <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                     {GOAL_CATEGORIES.find(c => c.id === goalType)?.label || "Objetivo"}
                   </label>
                   <div className="relative">
@@ -563,13 +563,13 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       onChange={(e) => setDestination(e.target.value)}
                       onBlur={handleSaveLocal}
                       placeholder={GOAL_CATEGORIES.find(c => c.id === goalType)?.placeholder || "Descreva aqui..."}
-                      className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                      className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/50"
                     />
                     
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                  <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                     Meta Financeira (R$)
                   </label>
                   <input
@@ -594,12 +594,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               <div className="space-y-6 flex-1">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                       Partida
                     </label>
                     <button
                       onClick={handleGetLocation}
-                      className="text-[9px] uppercase tracking-widest text-cookbook-primary hover:text-cookbook-gold font-medium"
+                      className="text-[11px] uppercase tracking-widest text-cookbook-primary hover:text-cookbook-gold font-medium"
                     >
                       Usar GPS
                     </button>
@@ -610,12 +610,12 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     onChange={(e) => setOrigin(e.target.value)}
                     onBlur={handleSaveLocal}
                     placeholder="Ex: São Paulo, SP"
-                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/50"
                   />
                 </div>
 
                 {mode === "casal" && <div className="space-y-1">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                  <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                     Nossa Data de Início do Relacionamento
                   </label>
                   <input
@@ -628,7 +628,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                 </div>}
 
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                  <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                     Álbum Compartilhado de Fotos (Opcional)
                   </label>
                   <input
@@ -643,7 +643,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium ml-1">
+                    <label className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium ml-1">
                       {mode === "grupo" ? "Prêmio do mês (ranking)" : mode === "solo" ? "Recompensa do mês" : "Aposta da Batalha (Duelo)"}
                     </label>
                     <button
@@ -655,7 +655,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         );
                         setSaveTrigger((prev) => prev + 1);
                       }}
-                      className="text-[9px] uppercase tracking-widest text-cookbook-gold hover:text-cookbook-primary font-medium"
+                      className="text-[11px] uppercase tracking-widest text-cookbook-gold hover:text-cookbook-primary font-medium"
                     >
                       Sortear
                     </button>
@@ -666,7 +666,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     onChange={(e) => setPrize(e.target.value)}
                     onBlur={handleSaveLocal}
                     placeholder="O perdedor paga a conta..."
-                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/20"
+                    className="w-full bg-transparent border-b border-cookbook-border/50 px-2 py-2 font-serif text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors placeholder:text-cookbook-text/50"
                   />
                 </div>
               </div>
@@ -690,7 +690,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <div className={`font-sans text-sm font-medium transition-colors ${notificationPermission === "granted" ? "text-emerald-500" : "text-cookbook-text group-hover:text-cookbook-primary"}`}>
                       {notificationPermission === "granted" ? "Alertas Nativos Ativados" : "Ativar Alertas Nativos"}
                     </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                    <div className="font-sans text-[11px] text-cookbook-text/70 mt-1 leading-tight">
                       {notificationPermission === "granted" ? "Você já está recebendo alertas deste dispositivo." : "Ser lembrado pelo navegador aumenta bastante a economia."}
                     </div>
                   </div>
@@ -709,7 +709,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                        </div>
                     )}
                   </div>
-                  <div className="font-sans text-[11px] text-cookbook-text/40 mb-3 leading-tight">
+                  <div className="font-sans text-[11px] text-cookbook-text/70 mb-3 leading-tight">
                     {mode === "grupo"
                       ? "Compartilhe o código ou o link com a turma. Todo mundo que entrar vê o mesmo pote."
                       : mode === "solo"
@@ -719,7 +719,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   
                   <button
                     onClick={handleShare}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-cookbook-gold text-white font-sans text-[10px] uppercase tracking-widest rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] active:scale-95 transition-transform"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-cookbook-gold text-cookbook-on-gold font-sans text-[11px] uppercase tracking-widest rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] active:scale-95 transition-transform"
                   >
                     <Share2 size={16} />
                     Enviar Convite
@@ -736,11 +736,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                           value={inviteCodeInput}
                           onChange={(e) => setInviteCodeInput(e.target.value)}
                           placeholder="Digite o código"
-                          className="flex-1 bg-cookbook-bg border border-cookbook-border/50 rounded-full px-3 py-2 text-sm font-mono text-center uppercase tracking-widest focus:outline-none focus:border-cookbook-primary"
+                          className="flex-1 min-w-0 bg-cookbook-bg border border-cookbook-border/50 rounded-full px-3 py-2.5 text-sm font-mono text-center uppercase tracking-widest focus:outline-none focus:border-cookbook-primary"
                         />
                         <button
                           onClick={handleApplyInviteCode}
-                          className="px-4 py-2 bg-cookbook-primary text-white rounded-full text-[10px] uppercase tracking-widest font-bold"
+                          className="shrink-0 px-4 py-3 bg-cookbook-primary text-cookbook-on-primary rounded-full text-[11px] uppercase tracking-widest font-bold"
                         >
                           Vincular
                         </button>
@@ -800,7 +800,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                           </div>
                         </div>
                         {theme === t.id && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-white rounded-full flex items-center justify-center shadow-md animate-fade-in">
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-cookbook-primary text-cookbook-on-primary rounded-full flex items-center justify-center shadow-md animate-fade-in">
                             <Sparkles size={12} />
                           </div>
                         )}
@@ -811,7 +811,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                         )}
                       </div>
                       <span
-                        className={`font-sans text-[10px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/40 group-hover:text-cookbook-text"}`}
+                        className={`font-sans text-[11px] uppercase tracking-widest transition-colors ${theme === t.id ? "text-cookbook-primary font-medium" : "text-cookbook-text/70 group-hover:text-cookbook-text"}`}
                       >
                         {t.label}
                       </span>
@@ -832,7 +832,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                                 <Crown size={10} />
                               </div>
                             </div>
-                            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40">{t.label}</span>
+                            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70">{t.label}</span>
                           </div>
                         }
                       >
@@ -864,7 +864,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               <span className="text-2xl">🩺</span>
               <div className="flex-1">
                 <p className="font-serif text-xl text-cookbook-text leading-tight">Diagnóstico de sincronização</p>
-                <p className="font-sans text-xs text-cookbook-text/50 mt-0.5">Algo não salva ou não aparece? Teste o acesso a cada função.</p>
+                <p className="font-sans text-xs text-cookbook-text/70 mt-0.5">Algo não salva ou não aparece? Teste o acesso a cada função.</p>
               </div>
             </button>
             {/* Support & Legal */}
@@ -883,7 +883,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors flex items-center gap-2">
                       <HelpCircle size={16} className="text-cookbook-primary/60" /> Ver Tutorial de Boas-Vindas
                     </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                    <div className="font-sans text-[11px] text-cookbook-text/70 mt-1 leading-tight">
                       Releia o guia passo a passo de como usar o Pote Sagrado.
                     </div>
                   </div>
@@ -898,7 +898,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
                       Atendimento e Suporte
                     </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                    <div className="font-sans text-[11px] text-cookbook-text/70 mt-1 leading-tight">
                       Tire suas dúvidas ou reporte problemas.
                     </div>
                   </div>
@@ -913,7 +913,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
                       Termos de Uso e Política de Privacidade
                     </div>
-                    <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                    <div className="font-sans text-[11px] text-cookbook-text/70 mt-1 leading-tight">
                       Leia sobre seus direitos e como tratamos os dados (LGPD).
                     </div>
                   </div>
@@ -939,7 +939,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                       <div className="font-sans text-sm font-medium text-cookbook-text group-hover:text-cookbook-primary transition-colors">
                         Sair do Aplicativo
                       </div>
-                      <div className="font-sans text-[11px] text-cookbook-text/40 mt-1 leading-tight">
+                      <div className="font-sans text-[11px] text-cookbook-text/70 mt-1 leading-tight">
                         Sua conta e saldo permanecem seguros nas nuvens.
                       </div>
                     </div>
@@ -951,7 +951,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <h4 className="font-serif text-red-600 font-medium mb-1 flex items-center justify-center gap-2">
                       <Trash2 size={16} /> Exclusão de Dados (LGPD)
                     </h4>
-                    <p className="font-sans text-[10px] text-red-500/80 leading-tight mb-4 text-center px-2">
+                    <p className="font-sans text-[11px] text-red-500/80 leading-tight mb-4 text-center px-2">
                       Solicite a remoção completa dos seus dados. Esta ação é irreversível e aciona a exclusão segura de todos os depósitos e fotos em nossos servidores.
                     </p>
                     <button
@@ -979,7 +979,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                           }
                         }
                       }}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-sans text-[10px] uppercase tracking-widest font-bold py-3 rounded-full transition-colors shadow-md"
+                      className="w-full bg-red-600 hover:bg-red-700 text-white font-sans text-[11px] uppercase tracking-widest font-bold py-3 rounded-full transition-colors shadow-md"
                     >
                       Excluir Minha Conta e Dados
                     </button>
@@ -1025,7 +1025,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                     <div className="flex items-center gap-2 text-white font-bold text-sm uppercase tracking-widest">
                       <Crown size={16} fill="white" /> Assinatura Ativa
                     </div>
-                    <p className="text-[10px] text-white/70 text-center uppercase tracking-widest font-medium">
+                    <p className="text-[11px] text-white/70 text-center uppercase tracking-widest font-medium">
                       Obrigado por apoiar o Pote Sagrado! <br/> Aproveite todos os recursos.
                     </p>
                   </div>
@@ -1038,7 +1038,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
                   </button>
                 )}
                 
-                <p className="text-center mt-4 text-[10px] text-white/50 uppercase tracking-[0.2em] font-medium">
+                <p className="text-center mt-4 text-[11px] text-white/70 uppercase tracking-[0.2em] font-medium">
                   Valor único para o casal
                 </p>
               </div>
@@ -1049,7 +1049,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
 
             <div className="bg-cookbook-bg/50 backdrop-blur-xl border border-cookbook-border/30 rounded-3xl p-6 text-center">
               <h4 className="font-serif text-lg text-cookbook-text mb-2">Por que ser Premium?</h4>
-              <p className="font-sans text-xs text-cookbook-text/50 leading-relaxed">
+              <p className="font-sans text-xs text-cookbook-text/70 leading-relaxed">
                 Ao se tornar premium, você ajuda a manter o Pote Sagrado independente e sem anúncios. O valor é cobrado por casal, permitindo que ambos aproveitem os benefícios simultaneamente.
               </p>
             </div>

@@ -547,7 +547,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           {" "}
           Missões e Ferramentas{" "}
         </h2>{" "}
-        <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold">
+        <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
           {" "}
           Economia vira aventura{" "}
         </p>{" "}
@@ -580,7 +580,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                 {" "}
                 Passagens{" "}
               </p>{" "}
-              <p className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
                 {" "}
                 Monitoramento{" "}
               </p>{" "}
@@ -601,7 +601,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                 {" "}
                 Gerador Dates{" "}
               </p>{" "}
-              <p className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
                 {" "}
                 Ideias Grátis{" "}
               </p>{" "}
@@ -619,7 +619,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             {Object.values(streaks).reduce((acc, s) => acc + s.count, 0)}{" "}
           </div>{" "}
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium mt-1">
             {" "}
             Completadas{" "}
           </div>{" "}
@@ -631,7 +631,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             {Math.max(...Object.values(streaks).map((s) => s.streak), 0)}{" "}
           </div>{" "}
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium mt-1">
             {" "}
             Melhor Streak{" "}
           </div>{" "}
@@ -643,7 +643,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             {allMissions.length}{" "}
           </div>{" "}
-          <div className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/50 font-medium mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium mt-1">
             {" "}
             Missões{" "}
           </div>{" "}
@@ -656,12 +656,12 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full font-sans text-[10px] uppercase tracking-widest font-medium whitespace-nowrap transition-all ${activeFilter === filter.id ? "bg-cookbook-primary text-white shadow-md" : "bg-cookbook-bg border border-cookbook-border/30 text-cookbook-text/60 hover:border-cookbook-primary/40 hover:bg-cookbook-border/30"}`}
+            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full font-sans text-[11px] uppercase tracking-widest font-medium whitespace-nowrap transition-all ${activeFilter === filter.id ? "bg-cookbook-primary text-white shadow-md" : "bg-cookbook-bg border border-cookbook-border/30 text-cookbook-text/70 hover:border-cookbook-primary/40 hover:bg-cookbook-border/30"}`}
           >
             {" "}
             <span>{filter.emoji}</span> <span>{filter.label}</span>{" "}
             <span
-              className={`ml-1 px-1.5 py-0.5 rounded-full text-[8px] ${activeFilter === filter.id ? "bg-white/20" : "bg-cookbook-bg"}`}
+              className={`ml-1 px-1.5 py-0.5 rounded-full text-[11px] ${activeFilter === filter.id ? "bg-white/20" : "bg-cookbook-bg"}`}
             >
               {" "}
               {filter.id === "todas"
@@ -686,14 +686,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               {" "}
               Nenhuma missão aqui{" "}
             </p>{" "}
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-6">
+            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-6">
               {" "}
               Crie desafios personalizados e transformem a rotina em
               aventura!{" "}
             </p>{" "}
             <button
               onClick={() => setShowAddForm(true)}
-              className="bg-cookbook-primary text-white font-sans text-[9px] uppercase tracking-widest px-5 py-2.5 rounded-full font-bold transition-transform hover:bg-cookbook-primary-hover active:scale-95 flex items-center gap-2 shadow-md"
+              className="bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-full font-bold transition-transform hover:bg-cookbook-primary-hover active:scale-95 flex items-center gap-2 shadow-md"
             >
               {" "}
               <Plus size={12} strokeWidth={2.5} /> Criar Primeira Missão{" "}
@@ -729,7 +729,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                           {mission.title}{" "}
                         </h4>{" "}
                         {mission.desc && (
-                          <p className="font-sans text-[10px] text-cookbook-text/50 mt-0.5 leading-relaxed">
+                          <p className="font-sans text-[11px] text-cookbook-text/70 mt-0.5 leading-relaxed">
                             {" "}
                             {mission.desc}{" "}
                           </p>
@@ -741,14 +741,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                           {" "}
                           <button
                             onClick={() => handleEditClick(mission)}
-                            className="text-cookbook-text/30 hover:text-cookbook-primary transition-colors p-1"
+                            className="text-cookbook-text/70 hover:text-cookbook-primary transition-colors p-1"
                           >
                             {" "}
                             <Pencil size={12} />{" "}
                           </button>{" "}
                           <button
                             onClick={() => handleDeleteMission(mission)}
-                            className="text-cookbook-text/30 hover:text-red-500 transition-colors p-1"
+                            className="text-cookbook-text/70 hover:text-red-500 transition-colors p-1"
                           >
                             {" "}
                             <Trash2 size={12} />{" "}
@@ -763,14 +763,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                         {" "}
                         {/* Category badge */}{" "}
                         <span
-                          className={`px-2 py-0.5 rounded-md font-sans text-[8px] uppercase tracking-widest font-bold border ${badge.color}`}
+                          className={`px-2 py-0.5 rounded-md font-sans text-[11px] uppercase tracking-widest font-bold border ${badge.color}`}
                         >
                           {" "}
                           {badge.label}{" "}
                         </span>{" "}
                         {/* Reward */}{" "}
                         {mission.reward > 0 && (
-                          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
+                          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold">
                             {" "}
                             R$ {mission.reward}{" "}
                           </span>
@@ -782,14 +782,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                         <div className="flex items-center gap-1.5">
                           {/* Count */}{" "}
                           {missionStats.count > 0 && (
-                            <span className="flex items-center justify-center font-sans text-[10px] bg-cookbook-text/5 text-cookbook-text/60 px-1.5 py-0.5 rounded-md font-bold" title="Vezes completadas">
+                            <span className="flex items-center justify-center font-sans text-[11px] bg-cookbook-text/5 text-cookbook-text/70 px-1.5 py-0.5 rounded-md font-bold" title="Vezes completadas">
                               {" "}
                               ×{missionStats.count}{" "}
                             </span>
                           )}{" "}
                           {/* Streak indicator */}{" "}
                           {missionStats.streak > 0 && (
-                            <span className="flex items-center gap-1 font-sans text-[10px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-bold" title="Dias seguidos">
+                            <span className="flex items-center gap-1 font-sans text-[11px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-md font-bold" title="Dias seguidos">
                               {" "}
                               <Flame size={12} strokeWidth={2.5} className="text-amber-500" /> {missionStats.streak}{" "}
                             </span>
@@ -805,7 +805,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                             else setAmount("");
                           }}
                           disabled={isSubmitting}
-                          className="flex items-center gap-1 bg-cookbook-bg border border-cookbook-border px-3 py-1.5 rounded-lg text-[9px] font-sans uppercase tracking-widest font-bold text-cookbook-text hover:bg-cookbook-primary hover:text-white hover:border-cookbook-primary transition-all disabled:opacity-50 active:scale-95"
+                          className="flex items-center gap-1 bg-cookbook-bg border border-cookbook-border px-3 py-1.5 rounded-lg text-[11px] font-sans uppercase tracking-widest font-bold text-cookbook-text hover:bg-cookbook-primary hover:text-cookbook-on-primary hover:border-cookbook-primary transition-all disabled:opacity-50 active:scale-95"
                         >
                           {" "}
                           <CheckCircle2 size={11} /> <span>Cumpri!</span>{" "}
@@ -823,7 +823,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       {!showAddForm ? (
         <button
           onClick={() => setShowAddForm(true)}
-          className="w-full flex items-center justify-center gap-2 bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border text-cookbook-text/60 font-sans text-[10px] uppercase tracking-widest py-4 rounded-full font-bold hover:bg-cookbook-border/30 hover:text-cookbook-primary transition-all active:scale-[0.98] shadow-sm"
+          className="w-full flex items-center justify-center gap-2 bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border text-cookbook-text/70 font-sans text-[11px] uppercase tracking-widest py-4 rounded-full font-bold hover:bg-cookbook-border/30 hover:text-cookbook-primary transition-all active:scale-[0.98] shadow-sm"
         >
           {" "}
           <Plus size={16} /> <span>Nova Missão</span>{" "}
@@ -839,7 +839,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             </h4>{" "}
             <button
               onClick={() => setShowAddForm(false)}
-              className="text-cookbook-text/40 hover:text-cookbook-text transition-colors"
+              className="text-cookbook-text/70 hover:text-cookbook-text transition-colors"
             >
               {" "}
               <X size={18} />{" "}
@@ -850,14 +850,14 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             <button
               onClick={() => setNewCategory("desafio")}
-              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "desafio" ? "bg-amber-500/20 border-amber-500/30 text-amber-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30"}`}
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[11px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "desafio" ? "bg-amber-500/20 border-amber-500/30 text-amber-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/70 hover:bg-cookbook-border/30"}`}
             >
               {" "}
               ⚔️ Desafio{" "}
             </button>{" "}
             <button
               onClick={() => setNewCategory("economia")}
-              className={`flex-1 py-2.5 rounded-xl font-sans text-[9px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "economia" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/50 hover:bg-cookbook-border/30"}`}
+              className={`flex-1 py-2.5 rounded-xl font-sans text-[11px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "economia" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/70 hover:bg-cookbook-border/30"}`}
             >
               {" "}
               💚 Economia{" "}
@@ -893,7 +893,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               />{" "}
               <div className="flex gap-2 items-center">
                 {" "}
-                <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold whitespace-nowrap">
+                <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold whitespace-nowrap">
                   {" "}
                   R${" "}
                 </span>{" "}
@@ -910,7 +910,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           <button
             onClick={handleAddMission}
             disabled={!newTitle.trim() || isSavingEdit}
-            className="w-full bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 border border-cookbook-primary rounded-xl font-bold hover:bg-cookbook-primary-hover shadow-sm transition-transform active:scale-[0.98] disabled:opacity-50"
+            className="w-full bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-3 border border-cookbook-primary rounded-xl font-bold hover:bg-cookbook-primary-hover shadow-sm transition-transform active:scale-[0.98] disabled:opacity-50"
           >
             {" "}
             {isSavingEdit ? "Criando..." : "Criar Missão"}{" "}
@@ -945,7 +945,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                 setSelectedMission(null);
                 setMissionImage(null);
               }}
-              className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text transition-colors"
+              className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-text transition-colors"
             >
               {" "}
               <X size={20} />{" "}
@@ -961,12 +961,12 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                 {selectedMission.title}{" "}
               </h3>{" "}
               {selectedMission.desc && (
-                <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed">
+                <p className="font-sans text-[11px] text-cookbook-text/70 leading-relaxed">
                   {" "}
                   {selectedMission.desc}{" "}
                 </p>
               )}{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mt-3">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mt-3">
                 {" "}
                 {selectedMission.reward > 0
                   ? `Recompensa: R$ ${selectedMission.reward}`
@@ -978,7 +978,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               {selectedMission.reward === 0 && (
                 <div className="relative">
                   {" "}
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/70 text-lg">
                     {" "}
                     R${" "}
                   </span>{" "}
@@ -1018,9 +1018,9 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                       {" "}
                       <Camera
                         size={16}
-                        className="text-cookbook-text/50"
+                        className="text-cookbook-text/70"
                       />{" "}
-                      <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/60">
+                      <span className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">
                         {" "}
                         Anexar Foto de Comprovação{" "}
                       </span>{" "}
@@ -1043,7 +1043,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                       isNaN(Number(amount.replace(",", "."))) ||
                       Number(amount.replace(",", ".")) <= 0))
                 }
-                className={`w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold disabled:opacity-50 transition-all active:scale-95 shadow-lg ${selectedMission.category === "economia" ? "bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500" : selectedMission.category === "desafio" ? "bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500" : "bg-gradient-to-r from-violet-500 to-violet-400 hover:from-violet-600 hover:to-violet-500"}`}
+                className={`w-full text-white font-sans text-[11px] uppercase tracking-widest py-4 rounded-xl font-bold disabled:opacity-50 transition-all active:scale-95 shadow-lg ${selectedMission.category === "economia" ? "bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500" : selectedMission.category === "desafio" ? "bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500" : "bg-gradient-to-r from-violet-500 to-violet-400 hover:from-violet-600 hover:to-violet-500"}`}
               >
                 {" "}
                 {isSubmitting
@@ -1070,7 +1070,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             {" "}
             <button
               onClick={() => setEditingMission(null)}
-              className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text transition-colors"
+              className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-text transition-colors"
             >
               {" "}
               <X size={20} />{" "}
@@ -1111,7 +1111,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                   />{" "}
                   <div className="relative">
                     {" "}
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/50 text-lg">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-serif text-cookbook-text/70 text-lg">
                       {" "}
                       R${" "}
                     </span>{" "}
@@ -1130,7 +1130,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               {" "}
               <button
                 onClick={() => setEditingMission(null)}
-                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-lg font-bold hover:bg-cookbook-border/50 transition-colors"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[11px] uppercase tracking-widest py-3 rounded-lg font-bold hover:bg-cookbook-border/50 transition-colors"
               >
                 {" "}
                 Cancelar{" "}
@@ -1138,7 +1138,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               <button
                 onClick={handleSaveEdit}
                 disabled={isSavingEdit}
-                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-lg font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
+                className="flex-1 bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-3 rounded-lg font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50"
               >
                 {" "}
                 {isSavingEdit ? "Salvando..." : "Salvar"}{" "}

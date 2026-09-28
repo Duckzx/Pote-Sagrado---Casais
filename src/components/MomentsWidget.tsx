@@ -193,7 +193,7 @@ export const MomentsWidget: React.FC<MomentsWidgetProps> = memo(({
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none" />
 
         {/* Small badge top right */}
-        <div className="absolute top-4 right-4 border border-cookbook-border/50 bg-cookbook-bg/50 backdrop-blur-md px-2 py-0.5 rounded-full font-sans text-[8px] uppercase tracking-widest text-cookbook-text/60 font-bold flex items-center shadow-sm">
+        <div className="absolute top-4 right-4 border border-cookbook-border/50 bg-cookbook-bg/50 backdrop-blur-md px-2 py-0.5 rounded-full font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold flex items-center shadow-sm">
           {moment.badge}
         </div>
 

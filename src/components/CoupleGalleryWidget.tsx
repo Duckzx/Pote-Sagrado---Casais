@@ -10,12 +10,12 @@ export const CoupleGalleryWidget: React.FC<{ addToast: any }> = ({ addToast }) =
   return (
     <div className="mb-4 relative z-10 w-full max-w-md mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-sans tracking-widest uppercase text-[10px] font-bold text-cookbook-text/40">
+        <h3 className="font-sans tracking-widest uppercase text-[11px] font-bold text-cookbook-text/70">
           Nosso Álbum
         </h3>
         <button
           onClick={() => setShowAddModal(true)}
-          className="w-8 h-8 rounded-full bg-cookbook-gold/10 flex items-center justify-center text-cookbook-gold hover:bg-cookbook-gold hover:text-white transition-colors"
+          className="w-8 h-8 rounded-full bg-cookbook-gold/10 flex items-center justify-center text-cookbook-gold hover:bg-cookbook-gold hover:text-cookbook-on-gold transition-colors"
         >
           <Plus size={16} />
         </button>
@@ -42,7 +42,7 @@ export const CoupleGalleryWidget: React.FC<{ addToast: any }> = ({ addToast }) =
           </div>
         ) : (
           <div className="flex items-center justify-center h-48 border border-dashed border-cookbook-border/50 rounded-3xl">
-            <p className="text-cookbook-text/40 font-sans text-[10px] uppercase tracking-widest text-center px-8">
+            <p className="text-cookbook-text/70 font-sans text-[11px] uppercase tracking-widest text-center px-8">
               Adicione fotos para inspirar a jornada de vocês
             </p>
           </div>

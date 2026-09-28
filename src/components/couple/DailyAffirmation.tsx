@@ -56,7 +56,7 @@ export const DailyAffirmation: React.FC = () => {
       <blockquote className="font-serif italic text-lg text-cookbook-text/80 leading-snug -mt-2">
         {phrase.text}
       </blockquote>
-      <figcaption className="font-sans text-[9px] uppercase tracking-[0.25em] text-cookbook-text/35 font-bold mt-2">
+      <figcaption className="font-sans text-[11px] uppercase tracking-[0.25em] text-cookbook-text/70 font-bold mt-2">
         Frase do dia
       </figcaption>
     </figure>

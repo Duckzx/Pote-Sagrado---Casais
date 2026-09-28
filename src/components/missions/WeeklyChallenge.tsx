@@ -90,8 +90,8 @@ export const WeeklyChallenge: React.FC = () => {
   return (
     <section className="relative overflow-hidden rounded-3xl p-5 border border-cookbook-border bg-gradient-to-br from-cookbook-gold/15 via-cookbook-bg to-cookbook-primary/10 shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-between">
-        <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Desafio da semana</p>
-        <span className="font-sans text-[10px] font-bold text-cookbook-text/40">
+        <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Desafio da semana</p>
+        <span className="font-sans text-[11px] font-bold text-cookbook-text/70">
           {daysLeft === 1 ? "último dia" : `faltam ${daysLeft} dias`}
         </span>
       </div>
@@ -99,7 +99,7 @@ export const WeeklyChallenge: React.FC = () => {
         <span className="text-4xl">{challenge.emoji}</span>
         <div>
           <p className="font-serif text-2xl text-cookbook-text leading-tight">{challenge.title}</p>
-          <p className="font-sans text-xs text-cookbook-text/60 mt-0.5">{challenge.tip}</p>
+          <p className="font-sans text-xs text-cookbook-text/70 mt-0.5">{challenge.tip}</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export const WeeklyChallenge: React.FC = () => {
         <button
           onClick={complete}
           disabled={busy}
-          className="px-5 rounded-2xl bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold shadow-md disabled:opacity-50"
+          className="px-5 rounded-2xl bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold shadow-md disabled:opacity-50"
         >
           {busy ? "..." : "Cumpri!"}
         </button>

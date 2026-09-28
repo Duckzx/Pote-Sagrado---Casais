@@ -49,8 +49,8 @@ export const SavingHeatmap: React.FC = () => {
   return (
     <section className="rounded-3xl p-5 border border-cookbook-border bg-cookbook-bg/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
       <div className="flex items-center justify-between mb-3">
-        <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-text/50">Últimas 12 semanas</p>
-        <p className="font-sans text-[10px] font-bold text-cookbook-primary">{activeDays} {activeDays === 1 ? "dia" : "dias"} guardando</p>
+        <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">Últimas 12 semanas</p>
+        <p className="font-sans text-[11px] font-bold text-cookbook-primary">{activeDays} {activeDays === 1 ? "dia" : "dias"} guardando</p>
       </div>
       <div className="flex gap-1 justify-between">
         {columns.map((col, i) => (
@@ -66,11 +66,11 @@ export const SavingHeatmap: React.FC = () => {
         ))}
       </div>
       <div className="flex items-center justify-end gap-1 mt-3">
-        <span className="font-sans text-[9px] text-cookbook-text/40 mr-1">menos</span>
+        <span className="font-sans text-[11px] text-cookbook-text/70 mr-1">menos</span>
         {shades.map((s) => (
           <span key={s} className={`w-3 h-3 rounded-[3px] ${s}`} />
         ))}
-        <span className="font-sans text-[9px] text-cookbook-text/40 ml-1">mais</span>
+        <span className="font-sans text-[11px] text-cookbook-text/70 ml-1">mais</span>
       </div>
     </section>
   );

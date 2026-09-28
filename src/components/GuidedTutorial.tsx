@@ -134,10 +134,10 @@ export const GuidedTutorial: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 1.1, y: -20 }}
           transition={{ type: "spring", damping: 20, stiffness: 100 }}
-          className="relative w-full max-w-sm bg-white rounded-[32px] p-8 shadow-2xl pointer-events-auto flex flex-col items-center text-center overflow-hidden"
+          className="relative w-full max-w-sm bg-cookbook-bg rounded-[32px] p-8 shadow-2xl pointer-events-auto flex flex-col items-center text-center overflow-hidden"
         >
           {/* Progress Bar */}
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-cookbook-text/5">
             <motion.div 
               className="h-full bg-cookbook-primary"
               initial={{ width: 0 }}
@@ -146,9 +146,9 @@ export const GuidedTutorial: React.FC = () => {
             />
           </div>
 
-          <button 
+          <button aria-label="Fechar tutorial" 
             onClick={completeOnboarding}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 p-2 text-cookbook-text/70 hover:text-cookbook-text transition-colors"
           >
             <X size={20} />
           </button>
@@ -157,11 +157,11 @@ export const GuidedTutorial: React.FC = () => {
             {step.icon}
           </div>
 
-          <h3 className="font-serif text-2xl font-bold text-gray-900 mb-3">
+          <h3 className="font-serif text-2xl font-bold text-cookbook-text mb-3">
             {step.title}
           </h3>
 
-          <p className="font-sans text-sm text-gray-500 leading-relaxed mb-8">
+          <p className="font-sans text-sm text-cookbook-text/70 leading-relaxed mb-8">
             {step.description}
           </p>
 
@@ -170,7 +170,7 @@ export const GuidedTutorial: React.FC = () => {
               onClick={handleBack}
               disabled={currentStep === 0}
               className={`flex items-center gap-1 text-sm font-bold uppercase tracking-widest transition-all ${
-                currentStep === 0 ? "opacity-0 pointer-events-none" : "text-gray-400 hover:text-gray-600"
+                currentStep === 0 ? "opacity-0 pointer-events-none" : "text-cookbook-text/70 hover:text-cookbook-text"
               }`}
             >
               <ChevronLeft size={18} /> Voltar
@@ -178,7 +178,7 @@ export const GuidedTutorial: React.FC = () => {
 
             <button
               onClick={handleNext}
-              className="flex-1 bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-cookbook-primary/20 hover:bg-cookbook-primary-hover active:scale-95 transition-all"
+              className="flex-1 bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-cookbook-primary/20 hover:bg-cookbook-primary-hover active:scale-95 transition-all"
             >
               {currentStep === steps.length - 1 ? (
                 <>Começar <Check size={16} /></>
@@ -206,7 +206,7 @@ export const GuidedTutorial: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mt-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-white font-sans text-[10px] uppercase tracking-widest font-medium"
+        className="mt-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 text-white font-sans text-[11px] uppercase tracking-widest font-medium"
       >
         Toque fora para pular o tutorial
       </motion.div>

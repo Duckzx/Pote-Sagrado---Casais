@@ -69,7 +69,7 @@ export const AnniversaryCountdown: React.FC = () => {
         </div>
         <div>
           <p className="font-serif text-lg text-cookbook-text leading-tight">Quando tudo começou?</p>
-          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mt-1">
+          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mt-1">
             Adicione a data e ganhe a contagem do mêsversário
           </p>
         </div>
@@ -87,7 +87,7 @@ export const AnniversaryCountdown: React.FC = () => {
         fill="currentColor"
         className="absolute -right-5 -top-5 text-cookbook-primary opacity-[0.08] rotate-12 pointer-events-none"
       />
-      <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50 mb-3">
+      <h3 className="font-sans tracking-[0.2em] uppercase text-[11px] font-bold text-cookbook-text/70 mb-3">
         Mêsversário
       </h3>
 
@@ -106,7 +106,7 @@ export const AnniversaryCountdown: React.FC = () => {
             <p className="font-serif text-lg text-cookbook-text leading-tight">
               {info.daysToMonth === 1 ? "dia" : "dias"} para o {info.monthsTogether}º mês
             </p>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
               {fmt(info.nextMonth)}
             </p>
           </div>
@@ -115,7 +115,7 @@ export const AnniversaryCountdown: React.FC = () => {
 
       {!isAnniversaryToday && (
         <div className="mt-4 pt-3 border-t border-cookbook-primary/10 flex items-center justify-between">
-          <span className="font-sans text-xs text-cookbook-text/60">
+          <span className="font-sans text-xs text-cookbook-text/70">
             {info.years}º aniversário de namoro
           </span>
           <span className="font-sans text-xs font-bold text-cookbook-text/80">

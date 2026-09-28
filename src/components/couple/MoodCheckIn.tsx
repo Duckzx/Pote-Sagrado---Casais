@@ -85,10 +85,10 @@ export const MoodCheckIn: React.FC = () => {
   return (
     <section className="bg-cookbook-bg/80 backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50">
+        <h3 className="font-sans tracking-[0.2em] uppercase text-[11px] font-bold text-cookbook-text/70">
           {mode === "solo" ? "Como estou hoje" : "Como estamos hoje"}
         </h3>
-        <span className="text-[10px] font-sans text-cookbook-text/30">atualiza a cada 24h</span>
+        <span className="text-[11px] font-sans text-cookbook-text/70">atualiza a cada 24h</span>
       </div>
 
       {mode === "grupo" ? (
@@ -98,7 +98,7 @@ export const MoodCheckIn: React.FC = () => {
             className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-primary/[0.06] border border-cookbook-primary/20 active:scale-95"
           >
             <span className="block text-2xl">{myMood ? myMood.emoji : "➕"}</span>
-            <span className="block font-sans text-[10px] font-bold text-cookbook-text/70 mt-1 truncate">Você</span>
+            <span className="block font-sans text-[11px] font-bold text-cookbook-text/70 mt-1 truncate">Você</span>
             <span className="block font-serif text-sm text-cookbook-text leading-tight truncate">{myMood ? myMood.label : "Contar"}</span>
           </button>
           {others.map((m) => {
@@ -106,13 +106,13 @@ export const MoodCheckIn: React.FC = () => {
             return (
               <div key={m.id} className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
                 <span className="block text-2xl">{mood ? mood.emoji : "💤"}</span>
-                <span className="block font-sans text-[10px] font-bold text-cookbook-text/70 mt-1 truncate">{firstName(m)}</span>
+                <span className="block font-sans text-[11px] font-bold text-cookbook-text/70 mt-1 truncate">{firstName(m)}</span>
                 <span className="block font-serif text-sm text-cookbook-text/70 leading-tight truncate">{mood ? mood.label : "—"}</span>
               </div>
             );
           })}
           {others.length === 0 && (
-            <p className="self-center font-serif italic text-cookbook-text/40 text-sm px-2">Convide a turma em Ajustes</p>
+            <p className="self-center font-serif italic text-cookbook-text/70 text-sm px-2">Convide a turma em Ajustes</p>
           )}
         </div>
       ) : (
@@ -122,7 +122,7 @@ export const MoodCheckIn: React.FC = () => {
             onClick={() => setIsPicking((v) => !v)}
             className="w-full text-left rounded-2xl p-4 bg-cookbook-primary/[0.06] border border-cookbook-primary/15 hover:border-cookbook-primary/40 transition-all active:scale-[0.98]"
           >
-            <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2">Você</p>
+            <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 mb-2">Você</p>
             {myMood ? (
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{myMood.emoji}</span>
@@ -136,7 +136,7 @@ export const MoodCheckIn: React.FC = () => {
           {/* Partner */}
           {mode === "casal" && (
             <div className="rounded-2xl p-4 bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
-              <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 mb-2 truncate">
+              <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 mb-2 truncate">
                 {partner ? firstName(partner) : "Seu par"}
               </p>
               {partnerMood ? (
@@ -145,7 +145,7 @@ export const MoodCheckIn: React.FC = () => {
                   <span className="font-serif text-lg text-cookbook-text leading-tight">{partnerMood.label}</span>
                 </div>
               ) : (
-                <p className="font-serif italic text-cookbook-text/40 text-base leading-tight">
+                <p className="font-serif italic text-cookbook-text/70 text-base leading-tight">
                   {partner ? "Ainda não contou" : "Convide nas configurações"}
                 </p>
               )}
@@ -155,12 +155,12 @@ export const MoodCheckIn: React.FC = () => {
       )}
 
       {mode === "casal" && partnerMood && (
-        <p className="mt-3 font-sans text-xs text-cookbook-text/60 leading-relaxed">
+        <p className="mt-3 font-sans text-xs text-cookbook-text/70 leading-relaxed">
           <span className="font-bold text-cookbook-primary">Dica:</span> {partnerMood.tip}
         </p>
       )}
       {mode === "solo" && myMood && (
-        <p className="mt-3 font-sans text-xs text-cookbook-text/60 leading-relaxed">
+        <p className="mt-3 font-sans text-xs text-cookbook-text/70 leading-relaxed">
           <span className="font-bold text-cookbook-primary">Para você:</span> {myMood.selfTip}
         </p>
       )}
@@ -185,7 +185,7 @@ export const MoodCheckIn: React.FC = () => {
                   }`}
                 >
                   <span className="text-xl">{mood.emoji}</span>
-                  <span className="font-sans text-[9px] font-bold leading-tight text-center">{mood.label}</span>
+                  <span className="font-sans text-[11px] font-bold leading-tight text-center">{mood.label}</span>
                 </button>
               ))}
             </div>

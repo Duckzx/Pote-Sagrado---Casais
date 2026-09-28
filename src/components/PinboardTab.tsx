@@ -139,7 +139,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           {" "}
           {copy.muralTitle}{" "}
         </h2>{" "}
-        <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+        <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
           {" "}
           {copy.muralSubtitle}{" "}
         </p>{" "}
@@ -178,27 +178,27 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
                 placeholder="Ex: Chalé em Campos"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-serif text-cookbook-text focus:outline-none focus:border-cookbook-primary text-sm placeholder:text-cookbook-text/30"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-serif text-cookbook-text focus:outline-none focus:border-cookbook-primary text-sm placeholder:text-cookbook-text/50"
               />{" "}
               <input
                 type="url"
                 placeholder="Link (https://...)"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
-                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/30"
+                className="w-full bg-cookbook-bg/90 backdrop-blur-md px-4 py-3 rounded-xl border border-cookbook-border font-sans text-xs text-cookbook-text focus:outline-none focus:border-cookbook-primary placeholder:text-cookbook-text/50"
               />{" "}
               <div className="flex justify-end space-x-2 pt-2">
                 {" "}
                 <button
                   onClick={() => setIsAddingLink(false)}
-                  className="px-5 py-2 text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold rounded-xl hover:bg-cookbook-bg"
+                  className="px-5 py-2 text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold rounded-xl hover:bg-cookbook-bg"
                 >
                   {" "}
                   Cancelar{" "}
                 </button>{" "}
                 <button
                   onClick={handleAddLink}
-                  className="px-5 py-2 text-[10px] uppercase tracking-widest bg-cookbook-primary text-white font-bold rounded-xl shadow-md active:scale-95 transition-transform"
+                  className="px-5 py-2 text-[11px] uppercase tracking-widest bg-cookbook-primary text-cookbook-on-primary font-bold rounded-xl shadow-md active:scale-95 transition-transform"
                 >
                   {" "}
                   Adicionar{" "}
@@ -250,7 +250,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
             </div>
           ))}{" "}
           {pinboardLinks.length === 0 && (
-            <div className="w-full h-40 rounded-3xl border-2 border-dashed border-cookbook-border bg-cookbook-bg/90 backdrop-blur-md flex items-center justify-center text-cookbook-text/40 font-serif italic text-sm text-center px-4 font-medium shrink-0 shadow-sm">
+            <div className="w-full h-40 rounded-3xl border-2 border-dashed border-cookbook-border bg-cookbook-bg/90 backdrop-blur-md flex items-center justify-center text-cookbook-text/70 font-serif italic text-sm text-center px-4 font-medium shrink-0 shadow-sm">
               {" "}
               Nenhum sonho adicionado.{" "}
             </div>
@@ -270,7 +270,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               Nossas Conquistas{" "}
             </h3>{" "}
           </div>{" "}
-          <span className="text-[10px] uppercase tracking-widest text-cookbook-text/40 font-medium">
+          <span className="text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
             {" "}
             {achievements.filter(a => a.imageUrl).length + (isUploadingPhoto ? 1 : 0)} de 6{" "}
           </span>{" "}
@@ -301,7 +301,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
               {item.destination !== "Nossa Conquista" && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                   <p className="text-white font-serif text-sm truncate">{item.destination}</p>
-                  <p className="text-white/70 font-sans text-[9px] uppercase tracking-widest font-bold">
+                  <p className="text-white/70 font-sans text-[11px] uppercase tracking-widest font-bold">
                     {formatCurrency(item.amount || 0)}
                   </p>
                 </div>
@@ -309,9 +309,9 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
             </div>
           ))}{" "}
           {isUploadingPhoto && (
-            <div className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 bg-cookbook-bg/90 backdrop-blur-md animate-pulse">
+            <div className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/70 bg-cookbook-bg/90 backdrop-blur-md animate-pulse">
               <Camera size={24} className="mb-2 opacity-50" />
-              <span className="font-sans text-[9px] uppercase tracking-widest font-bold">
+              <span className="font-sans text-[11px] uppercase tracking-widest font-bold">
                 Enviando...
               </span>
             </div>
@@ -319,14 +319,14 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           {achievements.length < 6 && !isUploadingPhoto && (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/40 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors group bg-cookbook-bg/90 backdrop-blur-md"
+              className="aspect-square rounded-3xl border-2 border-dashed border-cookbook-border flex flex-col items-center justify-center text-cookbook-text/70 hover:text-cookbook-primary hover:bg-cookbook-primary/5 transition-colors group bg-cookbook-bg/90 backdrop-blur-md"
             >
               {" "}
               <Camera
                 size={24}
                 className="mb-2 group-hover:scale-110 transition-transform"
               />{" "}
-              <span className="font-sans text-[9px] uppercase tracking-widest font-bold">
+              <span className="font-sans text-[11px] uppercase tracking-widest font-bold">
                 {" "}
                 Adicionar Foto{" "}
               </span>{" "}
@@ -340,7 +340,7 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
           className="hidden"
           onChange={handlePhotoUpload}
         />{" "}
-        <p className="font-sans text-[10px] text-cookbook-text/40 italic px-2 text-center">
+        <p className="font-sans text-[11px] text-cookbook-text/70 italic px-2 text-center">
           {" "}
           Você pode fixar até 6 memórias dos potes já quebrados.{" "}
         </p>{" "}

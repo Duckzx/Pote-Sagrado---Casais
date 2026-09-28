@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertTriangle className="text-red-500" size={32} />
           </div>
           <h1 className="font-serif text-2xl font-bold mb-2">Tivemos um soluço técnico.</h1>
-          <p className="font-sans text-sm text-cookbook-text/60 mb-8 max-w-md">
+          <p className="font-sans text-sm text-cookbook-text/70 mb-8 max-w-md">
             Alguma coisa não saiu como o esperado na aplicação. Tente recarregar a página para voltar ao normal.
             <br/><br/>
             {this.state.error?.message && (
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest font-bold px-6 py-3 rounded-full hover:bg-cookbook-primary-hover active:scale-[0.98] transition-all shadow-md"
+            className="flex items-center gap-2 bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest font-bold px-6 py-3 rounded-full hover:bg-cookbook-primary-hover active:scale-[0.98] transition-all shadow-md"
           >
             <RefreshCw size={16} /> Recarregar Página
           </button>

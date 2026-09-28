@@ -132,11 +132,11 @@ export const SacredPot: React.FC<SacredPotProps> = ({
         {/* Dynamic Achievements Badges */}{" "}
         {achievements.length > 0 && (
           <div
-            className={`absolute -right-4 top-16 z-20 bg-cookbook-gold text-white px-3 py-1.5 rounded-2xl shadow-lg rotate-[8deg] flex items-center space-x-1 border border-white/20 transition-opacity ${isBroken ? "opacity-0" : "opacity-100"}`}
+            className={`absolute -right-4 top-16 z-20 bg-cookbook-gold text-cookbook-on-gold px-3 py-1.5 rounded-2xl shadow-lg rotate-[8deg] flex items-center space-x-1 border border-white/20 transition-opacity ${isBroken ? "opacity-0" : "opacity-100"}`}
           >
             {" "}
             <span className="text-xs">🏆</span>{" "}
-            <span className="font-sans text-[10px] uppercase tracking-widest font-bold">
+            <span className="font-sans text-[11px] uppercase tracking-widest font-bold">
               {" "}
               {achievements.length}x Cheios{" "}
             </span>{" "}
@@ -219,7 +219,7 @@ export const SacredPot: React.FC<SacredPotProps> = ({
             {" "}
             <AnimatedNumber value={totalSaved} />{" "}
           </div>{" "}
-          <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-primary/80 mt-2 font-bold bg-cookbook-primary/10 inline-block px-3 py-1 rounded-full">
+          <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-primary/80 mt-2 font-bold bg-cookbook-primary/10 inline-block px-3 py-1 rounded-full">
             {" "}
             de{" "}
             {Intl.NumberFormat("pt-BR", {

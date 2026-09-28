@@ -297,10 +297,10 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
           
           <div className="relative z-10 flex flex-col mb-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">
+              <span className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">
                 {mode === "solo" ? "Seu Nível" : mode === "grupo" ? "Nível do Grupo" : "Nível do Casal"}
               </span>
-              <div className="bg-cookbook-primary/20 text-cookbook-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <div className="bg-cookbook-primary/20 text-cookbook-primary text-[11px] font-bold px-2 py-0.5 rounded-full">
                 Lvl {currentLevelInfo.level}
               </div>
             </div>
@@ -308,7 +308,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
               {currentLevelInfo.name}
             </h3>
             
-            <div className="flex items-center justify-between mb-1.5 text-[10px] font-sans font-bold uppercase tracking-widest text-cookbook-text/60">
+            <div className="flex items-center justify-between mb-1.5 text-[11px] font-sans font-bold uppercase tracking-widest text-cookbook-text/70">
               <span>{totalXp} XP</span>
               {currentLevelInfo.level !== nextLevelInfo.level && (
                 <span>Próximo Lvl: {nextLevelInfo.minXp} XP</span>
@@ -326,11 +326,11 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
 
         <div>
           <div className="flex items-center justify-between px-2 mb-4">
-            <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-bold">
+            <h3 className="font-sans text-[11px] uppercase tracking-[0.15em] text-cookbook-text/70 font-bold">
               {" "}
               Medalhas e Conquistas{" "}
             </h3>{" "}
-            <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold">
+            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold">
               {" "}
               {earnedBadges.size} / {ALL_BADGES.length}{" "}
             </span>{" "}
@@ -360,7 +360,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
                       "w-12 h-12 rounded-full flex items-center justify-center mb-3 text-current transition-all duration-500",
                       isEarned
                         ? badge.bg
-                        : "bg-cookbook-border/50 text-cookbook-text/40",
+                        : "bg-cookbook-border/50 text-cookbook-text/70",
                       isEarned ? badge.color : "",
                     )}
                   >
@@ -370,17 +370,17 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
                   <h4
                     className={clsx(
                       "font-serif italic text-sm mb-1 leading-tight transition-colors duration-500",
-                      isEarned ? "text-cookbook-text" : "text-cookbook-text/50",
+                      isEarned ? "text-cookbook-text" : "text-cookbook-text/70",
                     )}
                   >
                     {" "}
                     {badge.title}{" "}
                   </h4>{" "}
-                  <p className="font-sans text-[9px] uppercase tracking-wider text-cookbook-text/60 font-medium mb-2 opacity-80">
+                  <p className="font-sans text-[11px] uppercase tracking-wider text-cookbook-text/70 font-medium mb-2 opacity-80">
                     {" "}
                     {badge.desc}{" "}
                   </p>{" "}
-                  <span className={clsx("font-sans text-[9px] font-bold px-2 py-0.5 rounded-full mt-auto", isEarned ? badge.color + " " + badge.bg : "text-cookbook-text/40 bg-cookbook-bg")}>
+                  <span className={clsx("font-sans text-[11px] font-bold px-2 py-0.5 rounded-full mt-auto", isEarned ? badge.color + " " + badge.bg : "text-cookbook-text/70 bg-cookbook-bg")}>
                     +{badge.xp} XP
                   </span>
                 </div>
@@ -462,14 +462,14 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
                   background: `linear-gradient(90deg, transparent, ${newlyUnlocked.glowColor}, transparent)`,
                 }}
               />{" "}
-              <button
+              <button aria-label="Fechar"
                 onClick={handleClose}
-                className="absolute top-4 right-4 text-cookbook-text/40 hover:text-cookbook-text z-10 transition-colors"
+                className="absolute top-4 right-4 text-cookbook-text/70 hover:text-cookbook-text z-10 transition-colors"
               >
                 {" "}
                 <X size={20} />{" "}
               </button>{" "}
-              <div className="animate-badge-text-reveal reveal-delay-1 font-sans text-[10px] uppercase tracking-[0.25em] text-cookbook-primary font-bold mb-6">
+              <div className="animate-badge-text-reveal reveal-delay-1 font-sans text-[11px] uppercase tracking-[0.25em] text-cookbook-primary font-bold mb-6">
                 {" "}
                 🏆 Nova Conquista!{" "}
               </div>{" "}
@@ -499,7 +499,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
                 {" "}
                 {newlyUnlocked.title}{" "}
               </h3>{" "}
-              <p className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs uppercase tracking-wider text-cookbook-text/60 mb-2 leading-relaxed px-4">
+              <p className="animate-badge-text-reveal reveal-delay-3 font-sans text-xs uppercase tracking-wider text-cookbook-text/70 mb-2 leading-relaxed px-4">
                 {" "}
                 {newlyUnlocked.desc}{" "}
               </p>{" "}
@@ -508,7 +508,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
               </div>
               <button
                 onClick={handleClose}
-                className="animate-badge-text-reveal reveal-delay-4 w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
+                className="animate-badge-text-reveal reveal-delay-4 w-full text-white font-sans text-[11px] uppercase tracking-widest py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95"
                 style={{
                   background: `linear-gradient(135deg, var(--theme-primary), var(--theme-gold))`,
                 }}

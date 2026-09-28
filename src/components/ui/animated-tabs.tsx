@@ -65,7 +65,7 @@ export function TabsTrigger({ value, className, children }: TabsTriggerProps) {
       onClick={() => context.onValueChange(value)}
       className={cn(
         "relative flex-1 py-3 text-xs font-sans uppercase tracking-widest rounded-full transition-all duration-300 font-bold",
-        isActive ? "text-white" : "text-cookbook-text/60 hover:bg-cookbook-text/5",
+        isActive ? "text-white" : "text-cookbook-text/70 hover:bg-cookbook-text/5",
         className
       )}
     >

@@ -159,7 +159,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1, delay: 1 }}
-                className="font-sans text-[10px] uppercase tracking-widest text-white/70 mt-4"
+                className="font-sans text-[11px] uppercase tracking-widest text-white/70 mt-4"
               >
                 A jornada do casal
               </motion.p>
@@ -267,7 +267,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                   currency: "BRL",
                 }).format(biggestSave)}
               </motion.p>
-              <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold mb-6">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-gold font-bold mb-6">
                 por {biggestSaver}
               </p>
               <p className="font-sans text-xs text-white/80 text-balance leading-relaxed max-w-[260px] mx-auto">
@@ -320,7 +320,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
               </p>
 
               <div className="flex gap-4 justify-center" onClick={(e) => e.stopPropagation()}>
-                <button
+                <button aria-label="Baixar imagem"
                   onClick={handleExportImage}
                   className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md transition-all active:scale-95"
                 >
@@ -329,7 +329,7 @@ export const WrappedModal: React.FC<WrappedModalProps> = ({
                 {navigator.share && (
                   <button
                     onClick={handleShare}
-                    className="bg-cookbook-gold text-white font-sans text-[10px] uppercase tracking-widest py-3 px-6 rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] flex items-center gap-2 active:scale-95"
+                    className="bg-cookbook-gold text-cookbook-on-gold font-sans text-[11px] uppercase tracking-widest py-3 px-6 rounded-full font-bold shadow-[0_4px_20px_rgba(197,160,89,0.4)] flex items-center gap-2 active:scale-95"
                   >
                     <Share2 size={16} /> Compartilhar
                   </button>

@@ -31,7 +31,7 @@ export const PremiumGate: React.FC<PremiumGateProps> = ({
           <Crown size={20} className="text-amber-600 drop-shadow-sm" fill="white" />
         </div>
         <div className="mt-4 overflow-hidden rounded-full shadow-lg shadow-amber-500/20">
-           <div className="bg-amber-500 text-white font-sans text-[8px] uppercase tracking-[0.2em] font-bold px-4 py-2 premium-shimmer-button">
+           <div className="bg-amber-500 text-white font-sans text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2 premium-shimmer-button">
               Premium
            </div>
         </div>
