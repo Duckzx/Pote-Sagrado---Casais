@@ -466,3 +466,13 @@ input[type="date"] {
   border: 1.5px solid transparent;
 }
 
+
+/* Modo discreto: esconde valores em dinheiro */
+html.privacy-on [data-money] {
+  filter: blur(8px);
+  user-select: none;
+  transition: filter 0.25s ease;
+}
+[data-money] {
+  transition: filter 0.25s ease;
+}

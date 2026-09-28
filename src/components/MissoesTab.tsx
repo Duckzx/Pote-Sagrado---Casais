@@ -367,7 +367,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         selectedMission.category === "desafio"
           ? "⚔️ Desafio Concluído!"
           : "💚 Economia Registrada!",
-        `+R$ ${finalAmount.toFixed(2)} para o pote!`,
+        `+${Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(finalAmount)} para o pote!`,
         "success",
       );
       setSelectedMission(null);

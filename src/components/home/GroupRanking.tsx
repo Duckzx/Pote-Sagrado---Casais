@@ -39,7 +39,7 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-sans text-sm font-bold text-cookbook-text truncate">{r.name}</span>
-                <span className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{brl(r.total)}</span>
+                <span data-money className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{brl(r.total)}</span>
               </div>
               <div className="h-2 mt-1.5 rounded-full bg-cookbook-border/50 overflow-hidden">
                 <motion.div

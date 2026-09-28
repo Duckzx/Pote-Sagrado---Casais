@@ -51,10 +51,14 @@ import { MomentsWidget } from "./MomentsWidget";
 import { MoodCheckIn } from "./couple/MoodCheckIn";
 import { QuickActions } from "./home/QuickActions";
 import { StreakCard } from "./home/StreakCard";
+import { MonthSummary } from "./home/MonthSummary";
 import { GoalPlanCard } from "./home/GoalPlanCard";
 import { RecentActivity } from "./home/RecentActivity";
 import { useModeCopy } from "../lib/mode";
 import { BorderBeam } from "./magicui/border-beam";
+import { Eye, EyeOff } from "lucide-react";
+
+const fmtBRL = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 import { AnniversaryCountdown } from "./couple/AnniversaryCountdown";
 import { DailyAffirmation } from "./couple/DailyAffirmation";
 
@@ -308,13 +312,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         });
         addToast(
           "Booooooooa!",
-          `+R$ ${parsedAmount.toFixed(2)} no pote. Um passo mais perto da viagem!`,
+          `+${fmtBRL(parsedAmount)} no pote. Um passo mais perto do sonho!`,
           "success",
         );
       } else {
         addToast(
           "Tudo bem, acontece...",
-          `-R$ ${parsedAmount.toFixed(2)}. Da próxima a gente pensa duas vezes!`,
+          `-${fmtBRL(parsedAmount)}. Da próxima a gente pensa duas vezes!`,
           "info",
         );
       }
@@ -425,6 +429,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
     setShowBreakConfirm(true);
   };
   const { mode, ...copy } = useModeCopy();
+  const hideValues = useAppStore(s => s.hideValues);
+  const toggleHideValues = useAppStore(s => s.toggleHideValues);
 
   // Milestone celebration: crossing 25/50/75/100% opens the share card
   const [shareCelebration, setShareCelebration] = useState<string | null>(null);
@@ -473,6 +479,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
             {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
           </p>
         )}
+        <button
+          onClick={toggleHideValues}
+          className="absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full active:scale-95 transition-all shadow-sm"
+          title={hideValues ? "Mostrar valores" : "Esconder valores"}
+          aria-label={hideValues ? "Mostrar valores" : "Esconder valores"}
+        >
+          {hideValues ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
         <button
           onClick={() => setShowShareWidget(true)}
           className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-cookbook-primary/10 text-cookbook-primary rounded-full hover:bg-cookbook-primary/20 active:scale-95 transition-all shadow-sm md:static md:translate-y-0 md:mt-4 md:mx-auto md:block md:w-auto"
@@ -589,6 +603,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </div>{" "}
 
       <QuickActions />
+      <MonthSummary />
       <RecentActivity />
         </div>
       </div>{" "}
@@ -808,6 +823,46 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                     autoFocus
                   />{" "}
                 </div>{" "}
+                {/* One-tap amounts */}
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1">
+                  {[5, 10, 20, 50, 100, 200].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => {
+                        setQuickAmount(maskCurrency(String(v * 100)));
+                        vibrate(10);
+                      }}
+                      className={`shrink-0 px-3.5 py-2 rounded-full border font-sans text-xs font-bold transition-colors ${
+                        parseCurrencyString(quickAmount) === v
+                          ? "bg-cookbook-primary text-white border-cookbook-primary"
+                          : "border-cookbook-border text-cookbook-text/70 bg-cookbook-bg/80"
+                      }`}
+                    >
+                      R$ {v}
+                    </button>
+                  ))}
+                </div>
+                {/* Quick descriptions */}
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1">
+                  {(quickType === "income"
+                    ? ["☕ Café evitado", "🛵 Delivery evitado", "💼 Salário", "🎁 Presente", "💸 Pix recebido", "🛍️ Vendi algo"]
+                    : ["🍔 Comida", "🛍️ Compras", "🚗 Transporte", "🎉 Rolê", "💊 Saúde", "🏠 Casa"]
+                  ).map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setQuickDesc(label)}
+                      className={`shrink-0 px-3 py-1.5 rounded-full border font-sans text-[11px] transition-colors ${
+                        quickDesc === label
+                          ? "bg-cookbook-text text-cookbook-bg border-cookbook-text"
+                          : "border-cookbook-border text-cookbook-text/60 bg-cookbook-bg/80"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <input
                   type="text"
                   value={quickDesc}

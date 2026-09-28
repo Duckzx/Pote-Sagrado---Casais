@@ -10,5 +10,5 @@ export const AnimatedNumber = ({ value }: { value: number }) => {
   useEffect(() => {
     spring.set(value);
   }, [spring, value]);
-  return <motion.span>{display}</motion.span>;
+  return <motion.span data-money>{display}</motion.span>;
 };
