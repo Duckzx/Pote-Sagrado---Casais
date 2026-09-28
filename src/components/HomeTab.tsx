@@ -51,6 +51,7 @@ import { MomentsWidget } from "./MomentsWidget";
 import { MoodCheckIn } from "./couple/MoodCheckIn";
 import { QuickActions } from "./home/QuickActions";
 import { StreakCard } from "./home/StreakCard";
+import { GoalTemplates } from "./home/GoalTemplates";
 import { MonthSummary } from "./home/MonthSummary";
 import { GoalPlanCard } from "./home/GoalPlanCard";
 import { RecentActivity } from "./home/RecentActivity";
@@ -544,19 +545,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
         {/* Direita: Interações e Ações */}
         <div className="space-y-8 mt-8 md:mt-0">
       {/* First steps: no goal yet */}
-      {!goalAmount && (
-        <button
-          onClick={() => useAppStore.getState().setActiveTab("config")}
-          className="relative w-full overflow-hidden text-left rounded-3xl p-5 border border-cookbook-primary/30 bg-gradient-to-br from-cookbook-primary/15 via-cookbook-bg to-cookbook-gold/15 shadow-[0_8px_30px_rgba(0,0,0,0.05)] active:scale-[0.98] transition-transform"
-        >
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Primeiro passo</p>
-          <p className="font-serif text-2xl text-cookbook-text leading-tight mt-1">
-            {mode === "solo" ? "Qual é o seu sonho?" : "Qual é o sonho de vocês?"} ✨
-          </p>
-          <p className="font-sans text-xs text-cookbook-text/60 mt-1">Defina a meta e o valor para o pote começar a encher.</p>
-          <BorderBeam size={80} duration={7} colorFrom="var(--theme-primary)" colorTo="var(--theme-gold)" />
-        </button>
-      )}
+      {!goalAmount && <GoalTemplates />}
 
       {/* Couple rituals: mood of the day + mêsversário */}
       <StreakCard />

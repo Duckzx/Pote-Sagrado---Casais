@@ -23,6 +23,7 @@ import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { UserBadges } from "./UserBadges";
 import { CoupleGalleryWidget } from "./CoupleGalleryWidget";
 import { TimeCapsule } from "./couple/TimeCapsule";
+import { Wishlist } from "./mural/Wishlist";
 import { useModeCopy } from "../lib/mode";
 interface PinboardTabProps {
   addToast: (
@@ -347,6 +348,9 @@ export const PinboardTab: React.FC<PinboardTabProps> = ({ addToast }) => {
 
       <section className="space-y-4">
         {" "}
+        <div className="mb-8 relative z-10">
+          <Wishlist />
+        </div>
         <div className="mb-8 w-full max-w-md mx-auto relative z-10">
           <TimeCapsule />
         </div>
