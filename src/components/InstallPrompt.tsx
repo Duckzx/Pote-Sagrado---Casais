@@ -65,34 +65,34 @@ export const InstallPrompt: React.FC = () => {
   return (
     <div className="relative rounded-3xl p-4 border border-cookbook-primary/25 bg-cookbook-primary/[0.07]">
       <div className="flex items-center gap-3">
-        <div className="bg-cookbook-primary text-white p-2.5 rounded-2xl shrink-0">
+        <div className="bg-cookbook-primary text-cookbook-on-primary p-2.5 rounded-2xl shrink-0">
           <Download size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-serif text-lg text-cookbook-text leading-tight">Tenha o pote na tela inicial</p>
-          <p className="font-sans text-[11px] text-cookbook-text/60">Abre mais rápido, em tela cheia, como um app.</p>
+          <p className="font-sans text-[11px] text-cookbook-text/70">Abre mais rápido, em tela cheia, como um app.</p>
         </div>
-        <button onClick={install} className="shrink-0 text-[10px] bg-cookbook-primary text-white px-3.5 py-2 rounded-full font-bold uppercase tracking-wider">
+        <button onClick={install} className="shrink-0 text-[11px] bg-cookbook-primary text-cookbook-on-primary px-3.5 py-2 rounded-full font-bold uppercase tracking-wider">
           {ios ? "Como?" : "Instalar"}
         </button>
       </div>
       {showIosGuide && (
         <ol className="mt-3 space-y-2 font-sans text-xs text-cookbook-text/80">
           <li className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-white text-[10px] font-bold flex items-center justify-center">1</span>
+            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-cookbook-on-primary text-[11px] font-bold flex items-center justify-center">1</span>
             Toque em <Share size={14} className="inline text-cookbook-primary" /> <b>Compartilhar</b> na barra do Safari
           </li>
           <li className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-white text-[10px] font-bold flex items-center justify-center">2</span>
+            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-cookbook-on-primary text-[11px] font-bold flex items-center justify-center">2</span>
             Escolha <PlusSquare size={14} className="inline text-cookbook-primary" /> <b>Adicionar à Tela de Início</b>
           </li>
           <li className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-white text-[10px] font-bold flex items-center justify-center">3</span>
-            Toque em <b>Adicionar</b>. Pronto! 🍯
+            <span className="w-5 h-5 rounded-full bg-cookbook-primary text-cookbook-on-primary text-[11px] font-bold flex items-center justify-center">3</span>
+            Toque em <b>Adicionar</b>. Pronto!
           </li>
         </ol>
       )}
-      <button onClick={dismiss} className="absolute top-2 right-2 p-1 text-cookbook-text/30" aria-label="Dispensar">
+      <button onClick={dismiss} className="absolute top-2 right-2 p-1 text-cookbook-text/70" aria-label="Dispensar">
         <X size={14} />
       </button>
     </div>

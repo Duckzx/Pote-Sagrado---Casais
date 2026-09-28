@@ -30,7 +30,7 @@ export const ReminderButton: React.FC = () => {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-full border border-cookbook-border font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/60"
+        className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-full border border-cookbook-border font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70"
       >
         <CalendarPlus size={14} /> Lembrete semanal no calendário
       </button>
@@ -44,14 +44,14 @@ export const ReminderButton: React.FC = () => {
           <button
             key={d.id}
             onClick={() => setDay(d.id)}
-            className={`py-2 rounded-xl font-sans text-[10px] font-bold ${day === d.id ? "bg-cookbook-primary text-white" : "text-cookbook-text/60"}`}
+            className={`py-2 rounded-xl font-sans text-[11px] font-bold ${day === d.id ? "bg-cookbook-primary text-white" : "text-cookbook-text/70"}`}
           >
             {d.label}
           </button>
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <span className="font-sans text-xs text-cookbook-text/60">às</span>
+        <span className="font-sans text-xs text-cookbook-text/70">às</span>
         <select
           value={hour}
           onChange={(e) => setHour(Number(e.target.value))}
@@ -62,7 +62,7 @@ export const ReminderButton: React.FC = () => {
             <option key={h} value={h}>{`${String(h).padStart(2, "0")}:00`}</option>
           ))}
         </select>
-        <button onClick={add} className="px-4 py-2 rounded-xl bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest font-bold">
+        <button onClick={add} className="px-4 py-2 rounded-xl bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold">
           Adicionar
         </button>
       </div>

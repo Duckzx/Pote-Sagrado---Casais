@@ -18,24 +18,27 @@ export interface ModeCopy {
   othersLabel: string;
 }
 
-export const MODE_OPTIONS: { id: PoteMode; emoji: string; title: string; subtitle: string; gradient: string }[] = [
+export const MODE_OPTIONS: { id: PoteMode; emoji: 'tulip' | 'heart' | 'group'; tone: 'amber' | 'rose' | 'violet'; title: string; subtitle: string; gradient: string }[] = [
   {
     id: 'solo',
-    emoji: '🌷',
+    emoji: 'tulip',
+    tone: 'amber',
     title: 'Só eu',
     subtitle: 'Minhas metas, meu ritmo. Autocuidado com o dinheiro.',
     gradient: 'from-amber-200/70 via-rose-100/60 to-transparent',
   },
   {
     id: 'casal',
-    emoji: '💞',
+    emoji: 'heart',
+    tone: 'rose',
     title: 'Em casal',
     subtitle: 'Sonhos a dois, mêsversário, cartas e duelos.',
     gradient: 'from-rose-300/70 via-pink-100/60 to-transparent',
   },
   {
     id: 'grupo',
-    emoji: '🫶',
+    emoji: 'group',
+    tone: 'violet',
     title: 'Com amigos',
     subtitle: 'Viagem da turma, vaquinha, república ou família.',
     gradient: 'from-violet-300/70 via-fuchsia-100/60 to-transparent',

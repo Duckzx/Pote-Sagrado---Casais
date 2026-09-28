@@ -1,5 +1,6 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
+import { MotionConfig } from 'motion/react';
 import App from './App.tsx';
 import './index.css';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
@@ -24,7 +25,10 @@ registerSW({ immediate: true });
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <App />
+      {/* Honors the OS "reduce motion" setting for every motion/react animation */}
+      <MotionConfig reducedMotion="user">
+        <App />
+      </MotionConfig>
     </ErrorBoundary>
   </StrictMode>,
 );

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { IconBadge } from "./ui/app-icon";
 import { motion, AnimatePresence } from "motion/react";
 import { Check } from "lucide-react";
 import { doc, setDoc } from "firebase/firestore";
@@ -57,8 +58,8 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
     <div className="fixed inset-0 z-[240] bg-cookbook-bg/95 backdrop-blur-xl overflow-y-auto">
       <div className="min-h-full flex flex-col justify-center px-6 py-10 max-w-md mx-auto">
         <BlurFade delay={0.05}>
-          <p className="font-sans text-[10px] uppercase tracking-[0.3em] font-bold text-cookbook-primary text-center">
-            {needsModeChoice ? "Bem-vinda(o) ✨" : "Modo de uso"}
+          <p className="font-sans text-[11px] uppercase tracking-[0.3em] font-bold text-cookbook-primary text-center">
+            {needsModeChoice ? "Bem-vinda(o)" : "Modo de uso"}
           </p>
         </BlurFade>
         <BlurFade delay={0.12}>
@@ -67,7 +68,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
           </h2>
         </BlurFade>
         <BlurFade delay={0.18}>
-          <p className="font-sans text-sm text-cookbook-text/60 text-center mt-3">
+          <p className="font-sans text-sm text-cookbook-text/70 text-center mt-3">
             Dá para mudar depois em Ajustes.
           </p>
         </BlurFade>
@@ -90,10 +91,10 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${option.gradient} opacity-60 pointer-events-none`} />
                   <div className="relative flex items-center gap-4">
-                    <span className="text-4xl">{option.emoji}</span>
+                    <IconBadge name={option.emoji} tone={option.tone} badgeSize="lg" />
                     <div className="flex-1">
                       <p className="font-serif text-2xl text-cookbook-text leading-tight">{option.title}</p>
-                      <p className="font-sans text-xs text-cookbook-text/60 mt-1 leading-snug">{option.subtitle}</p>
+                      <p className="font-sans text-xs text-cookbook-text/70 mt-1 leading-snug">{option.subtitle}</p>
                     </div>
                     <div
                       className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors ${
@@ -119,14 +120,14 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
               className="overflow-hidden"
             >
               <label className="block mt-5">
-                <span className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/50">
+                <span className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">
                   Nome do grupo
                 </span>
                 <input
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   maxLength={40}
-                  placeholder="Ex: Viagem pra Bahia 🌴"
+                  placeholder="Ex: Viagem pra Bahia"
                   className="mt-2 w-full bg-cookbook-bg border border-cookbook-border rounded-2xl px-4 py-3 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary"
                 />
               </label>
@@ -147,7 +148,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
           {onClose && (
             <button
               onClick={onClose}
-              className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-text/40 py-2"
+              className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 py-2"
             >
               Cancelar
             </button>

@@ -8,3 +8,4 @@ coverage/
 !.env.example
 firestore-debug.log
 *-debug.log
+__pycache__/

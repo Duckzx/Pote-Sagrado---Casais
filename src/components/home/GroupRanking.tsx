@@ -1,4 +1,5 @@
 import React from "react";
+import { IconBadge } from "../ui/app-icon";
 import { motion } from "motion/react";
 import { Crown } from "lucide-react";
 import { BorderBeam } from "../magicui/border-beam";
@@ -10,7 +11,7 @@ interface RankEntry {
 }
 
 const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDAL_TONES = ["gold", "neutral", "amber"] as const;
 
 /** Monthly contribution ranking for group pots: podium + list. */
 export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) => {
@@ -29,7 +30,7 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
             <span className="font-serif text-3xl text-cookbook-text">{leader.name.charAt(0).toUpperCase()}</span>
           </div>
           <p className="font-serif text-2xl text-cookbook-text mt-2">{leader.name}</p>
-          <p className="font-sans text-[10px] uppercase tracking-widest font-bold text-cookbook-primary">
+          <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-primary">
             lidera com {brl(leader.total)}
           </p>
         </div>
@@ -38,14 +39,14 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
       <ol className="space-y-3">
         {ranking.map((r, i) => (
           <li key={`${r.name}-${i}`} className="flex items-center gap-3">
-            <span className="w-7 text-center text-lg">{MEDALS[i] || <span className="font-sans text-xs font-bold text-cookbook-text/40">{i + 1}º</span>}</span>
+            <span className="w-8 flex justify-center">{i < 3 ? <IconBadge name="medal" tone={MEDAL_TONES[i]} badgeSize="xs" weight="fill" /> : <span className="font-sans text-xs font-bold text-cookbook-text/70">{i + 1}º</span>}</span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-sans text-sm font-bold text-cookbook-text truncate">{r.name}</span>
                 <span data-money className="font-sans text-xs font-bold tabular-nums text-cookbook-text/70">{brl(r.total)}</span>
               </div>
               {ranking.length > 1 && groupTotal > 0 && (
-                <p data-money className={`font-sans text-[10px] mt-0.5 ${r.total >= fairShare ? "text-emerald-600" : "text-amber-700"}`}>
+                <p data-money className={`font-sans text-[11px] mt-0.5 ${r.total >= fairShare ? "text-emerald-600" : "text-amber-700"}`}>
                   {r.total >= fairShare
                     ? `+${brl(r.total - fairShare)} acima da parte justa`
                     : `faltam ${brl(fairShare - r.total)} para a parte justa`}
@@ -65,13 +66,13 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
       </ol>
 
       {ranking.length > 1 && groupTotal > 0 && (
-        <p data-money className="font-sans text-[11px] text-cookbook-text/50 text-center mt-5">
+        <p data-money className="font-sans text-[11px] text-cookbook-text/70 text-center mt-5">
           Total do mês: {brl(groupTotal)} · parte justa: {brl(fairShare)} por pessoa
         </p>
       )}
 
       {ranking.length === 0 && (
-        <p className="font-serif italic text-center text-cookbook-text/40 py-6">Convide a turma para começar o ranking</p>
+        <p className="font-serif italic text-center text-cookbook-text/70 py-6">Convide a turma para começar o ranking</p>
       )}
       <BorderBeam size={120} duration={8} colorFrom="var(--theme-gold)" colorTo="var(--theme-primary)" />
     </div>

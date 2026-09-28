@@ -6,6 +6,7 @@ import { useOptimisticLoveCards } from '../hooks/useOptimisticLoveCards';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAppStore } from '../store/useAppStore';
 import { LoveCardCategory } from '../types';
+import { AppIcon, IconBadge, type IconTone } from './ui/app-icon';
 import { ALL_LOVE_CARDS, CATEGORY_META, getCardsByLevel, getUnlockedCards } from '../data/loveCards';
 import { cn } from '../lib/utils';
 import { PremiumGate } from './PremiumGate';
@@ -33,17 +34,17 @@ const CategoryPills: React.FC<{
             whileTap={{ scale: 0.95 }}
             onClick={() => onChange(cat)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2.5 rounded-2xl border whitespace-nowrap transition-all duration-300 font-sans text-[10px] uppercase tracking-widest font-bold shrink-0',
+              'flex items-center gap-2 px-4 py-2.5 rounded-2xl border whitespace-nowrap transition-all duration-300 font-sans text-[11px] uppercase tracking-widest font-bold shrink-0',
               isActive
                 ? 'bg-cookbook-text text-cookbook-bg border-cookbook-text shadow-lg'
-                : 'bg-cookbook-bg/80 text-cookbook-text/60 border-cookbook-border hover:border-cookbook-text/20'
+                : 'bg-cookbook-bg/80 text-cookbook-text/70 border-cookbook-border hover:border-cookbook-text/20'
             )}
           >
-            <span className="text-base">{meta.emoji}</span>
+            <AppIcon name={meta.emoji} size={16} weight={isActive ? "fill" : "duotone"} />
             <span>{meta.label}</span>
             <span className={cn(
-              'text-[8px] px-1.5 py-0.5 rounded-full',
-              isActive ? 'bg-cookbook-bg/20 text-cookbook-bg' : 'bg-cookbook-text/5 text-cookbook-text/40'
+              'text-[11px] px-1.5 py-0.5 rounded-full',
+              isActive ? 'bg-cookbook-bg/20 text-cookbook-bg' : 'bg-cookbook-text/5 text-cookbook-text/70'
             )}>
               Nv.{progress[cat] || 1}
             </span>
@@ -65,10 +66,10 @@ const LevelProgress: React.FC<{
     <div className="flex items-center gap-3">
       <div className="flex-1">
         <div className="flex justify-between mb-1.5">
-          <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
             Nível {level}
           </span>
-          <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
             {done}/{total} cartas
           </span>
         </div>
@@ -100,10 +101,11 @@ const AnswerDrawer: React.FC<{
   cardTitle: string;
   cardDescription: string;
   cardEmoji: string;
+  cardTone: IconTone;
   onSubmit: (answer?: string) => void;
   onClose: () => void;
   needsText: boolean;
-}> = ({ isOpen, cardTitle, cardDescription, cardEmoji, onSubmit, onClose, needsText }) => {
+}> = ({ isOpen, cardTitle, cardDescription, cardEmoji, cardTone, onSubmit, onClose, needsText }) => {
   const [answer, setAnswer] = useState('');
 
   if (!isOpen) return null;
@@ -127,14 +129,14 @@ const AnswerDrawer: React.FC<{
       >
         <div className="w-10 h-1 bg-cookbook-border rounded-full mx-auto mb-6" />
 
-        <button onClick={onClose} className="absolute top-5 right-5 text-cookbook-text/30 hover:text-cookbook-text">
+        <button aria-label="Fechar" onClick={onClose} className="absolute top-5 right-5 text-cookbook-text/70 hover:text-cookbook-text">
           <X size={20} />
         </button>
 
         <div className="text-center mb-6">
-          <span className="text-4xl block mb-3">{cardEmoji}</span>
+          <IconBadge name={cardEmoji} tone={cardTone} badgeSize="lg" className="mx-auto mb-3" />
           <h3 className="font-serif text-xl text-cookbook-text mb-2">{cardTitle}</h3>
-          <p className="font-sans text-sm text-cookbook-text/60">{cardDescription}</p>
+          <p className="font-sans text-sm text-cookbook-text/70">{cardDescription}</p>
         </div>
 
         {needsText ? (
@@ -144,12 +146,12 @@ const AnswerDrawer: React.FC<{
               onChange={e => setAnswer(e.target.value)}
               placeholder="Escreva a sua resposta..."
               rows={3}
-              className="w-full bg-cookbook-text/5 border border-cookbook-border rounded-2xl p-4 font-sans text-sm text-cookbook-text placeholder:text-cookbook-text/30 focus:outline-none focus:border-cookbook-primary/50 resize-none"
+              className="w-full bg-cookbook-text/5 border border-cookbook-border rounded-2xl p-4 font-sans text-sm text-cookbook-text placeholder:text-cookbook-text/50 focus:outline-none focus:border-cookbook-primary/50 resize-none"
             />
             <button
               onClick={() => { onSubmit(answer); setAnswer(''); }}
               disabled={!answer.trim()}
-              className="w-full bg-cookbook-text text-cookbook-bg font-sans text-[10px] uppercase tracking-widest py-4 rounded-2xl font-bold disabled:opacity-30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full bg-cookbook-text text-cookbook-bg font-sans text-[11px] uppercase tracking-widest py-4 rounded-2xl font-bold disabled:opacity-30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Send size={14} /> Enviar Resposta
             </button>
@@ -157,7 +159,7 @@ const AnswerDrawer: React.FC<{
         ) : (
           <button
             onClick={() => onSubmit()}
-            className="w-full bg-cookbook-text text-cookbook-bg font-sans text-[10px] uppercase tracking-widest py-4 rounded-2xl font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full bg-cookbook-text text-cookbook-bg font-sans text-[11px] uppercase tracking-widest py-4 rounded-2xl font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Check size={14} /> Completar Desafio
           </button>
@@ -305,7 +307,7 @@ export const LoveCardsTab: React.FC = () => {
           <h2 className="font-serif text-2xl text-cookbook-text">Cartas do Amor</h2>
           <Heart size={20} className="text-cookbook-primary/80" fill="currentColor" />
         </div>
-        <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">
+        <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold">
           Inspirado nos Mapas do Amor de Gottman
         </p>
       </motion.div>
@@ -319,7 +321,7 @@ export const LoveCardsTab: React.FC = () => {
       >
         <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cookbook-gold/10 to-cookbook-mural/30 rounded-full border border-cookbook-gold/20">
           <Sparkles size={14} className="text-cookbook-gold" />
-          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-gold font-bold whitespace-nowrap">
+          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-gold font-bold whitespace-nowrap">
             {goldDust} Pó de Ouro
           </span>
         </div>
@@ -329,7 +331,7 @@ export const LoveCardsTab: React.FC = () => {
             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cookbook-text/5 border border-cookbook-border hover:bg-cookbook-text/10 transition-colors active:scale-95 text-cookbook-primary"
           >
             <Share2 size={12} />
-            <span className="font-sans text-[9px] uppercase tracking-widest font-bold whitespace-nowrap">Convidar</span>
+            <span className="font-sans text-[11px] uppercase tracking-widest font-bold whitespace-nowrap">Convidar</span>
           </button>
         </div>
       </motion.div>
@@ -405,10 +407,10 @@ export const LoveCardsTab: React.FC = () => {
 
                     {/* Status badges */}
                     <div className="flex justify-between items-start mb-6 relative z-10">
-                      <span className={cn('px-3 py-1 rounded-full font-sans text-[9px] uppercase tracking-widest font-bold border', meta.bgColor, meta.color, 'border-current/10')}>
-                        {meta.emoji} {meta.label}
+                      <span className={cn('px-3 py-1 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold border', meta.bgColor, meta.color, 'border-current/10')}>
+                        <AppIcon name={meta.emoji} size={14} weight="fill" /> {meta.label}
                       </span>
-                      <span className="px-2.5 py-1 bg-cookbook-text/5 rounded-full font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40 border border-cookbook-border/50">
+                      <span className="px-2.5 py-1 bg-cookbook-text/5 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 border border-cookbook-border/50">
                         Nv.{currentCard.level}
                       </span>
                     </div>
@@ -416,14 +418,14 @@ export const LoveCardsTab: React.FC = () => {
                     {/* Emoji */}
                     <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10">
                       <motion.span
-                        className="text-6xl block mb-6"
+                        className="block mb-6"
                         animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                       >
-                        {currentCard.emoji}
+                        <IconBadge name={CATEGORY_META[currentCard.category].emoji} tone={CATEGORY_META[currentCard.category].tone} badgeSize="xl" className="mx-auto" />
                       </motion.span>
                       <h3 className="font-serif text-xl text-cookbook-text mb-3">{currentCard.title}</h3>
-                      <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/30 font-bold">
+                      <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
                         Toque para virar ↻
                       </p>
                     </div>
@@ -431,12 +433,12 @@ export const LoveCardsTab: React.FC = () => {
                     {/* Interaction status */}
                     <div className="flex justify-center gap-2 mt-4 relative z-10">
                       {hasUserResponded(currentCard.id) && (
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full font-sans text-[9px] uppercase tracking-widest font-bold border border-emerald-500/20">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold border border-emerald-500/20">
                           <Check size={10} /> Você respondeu
                         </span>
                       )}
                       {isMatch(currentCard.id) && (
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-cookbook-gold/10 text-cookbook-gold rounded-full font-sans text-[9px] uppercase tracking-widest font-bold border border-cookbook-gold/20">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-cookbook-gold/10 text-cookbook-gold rounded-full font-sans text-[11px] uppercase tracking-widest font-bold border border-cookbook-gold/20">
                           <CheckCheck size={10} /> Match!
                         </span>
                       )}
@@ -450,7 +452,7 @@ export const LoveCardsTab: React.FC = () => {
                   >
                     <div className={cn('absolute top-0 left-0 w-full h-1.5 rounded-t-[2rem]', meta.bgColor.replace('/10', ''))} />
 
-                    <span className="text-3xl mb-4">{currentCard.emoji}</span>
+                    <IconBadge name={CATEGORY_META[currentCard.category].emoji} tone={CATEGORY_META[currentCard.category].tone} badgeSize="md" className="mb-4" />
                     <h3 className="font-serif text-lg text-cookbook-text mb-4">{currentCard.title}</h3>
                     <p className="font-sans text-sm text-cookbook-text/70 leading-relaxed mb-8 max-w-[280px]">
                       {currentCard.description}
@@ -459,7 +461,7 @@ export const LoveCardsTab: React.FC = () => {
                     {!hasUserResponded(currentCard.id) ? (
                       <button
                         onClick={e => { e.stopPropagation(); setDrawerCard(currentCard.id); setIsFlipped(false); }}
-                        className="bg-cookbook-text text-cookbook-bg font-sans text-[10px] uppercase tracking-widest px-8 py-3.5 rounded-2xl font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"
+                        className="bg-cookbook-text text-cookbook-bg font-sans text-[11px] uppercase tracking-widest px-8 py-3.5 rounded-2xl font-bold shadow-lg active:scale-95 transition-transform flex items-center gap-2"
                       >
                         <Send size={12} /> Responder
                       </button>
@@ -467,7 +469,7 @@ export const LoveCardsTab: React.FC = () => {
                       <div className="w-full space-y-4 overflow-y-auto max-h-[200px] pr-2 custom-scrollbar">
                         {/* Your response */}
                         <div className="bg-cookbook-text/5 rounded-2xl p-4 text-left border border-cookbook-border/50">
-                          <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-text/40 font-bold mb-1">Sua Resposta</p>
+                          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-1">Sua Resposta</p>
                           <p className="font-sans text-xs text-cookbook-text italic">
                             "{interactions[currentCard.id]?.find(i => i.partnerId === auth.currentUser?.uid)?.answer || 'Completado!'}"
                           </p>
@@ -480,14 +482,14 @@ export const LoveCardsTab: React.FC = () => {
                             animate={{ opacity: 1, x: 0 }}
                             className="bg-cookbook-primary/10 rounded-2xl p-4 text-left border border-cookbook-primary/20"
                           >
-                            <p className="font-sans text-[8px] uppercase tracking-widest text-cookbook-primary/60 font-bold mb-1">Resposta do Parceiro(a)</p>
+                            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary/60 font-bold mb-1">Resposta do Parceiro(a)</p>
                             <p className="font-sans text-xs text-cookbook-text font-medium">
                               "{interactions[currentCard.id]?.find(i => i.partnerId !== auth.currentUser?.uid)?.answer || 'Completado!'}"
                             </p>
                           </motion.div>
                         ) : (
                           <div className="bg-cookbook-text/5 rounded-2xl p-4 text-center border border-dashed border-cookbook-border/30 opacity-50">
-                            <p className="font-sans text-[10px] text-cookbook-text/40 italic">Aguardando resposta do parceiro para revelar...</p>
+                            <p className="font-sans text-[11px] text-cookbook-text/70 italic">Aguardando resposta do parceiro para revelar...</p>
                           </div>
                         )}
 
@@ -495,7 +497,7 @@ export const LoveCardsTab: React.FC = () => {
                           <div className="pt-2 flex justify-center">
                             <div className="flex items-center gap-2 px-4 py-2 bg-cookbook-gold/20 text-cookbook-gold rounded-full border border-cookbook-gold/20 animate-bounce">
                               <Sparkles size={12} />
-                              <span className="font-sans text-[9px] uppercase tracking-widest font-black">Match Perfeito!</span>
+                              <span className="font-sans text-[11px] uppercase tracking-widest font-black">Match Perfeito!</span>
                             </div>
                           </div>
                         )}
@@ -511,8 +513,8 @@ export const LoveCardsTab: React.FC = () => {
               animate={{ opacity: 1 }}
               className="bg-cookbook-bg/80 backdrop-blur-xl border-2 border-dashed border-cookbook-border rounded-[2rem] p-12 text-center min-h-[320px] flex flex-col items-center justify-center"
             >
-              <span className="text-4xl mb-4 opacity-30">{meta.emoji}</span>
-              <p className="font-serif italic text-cookbook-text/40 text-sm">Nenhuma carta neste nível.</p>
+              <IconBadge name={meta.emoji} tone={meta.tone} badgeSize="lg" className="mb-4 opacity-70" />
+              <p className="font-serif italic text-cookbook-text/70 text-sm">Nenhuma carta neste nível.</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -521,17 +523,17 @@ export const LoveCardsTab: React.FC = () => {
       {/* Navigation */}
       {cards.length > 1 && (
         <div className="flex items-center justify-center gap-6">
-          <button
+          <button aria-label="Carta anterior"
             onClick={handlePrev}
             disabled={currentIndex === 0}
             className="p-3 rounded-full bg-cookbook-bg border border-cookbook-border shadow-sm disabled:opacity-20 active:scale-90 transition-all hover:bg-cookbook-text/5"
           >
             <ChevronLeft size={18} className="text-cookbook-text" />
           </button>
-          <span className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold">
+          <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
             {currentIndex + 1} / {cards.length}
           </span>
-          <button
+          <button aria-label="Próxima carta"
             onClick={handleNext}
             disabled={currentIndex === cards.length - 1}
             className="p-3 rounded-full bg-cookbook-bg border border-cookbook-border shadow-sm disabled:opacity-20 active:scale-90 transition-all hover:bg-cookbook-text/5"
@@ -549,7 +551,7 @@ export const LoveCardsTab: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="space-y-3"
         >
-          <h3 className="font-sans text-[9px] uppercase tracking-[0.2em] text-cookbook-text/30 font-bold text-center flex items-center justify-center gap-2">
+          <h3 className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold text-center flex items-center justify-center gap-2">
             <Lock size={10} /> Próximos Níveis <Lock size={10} />
           </h3>
           <div className="grid grid-cols-2 gap-2">
@@ -561,11 +563,11 @@ export const LoveCardsTab: React.FC = () => {
                     lvl >= 4 && "bg-amber-500/5 border-amber-500/20"
                   )}
                 >
-                  <Lock size={10} className="text-cookbook-text/30" />
-                  <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-bold">
+                  <Lock size={10} className="text-cookbook-text/70" />
+                  <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
                     Nível {lvl}
                   </span>
-                  <span className="text-[10px] text-cookbook-text/50">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
+                  <span className="text-[11px] text-cookbook-text/70">{getCardsByLevel(activeCategory, lvl).length} cartas</span>
                 </div>
               );
               // Levels 2-3 unlock by playing; 4-5 are Premium
@@ -586,7 +588,8 @@ export const LoveCardsTab: React.FC = () => {
             isOpen={!!drawerCard}
             cardTitle={drawerCardData.title}
             cardDescription={drawerCardData.description}
-            cardEmoji={drawerCardData.emoji}
+            cardEmoji={CATEGORY_META[drawerCardData.category].emoji}
+            cardTone={CATEGORY_META[drawerCardData.category].tone}
             needsText={drawerCardData.category === 'truth_or_dare' || drawerCardData.category === 'mutual_knowledge'}
             onSubmit={handleRespond}
             onClose={() => setDrawerCard(null)}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { AppIcon } from "./ui/app-icon";
 import { createPortal } from "react-dom";
 import {
   Plane,
@@ -55,6 +56,7 @@ import { InviteNudge } from "./home/InviteNudge";
 import { InstallPrompt } from "./InstallPrompt";
 import { GoalTemplates } from "./home/GoalTemplates";
 import { MonthSummary } from "./home/MonthSummary";
+import { SavingHeatmap } from "./home/SavingHeatmap";
 import { GoalPlanCard } from "./home/GoalPlanCard";
 import { RecentActivity } from "./home/RecentActivity";
 import { useModeCopy } from "../lib/mode";
@@ -160,14 +162,14 @@ const MilestoneTracker = ({
         {" "}
         Conquista: {activeMilestone.label}{" "}
       </h4>{" "}
-      <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-4">
+      <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-4">
         {" "}
         Vocês merecem uma recompensa: {activeMilestone.reward}{" "}
       </p>{" "}
       <PremiumGate onOpenPremium={openPremiumModal}>
         <button
           onClick={onRewardClick}
-          className="bg-amber-500 text-white font-sans text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
+          className="bg-amber-500 text-white font-sans text-[11px] uppercase tracking-widest px-6 py-3.5 rounded-2xl font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all w-full flex items-center justify-center gap-2"
         >
           {" "}
           <Heart size={14} className="fill-white" /> Gerar "Mini Date"
@@ -199,7 +201,7 @@ const PremiumBanner = () => {
             <Crown size={14} fill="white" />
           </div>
           <div className="flex flex-col">
-            <span className="font-sans text-[9px] uppercase tracking-[0.2em] font-bold text-cookbook-text/40">
+            <span className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">
               Versão Gratuita
             </span>
             <span className="font-serif text-[13px] text-cookbook-text group-hover:text-amber-600 transition-colors">
@@ -207,7 +209,7 @@ const PremiumBanner = () => {
             </span>
           </div>
         </div>
-        <ChevronRight size={14} className="text-cookbook-text/20 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+        <ChevronRight size={14} className="text-cookbook-text/70 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
       </div>
     </motion.div>
   );
@@ -303,7 +305,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       if (quickImage) {
         depositData.imageUrl = quickImage;
       }
-      await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      const newRef = await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      useAppStore.getState().showUndo(
+        `${quickType === "income" ? "+" : "-"}${fmtBRL(parsedAmount)} · ${depositData.action}`,
+        newRef.path,
+      );
       /* Haptic and audio feedback */ vibrate([30, 50, 30]);
       if (quickType === "income") {
         playCoinSound();
@@ -473,13 +479,13 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       <PremiumBanner />
       <div className="text-center space-y-1 relative mb-8">
         {" "}
-        <h2 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/60 font-bold">
+        <h2 className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold">
           {" "}
           {copy.reserveTitle}{" "}
         </h2>{" "}
         {mode === "casal" && daysTogether !== null && daysTogether >= 0 && (
-          <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1">
-            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
+          <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1 inline-flex items-center gap-1.5">
+            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos <AppIcon name="heart" size={16} weight="fill" />
           </p>
         )}
         <button
@@ -496,7 +502,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           title="Compartilhar Status / PWA"
         >
           {" "}
-          <Share2 size={16} className="md:inline md:mr-2" /> <span className="hidden md:inline font-sans text-[10px] uppercase tracking-widest font-bold">Compartilhar</span>{" "}
+          <Share2 size={16} className="md:inline md:mr-2" /> <span className="hidden md:inline font-sans text-[11px] uppercase tracking-widest font-bold">Compartilhar</span>{" "}
         </button>{" "}
       </div>{" "}
 
@@ -535,7 +541,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {" "}
           <button
             onClick={handleBreakPotClick}
-            className="w-full bg-cookbook-gold text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_20px_rgba(197,160,89,0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98] font-bold flex items-center justify-center space-x-2 border-2 border-white/20"
+            className="w-full bg-cookbook-gold text-cookbook-on-gold font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_20px_rgba(197,160,89,0.4)] transition-transform hover:scale-[1.02] active:scale-[0.98] font-bold flex items-center justify-center space-x-2 border-2 border-white/20"
           >
             {" "}
             <Sparkles size={18} /> <span>Quebrar e Historiar Pote!</span>{" "}
@@ -580,7 +586,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {" "}
                 {mode === "solo" ? "Meu Momento Wrapped" : "Nosso Momento Wrapped"}{" "}
               </p>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-widest text-white/80 font-medium">
+              <p className="font-sans text-[11px] uppercase tracking-widest text-white/80 font-medium">
                 {" "}
                 {mode === "solo" ? "Meu resumo" : mode === "grupo" ? "Resumo do grupo" : "Resumo do casal"}{" "}
               </p>{" "}
@@ -597,6 +603,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       <QuickActions />
       <InstallPrompt />
       <MonthSummary />
+      <SavingHeatmap />
       <RecentActivity />
         </div>
       </div>{" "}
@@ -648,7 +655,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {" "}
               <button
                 onClick={() => setDepositToEdit(null)}
-                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
               >
                 {" "}
                 Cancelar{" "}
@@ -656,7 +663,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               <button
                 onClick={confirmEdit}
                 disabled={isEditing}
-                className="flex-1 bg-cookbook-primary text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50 shadow-md active:scale-95"
+                className="flex-1 bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-primary-hover transition-colors disabled:opacity-50 shadow-md active:scale-95"
               >
                 {" "}
                 {isEditing ? "Salvando..." : "Salvar"}{" "}
@@ -685,7 +692,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {" "}
               Remover Economia?{" "}
             </h3>{" "}
-            <p className="font-sans text-xs text-cookbook-text/60 mb-6">
+            <p className="font-sans text-xs text-cookbook-text/70 mb-6">
               {" "}
               Tem certeza que deseja excluir este valor do pote? Essa ação não
               pode ser desfeita.{" "}
@@ -694,14 +701,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
               {" "}
               <button
                 onClick={() => setDepositToDelete(null)}
-                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
+                className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-text font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-cookbook-border/30 transition-colors"
               >
                 {" "}
                 Cancelar{" "}
               </button>{" "}
               <button
                 onClick={confirmDelete}
-                className="flex-1 bg-red-500 text-white font-sans text-[10px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md active:scale-95"
+                className="flex-1 bg-red-500 text-white font-sans text-[11px] uppercase tracking-widest py-3 rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md active:scale-95"
               >
                 {" "}
                 Sim, Remover{" "}
@@ -736,14 +743,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {" "}
                 <button
                   onClick={() => setShowBreakConfirm(false)}
-                  className="flex-1 py-3 bg-white/10 hover:bg-cookbook-border/30/20 transition-colors text-white font-sans text-[10px] uppercase tracking-widest font-bold rounded-2xl"
+                  className="flex-1 py-3 bg-white/10 hover:bg-cookbook-border/30/20 transition-colors text-white font-sans text-[11px] uppercase tracking-widest font-bold rounded-2xl"
                 >
                   {" "}
                   Cancelar{" "}
                 </button>{" "}
                 <button
                   onClick={confirmBreakPot}
-                  className="flex-1 py-3 bg-cookbook-gold text-white font-sans text-[10px] uppercase tracking-widest font-bold rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-all w-full"
+                  className="flex-1 py-3 bg-cookbook-gold text-cookbook-on-gold font-sans text-[11px] uppercase tracking-widest font-bold rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition-all w-full"
                 >
                   {" "}
                   <Sparkles size={14} /> <span>Quebrar Pote!</span>{" "}
@@ -756,7 +763,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {/* ========== FAB Quick Deposit ========== */}{" "}
       <button
         onClick={() => setShowQuickDeposit(true)}
-        className={`fixed bottom-24 right-5 z-40 w-14 h-14 rounded-full bg-cookbook-primary text-white shadow-lg flex items-center justify-center transition-all hover:shadow-xl hover:scale-105 active:scale-95 ${showQuickDeposit ? "rotate-45 bg-cookbook-text" : ""}`}
+        className={`fixed bottom-24 right-5 z-40 w-14 h-14 rounded-full bg-cookbook-primary text-cookbook-on-primary shadow-lg flex items-center justify-center transition-all hover:shadow-xl hover:scale-105 active:scale-95 ${showQuickDeposit ? "rotate-45 bg-cookbook-text" : ""}`}
         aria-label="Depósito rápido"
       >
         {" "}
@@ -787,14 +794,14 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {" "}
                 <button
                   onClick={() => setQuickType("income")}
-                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
+                  className={`flex-1 py-3 rounded-2xl font-sans text-[11px] uppercase tracking-widest font-bold border transition-all ${quickType === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/70"}`}
                 >
                   {" "}
                   ↑ Entrada{" "}
                 </button>{" "}
                 <button
                   onClick={() => setQuickType("expense")}
-                  className={`flex-1 py-3 rounded-2xl font-sans text-[10px] uppercase tracking-widest font-bold border transition-all ${quickType === "expense" ? "bg-red-500 text-white border-red-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/50"}`}
+                  className={`flex-1 py-3 rounded-2xl font-sans text-[11px] uppercase tracking-widest font-bold border transition-all ${quickType === "expense" ? "bg-red-500 text-white border-red-500 shadow-sm" : "bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border text-cookbook-text/70"}`}
                 >
                   {" "}
                   ↓ Saída{" "}
@@ -839,19 +846,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {/* Quick descriptions */}
                 <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1">
                   {(quickType === "income"
-                    ? ["☕ Café evitado", "🛵 Delivery evitado", "💼 Salário", "🎁 Presente", "💸 Pix recebido", "🛍️ Vendi algo"]
-                    : ["🍔 Comida", "🛍️ Compras", "🚗 Transporte", "🎉 Rolê", "💊 Saúde", "🏠 Casa"]
-                  ).map((label) => (
+                    ? ([["coffee", "Café evitado"], ["delivery", "Delivery evitado"], ["briefcase", "Salário"], ["gift", "Presente"], ["lightning", "Pix recebido"], ["tag", "Vendi algo"]] as const)
+                    : ([["food", "Comida"], ["bag", "Compras"], ["car", "Transporte"], ["confetti", "Rolê"], ["pill", "Saúde"], ["house", "Casa"]] as const)
+                  ).map(([icon, label]) => (
                     <button
                       key={label}
                       type="button"
                       onClick={() => setQuickDesc(label)}
-                      className={`shrink-0 px-3 py-1.5 rounded-full border font-sans text-[11px] transition-colors ${
+                      className={`shrink-0 inline-flex items-center gap-1.5 pl-2 pr-3 py-2 rounded-full border font-sans text-xs font-medium transition-colors ${
                         quickDesc === label
                           ? "bg-cookbook-text text-cookbook-bg border-cookbook-text"
-                          : "border-cookbook-border text-cookbook-text/60 bg-cookbook-bg/80"
+                          : "border-cookbook-border text-cookbook-text/80 bg-cookbook-bg/80"
                       }`}
                     >
+                      <AppIcon name={icon} size={16} weight={quickDesc === label ? "fill" : "duotone"} />
                       {label}
                     </button>
                   ))}
@@ -890,9 +898,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                           {" "}
                           <Camera
                             size={20}
-                            className="text-cookbook-text/40 mb-1"
+                            className="text-cookbook-text/70 mb-1"
                           />{" "}
-                          <p className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/50">
+                          <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">
                             {" "}
                             Adicionar Foto (Opcional){" "}
                           </p>{" "}
@@ -916,7 +924,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                   isNaN(parseCurrencyString(quickAmount)) ||
                   parseCurrencyString(quickAmount) <= 0
                 }
-                className={`w-full text-white font-sans text-[10px] uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98] ${quickType === "expense" ? "bg-red-500 hover:bg-red-600" : "bg-cookbook-primary hover:bg-cookbook-primary-hover"}`}
+                className={`w-full text-white font-sans text-[11px] uppercase tracking-widest py-4 rounded-2xl font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.98] ${quickType === "expense" ? "bg-red-500 hover:bg-red-600" : "bg-cookbook-primary hover:bg-cookbook-primary-hover"}`}
               >
                 {" "}
                 {isQuickSubmitting

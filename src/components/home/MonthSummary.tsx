@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { AppIcon } from "../ui/app-icon";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { toDate } from "../../lib/progress";
@@ -59,7 +60,7 @@ export const MonthSummary: React.FC = () => {
 
   return (
     <section className="rounded-3xl p-5 border border-cookbook-border bg-cookbook-bg/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-      <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-text/50">
+      <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">
         Resumo de {monthName}
       </p>
       <div className="flex items-end justify-between gap-3 mt-2">
@@ -82,21 +83,21 @@ export const MonthSummary: React.FC = () => {
       <div className="grid grid-cols-3 gap-2 mt-4">
         <div className="rounded-2xl bg-cookbook-text/[0.04] p-3">
           <p className="font-serif text-xl text-cookbook-text leading-none">{current.count}</p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 mt-1">depósitos</p>
+          <p className="font-sans text-[11px] text-cookbook-text/70 mt-1">depósitos</p>
         </div>
         <div className="rounded-2xl bg-cookbook-text/[0.04] p-3 col-span-2 min-w-0">
           <p data-money className="font-serif text-xl text-cookbook-text leading-none">
             {current.biggest ? brl(current.biggest.amount) : "—"}
           </p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 mt-1 truncate">
+          <p className="font-sans text-[11px] text-cookbook-text/70 mt-1 truncate">
             maior: {current.biggest?.action || "ainda nada"}
           </p>
         </div>
       </div>
 
       {mode !== "solo" && topName && (
-        <p className="font-sans text-xs text-cookbook-text/60 mt-3">
-          🏆 <span className="font-bold text-cookbook-text">{topName}</span> é quem mais guardou este mês
+        <p className="font-sans text-xs text-cookbook-text/70 mt-3 flex items-center gap-1.5">
+          <AppIcon name="trophy" size={16} weight="fill" className="text-cookbook-gold shrink-0" /> <span className="font-bold text-cookbook-text">{topName}</span> é quem mais guardou este mês
         </p>
       )}
     </section>

@@ -37,7 +37,7 @@ export const QuickActions: React.FC = () => {
 
   return (
     <section>
-      <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50 mb-3 px-1">
+      <h3 className="font-sans tracking-[0.2em] uppercase text-[11px] font-bold text-cookbook-text/70 mb-3 px-1">
         Atalhos
       </h3>
       <div className="grid grid-cols-2 gap-3">
@@ -56,7 +56,7 @@ export const QuickActions: React.FC = () => {
                     <Icon size={16} />
                   </div>
                   <p className="font-serif text-lg text-cookbook-text leading-tight">{a.label}</p>
-                  <p className="font-sans text-[10px] text-cookbook-text/50 mt-0.5">{a.hint}</p>
+                  <p className="font-sans text-[11px] text-cookbook-text/70 mt-0.5">{a.hint}</p>
                 </div>
               </button>
             </BlurFade>

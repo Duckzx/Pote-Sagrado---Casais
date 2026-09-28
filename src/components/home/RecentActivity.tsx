@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { IconBadge, iconForAction, stripLeadingEmoji } from "../ui/app-icon";
 import { useAppStore } from "../../store/useAppStore";
 import { AnimatedList } from "../magicui/animated-list";
 
@@ -37,7 +38,7 @@ export const RecentActivity: React.FC = () => {
 
   return (
     <section>
-      <h3 className="font-sans tracking-[0.2em] uppercase text-[10px] font-bold text-cookbook-text/50 mb-3 px-1">
+      <h3 className="font-sans tracking-[0.2em] uppercase text-[11px] font-bold text-cookbook-text/70 mb-3 px-1">
         Atividade recente
       </h3>
       <AnimatedList delay={450} className="gap-2">
@@ -51,19 +52,13 @@ export const RecentActivity: React.FC = () => {
               key={d.id}
               className="w-full flex items-center gap-3 rounded-2xl p-3 bg-cookbook-bg/85 backdrop-blur-xl border border-cookbook-border shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
             >
-              <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 ${
-                  isExpense ? "bg-red-500/10" : "bg-emerald-500/10"
-                }`}
-              >
-                {isExpense ? "💸" : "🪙"}
-              </div>
+              <IconBadge name={iconForAction(d.action, d.type)} tone={isExpense ? "rose" : "emerald"} badgeSize="sm" />
               <div className="flex-1 min-w-0">
                 <p className="font-sans text-sm text-cookbook-text truncate">
                   <span className="font-bold">{mode === "solo" ? "" : `${name} · `}</span>
-                  {d.action || (isExpense ? "Gasto" : "Depósito")}
+                  {stripLeadingEmoji(d.action) || (isExpense ? "Gasto" : "Depósito")}
                 </p>
-                <p className="font-sans text-[10px] text-cookbook-text/40">{timeAgo(date)}</p>
+                <p className="font-sans text-[11px] text-cookbook-text/70">{timeAgo(date)}</p>
               </div>
               <span data-money className={`font-sans text-sm font-bold tabular-nums ${isExpense ? "text-red-500" : "text-emerald-600"}`}>
                 {isExpense ? "-" : "+"}

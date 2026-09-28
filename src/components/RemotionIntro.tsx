@@ -242,13 +242,13 @@ const RemotionIntro: React.FC<{ onComplete: () => void }> = ({ onComplete }) => 
            
            <button
              onClick={() => setIsDone(true)}
-             className="w-full bg-cookbook-gold text-white font-sans text-xs uppercase tracking-widest py-4 rounded-full font-bold shadow-lg active:scale-95 transition-transform text-center z-10"
+             className="w-full bg-cookbook-gold text-cookbook-on-gold font-sans text-xs uppercase tracking-widest py-4 rounded-full font-bold shadow-lg active:scale-95 transition-transform text-center z-10"
            >
              Começar a Usar
            </button>
            <button
              onClick={() => setIsDone(true)}
-             className="w-full text-white/50 hover:text-white font-sans text-[10px] uppercase tracking-widest py-2 active:scale-95 transition-all text-center z-10"
+             className="w-full text-white/70 hover:text-white font-sans text-[11px] uppercase tracking-widest py-2 active:scale-95 transition-all text-center z-10"
            >
              Pular Intro
            </button>

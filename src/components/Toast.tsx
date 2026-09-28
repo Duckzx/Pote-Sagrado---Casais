@@ -16,7 +16,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
   removeToast,
 }) => {
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 flex flex-col items-center space-y-2 pointer-events-none px-4">
+    <div role="status" aria-live="polite" className="fixed top-[max(1rem,env(safe-area-inset-top))] left-0 right-0 z-[250] flex flex-col items-center space-y-2 pointer-events-none px-4">
       {" "}
       <AnimatePresence>
         {" "}
@@ -41,14 +41,14 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
                 {" "}
                 {toast.title}{" "}
               </h4>{" "}
-              <p className="font-sans text-[10px] uppercase tracking-wider text-cookbook-text/60 font-bold mt-1">
+              <p className="font-sans text-[11px] uppercase tracking-wider text-cookbook-text/70 font-bold mt-1">
                 {" "}
                 {toast.message}{" "}
               </p>{" "}
             </div>{" "}
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-cookbook-text/40 hover:text-cookbook-text"
+              className="text-cookbook-text/70 hover:text-cookbook-text"
             >
               {" "}
               <X size={16} />{" "}

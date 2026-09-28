@@ -10,18 +10,19 @@ import { BlurFade } from "./magicui/blur-fade";
 import { ShimmerButton } from "./magicui/shimmer-button";
 import { Marquee } from "./magicui/marquee";
 import { SparklesText } from "./magicui/sparkles-text";
+import { AppIcon, type IconName } from "./ui/app-icon";
 
-const FEATURES = [
-  "🍯 Pote compartilhado",
-  "💞 Modo casal",
-  "🫶 Vaquinha com amigos",
-  "🌷 Metas só suas",
-  "💌 Cápsula do tempo",
-  "💐 Mêsversário",
-  "🥰 Humor do dia",
-  "🏆 Ranking da turma",
-  "✨ Missões de economia",
-  "📸 Álbum de memórias",
+const FEATURES: [IconName, string][] = [
+  ["piggy", "Pote compartilhado"],
+  ["heart", "Modo casal"],
+  ["group", "Vaquinha com amigos"],
+  ["tulip", "Metas só suas"],
+  ["envelope", "Cápsula do tempo"],
+  ["calendar", "Mêsversário"],
+  ["smile", "Humor do dia"],
+  ["trophy", "Ranking da turma"],
+  ["target", "Missões de economia"],
+  ["camera", "Álbum de memórias"],
 ];
 
 type Mode = "choose" | "login" | "signup" | "reset";
@@ -89,8 +90,8 @@ export const LoginScreen: React.FC = () => {
       <div className="relative z-10 w-full max-w-sm mx-auto text-center">
         {fromShare && (
           <BlurFade delay={0}>
-            <p className="inline-block mb-4 font-sans text-xs font-semibold text-cookbook-primary bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-full px-4 py-1.5">
-              💌 Viu o progresso de alguém? Crie o seu em 30 segundos
+            <p className="inline-block mb-4 font-sans text-xs font-semibold text-cookbook-primary bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-full px-4 py-1.5 inline-flex items-center gap-1.5">
+              <AppIcon name="envelope" size={16} /> Viu o progresso de alguém? Crie o seu em 30 segundos
             </p>
           </BlurFade>
         )}
@@ -111,7 +112,7 @@ export const LoginScreen: React.FC = () => {
           </h1>
         </BlurFade>
         <BlurFade delay={0.2}>
-          <p className="font-sans text-sm text-cookbook-text/60 mt-4 leading-relaxed">
+          <p className="font-sans text-sm text-cookbook-text/70 mt-4 leading-relaxed">
             Guarde dinheiro para os seus sonhos — sozinha(o), em casal ou com a turma.
           </p>
         </BlurFade>
@@ -119,12 +120,13 @@ export const LoginScreen: React.FC = () => {
 
       <BlurFade delay={0.28} className="relative z-10 w-screen mt-6">
         <Marquee pauseOnHover className="[--duration:35s] [--gap:0.5rem]" repeat={3}>
-          {FEATURES.map((f) => (
+          {FEATURES.map(([icon, label]) => (
             <span
-              key={f}
-              className="shrink-0 font-sans text-xs font-semibold text-cookbook-text/70 bg-cookbook-bg/80 backdrop-blur border border-cookbook-border rounded-full px-3 py-1.5"
+              key={label}
+              className="shrink-0 inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-cookbook-text/80 bg-cookbook-bg/80 backdrop-blur border border-cookbook-border rounded-full pl-2 pr-3 py-1.5"
             >
-              {f}
+              <AppIcon name={icon} size={16} className="text-cookbook-primary" />
+              {label}
             </span>
           ))}
         </Marquee>
@@ -161,7 +163,7 @@ export const LoginScreen: React.FC = () => {
                 <Mail size={15} /> Criar conta com e-mail
               </button>
 
-              <p className="font-sans text-xs text-cookbook-text/60 pt-1">
+              <p className="font-sans text-xs text-cookbook-text/70 pt-1">
                 Já tem conta com e-mail?{" "}
                 <button onClick={() => { setMode("login"); setError(null); }} className="font-bold text-cookbook-primary underline underline-offset-2">
                   Entrar
@@ -194,14 +196,17 @@ export const LoginScreen: React.FC = () => {
               className="bg-cookbook-bg/85 backdrop-blur-xl border border-cookbook-border rounded-3xl p-5 space-y-3 text-left shadow-[0_20px_50px_rgba(0,0,0,0.08)]"
             >
               <div className="flex items-center gap-2 mb-1">
-                <button type="button" onClick={() => { setMode("choose"); setError(null); }} className="p-1 -ml-1 text-cookbook-text/50" aria-label="Voltar">
+                <button type="button" onClick={() => { setMode("choose"); setError(null); }} className="w-11 h-11 -ml-3 flex items-center justify-center rounded-full text-cookbook-text/70" aria-label="Voltar">
                   <ArrowLeft size={18} />
                 </button>
                 <h2 className="font-serif text-2xl text-cookbook-text">{title}</h2>
               </div>
 
               {mode === "signup" && (
+                <div>
+                <label htmlFor="login-name" className="block font-sans text-xs font-semibold text-cookbook-text/80 mb-1.5 ml-1">Nome</label>
                 <input
+                  id="login-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Como quer ser chamada(o)?"
@@ -210,8 +215,12 @@ export const LoginScreen: React.FC = () => {
                   maxLength={60}
                   className="w-full bg-cookbook-bg border border-cookbook-border rounded-2xl px-4 py-3.5 font-sans text-base text-cookbook-text focus:outline-none focus:border-cookbook-primary"
                 />
+                </div>
               )}
+              <div>
+              <label htmlFor="login-email" className="block font-sans text-xs font-semibold text-cookbook-text/80 mb-1.5 ml-1">E-mail</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -219,11 +228,17 @@ export const LoginScreen: React.FC = () => {
                 autoComplete="email"
                 inputMode="email"
                 required
+                aria-invalid={!!error || undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 className="w-full bg-cookbook-bg border border-cookbook-border rounded-2xl px-4 py-3.5 font-sans text-base text-cookbook-text focus:outline-none focus:border-cookbook-primary"
               />
+              </div>
               {mode !== "reset" && (
+                <div>
+                <label htmlFor="login-password" className="block font-sans text-xs font-semibold text-cookbook-text/80 mb-1.5 ml-1">Senha</label>
                 <div className="relative">
                   <input
+                    id="login-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -236,26 +251,27 @@ export const LoginScreen: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-cookbook-text/40"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-xl text-cookbook-text/70"
                     aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                </div>
               )}
 
-              {error && <p className="font-sans text-xs text-red-500 font-medium">{error}</p>}
+              {error && <p id="login-error" role="alert" className="font-sans text-sm text-red-600 font-medium">{error}</p>}
 
               <ShimmerButton
                 type="submit"
                 disabled={isBusy}
                 background="var(--theme-primary)"
-                className="w-full py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold disabled:opacity-50"
+                className="text-cookbook-on-primary w-full py-4 font-sans text-xs uppercase tracking-[0.15em] font-bold disabled:opacity-50"
               >
                 {isBusy ? "Aguarde..." : mode === "signup" ? "Criar minha conta" : mode === "reset" ? "Enviar link" : "Entrar"}
               </ShimmerButton>
 
-              <div className="flex justify-between font-sans text-xs text-cookbook-text/60 pt-1">
+              <div className="flex justify-between font-sans text-xs text-cookbook-text/70 pt-1">
                 {mode === "login" ? (
                   <>
                     <button type="button" onClick={() => { setMode("reset"); setError(null); }} className="underline underline-offset-2">
@@ -279,7 +295,7 @@ export const LoginScreen: React.FC = () => {
           <p className="font-sans text-xs text-red-500 font-medium text-center mt-3">{error}</p>
         )}
 
-        <p className="font-sans text-[10px] text-cookbook-text/40 text-center mt-6 leading-relaxed">
+        <p className="font-sans text-[11px] text-cookbook-text/70 text-center mt-6 leading-relaxed">
           Ao continuar você concorda com os{" "}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent("open-legal", { detail: "termos" }))}

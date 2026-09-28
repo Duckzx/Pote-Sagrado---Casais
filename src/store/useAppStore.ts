@@ -85,6 +85,11 @@ interface AppState {
   needsModeChoice: boolean;
   setModeInfo: (info: { mode: PoteMode; groupName: string; needsModeChoice: boolean }) => void;
 
+  // "Desfazer" snackbar after creating a deposit
+  undo: { label: string; path: string; id: number } | null;
+  showUndo: (label: string, path: string) => void;
+  clearUndo: () => void;
+
   // Modo discreto (hide money values)
   hideValues: boolean;
   toggleHideValues: () => void;
@@ -211,6 +216,10 @@ export const useAppStore = create<AppState>((set) => ({
   groupName: '',
   needsModeChoice: false,
   setModeInfo: (info) => set(info),
+
+  undo: null,
+  showUndo: (label, path) => set({ undo: { label, path, id: Date.now() } }),
+  clearUndo: () => set({ undo: null }),
 
   hideValues: (() => {
     try { return localStorage.getItem('pote_hideValues') === 'true'; } catch { return false; }

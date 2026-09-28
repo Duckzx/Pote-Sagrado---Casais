@@ -10,6 +10,7 @@ import { useAppStore } from "./store/useAppStore";
 import { ModePicker } from "./components/ModePicker";
 import { LoginScreen } from "./components/LoginScreen";
 import { SyncIssueBanner } from "./components/Diagnostics";
+import { UndoSnackbar } from "./components/UndoSnackbar";
 import { MODE_TABS } from "./lib/mode";
 
 // ========================================
@@ -88,7 +89,7 @@ class ErrorBoundary extends React.Component<
           <p className="font-sans text-sm text-cookbook-text/80 font-bold mb-2">
             Error:
           </p>
-          <p className="font-mono text-xs text-cookbook-text/60 mb-4 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-32 w-full">
+          <p className="font-mono text-xs text-cookbook-text/70 mb-4 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-32 w-full">
             {message}
           </p>
           {stack && (
@@ -96,14 +97,14 @@ class ErrorBoundary extends React.Component<
               <p className="font-sans text-sm text-cookbook-text/80 font-bold mb-2">
                 Stack:
               </p>
-              <pre className="font-mono text-[10px] text-cookbook-text/50 mb-8 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-64 w-full">
+              <pre className="font-mono text-[11px] text-cookbook-text/70 mb-8 break-all bg-black/5 p-4 rounded text-left overflow-auto max-h-64 w-full">
                 {stack}
               </pre>
             </>
           )}
           <button
             onClick={() => window.location.reload()}
-            className="bg-cookbook-primary text-white px-6 py-3 rounded font-bold text-xs uppercase tracking-widest"
+            className="bg-cookbook-primary text-cookbook-on-primary px-6 py-3 rounded font-bold text-xs uppercase tracking-widest"
           >
             Recarregar App
           </button>
@@ -275,7 +276,7 @@ function AppContent() {
           </ul>
           <p>Para dúvidas e solicitações de dados, entre em contato via <a href="mailto:suporte@potesagrado.com" className="text-cookbook-primary underline">suporte@potesagrado.com</a></p>
         </div>
-        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-white rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
+        <button onClick={() => window.location.assign("/")} className="mt-8 px-6 py-2 bg-cookbook-primary text-cookbook-on-primary rounded-full font-bold uppercase tracking-widest text-xs">Voltar ao App</button>
       </div>
     );
   }
@@ -387,6 +388,7 @@ function AppContent() {
       )}
       
       <SyncIssueBanner />
+      <UndoSnackbar />
 
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />
@@ -408,7 +410,7 @@ function AppContent() {
                 onClick={() => {
                    window.dispatchEvent(new CustomEvent('open-legal', { detail: 'termos' }));
                 }}
-                className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/50 hover:text-cookbook-primary font-bold transition-colors w-full sm:w-auto py-2"
+                className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 hover:text-cookbook-primary font-bold transition-colors w-full sm:w-auto py-2"
               >
                  Ler Termos
               </button>
@@ -418,7 +420,7 @@ function AppContent() {
                    // re-render trick or just let react handle it via state
                    window.location.reload();
                  }}
-                 className="bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-3 px-6 rounded-full font-bold hover:bg-cookbook-primary-hover active:scale-[0.98] transition-all shadow-md w-full sm:w-auto"
+                 className="bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest py-3 px-6 rounded-full font-bold hover:bg-cookbook-primary-hover active:scale-[0.98] transition-all shadow-md w-full sm:w-auto"
               >
                  Ciente e Aceito
               </button>

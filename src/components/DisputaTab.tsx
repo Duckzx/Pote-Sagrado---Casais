@@ -1,3 +1,4 @@
+import { IconBadge } from "./ui/app-icon";
 import React, { useMemo, useRef, useState } from "react";
 import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
@@ -245,7 +246,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
             <h2 className="font-serif text-2xl text-cookbook-text">{mode === "grupo" ? "Ranking da Turma" : "A Grande Batalha"}</h2>
             <Swords size={20} className="text-cookbook-primary/80" />
           </div>
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/50 font-bold">{mode === "grupo" ? "Quem mais contribuiu no mês?" : "Quem domina o mês?"}</p>
+          <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold">{mode === "grupo" ? "Quem mais contribuiu no mês?" : "Quem domina o mês?"}</p>
         </motion.div>
       </div>
       
@@ -280,7 +281,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                  {users[0].name.charAt(0)}
                </div>
             </div>
-            <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
+            <span className={`font-sans text-[11px] uppercase tracking-widest font-bold ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
               {users[0].name}
             </span>
             <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[0].total > users[1].total ? "text-cookbook-primary" : "text-cookbook-text"}`}>
@@ -290,7 +291,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           
           <div className="flex flex-col items-center justify-center px-2">
              <div className="w-8 h-8 rounded-full bg-cookbook-bg border border-cookbook-border flex items-center justify-center shadow-inner relative z-20 -mt-10">
-                <span className="font-sans text-[9px] uppercase tracking-widest font-bold text-cookbook-text/40">vs</span>
+                <span className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">vs</span>
              </div>
           </div>
           
@@ -311,7 +312,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                  {users[1].name.charAt(0)}
                </div>
             </div>
-            <span className={`font-sans text-[10px] uppercase tracking-widest font-bold ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
+            <span className={`font-sans text-[11px] uppercase tracking-widest font-bold ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
               {users[1].name}
             </span>
             <span className={`font-serif text-xl sm:text-2xl leading-none mt-1 ${users[1].total > users[0].total ? "text-emerald-500" : "text-cookbook-text"}`}>
@@ -348,10 +349,10 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </div>
           
           <div className="flex justify-between mt-3 px-1">
-            <span className="font-sans text-[10px] text-cookbook-primary font-bold tracking-wider">
+            <span className="font-sans text-[11px] text-cookbook-primary font-bold tracking-wider">
               {p1Percentage.toFixed(1)}%
             </span>
-            <span className="font-sans text-[10px] text-emerald-500 font-bold tracking-wider">
+            <span className="font-sans text-[11px] text-emerald-500 font-bold tracking-wider">
               {p2Percentage.toFixed(1)}%
             </span>
           </div>
@@ -361,7 +362,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       {/* Prize */}{" "}
       <div className="bg-gradient-to-br from-cookbook-gold/10 to-cookbook-mural/30 border border-cookbook-gold/20 rounded-3xl p-5 text-center shadow-sm">
         {" "}
-        <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-gold font-bold">
+        <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-gold font-bold">
           {" "}
           ◈ Recompensa do Mês{" "}
         </span>{" "}
@@ -397,7 +398,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold mb-1">
             {users[0].name} está dominando!
           </p>
-          <p className="font-sans text-[10px] text-cookbook-text/50 leading-relaxed mb-5 px-4">
+          <p className="font-sans text-[11px] text-cookbook-text/70 leading-relaxed mb-5 px-4">
             {users[0].total - users[1].total > 100 
               ? `Que surra! Se o mês acabasse hoje, ${users[1].name} pagaria a recompensa fácil.`
               : `Disputa acirrada! Mas se o mês acabasse hoje, ${users[1].name} pagaria a recompensa.`}
@@ -410,7 +411,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                 if (window.navigator?.vibrate) window.navigator.vibrate([200, 100, 200]);
                 addToast("Mentalizado!", `Você enviou ondas neurais de provocação para o adversário!`, "success");
               }}
-              className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 hover:border-cookbook-primary/30 transition-all font-sans text-[10px] uppercase tracking-widest py-3 rounded-full font-bold shadow-sm active:scale-95 text-center flex items-center justify-center gap-2 group"
+              className="flex-1 bg-cookbook-bg border border-cookbook-border text-cookbook-primary hover:bg-cookbook-primary/10 hover:border-cookbook-primary/30 transition-all font-sans text-[11px] uppercase tracking-widest py-3 rounded-full font-bold shadow-sm active:scale-95 text-center flex items-center justify-center gap-2 group"
             >
               <Sparkles size={14} className="text-cookbook-primary/50 group-hover:text-cookbook-primary transition-colors" />
               Provocar
@@ -426,7 +427,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           </div>
           
           <div className="mt-5 pt-4 border-t border-cookbook-border/30">
-            <span className="font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
+            <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
               Vantagem Atual:{" "}
               <span className="text-cookbook-primary font-bold">
                 {Intl.NumberFormat("pt-BR", {
@@ -446,13 +447,13 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
         transition={{ delay: 0.3 }}
         className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
       >
-        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center">
+        <h3 className="font-sans text-[11px] uppercase tracking-[0.15em] text-cookbook-text/70 font-medium text-center">
           Desempenho Semanal
         </h3>
         <div className="space-y-4">
           {weeklyData.map((week, i) => (
             <div key={i} className="space-y-2">
-              <div className="flex justify-between font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 font-medium">
+              <div className="flex justify-between font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-medium">
                 <span>{week.label}</span>
                 <span className="flex gap-4">
                   <span className="text-cookbook-primary">
@@ -491,7 +492,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
          transition={{ delay: 0.4 }}
          className="bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
       >
-        <h3 className="font-sans text-[10px] uppercase tracking-[0.15em] text-cookbook-text/40 font-medium text-center mb-5">
+        <h3 className="font-sans text-[11px] uppercase tracking-[0.15em] text-cookbook-text/70 font-medium text-center mb-5">
           Estatísticas Avançadas
         </h3>
         
@@ -503,23 +504,23 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                 <Zap size={14} />
               </div>
               <div>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Golpe Crítico</p>
+                <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">Golpe Crítico</p>
                 <p className="font-serif text-xs text-cookbook-text">Maior depósito único</p>
               </div>
             </div>
             <div className="text-right">
               {users[0].maxHit >= users[1].maxHit && users[0].maxHit > 0 ? (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].maxHit)}</p>
                 </>
               ) : users[1].maxHit > 0 ? (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
                   <p className="font-serif text-sm text-emerald-500">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].maxHit)}</p>
                 </>
               ) : (
-                <span className="font-serif text-xs text-cookbook-text/40">--</span>
+                <span className="font-serif text-xs text-cookbook-text/70">--</span>
               )}
             </div>
           </motion.div>
@@ -531,23 +532,23 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                 <Target size={14} />
               </div>
               <div>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Ataque Rápido</p>
+                <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">Ataque Rápido</p>
                 <p className="font-serif text-xs text-cookbook-text">Mais depósitos feitos</p>
               </div>
             </div>
             <div className="text-right">
               {users[0].count >= users[1].count && users[0].count > 0 ? (
                  <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">{users[0].count}x</p>
                  </>
               ) : users[1].count > 0 ? (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
                   <p className="font-serif text-sm text-emerald-500">{users[1].count}x</p>
                  </>
               ) : (
-                 <span className="font-serif text-xs text-cookbook-text/40">--</span>
+                 <span className="font-serif text-xs text-cookbook-text/70">--</span>
               )}
             </div>
           </motion.div>
@@ -559,19 +560,19 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                 <Shield size={14} />
               </div>
               <div>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/50 font-bold mb-0.5">Escudo Forte</p>
+                <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-0.5">Escudo Forte</p>
                 <p className="font-serif text-xs text-cookbook-text">Menos gastos no mês</p>
               </div>
             </div>
             <div className="text-right">
               {users[0].expenses <= users[1].expenses ? (
                  <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-primary font-bold mb-0.5">{users[0].name}</p>
                   <p className="font-serif text-sm text-cookbook-primary">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[0].expenses)}</p>
                  </>
               ) : (
                 <>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
+                  <p className="font-sans text-[11px] uppercase tracking-widest text-emerald-500 font-bold mb-0.5">{users[1].name}</p>
                   <p className="font-serif text-sm text-emerald-500">- {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(users[1].expenses)}</p>
                  </>
               )}
@@ -588,8 +589,8 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
           transition={{ delay: 0.5 }}
           className="space-y-4"
         >
-          <h3 className="font-sans text-[10px] uppercase tracking-[0.2em] text-cookbook-text/40 font-bold mb-6 flex items-center justify-center gap-2">
-            <Trophy size={12} className="text-cookbook-text/30" /> Histórico de Batalhas <Trophy size={12} className="text-cookbook-text/30" />
+          <h3 className="font-sans text-[11px] uppercase tracking-[0.2em] text-cookbook-text/70 font-bold mb-6 flex items-center justify-center gap-2">
+            <Trophy size={12} className="text-cookbook-text/70" /> Histórico de Batalhas <Trophy size={12} className="text-cookbook-text/70" />
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {pastStats.map((stat, idx) => (
@@ -602,7 +603,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                  {stat.winner && <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-cookbook-gold/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>}
                  
                  <div className="text-center relative z-10 mb-3">
-                   <div className="inline-block px-3 py-1 bg-cookbook-text/5 rounded-full font-sans text-[9px] uppercase tracking-widest text-cookbook-text/60 font-bold mb-2">
+                   <div className="inline-block px-3 py-1 bg-cookbook-text/5 rounded-full font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mb-2">
                      {stat.label}
                    </div>
                  </div>
@@ -612,11 +613,11 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                       <div className="w-12 h-12 bg-gradient-to-br from-cookbook-gold/20 to-cookbook-gold/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-gold/30 shadow-inner">
                         <Trophy size={20} className="text-cookbook-gold drop-shadow-sm" />
                       </div>
-                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold mb-1 text-center truncate w-full">
+                      <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text font-bold mb-1 text-center truncate w-full">
                         {stat.winner.name} 
                       </div>
                       <div className="font-serif text-sm text-cookbook-text/80 tracking-tight">
-                         {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/30 text-[9px] font-sans">dif</span>
+                         {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL'}).format(Math.abs(stat.u1.total - stat.u2.total))} <span className="text-cookbook-text/70 text-[11px] font-sans">dif</span>
                       </div>
                    </div>
                  ) : (
@@ -624,7 +625,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
                       <div className="w-12 h-12 bg-cookbook-text/5 rounded-full flex items-center justify-center mb-2 border border-cookbook-text/10">
                         <span className="font-serif italic text-sm">--</span>
                       </div>
-                      <div className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text font-bold">
+                      <div className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text font-bold">
                         Empate
                       </div>
                    </div>
@@ -639,15 +640,12 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       {users[0].total === 0 && users[1].total === 0 && (
         <div className="text-center py-8 px-4 bg-cookbook-bg/90 backdrop-blur-md border-2 border-dashed border-cookbook-border rounded-3xl shadow-sm">
           {" "}
-          <span className="text-4xl block mb-3 opacity-50 text-cookbook-primary grayscale">
-            {" "}
-            ⚔️{" "}
-          </span>{" "}
-          <p className="font-serif italic text-cookbook-text/60 text-sm mb-1">
+          <IconBadge name="sword" tone="amber" badgeSize="lg" className="mx-auto mb-3" />
+          <p className="font-serif italic text-cookbook-text/70 text-sm mb-1">
             {" "}
             A batalha ainda não começou!{" "}
           </p>{" "}
-          <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/40 font-bold mt-2">
+          <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold mt-2">
             {" "}
             Complete a primeira economia do mês.{" "}
           </p>{" "}

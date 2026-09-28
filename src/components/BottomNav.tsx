@@ -62,7 +62,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       aria-label="Navegação principal"
       className="fixed left-0 right-0 z-50 flex justify-center w-full px-3 pointer-events-none bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:top-0 md:bottom-0 md:w-24 md:h-[100dvh] md:px-0 md:flex-col md:justify-center md:items-center"
     >
-      <div className="bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/55 rounded-[28px] h-[68px] flex items-center justify-around w-full max-w-[400px] px-1 shadow-[0_20px_40px_rgba(0,0,0,0.12)] border border-cookbook-border/60 pointer-events-auto md:h-full md:max-w-none md:flex-col md:justify-center md:gap-3 md:rounded-none md:border-r md:border-y-0 md:border-l-0 md:shadow-none md:py-8">
+      <div className="bg-cookbook-bg/85 backdrop-blur-xl text-cookbook-text/70 rounded-[28px] h-[68px] flex items-center justify-around w-full max-w-[400px] px-1 shadow-[0_20px_40px_rgba(0,0,0,0.12)] border border-cookbook-border/60 pointer-events-auto md:h-full md:max-w-none md:flex-col md:justify-center md:gap-3 md:rounded-none md:border-r md:border-y-0 md:border-l-0 md:shadow-none md:py-8">
         {displayTabs.map((tab) => {
           if (tab === "home") {
             const isHome = activeTab === "home";
@@ -80,7 +80,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                   <SacredPotIcon
                     size={24}
                     strokeWidth={isHome ? 2.5 : 2}
-                    className={cn("transition-colors", isHome ? "text-cookbook-gold" : "text-white")}
+                    className={cn("transition-colors", isHome ? "text-cookbook-gold" : "text-cookbook-on-primary")}
                   />
                 </button>
               </div>
@@ -107,7 +107,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 />
               )}
               <Icon size={20} strokeWidth={isActive ? 2.4 : 1.9} className="relative z-10" />
-              <span className={cn("relative z-10 font-sans text-[10px] leading-none", isActive ? "font-bold" : "font-medium")}>
+              <span className={cn("relative z-10 font-sans text-[11px] leading-none", isActive ? "font-bold" : "font-medium")}>
                 {tab.label}
               </span>
               {tab.id === "lovecards" && hasUnreadNotifications && (

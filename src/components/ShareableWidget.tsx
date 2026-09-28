@@ -172,7 +172,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="font-sans text-[10px] uppercase tracking-[0.25em] font-bold text-white/50">Compartilhar</p>
+            <p className="font-sans text-[11px] uppercase tracking-[0.25em] font-bold text-white/70">Compartilhar</p>
             <h3 className="font-serif text-2xl leading-tight">{celebration || "Mostre sua conquista ✨"}</h3>
           </div>
           <button onClick={onClose} className="p-2 rounded-full bg-white/10" aria-label="Fechar">
@@ -186,7 +186,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
             <button
               key={f}
               onClick={() => setFormat(f)}
-              className={`flex-1 py-2 rounded-full font-sans text-[10px] uppercase tracking-widest font-bold transition-colors ${
+              className={`flex-1 py-2 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold transition-colors ${
                 format === f ? "bg-white text-[#1B0F14]" : "text-white/60"
               }`}
             >
@@ -200,7 +200,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
           {previewUrl && !failed ? (
             <img src={previewUrl} alt="Prévia da imagem para compartilhar" className="w-full h-full object-cover" />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white/50">
+            <div className="absolute inset-0 flex items-center justify-center text-white/70">
               {failed ? <span className="font-sans text-xs px-4 text-center">Não foi possível gerar a imagem.</span> : <Loader2 className="animate-spin" />}
             </div>
           )}
@@ -210,7 +210,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
           onClick={shareNative}
           disabled={!blob}
           background="var(--theme-primary)"
-          className="w-full mt-5 py-4 gap-2 font-sans text-xs uppercase tracking-[0.2em] font-bold disabled:opacity-50"
+          className="text-cookbook-on-primary w-full mt-5 py-4 gap-2 font-sans text-xs uppercase tracking-[0.2em] font-bold disabled:opacity-50"
         >
           <Share2 size={16} /> Compartilhar imagem
         </ShimmerButton>
@@ -218,20 +218,20 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
         <div className="grid grid-cols-3 gap-2 mt-3">
           <button onClick={download} disabled={!blob} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white/10 active:scale-95 disabled:opacity-40">
             <Download size={18} />
-            <span className="font-sans text-[10px] font-bold">Salvar</span>
+            <span className="font-sans text-[11px] font-bold">Salvar</span>
           </button>
           <button onClick={shareWhatsApp} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-[#25D366]/20 text-[#7CF0A8] active:scale-95">
             <WhatsappIcon />
-            <span className="font-sans text-[10px] font-bold">WhatsApp</span>
+            <span className="font-sans text-[11px] font-bold">WhatsApp</span>
           </button>
           <button onClick={copyLink} className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-white/10 active:scale-95">
             <Link2 size={18} />
-            <span className="font-sans text-[10px] font-bold">Copiar texto</span>
+            <span className="font-sans text-[11px] font-bold">Copiar texto</span>
           </button>
         </div>
 
-        <p className="font-sans text-[10px] text-white/40 text-center mt-4 leading-relaxed">
-          Dica: poste nos Stories e marque quem está juntando com você 💞
+        <p className="font-sans text-[11px] text-white/70 text-center mt-4 leading-relaxed">
+          Dica: poste nos Stories e marque quem está juntando com você
         </p>
       </motion.div>
     </div>

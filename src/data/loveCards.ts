@@ -139,11 +139,11 @@ export const ALL_LOVE_CARDS: LoveCard[] = [
 ];
 
 /** Category metadata for UI rendering */
-export const CATEGORY_META: Record<LoveCard['category'], { label: string; emoji: string; color: string; bgColor: string }> = {
-  love_romance: { label: 'Amor & Romance', emoji: '💕', color: 'text-rose-500', bgColor: 'bg-rose-500/10' },
-  mutual_knowledge: { label: 'Conhecimento Mútuo', emoji: '🧠', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-  spicy: { label: 'Picantes', emoji: '🔥', color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-  truth_or_dare: { label: 'Verdade ou Desafio', emoji: '🎲', color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+export const CATEGORY_META: Record<LoveCard['category'], { label: string; emoji: string; tone: 'rose' | 'sky' | 'amber' | 'violet'; color: string; bgColor: string }> = {
+  love_romance: { label: 'Amor & Romance', emoji: 'heart', tone: 'rose', color: 'text-rose-500', bgColor: 'bg-rose-500/10' },
+  mutual_knowledge: { label: 'Conhecimento Mútuo', emoji: 'brain', tone: 'sky', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  spicy: { label: 'Picantes', emoji: 'fire', tone: 'amber', color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
+  truth_or_dare: { label: 'Verdade ou Desafio', emoji: 'dice', tone: 'violet', color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
 };
 
 /** Get cards for a specific category and level */

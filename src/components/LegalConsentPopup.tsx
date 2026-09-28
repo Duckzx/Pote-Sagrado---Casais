@@ -45,7 +45,7 @@ export const LegalConsentPopup: React.FC = () => {
           </div>
           <div>
             <h2 className="font-serif text-2xl font-bold text-cookbook-text">Termos e Privacidade</h2>
-            <p className="font-sans text-[10px] uppercase tracking-widest text-cookbook-text/60 mt-1">Pote Sagrado App</p>
+            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 mt-1">Pote Sagrado App</p>
           </div>
         </div>
         
@@ -71,7 +71,7 @@ export const LegalConsentPopup: React.FC = () => {
            <button 
              onClick={handleAccept}
              disabled={isAccepting}
-             className={`w-full bg-cookbook-primary text-white font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_16px_rgba(197,160,89,0.3)] transition-all hover:bg-cookbook-primary-hover active:scale-[0.98] font-bold flex items-center justify-center gap-2 ${isAccepting ? 'opacity-70 grayscale cursor-wait' : ''}`}
+             className={`w-full bg-cookbook-primary text-cookbook-on-primary font-sans text-xs uppercase tracking-widest py-4 rounded-xl shadow-[0_8px_16px_rgba(197,160,89,0.3)] transition-all hover:bg-cookbook-primary-hover active:scale-[0.98] font-bold flex items-center justify-center gap-2 ${isAccepting ? 'opacity-70 grayscale cursor-wait' : ''}`}
            >
              {isAccepting ? (
                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -80,7 +80,7 @@ export const LegalConsentPopup: React.FC = () => {
              )}
              {isAccepting ? 'Processando...' : 'Aceitar e Continuar'}
            </button>
-           <p className="text-center font-sans text-[9px] uppercase tracking-widest text-cookbook-text/50 mt-4 leading-relaxed">
+           <p className="text-center font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 mt-4 leading-relaxed">
             Ao clicar em aceitar, este consentimento ficará gravado no seu perfil permanentemente.
            </p>
         </div>
