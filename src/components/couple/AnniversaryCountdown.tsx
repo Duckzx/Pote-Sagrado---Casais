@@ -93,11 +93,11 @@ export const AnniversaryCountdown: React.FC = () => {
 
       {isAnniversaryToday ? (
         <p className="font-serif text-3xl text-cookbook-text leading-tight">
-          Hoje fazem <span className="italic text-cookbook-primary">{info.years} {info.years === 1 ? "ano" : "anos"}</span> 🥂
+          Hoje fazem <span className="italic text-cookbook-primary">{info.years} {info.years === 1 ? "ano" : "anos"}</span>
         </p>
       ) : isToday ? (
         <p className="font-serif text-3xl text-cookbook-text leading-tight">
-          Feliz <span className="italic text-cookbook-primary">{info.monthsTogether}º</span> mêsversário 💐
+          Feliz <span className="italic text-cookbook-primary">{info.monthsTogether}º</span> mêsversário
         </p>
       ) : (
         <div className="flex items-end gap-3">

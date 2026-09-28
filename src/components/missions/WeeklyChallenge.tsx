@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { AppIcon, IconBadge } from "../ui/app-icon";
 import confetti from "canvas-confetti";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../firebase";
@@ -16,14 +17,14 @@ interface WeekChallenge {
 }
 
 const CHALLENGES: WeekChallenge[] = [
-  { emoji: "🛵", title: "Semana sem delivery", tip: "Cozinhem em casa e guardem o que iria para o app.", suggested: 60 },
-  { emoji: "🪙", title: "Guardar o troco", tip: "Todo troco ou arredondamento da semana vai para o pote.", suggested: 20 },
-  { emoji: "🛍️", title: "Fim de semana sem gastos", tip: "Programas gratuitos: parque, piquenique, filme em casa.", suggested: 80 },
-  { emoji: "☕", title: "Café de casa", tip: "Troque o café da rua pelo de casa a semana toda.", suggested: 40 },
-  { emoji: "🧺", title: "Desapego da semana", tip: "Venda algo parado no guarda-roupa ou na estante.", suggested: 50 },
-  { emoji: "🚶", title: "Semana sem app de corrida", tip: "Caminhe, pedale ou vá de transporte público.", suggested: 45 },
-  { emoji: "📵", title: "Zero compras por impulso", tip: "Antes de comprar, espere 48h. Se ainda quiser, guarde o valor.", suggested: 70 },
-  { emoji: "🥗", title: "Marmita a semana toda", tip: "Leve comida de casa e guarde a diferença.", suggested: 90 },
+  { emoji: "delivery", title: "Semana sem delivery", tip: "Cozinhem em casa e guardem o que iria para o app.", suggested: 60 },
+  { emoji: "coins", title: "Guardar o troco", tip: "Todo troco ou arredondamento da semana vai para o pote.", suggested: 20 },
+  { emoji: "bag", title: "Fim de semana sem gastos", tip: "Programas gratuitos: parque, piquenique, filme em casa.", suggested: 80 },
+  { emoji: "coffee", title: "Café de casa", tip: "Troque o café da rua pelo de casa a semana toda.", suggested: 40 },
+  { emoji: "basket", title: "Desapego da semana", tip: "Venda algo parado no guarda-roupa ou na estante.", suggested: 50 },
+  { emoji: "walk", title: "Semana sem app de corrida", tip: "Caminhe, pedale ou vá de transporte público.", suggested: 45 },
+  { emoji: "nophone", title: "Zero compras por impulso", tip: "Antes de comprar, espere 48h. Se ainda quiser, guarde o valor.", suggested: 70 },
+  { emoji: "bowl", title: "Marmita a semana toda", tip: "Leve comida de casa e guarde a diferença.", suggested: 90 },
 ];
 
 /** Monday-based week number, same for everyone in the pot. */
@@ -78,7 +79,7 @@ export const WeeklyChallenge: React.FC = () => {
       playCoinSound();
       vibrate([30, 50, 30]);
       confetti({ particleCount: 70, spread: 65, origin: { y: 0.7 }, colors: ["#C9677F", "#D4A574", "#F5DDE2"] });
-      addToast("Desafio cumprido! 🎯", `${challenge.emoji} ${challenge.title}: +${brl(value)} no pote`, "success");
+      addToast("Desafio cumprido! 🎯", `${challenge.title}: +${brl(value)} no pote`, "success");
       setAmount("");
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `casais/${casalId}/deposits`);
@@ -96,7 +97,7 @@ export const WeeklyChallenge: React.FC = () => {
         </span>
       </div>
       <div className="flex items-center gap-3 mt-2">
-        <span className="text-4xl">{challenge.emoji}</span>
+        <IconBadge name={challenge.emoji} tone="amber" badgeSize="lg" />
         <div>
           <p className="font-serif text-2xl text-cookbook-text leading-tight">{challenge.title}</p>
           <p className="font-sans text-xs text-cookbook-text/70 mt-0.5">{challenge.tip}</p>
@@ -104,8 +105,8 @@ export const WeeklyChallenge: React.FC = () => {
       </div>
 
       {doneThisWeek.length > 0 && (
-        <p data-money className="mt-3 rounded-2xl bg-emerald-500/10 text-emerald-700 px-3 py-2 font-sans text-xs font-bold">
-          ✓ Cumprido {doneThisWeek.length}x esta semana · {brl(doneTotal)} guardados
+        <p data-money className="mt-3 rounded-2xl bg-emerald-500/10 text-emerald-700 px-3 py-2 font-sans text-xs font-bold flex items-center gap-1.5">
+          <AppIcon name="trophy" size={16} weight="fill" /> Cumprido {doneThisWeek.length}x esta semana · {brl(doneTotal)} guardados
         </p>
       )}
 

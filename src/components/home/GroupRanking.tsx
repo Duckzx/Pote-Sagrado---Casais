@@ -1,4 +1,5 @@
 import React from "react";
+import { IconBadge } from "../ui/app-icon";
 import { motion } from "motion/react";
 import { Crown } from "lucide-react";
 import { BorderBeam } from "../magicui/border-beam";
@@ -10,7 +11,7 @@ interface RankEntry {
 }
 
 const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDAL_TONES = ["gold", "neutral", "amber"] as const;
 
 /** Monthly contribution ranking for group pots: podium + list. */
 export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) => {
@@ -38,7 +39,7 @@ export const GroupRanking: React.FC<{ ranking: RankEntry[] }> = ({ ranking }) =>
       <ol className="space-y-3">
         {ranking.map((r, i) => (
           <li key={`${r.name}-${i}`} className="flex items-center gap-3">
-            <span className="w-7 text-center text-lg">{MEDALS[i] || <span className="font-sans text-xs font-bold text-cookbook-text/70">{i + 1}º</span>}</span>
+            <span className="w-8 flex justify-center">{i < 3 ? <IconBadge name="medal" tone={MEDAL_TONES[i]} badgeSize="xs" weight="fill" /> : <span className="font-sans text-xs font-bold text-cookbook-text/70">{i + 1}º</span>}</span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="font-sans text-sm font-bold text-cookbook-text truncate">{r.name}</span>

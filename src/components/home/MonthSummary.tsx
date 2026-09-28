@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { AppIcon } from "../ui/app-icon";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
 import { toDate } from "../../lib/progress";
@@ -95,8 +96,8 @@ export const MonthSummary: React.FC = () => {
       </div>
 
       {mode !== "solo" && topName && (
-        <p className="font-sans text-xs text-cookbook-text/70 mt-3">
-          🏆 <span className="font-bold text-cookbook-text">{topName}</span> é quem mais guardou este mês
+        <p className="font-sans text-xs text-cookbook-text/70 mt-3 flex items-center gap-1.5">
+          <AppIcon name="trophy" size={16} weight="fill" className="text-cookbook-gold shrink-0" /> <span className="font-bold text-cookbook-text">{topName}</span> é quem mais guardou este mês
         </p>
       )}
     </section>

@@ -1,3 +1,4 @@
+import { IconBadge } from "./ui/app-icon";
 import React, { useState, useEffect } from "react";
 import { doc, setDoc, serverTimestamp, getDoc, arrayUnion } from "firebase/firestore";
 import { db, auth, logout, getMessagingLazy } from "../firebase";
@@ -71,9 +72,9 @@ const THEMES = [
   },
   { id: "nordic", label: "Nordic Twilight", colors: ["#F0F4F8", "#5C7C8A"] },
   { id: "tropical", label: "Tropical Breeze", colors: ["#F2FAF5", "#2A9D8F"] },
-  { id: "midnight", label: "🌙 Midnight", colors: ["#1A1A2E", "#C5A059"] },
+  { id: "midnight", label: "Midnight", colors: ["#1A1A2E", "#C5A059"] },
   { id: "noir", label: "Noir (P&B)", colors: ["#FFFFFF", "#000000"] },
-  { id: "cereja", label: "🍒 Cereja Noir", colors: ["#170D10", "#E28CA0"] },
+  { id: "cereja", label: "Cereja Noir", colors: ["#170D10", "#E28CA0"] },
 ];
 export const ConfigTab: React.FC<ConfigTabProps> = ({
   currentGoalType,
@@ -175,7 +176,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
   };
   
   const [newChallengeLabel, setNewChallengeLabel] = useState("");
-  const [newChallengeIcon, setNewChallengeIcon] = useState("⭐");
+  const [newChallengeIcon, setNewChallengeIcon] = useState("star");
   const [isSaving, setIsSaving] = useState(false);
   const [isRequestingPush, setIsRequestingPush] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<string>("default");
@@ -234,11 +235,11 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
     const newChallenge = {
       id: `custom_${Date.now()}`,
       label: newChallengeLabel.trim(),
-      icon: newChallengeIcon || "⭐",
+      icon: newChallengeIcon || "star",
     };
     setChallenges([...challenges, newChallenge]);
     setNewChallengeLabel("");
-    setNewChallengeIcon("⭐");
+    setNewChallengeIcon("star");
   };
   const handleRemoveChallenge = (id: string) => {
     setChallenges(challenges.filter((c) => c.id !== id));
@@ -506,7 +507,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               onClick={() => setShowModePicker(true)}
               className="w-full text-left bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 active:scale-[0.98] transition-transform"
             >
-              <span className="text-3xl">{MODE_OPTIONS.find((o) => o.id === mode)?.emoji}</span>
+              <IconBadge name={MODE_OPTIONS.find((o) => o.id === mode)?.emoji} tone={MODE_OPTIONS.find((o) => o.id === mode)?.tone} badgeSize="md" />
               <div className="flex-1">
                 <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70">Modo de uso</p>
                 <p className="font-serif text-xl text-cookbook-text leading-tight">
@@ -861,7 +862,7 @@ export const ConfigTab: React.FC<ConfigTabProps> = ({
               onClick={() => setShowDiagnostics(true)}
               className="w-full text-left bg-cookbook-bg backdrop-blur-2xl border border-cookbook-border rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center gap-4 active:scale-[0.98] transition-transform"
             >
-              <span className="text-2xl">🩺</span>
+              <IconBadge name="health" tone="sky" badgeSize="md" />
               <div className="flex-1">
                 <p className="font-serif text-xl text-cookbook-text leading-tight">Diagnóstico de sincronização</p>
                 <p className="font-sans text-xs text-cookbook-text/70 mt-0.5">Algo não salva ou não aparece? Teste o acesso a cada função.</p>

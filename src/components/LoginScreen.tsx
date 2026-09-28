@@ -10,18 +10,19 @@ import { BlurFade } from "./magicui/blur-fade";
 import { ShimmerButton } from "./magicui/shimmer-button";
 import { Marquee } from "./magicui/marquee";
 import { SparklesText } from "./magicui/sparkles-text";
+import { AppIcon, type IconName } from "./ui/app-icon";
 
-const FEATURES = [
-  "🍯 Pote compartilhado",
-  "💞 Modo casal",
-  "🫶 Vaquinha com amigos",
-  "🌷 Metas só suas",
-  "💌 Cápsula do tempo",
-  "💐 Mêsversário",
-  "🥰 Humor do dia",
-  "🏆 Ranking da turma",
-  "✨ Missões de economia",
-  "📸 Álbum de memórias",
+const FEATURES: [IconName, string][] = [
+  ["piggy", "Pote compartilhado"],
+  ["heart", "Modo casal"],
+  ["group", "Vaquinha com amigos"],
+  ["tulip", "Metas só suas"],
+  ["envelope", "Cápsula do tempo"],
+  ["calendar", "Mêsversário"],
+  ["smile", "Humor do dia"],
+  ["trophy", "Ranking da turma"],
+  ["target", "Missões de economia"],
+  ["camera", "Álbum de memórias"],
 ];
 
 type Mode = "choose" | "login" | "signup" | "reset";
@@ -89,8 +90,8 @@ export const LoginScreen: React.FC = () => {
       <div className="relative z-10 w-full max-w-sm mx-auto text-center">
         {fromShare && (
           <BlurFade delay={0}>
-            <p className="inline-block mb-4 font-sans text-xs font-semibold text-cookbook-primary bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-full px-4 py-1.5">
-              💌 Viu o progresso de alguém? Crie o seu em 30 segundos
+            <p className="inline-block mb-4 font-sans text-xs font-semibold text-cookbook-primary bg-cookbook-primary/10 border border-cookbook-primary/20 rounded-full px-4 py-1.5 inline-flex items-center gap-1.5">
+              <AppIcon name="envelope" size={16} /> Viu o progresso de alguém? Crie o seu em 30 segundos
             </p>
           </BlurFade>
         )}
@@ -119,12 +120,13 @@ export const LoginScreen: React.FC = () => {
 
       <BlurFade delay={0.28} className="relative z-10 w-screen mt-6">
         <Marquee pauseOnHover className="[--duration:35s] [--gap:0.5rem]" repeat={3}>
-          {FEATURES.map((f) => (
+          {FEATURES.map(([icon, label]) => (
             <span
-              key={f}
-              className="shrink-0 font-sans text-xs font-semibold text-cookbook-text/70 bg-cookbook-bg/80 backdrop-blur border border-cookbook-border rounded-full px-3 py-1.5"
+              key={label}
+              className="shrink-0 inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-cookbook-text/80 bg-cookbook-bg/80 backdrop-blur border border-cookbook-border rounded-full pl-2 pr-3 py-1.5"
             >
-              {f}
+              <AppIcon name={icon} size={16} className="text-cookbook-primary" />
+              {label}
             </span>
           ))}
         </Marquee>

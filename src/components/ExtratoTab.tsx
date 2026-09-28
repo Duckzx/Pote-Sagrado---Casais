@@ -9,10 +9,6 @@ import {
   X,
   Calendar,
   User,
-  Utensils,
-  Car,
-  ShoppingCart,
-  Smartphone,
   Plus,
   Download,
   MoreVertical,
@@ -25,6 +21,7 @@ import { doc, updateDoc, deleteDoc, arrayUnion } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { playSuccessSound, vibrate } from "../lib/audio";
+import { AppIcon, EmptyState, IconBadge, iconForAction, stripLeadingEmoji } from "./ui/app-icon";
 
 interface ExtratoTabProps {
   deposits: any[];
@@ -381,21 +378,21 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 text-center relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
-          <ArrowUpCircle size={18} className="text-emerald-500 mx-auto mb-2 opacity-80" />
+          <IconBadge name="income" tone="emerald" badgeSize="xs" className="mx-auto mb-2" weight="bold" />
           <div className="font-serif text-sm text-emerald-700 font-medium">
              <span data-money>{formatCurrency(totals.depositos)}</span>
           </div>
-          <div className="font-sans text-[11px] uppercase tracking-widest text-emerald-600/70 font-bold mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-emerald-700 font-bold mt-1">
              Entradas
           </div>
         </div>
         <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/20 rounded-full blur-xl transform translate-x-1/2 -translate-y-1/2"></div>
-          <ArrowDownCircle size={18} className="text-red-500 mx-auto mb-2 opacity-80" />
+          <IconBadge name="expense" tone="rose" badgeSize="xs" className="mx-auto mb-2" weight="bold" />
           <div className="font-serif text-sm text-red-700 font-medium">
              <span data-money>{formatCurrency(totals.gastos)}</span>
           </div>
-          <div className="font-sans text-[11px] uppercase tracking-widest text-red-600/70 font-bold mt-1">
+          <div className="font-sans text-[11px] uppercase tracking-widest text-red-700 font-bold mt-1">
              Saídas
           </div>
         </div>
@@ -447,8 +444,8 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
         {/* Search & Actions */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cookbook-text/70">
-              <span className="text-sm">🔎</span>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cookbook-text/70 z-10">
+              <AppIcon name="search" size={18} weight="bold" />
             </div>
             <input
               type="text"
@@ -516,10 +513,10 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
               onChange={(e) => setFilterUser(e.target.value)}
               className="appearance-none bg-cookbook-bg/80 backdrop-blur-md border border-cookbook-border rounded-xl pl-4 pr-8 py-2 font-sans text-[11px] uppercase tracking-wider text-cookbook-text/70 font-bold focus:outline-none focus:border-cookbook-primary h-[34px]"
             >
-              <option value="todos">👥 Ambos</option>
+              <option value="todos">Todos</option>
               {users.map(([uid, name]) => (
                 <option key={uid} value={uid}>
-                  👤 {name}
+                  {name}
                 </option>
               ))}
             </select>
@@ -568,14 +565,12 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
       {/* Timeline */}
       <div className="space-y-4">
         {Object.keys(groupedByDate).length === 0 ? (
-          <div className="text-center py-12 px-4 bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border rounded-3xl">
-            <span className="text-3xl block mb-3 grayscale opacity-50">📭</span>
-            <p className="font-serif italic text-cookbook-text/70 text-sm mb-1">
-              Nada por aqui ainda
-            </p>
-            <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
-              As transações deste mês aparecerão aqui
-            </p>
+          <div className="bg-cookbook-bg/90 backdrop-blur-md border border-dashed border-cookbook-border rounded-3xl">
+            <EmptyState
+              icon="receipt"
+              title="Nada por aqui ainda"
+              subtitle="Os depósitos e gastos deste período aparecem aqui, com quem guardou e quando."
+            />
           </div>
         ) : (
           Object.entries(groupedByDate).map(([dateLabel, items], groupIndex) => {
@@ -599,7 +594,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                     {dateLabel}
                   </span>
                   <div className="text-right">
-                    <span className="font-sans text-[7px] uppercase tracking-widest text-cookbook-text/70 font-bold block leading-tight">
+                    <span className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold block leading-tight">
                       Saldo do Dia
                     </span>
                     <span className={`font-serif text-xs font-medium ${dailyBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
@@ -614,13 +609,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                     const isExpense = deposit.type === "expense";
                     const isOwner = currentUser && deposit.who === currentUser.uid;
                     
-                    // Pick dynamic icon based on action text
-                    const act = (deposit.action || "").toLowerCase();
-                    let Icon = isExpense ? ArrowDownCircle : ArrowUpCircle;
-                    if (act.includes('ifood') || act.includes('comida') || act.includes('pizza') || act.includes('lanche')) Icon = Utensils;
-                    else if (act.includes('uber') || act.includes('carro') || act.includes('gasolina')) Icon = Car;
-                    else if (act.includes('compra') || act.includes('shopping') || act.includes('mercado')) Icon = ShoppingCart;
-                    else if (act.includes('pix') || act.includes('transferência') || act.includes('celular') || act.includes('app')) Icon = Smartphone;
+                    const rowIcon = iconForAction(deposit.action, deposit.type);
 
                     return (
                       <div
@@ -630,13 +619,11 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
                         <div className={`absolute top-0 bottom-0 left-0 w-1 ${isExpense ? 'bg-red-500/30' : 'bg-emerald-500/30'}`} />
                         <div className="relative flex items-center justify-between gap-3 px-4 py-4">
                           <div className="flex items-center gap-3 flex-1 min-w-0 pl-2">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${isExpense ? "bg-red-500/10 text-red-500 border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"}`}>
-                              <Icon size={18} />
-                            </div>
+                            <IconBadge name={rowIcon} tone={isExpense ? "rose" : "emerald"} badgeSize="sm" />
                             
                             <div className="flex-1 min-w-0">
                               <div className="font-serif text-sm text-cookbook-text truncate font-medium">
-                                {deposit.action || (isExpense ? "Saída" : "Entrada")}
+                                {stripLeadingEmoji(deposit.action) || (isExpense ? "Saída" : "Entrada")}
                               </div>
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                                 <span className="font-sans text-[11px] uppercase tracking-widest bg-cookbook-text/5 text-cookbook-text/70 px-1.5 py-0.5 rounded-full font-bold truncate max-w-[100px] shadow-sm">
@@ -854,7 +841,7 @@ export const ExtratoTab: React.FC<ExtratoTabProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {" "}
-            <span className="text-4xl block mb-4">🗑️</span>{" "}
+            <IconBadge name="trash" tone="rose" badgeSize="lg" className="mx-auto mb-4" />
             <h3 className="font-serif text-xl text-cookbook-text mb-2 font-medium">
               {" "}
               Excluir Transação?{" "}

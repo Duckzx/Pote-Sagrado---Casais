@@ -471,7 +471,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
               </button>{" "}
               <div className="animate-badge-text-reveal reveal-delay-1 font-sans text-[11px] uppercase tracking-[0.25em] text-cookbook-primary font-bold mb-6">
                 {" "}
-                🏆 Nova Conquista!{" "}
+                Nova Conquista!{" "}
               </div>{" "}
               <div className="relative w-28 h-28 mx-auto mb-6">
                 {" "}
@@ -514,7 +514,7 @@ export const UserBadges: React.FC<UserBadgesProps> = memo(({
                 }}
               >
                 {" "}
-                ✨ Continuar Jornada{" "}
+                Continuar Jornada{" "}
               </button>{" "}
             </div>{" "}
           </div>{" "}

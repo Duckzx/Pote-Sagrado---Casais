@@ -1,3 +1,4 @@
+import { IconBadge } from "./ui/app-icon";
 import React, { useMemo, useRef, useState } from "react";
 import { Trophy, Share2, Zap, Target, Shield, Swords, Sparkles, TrendingUp, Crown } from "lucide-react";
 import domtoimage from "dom-to-image-more";
@@ -639,10 +640,7 @@ export const DisputaTab: React.FC<DisputaTabProps> = ({ deposits, prize, addToas
       {users[0].total === 0 && users[1].total === 0 && (
         <div className="text-center py-8 px-4 bg-cookbook-bg/90 backdrop-blur-md border-2 border-dashed border-cookbook-border rounded-3xl shadow-sm">
           {" "}
-          <span className="text-4xl block mb-3 opacity-50 text-cookbook-primary grayscale">
-            {" "}
-            ⚔️{" "}
-          </span>{" "}
+          <IconBadge name="sword" tone="amber" badgeSize="lg" className="mx-auto mb-3" />
           <p className="font-serif italic text-cookbook-text/70 text-sm mb-1">
             {" "}
             A batalha ainda não começou!{" "}

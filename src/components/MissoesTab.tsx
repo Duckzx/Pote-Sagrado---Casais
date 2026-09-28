@@ -1,3 +1,4 @@
+import { AppIcon, IconBadge, IconPicker, type IconName } from "./ui/app-icon";
 import React, { useState, useMemo } from "react";
 import {
   CheckCircle2,
@@ -161,11 +162,20 @@ interface MissoesTabProps {
   },
 ];
 type FilterType = "todas" | "economia" | "desafio" | "custom";
+/** Icons offered when creating or editing a mission */
+const MISSION_ICONS: IconName[] = [
+  "star", "coffee", "food", "delivery", "bowl", "bus", "walk", "bag", "tag", "package", "coins", "piggy",
+  "tree", "broom", "wine", "popcorn", "gym", "book", "heart", "gift", "phone", "lightning",
+];
+
+const missionTone = (category?: string) =>
+  category === "economia" ? "emerald" : category === "desafio" ? "amber" : "violet";
+
 const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
-  { id: "todas", label: "Todas", emoji: "🎯" },
-  { id: "economia", label: "Economia", emoji: "💚" },
-  { id: "desafio", label: "Desafios", emoji: "⚔️" },
-  { id: "custom", label: "Minhas", emoji: "⭐" },
+  { id: "todas", label: "Todas", emoji: "target" },
+  { id: "economia", label: "Economia", emoji: "leaf" },
+  { id: "desafio", label: "Desafios", emoji: "sword" },
+  { id: "custom", label: "Minhas", emoji: "star" },
 ];
 /* Component */ import { compressImage } from "../lib/imageUtils";
 import { Camera, Plane, ArrowRight, Heart, Sparkles } from "lucide-react";
@@ -204,7 +214,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newReward, setNewReward] = useState("");
-  const [newIcon, setNewIcon] = useState("⭐");
+  const [newIcon, setNewIcon] = useState<string>("star");
   const [newCategory, setNewCategory] = useState<"economia" | "desafio">(
     "desafio",
   );
@@ -219,7 +229,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           id: bc.id,
           title: bc.title,
           desc: bc.desc || "",
-          icon: bc.icon || "⭐",
+          icon: bc.icon || "star",
           category: "desafio",
           reward: bc.reward || 0,
           recurrence: bc.recurrence || "livre",
@@ -233,7 +243,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         id: cc.id,
         title: cc.label,
         desc: "",
-        icon: cc.icon || "⭐",
+        icon: cc.icon || "star",
         category: "custom",
         reward: 0,
       });
@@ -474,7 +484,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             title: newTitle.trim(),
             desc: newDesc.trim(),
             reward: Number(newReward) || 0,
-            icon: newIcon || "⭐",
+            icon: newIcon || "star",
           };
           const current =
             battleChallenges.length > 0
@@ -489,7 +499,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
           const newCustom = {
             id: `custom_${Date.now()}`,
             label: newTitle.trim(),
-            icon: newIcon || "⭐",
+            icon: newIcon || "star",
           };
           await setDoc(
             doc(db, `casais/${casalId}/trip_config`, "main"),
@@ -505,7 +515,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         setNewTitle("");
         setNewDesc("");
         setNewReward("");
-        setNewIcon("⭐");
+        setNewIcon("star");
         setShowAddForm(false);
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `casais/${casalId}/trip_config`);
@@ -659,7 +669,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             className={`flex items-center gap-1.5 px-5 py-2.5 rounded-full font-sans text-[11px] uppercase tracking-widest font-medium whitespace-nowrap transition-all ${activeFilter === filter.id ? "bg-cookbook-primary text-white shadow-md" : "bg-cookbook-bg border border-cookbook-border/30 text-cookbook-text/70 hover:border-cookbook-primary/40 hover:bg-cookbook-border/30"}`}
           >
             {" "}
-            <span>{filter.emoji}</span> <span>{filter.label}</span>{" "}
+            <AppIcon name={filter.emoji} size={16} weight={activeFilter === filter.id ? "fill" : "duotone"} /> <span>{filter.label}</span>{" "}
             <span
               className={`ml-1 px-1.5 py-0.5 rounded-full text-[11px] ${activeFilter === filter.id ? "bg-white/20" : "bg-cookbook-bg"}`}
             >
@@ -678,10 +688,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         {filteredMissions.length === 0 ? (
           <div className="text-center py-10 px-6 bg-cookbook-bg border border-cookbook-border border-dashed rounded-xl w-full flex flex-col items-center">
             {" "}
-            <div className="w-12 h-12 bg-cookbook-gold/10 rounded-full flex items-center justify-center mb-4">
-              {" "}
-              <span className="text-2xl">🎯</span>{" "}
-            </div>{" "}
+            <IconBadge name="target" tone="gold" badgeSize="lg" className="mb-4" />
             <p className="font-serif italic text-cookbook-text/70 text-sm mb-2">
               {" "}
               Nenhuma missão aqui{" "}
@@ -716,7 +723,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
                 <div className="flex items-start gap-3">
                   {" "}
                   {/* Icon */}{" "}
-                  <div className="text-3xl mt-0.5 shrink-0">{mission.icon}</div>{" "}
+                  <IconBadge name={mission.icon} tone={missionTone(mission.category)} badgeSize="md" />{" "}
                   {/* Content */}{" "}
                   <div className="flex-1 min-w-0">
                     {" "}
@@ -845,6 +852,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               <X size={18} />{" "}
             </button>{" "}
           </div>{" "}
+          <IconPicker options={MISSION_ICONS} value={newIcon} onChange={setNewIcon} tone={missionTone(newCategory)} />
           {/* Category selector */}{" "}
           <div className="flex gap-2">
             {" "}
@@ -853,26 +861,19 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
               className={`flex-1 py-2.5 rounded-xl font-sans text-[11px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "desafio" ? "bg-amber-500/20 border-amber-500/30 text-amber-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/70 hover:bg-cookbook-border/30"}`}
             >
               {" "}
-              ⚔️ Desafio{" "}
+              <span className="inline-flex items-center gap-1.5"><AppIcon name="sword" size={16} /> Desafio</span>
             </button>{" "}
             <button
               onClick={() => setNewCategory("economia")}
               className={`flex-1 py-2.5 rounded-xl font-sans text-[11px] uppercase tracking-widest font-bold border backdrop-blur-md transition-all ${newCategory === "economia" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-700 " : "bg-cookbook-bg border-white/20 text-cookbook-text/70 hover:bg-cookbook-border/30"}`}
             >
               {" "}
-              💚 Economia{" "}
+              <span className="inline-flex items-center gap-1.5"><AppIcon name="leaf" size={16} /> Economia</span>
             </button>{" "}
           </div>{" "}
           <div className="flex gap-2">
             {" "}
-            <input
-              type="text"
-              value={newIcon}
-              onChange={(e) => setNewIcon(e.target.value)}
-              placeholder="⭐"
-              className="w-14 bg-cookbook-bg/90 backdrop-blur-md border border-cookbook-border rounded-xl px-2 py-3 font-serif text-center text-lg text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors shadow-sm"
-              maxLength={2}
-            />{" "}
+            <IconBadge name={newIcon} tone={missionTone(newCategory)} badgeSize="md" />
             <input
               type="text"
               value={newTitle}
@@ -952,10 +953,7 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             </button>{" "}
             <div className="text-center mb-6 pt-2">
               {" "}
-              <span className="text-5xl block mb-4">
-                {" "}
-                {selectedMission.icon}{" "}
-              </span>{" "}
+              <IconBadge name={selectedMission.icon} tone={missionTone(selectedMission.category)} badgeSize="xl" className="mx-auto mb-4" />
               <h3 className="font-serif italic text-xl text-cookbook-text mb-1">
                 {" "}
                 {selectedMission.title}{" "}
@@ -1081,16 +1079,10 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
             </h3>{" "}
             <div className="space-y-3 mb-6">
               {" "}
+              <IconPicker options={MISSION_ICONS} value={editIcon} onChange={setEditIcon} tone="violet" />
               <div className="flex gap-2">
                 {" "}
-                <input
-                  type="text"
-                  value={editIcon}
-                  onChange={(e) => setEditIcon(e.target.value)}
-                  placeholder="🍱"
-                  className="w-14 bg-cookbook-bg border border-cookbook-border rounded-lg px-2 py-3 font-serif text-center text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary transition-colors"
-                  maxLength={2}
-                />{" "}
+                <IconBadge name={editIcon} tone="violet" badgeSize="md" />
                 <input
                   type="text"
                   value={editTitle}

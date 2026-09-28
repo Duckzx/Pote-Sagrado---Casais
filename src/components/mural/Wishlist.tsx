@@ -8,8 +8,9 @@ import { Wish } from "../../types";
 import { maskCurrency, parseCurrencyString } from "../../lib/maskUtils";
 import { handleFirestoreError, OperationType } from "../../lib/firestore-errors";
 import { vibrate } from "../../lib/audio";
+import { EmptyState, IconBadge, IconPicker, type IconName } from "../ui/app-icon";
 
-const EMOJIS = ["🎀", "👗", "👟", "💄", "📱", "🎧", "✈️", "🏖️", "🍣", "🎁", "🪴", "💍"];
+const WISH_ICONS: IconName[] = ["gift", "dress", "sneaker", "bag", "sparkle", "phone", "headphones", "laptop", "travel", "beach", "bowl", "plant", "ring", "camera", "house", "car"];
 const brl = (v: number) => Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const EMPTY: Wish[] = [];
 
@@ -27,7 +28,7 @@ export const Wishlist: React.FC = () => {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [emoji, setEmoji] = useState(EMOJIS[0]);
+  const [emoji, setEmoji] = useState<string>(WISH_ICONS[0]);
 
   const sorted = useMemo(
     () => [...wishes].sort((a, b) => Number(a.bought) - Number(b.bought) || a.price - b.price),
@@ -66,7 +67,7 @@ export const Wishlist: React.FC = () => {
     save(wishes.map((x) => (x.id === w.id ? { ...x, bought: !x.bought } : x)));
     if (!w.bought) {
       vibrate([20, 40, 20]);
-      addToast("Realizado! 🎉", `${w.emoji} ${w.name} saiu da lista de desejos.`, "success");
+      addToast("Realizado! 🎉", `${w.name} saiu da lista de desejos.`, "success");
     }
   };
 
@@ -76,7 +77,7 @@ export const Wishlist: React.FC = () => {
     <section className="w-full max-w-md mx-auto rounded-3xl p-5 border border-cookbook-border bg-cookbook-bg/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-serif text-2xl text-cookbook-text leading-tight">Lista de desejos 🎀</h3>
+          <h3 className="font-serif text-2xl text-cookbook-text leading-tight">Lista de desejos</h3>
           <p className="font-sans text-xs text-cookbook-text/70 mt-1">O que o pote já consegue comprar.</p>
         </div>
         <button
@@ -92,17 +93,7 @@ export const Wishlist: React.FC = () => {
         {adding && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
             <div className="pt-4 space-y-2">
-              <div className="flex gap-1.5 overflow-x-auto hide-scrollbar">
-                {EMOJIS.map((e) => (
-                  <button
-                    key={e}
-                    onClick={() => setEmoji(e)}
-                    className={`shrink-0 w-9 h-9 rounded-xl text-lg ${emoji === e ? "bg-cookbook-primary/20 ring-2 ring-cookbook-primary" : "bg-cookbook-text/5"}`}
-                  >
-                    {e}
-                  </button>
-                ))}
-              </div>
+              <IconPicker options={WISH_ICONS} value={emoji} onChange={setEmoji} />
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -132,7 +123,7 @@ export const Wishlist: React.FC = () => {
       </AnimatePresence>
 
       {sorted.length === 0 && !adding && (
-        <p className="font-serif italic text-cookbook-text/70 text-center py-6">Adicione o primeiro desejo ✨</p>
+        <EmptyState icon="gift" title="Sua lista está vazia" subtitle="Anote o que o pote vai realizar e acompanhe quanto falta para cada um." className="py-6" />
       )}
 
       <ul className="mt-4 space-y-2">
@@ -147,12 +138,12 @@ export const Wishlist: React.FC = () => {
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{w.emoji}</span>
+                <IconBadge name={w.emoji} tone={w.bought ? "emerald" : "primary"} badgeSize="sm" />
                 <div className="flex-1 min-w-0">
                   <p className={`font-sans text-sm font-bold text-cookbook-text truncate ${w.bought ? "line-through" : ""}`}>{w.name}</p>
                   <p data-money className="font-sans text-[11px] text-cookbook-text/70">
                     {brl(w.price)}
-                    {!w.bought && (affordable ? " · já dá para comprar! 🎉" : ` · ${Math.floor(pct)}%`)}
+                    {!w.bought && (affordable ? " · já dá para comprar!" : ` · ${Math.floor(pct)}%`)}
                   </p>
                 </div>
                 <button

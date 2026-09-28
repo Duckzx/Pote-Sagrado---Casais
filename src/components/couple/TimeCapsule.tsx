@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { IconBadge } from "../ui/app-icon";
 import { motion, AnimatePresence } from "motion/react";
 import { Lock, MailOpen, PenLine, Trash2, X } from "lucide-react";
 import {
@@ -166,14 +167,14 @@ export const TimeCapsule: React.FC = () => {
 
       {capsules.length === 0 && !isWriting && (
         <p className="font-serif italic text-cookbook-text/70 text-center py-6">
-          {mode === "solo" ? "Escreva para você mesma(o) ler daqui a um tempo 💌" : mode === "grupo" ? "Deixe um recado para a turma abrir no futuro 💌" : "Escreva algo para o seu par ler daqui a um tempo 💌"}
+          {mode === "solo" ? "Escreva para você mesma(o) ler daqui a um tempo" : mode === "grupo" ? "Deixe um recado para a turma abrir no futuro 💌" : "Escreva algo para o seu par ler daqui a um tempo"}
         </p>
       )}
 
       <div className="space-y-2">
         {ready.map((c) => (
           <div key={c.id} className="flex items-center gap-3 rounded-2xl p-3 bg-cookbook-gold/[0.08] border border-cookbook-gold/25">
-            <span className="text-2xl">{c.openedAt ? "📖" : "💌"}</span>
+            <IconBadge name={c.openedAt ? "letter" : "envelope"} tone="gold" badgeSize="sm" />
             <div className="flex-1 min-w-0">
               <p className="font-serif text-base text-cookbook-text truncate">
                 {c.from === user?.uid ? "Sua carta" : `Carta de ${c.fromName}`}
@@ -260,7 +261,7 @@ export const TimeCapsule: React.FC = () => {
                   disabled={isSaving || !message.trim()}
                   className="flex-[2] font-sans text-[11px] uppercase tracking-widest font-bold py-3 rounded-full bg-cookbook-primary text-cookbook-on-primary shadow-md disabled:opacity-40"
                 >
-                  {isSaving ? "Lacrando..." : "Lacrar carta 💌"}
+                  {isSaving ? "Lacrando..." : "Lacrar carta"}
                 </button>
               </div>
             </div>

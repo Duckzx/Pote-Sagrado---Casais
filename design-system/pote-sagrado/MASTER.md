@@ -74,8 +74,17 @@ Contrast rules (checked for every theme):
 
 ## Icons
 
-- Lucide for all controls and navigation; emojis only as decorative content (never as the only label).
-- Every icon-only button has an `aria-label`.
+- **Illustrative icons: Phosphor, duotone** (skill recommendation: "Phosphor primary"), via
+  `src/components/ui/app-icon.tsx`:
+  - `IconBadge` — icon in a tinted squircle (`tone`: primary, gold, emerald, rose, violet, sky, amber, neutral);
+    use for categories, missions, moods, wishes, transactions, modals.
+  - `EmptyState` — badge with halo + title + helper text + optional action; use it for empty lists.
+  - `IconPicker` — icon choice for user content (wishes, custom missions); stores the icon key.
+  - `iconForAction()` picks a transaction icon from its description; `resolveIcon()` maps emojis
+    saved by older versions to icons, so existing data keeps rendering.
+- **Controls and navigation: Lucide** (close, arrows, menus, bottom nav).
+- Emojis never act as icons or bullets. They stay only inside friendly copy (toasts, share texts).
+- Every icon-only button has an `aria-label`; decorative icons are `aria-hidden`.
 
 ## Pre-delivery checklist
 

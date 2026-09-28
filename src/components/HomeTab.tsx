@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { AppIcon } from "./ui/app-icon";
 import { createPortal } from "react-dom";
 import {
   Plane,
@@ -483,8 +484,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({
           {copy.reserveTitle}{" "}
         </h2>{" "}
         {mode === "casal" && daysTogether !== null && daysTogether >= 0 && (
-          <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1">
-            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos ❤️
+          <p className="font-serif italic text-base text-cookbook-primary animate-fade-in mt-1 inline-flex items-center gap-1.5">
+            {daysTogether} {daysTogether === 1 ? 'dia' : 'dias'} juntos <AppIcon name="heart" size={16} weight="fill" />
           </p>
         )}
         <button
@@ -845,19 +846,20 @@ export const HomeTab: React.FC<HomeTabProps> = ({
                 {/* Quick descriptions */}
                 <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1">
                   {(quickType === "income"
-                    ? ["☕ Café evitado", "🛵 Delivery evitado", "💼 Salário", "🎁 Presente", "💸 Pix recebido", "🛍️ Vendi algo"]
-                    : ["🍔 Comida", "🛍️ Compras", "🚗 Transporte", "🎉 Rolê", "💊 Saúde", "🏠 Casa"]
-                  ).map((label) => (
+                    ? ([["coffee", "Café evitado"], ["delivery", "Delivery evitado"], ["briefcase", "Salário"], ["gift", "Presente"], ["lightning", "Pix recebido"], ["tag", "Vendi algo"]] as const)
+                    : ([["food", "Comida"], ["bag", "Compras"], ["car", "Transporte"], ["confetti", "Rolê"], ["pill", "Saúde"], ["house", "Casa"]] as const)
+                  ).map(([icon, label]) => (
                     <button
                       key={label}
                       type="button"
                       onClick={() => setQuickDesc(label)}
-                      className={`shrink-0 px-3 py-1.5 rounded-full border font-sans text-[11px] transition-colors ${
+                      className={`shrink-0 inline-flex items-center gap-1.5 pl-2 pr-3 py-2 rounded-full border font-sans text-xs font-medium transition-colors ${
                         quickDesc === label
                           ? "bg-cookbook-text text-cookbook-bg border-cookbook-text"
-                          : "border-cookbook-border text-cookbook-text/70 bg-cookbook-bg/80"
+                          : "border-cookbook-border text-cookbook-text/80 bg-cookbook-bg/80"
                       }`}
                     >
+                      <AppIcon name={icon} size={16} weight={quickDesc === label ? "fill" : "duotone"} />
                       {label}
                     </button>
                   ))}

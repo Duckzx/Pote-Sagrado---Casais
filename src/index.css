@@ -120,6 +120,41 @@
   }
 }
 
+
+/* ===== Icon system (Phosphor duotone in tinted squircles) ===== */
+.tone-primary { --tone: var(--theme-primary); }
+.tone-gold    { --tone: #A8742B; }
+.tone-emerald { --tone: #059669; }
+.tone-rose    { --tone: #E11D48; }
+.tone-violet  { --tone: #7C3AED; }
+.tone-sky     { --tone: #0284C7; }
+.tone-amber   { --tone: #D97706; }
+.tone-neutral { --tone: var(--theme-text); }
+[data-theme="midnight"] .tone-gold, [data-theme="cereja"] .tone-gold { --tone: #E6BE8A; }
+[data-theme="midnight"] .tone-emerald, [data-theme="cereja"] .tone-emerald { --tone: #34D399; }
+[data-theme="midnight"] .tone-rose, [data-theme="cereja"] .tone-rose { --tone: #FB7185; }
+[data-theme="midnight"] .tone-violet, [data-theme="cereja"] .tone-violet { --tone: #A78BFA; }
+[data-theme="midnight"] .tone-sky, [data-theme="cereja"] .tone-sky { --tone: #38BDF8; }
+[data-theme="midnight"] .tone-amber, [data-theme="cereja"] .tone-amber { --tone: #FBBF24; }
+
+.icon-badge {
+  color: var(--tone);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--tone) 18%, transparent), color-mix(in srgb, var(--tone) 6%, transparent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent),
+    0 6px 16px -8px color-mix(in srgb, var(--tone) 45%, transparent);
+}
+[data-theme="midnight"] .icon-badge, [data-theme="cereja"] .icon-badge {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--tone) 25%, transparent);
+}
+.icon-halo {
+  background: radial-gradient(circle, color-mix(in srgb, var(--tone) 22%, transparent) 0%, transparent 70%);
+}
+
 /* Never scroll sideways on phones */
 html, body {
   overflow-x: clip;

@@ -119,7 +119,7 @@ export const PremiumModal: React.FC<PremiumModalProps> = ({ onClose }) => {
                   className={`py-3 rounded-xl text-[11px] uppercase tracking-widest font-bold transition-all relative ${plan === 'yearly' ? 'bg-cookbook-bg shadow-sm text-cookbook-text' : 'text-cookbook-text/70'}`}
                 >
                   Anual
-                  <span className="absolute -top-2 -right-1 bg-emerald-500 text-white text-[7px] px-1.5 py-0.5 rounded-full font-black animate-pulse">−20%</span>
+                  <span className="absolute -top-2 -right-1 bg-emerald-500 text-white text-[11px] px-1.5 py-0.5 rounded-full font-black animate-pulse">−20%</span>
                 </button>
               </div>
 

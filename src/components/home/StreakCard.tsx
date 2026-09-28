@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { AppIcon, IconBadge } from "../ui/app-icon";
 import { Share2 } from "lucide-react";
 import { ReminderButton } from "./ReminderButton";
 import { ShareableWidget } from "../ShareableWidget";
@@ -19,7 +20,7 @@ export const StreakCard: React.FC = () => {
 
   const alive = streak.current > 0;
   const hint = streak.savedToday
-    ? "Hoje já está garantido. Volte amanhã! ✨"
+    ? "Hoje já está garantido. Volte amanhã!"
     : alive
       ? "Guarde qualquer valor hoje para não perder a ofensiva."
       : mode === "solo"
@@ -32,11 +33,9 @@ export const StreakCard: React.FC = () => {
         <motion.div
           animate={alive ? { scale: [1, 1.12, 1], rotate: [0, -4, 4, 0] } : {}}
           transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.5 }}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 ${
-            alive ? "bg-gradient-to-br from-amber-300/60 to-rose-400/50" : "bg-cookbook-text/5 grayscale"
-          }`}
+          className="shrink-0"
         >
-          🔥
+          <IconBadge name="fire" tone={alive ? "amber" : "neutral"} badgeSize="lg" weight={alive ? "fill" : "duotone"} className={alive ? "" : "opacity-60"} />
         </motion.div>
         <div className="flex-1 min-w-0">
           <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-text/70">Ofensiva</p>
@@ -59,7 +58,7 @@ export const StreakCard: React.FC = () => {
                     : "bg-cookbook-text/[0.05]"
               }`}
             >
-              {d.done ? "✓" : ""}
+              {d.done ? <AppIcon name="fire" size={16} weight="fill" /> : ""}
             </div>
             <span className={`font-sans text-[11px] font-bold ${d.isToday ? "text-cookbook-primary" : "text-cookbook-text/70"}`}>
               {d.isToday ? "hoje" : d.label}

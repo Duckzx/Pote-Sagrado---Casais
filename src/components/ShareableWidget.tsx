@@ -231,7 +231,7 @@ export const ShareableWidget: React.FC<ShareableWidgetProps> = ({
         </div>
 
         <p className="font-sans text-[11px] text-white/70 text-center mt-4 leading-relaxed">
-          Dica: poste nos Stories e marque quem está juntando com você 💞
+          Dica: poste nos Stories e marque quem está juntando com você
         </p>
       </motion.div>
     </div>

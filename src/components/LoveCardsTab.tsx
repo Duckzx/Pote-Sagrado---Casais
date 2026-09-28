@@ -6,6 +6,7 @@ import { useOptimisticLoveCards } from '../hooks/useOptimisticLoveCards';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAppStore } from '../store/useAppStore';
 import { LoveCardCategory } from '../types';
+import { AppIcon, IconBadge, type IconTone } from './ui/app-icon';
 import { ALL_LOVE_CARDS, CATEGORY_META, getCardsByLevel, getUnlockedCards } from '../data/loveCards';
 import { cn } from '../lib/utils';
 import { PremiumGate } from './PremiumGate';
@@ -39,7 +40,7 @@ const CategoryPills: React.FC<{
                 : 'bg-cookbook-bg/80 text-cookbook-text/70 border-cookbook-border hover:border-cookbook-text/20'
             )}
           >
-            <span className="text-base">{meta.emoji}</span>
+            <AppIcon name={meta.emoji} size={16} weight={isActive ? "fill" : "duotone"} />
             <span>{meta.label}</span>
             <span className={cn(
               'text-[11px] px-1.5 py-0.5 rounded-full',
@@ -100,10 +101,11 @@ const AnswerDrawer: React.FC<{
   cardTitle: string;
   cardDescription: string;
   cardEmoji: string;
+  cardTone: IconTone;
   onSubmit: (answer?: string) => void;
   onClose: () => void;
   needsText: boolean;
-}> = ({ isOpen, cardTitle, cardDescription, cardEmoji, onSubmit, onClose, needsText }) => {
+}> = ({ isOpen, cardTitle, cardDescription, cardEmoji, cardTone, onSubmit, onClose, needsText }) => {
   const [answer, setAnswer] = useState('');
 
   if (!isOpen) return null;
@@ -132,7 +134,7 @@ const AnswerDrawer: React.FC<{
         </button>
 
         <div className="text-center mb-6">
-          <span className="text-4xl block mb-3">{cardEmoji}</span>
+          <IconBadge name={cardEmoji} tone={cardTone} badgeSize="lg" className="mx-auto mb-3" />
           <h3 className="font-serif text-xl text-cookbook-text mb-2">{cardTitle}</h3>
           <p className="font-sans text-sm text-cookbook-text/70">{cardDescription}</p>
         </div>
@@ -406,7 +408,7 @@ export const LoveCardsTab: React.FC = () => {
                     {/* Status badges */}
                     <div className="flex justify-between items-start mb-6 relative z-10">
                       <span className={cn('px-3 py-1 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold border', meta.bgColor, meta.color, 'border-current/10')}>
-                        {meta.emoji} {meta.label}
+                        <AppIcon name={meta.emoji} size={14} weight="fill" /> {meta.label}
                       </span>
                       <span className="px-2.5 py-1 bg-cookbook-text/5 rounded-full font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 border border-cookbook-border/50">
                         Nv.{currentCard.level}
@@ -416,11 +418,11 @@ export const LoveCardsTab: React.FC = () => {
                     {/* Emoji */}
                     <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10">
                       <motion.span
-                        className="text-6xl block mb-6"
+                        className="block mb-6"
                         animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                       >
-                        {currentCard.emoji}
+                        <IconBadge name={CATEGORY_META[currentCard.category].emoji} tone={CATEGORY_META[currentCard.category].tone} badgeSize="xl" className="mx-auto" />
                       </motion.span>
                       <h3 className="font-serif text-xl text-cookbook-text mb-3">{currentCard.title}</h3>
                       <p className="font-sans text-[11px] uppercase tracking-widest text-cookbook-text/70 font-bold">
@@ -450,7 +452,7 @@ export const LoveCardsTab: React.FC = () => {
                   >
                     <div className={cn('absolute top-0 left-0 w-full h-1.5 rounded-t-[2rem]', meta.bgColor.replace('/10', ''))} />
 
-                    <span className="text-3xl mb-4">{currentCard.emoji}</span>
+                    <IconBadge name={CATEGORY_META[currentCard.category].emoji} tone={CATEGORY_META[currentCard.category].tone} badgeSize="md" className="mb-4" />
                     <h3 className="font-serif text-lg text-cookbook-text mb-4">{currentCard.title}</h3>
                     <p className="font-sans text-sm text-cookbook-text/70 leading-relaxed mb-8 max-w-[280px]">
                       {currentCard.description}
@@ -511,7 +513,7 @@ export const LoveCardsTab: React.FC = () => {
               animate={{ opacity: 1 }}
               className="bg-cookbook-bg/80 backdrop-blur-xl border-2 border-dashed border-cookbook-border rounded-[2rem] p-12 text-center min-h-[320px] flex flex-col items-center justify-center"
             >
-              <span className="text-4xl mb-4 opacity-30">{meta.emoji}</span>
+              <IconBadge name={meta.emoji} tone={meta.tone} badgeSize="lg" className="mb-4 opacity-70" />
               <p className="font-serif italic text-cookbook-text/70 text-sm">Nenhuma carta neste nível.</p>
             </motion.div>
           )}
@@ -586,7 +588,8 @@ export const LoveCardsTab: React.FC = () => {
             isOpen={!!drawerCard}
             cardTitle={drawerCardData.title}
             cardDescription={drawerCardData.description}
-            cardEmoji={drawerCardData.emoji}
+            cardEmoji={CATEGORY_META[drawerCardData.category].emoji}
+            cardTone={CATEGORY_META[drawerCardData.category].tone}
             needsText={drawerCardData.category === 'truth_or_dare' || drawerCardData.category === 'mutual_knowledge'}
             onSubmit={handleRespond}
             onClose={() => setDrawerCard(null)}

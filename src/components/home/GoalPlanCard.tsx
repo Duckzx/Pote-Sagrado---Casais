@@ -83,9 +83,9 @@ export const GoalPlanCard: React.FC = () => {
       </div>
 
       {reached ? (
-        <p className="font-serif text-2xl text-cookbook-text mt-2">Meta alcançada! 🎉</p>
+        <p className="font-serif text-2xl text-cookbook-text mt-2">Meta alcançada!</p>
       ) : expired ? (
-        <p className="font-serif text-xl text-cookbook-text mt-2">A data chegou. Que tal escolher uma nova? 💪</p>
+        <p className="font-serif text-xl text-cookbook-text mt-2">A data chegou. Que tal escolher uma nova?</p>
       ) : (
         <>
           <div className="flex items-end gap-2 mt-2">

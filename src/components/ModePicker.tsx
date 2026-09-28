@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { IconBadge } from "./ui/app-icon";
 import { motion, AnimatePresence } from "motion/react";
 import { Check } from "lucide-react";
 import { doc, setDoc } from "firebase/firestore";
@@ -58,7 +59,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
       <div className="min-h-full flex flex-col justify-center px-6 py-10 max-w-md mx-auto">
         <BlurFade delay={0.05}>
           <p className="font-sans text-[11px] uppercase tracking-[0.3em] font-bold text-cookbook-primary text-center">
-            {needsModeChoice ? "Bem-vinda(o) ✨" : "Modo de uso"}
+            {needsModeChoice ? "Bem-vinda(o)" : "Modo de uso"}
           </p>
         </BlurFade>
         <BlurFade delay={0.12}>
@@ -90,7 +91,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${option.gradient} opacity-60 pointer-events-none`} />
                   <div className="relative flex items-center gap-4">
-                    <span className="text-4xl">{option.emoji}</span>
+                    <IconBadge name={option.emoji} tone={option.tone} badgeSize="lg" />
                     <div className="flex-1">
                       <p className="font-serif text-2xl text-cookbook-text leading-tight">{option.title}</p>
                       <p className="font-sans text-xs text-cookbook-text/70 mt-1 leading-snug">{option.subtitle}</p>
@@ -126,7 +127,7 @@ export const ModePicker: React.FC<ModePickerProps> = ({ onClose }) => {
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   maxLength={40}
-                  placeholder="Ex: Viagem pra Bahia 🌴"
+                  placeholder="Ex: Viagem pra Bahia"
                   className="mt-2 w-full bg-cookbook-bg border border-cookbook-border rounded-2xl px-4 py-3 font-serif text-xl text-cookbook-text focus:outline-none focus:border-cookbook-primary"
                 />
               </label>

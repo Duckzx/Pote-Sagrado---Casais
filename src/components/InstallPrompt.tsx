@@ -88,7 +88,7 @@ export const InstallPrompt: React.FC = () => {
           </li>
           <li className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-cookbook-primary text-cookbook-on-primary text-[11px] font-bold flex items-center justify-center">3</span>
-            Toque em <b>Adicionar</b>. Pronto! 🍯
+            Toque em <b>Adicionar</b>. Pronto!
           </li>
         </ol>
       )}

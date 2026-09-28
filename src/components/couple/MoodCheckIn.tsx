@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { IconBadge, type IconName, type IconTone } from "../ui/app-icon";
 import { motion, AnimatePresence } from "motion/react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -7,7 +8,8 @@ import { vibrate } from "../../lib/audio";
 
 export interface MoodOption {
   id: string;
-  emoji: string;
+  emoji: IconName;
+  tone: IconTone;
   label: string;
   /** Tip shown to the partner */
   tip: string;
@@ -16,14 +18,14 @@ export interface MoodOption {
 }
 
 export const MOODS: MoodOption[] = [
-  { id: "radiante", emoji: "✨", label: "Radiante", tip: "Aproveitem a energia boa e planejem algo juntos hoje.", selfTip: "Anote um sonho novo no mural enquanto a energia está alta." },
-  { id: "apaixonada", emoji: "🥰", label: "No clima", tip: "Um elogio sincero agora vai fazer o dia valer.", selfTip: "Registre esse momento: uma foto no álbum vale ouro." },
-  { id: "tranquila", emoji: "🌿", label: "Em paz", tip: "Um café a dois sem celular combina com hoje.", selfTip: "Dia perfeito para revisar suas metas com calma." },
-  { id: "saudade", emoji: "💭", label: "Com saudade", tip: "Mande uma foto ou um áudio só para dizer oi.", selfTip: "Mande uma mensagem para quem você ama. Custa zero." },
-  { id: "cansada", emoji: "🌙", label: "Cansaço", tip: "Que tal assumir o jantar ou a louça hoje?", selfTip: "Descanso também é investimento. Pausa sem culpa hoje." },
-  { id: "colo", emoji: "🥺", label: "Querendo colo", tip: "Abraço demorado e zero cobranças. Só presença.", selfTip: "Faça algo gentil por você que não custe nada: banho demorado, playlist favorita." },
-  { id: "estressada", emoji: "🌧️", label: "Dia difícil", tip: "Escute sem tentar resolver. Pergunte como pode ajudar.", selfTip: "Respire. Evite compras por impulso hoje: amanhã você decide melhor." },
-  { id: "fome", emoji: "🍓", label: "Com fome", tip: "Surpreenda com o lanche favorito. Vale ponto extra.", selfTip: "Cozinhar em casa hoje já é uma economia para o pote." },
+  { id: "radiante", emoji: "sun", tone: "amber", label: "Radiante", tip: "Aproveitem a energia boa e planejem algo juntos hoje.", selfTip: "Anote um sonho novo no mural enquanto a energia está alta." },
+  { id: "apaixonada", emoji: "heart", tone: "rose", label: "No clima", tip: "Um elogio sincero agora vai fazer o dia valer.", selfTip: "Registre esse momento: uma foto no álbum vale ouro." },
+  { id: "tranquila", emoji: "leaf", tone: "emerald", label: "Em paz", tip: "Um café a dois sem celular combina com hoje.", selfTip: "Dia perfeito para revisar suas metas com calma." },
+  { id: "saudade", emoji: "chat", tone: "violet", label: "Com saudade", tip: "Mande uma foto ou um áudio só para dizer oi.", selfTip: "Mande uma mensagem para quem você ama. Custa zero." },
+  { id: "cansada", emoji: "night", tone: "sky", label: "Cansaço", tip: "Que tal assumir o jantar ou a louça hoje?", selfTip: "Descanso também é investimento. Pausa sem culpa hoje." },
+  { id: "colo", emoji: "love", tone: "primary", label: "Querendo colo", tip: "Abraço demorado e zero cobranças. Só presença.", selfTip: "Faça algo gentil por você que não custe nada: banho demorado, playlist favorita." },
+  { id: "estressada", emoji: "rain", tone: "sky", label: "Dia difícil", tip: "Escute sem tentar resolver. Pergunte como pode ajudar.", selfTip: "Respire. Evite compras por impulso hoje: amanhã você decide melhor." },
+  { id: "fome", emoji: "cherries", tone: "rose", label: "Com fome", tip: "Surpreenda com o lanche favorito. Vale ponto extra.", selfTip: "Cozinhar em casa hoje já é uma economia para o pote." },
 ];
 
 const MOOD_TTL_MS = 24 * 60 * 60 * 1000;
@@ -97,7 +99,7 @@ export const MoodCheckIn: React.FC = () => {
             onClick={() => setIsPicking((v) => !v)}
             className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-primary/[0.06] border border-cookbook-primary/20 active:scale-95"
           >
-            <span className="block text-2xl">{myMood ? myMood.emoji : "➕"}</span>
+            <IconBadge name={myMood ? myMood.emoji : "sparkle"} tone={myMood ? myMood.tone : "primary"} badgeSize="sm" className="mx-auto" />
             <span className="block font-sans text-[11px] font-bold text-cookbook-text/70 mt-1 truncate">Você</span>
             <span className="block font-serif text-sm text-cookbook-text leading-tight truncate">{myMood ? myMood.label : "Contar"}</span>
           </button>
@@ -105,7 +107,7 @@ export const MoodCheckIn: React.FC = () => {
             const mood = activeMood(m);
             return (
               <div key={m.id} className="shrink-0 w-24 rounded-2xl p-3 text-center bg-cookbook-gold/[0.07] border border-cookbook-gold/20">
-                <span className="block text-2xl">{mood ? mood.emoji : "💤"}</span>
+                <IconBadge name={mood ? mood.emoji : "night"} tone={mood ? mood.tone : "neutral"} badgeSize="sm" className={mood ? "mx-auto" : "mx-auto opacity-50"} />
                 <span className="block font-sans text-[11px] font-bold text-cookbook-text/70 mt-1 truncate">{firstName(m)}</span>
                 <span className="block font-serif text-sm text-cookbook-text/70 leading-tight truncate">{mood ? mood.label : "—"}</span>
               </div>
@@ -125,11 +127,11 @@ export const MoodCheckIn: React.FC = () => {
             <p className="font-sans text-[11px] uppercase tracking-widest font-bold text-cookbook-text/70 mb-2">Você</p>
             {myMood ? (
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{myMood.emoji}</span>
+                <IconBadge name={myMood.emoji} tone={myMood.tone} badgeSize="sm" />
                 <span className="font-serif text-lg text-cookbook-text leading-tight">{myMood.label}</span>
               </div>
             ) : (
-              <p className="font-serif italic text-cookbook-primary text-base leading-tight">Toque para contar ✨</p>
+              <p className="font-serif italic text-cookbook-primary text-base leading-tight">Toque para contar</p>
             )}
           </button>
 
@@ -141,7 +143,7 @@ export const MoodCheckIn: React.FC = () => {
               </p>
               {partnerMood ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{partnerMood.emoji}</span>
+                  <IconBadge name={partnerMood.emoji} tone={partnerMood.tone} badgeSize="sm" />
                   <span className="font-serif text-lg text-cookbook-text leading-tight">{partnerMood.label}</span>
                 </div>
               ) : (
@@ -180,11 +182,11 @@ export const MoodCheckIn: React.FC = () => {
                   onClick={() => chooseMood(mood)}
                   className={`flex flex-col items-center gap-1 rounded-2xl py-3 px-1 border transition-all active:scale-95 ${
                     myMood?.id === mood.id
-                      ? "bg-cookbook-primary text-white border-cookbook-primary"
+                      ? "bg-cookbook-primary/10 border-cookbook-primary text-cookbook-text ring-1 ring-cookbook-primary"
                       : "bg-cookbook-bg border-cookbook-border hover:border-cookbook-primary/40"
                   }`}
                 >
-                  <span className="text-xl">{mood.emoji}</span>
+                  <IconBadge name={mood.emoji} tone={mood.tone} badgeSize="xs" />
                   <span className="font-sans text-[11px] font-bold leading-tight text-center">{mood.label}</span>
                 </button>
               ))}

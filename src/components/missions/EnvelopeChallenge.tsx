@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { AppIcon, IconBadge } from "../ui/app-icon";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { addDoc, collection, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
@@ -110,7 +111,7 @@ export const EnvelopeChallenge: React.FC = () => {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-sans text-[11px] uppercase tracking-[0.2em] font-bold text-cookbook-primary">Desafio viral</p>
-          <h3 className="font-serif text-2xl text-cookbook-text leading-tight">100 Envelopes 💌</h3>
+          <h3 className="font-serif text-2xl text-cookbook-text leading-tight">100 Envelopes</h3>
           <p className="font-sans text-xs text-cookbook-text/70 mt-1">
             Abra um envelope e guarde o valor dele. No fim: {brl(GOAL)}.
           </p>
@@ -146,7 +147,7 @@ export const EnvelopeChallenge: React.FC = () => {
                   : "bg-cookbook-primary/[0.06] border border-cookbook-primary/15 text-cookbook-text/70"
               }`}
             >
-              {done ? "✓" : n}
+              {done ? <AppIcon name="letter" size={18} weight="fill" className="mx-auto" /> : n}
             </button>
           );
         })}
@@ -172,7 +173,7 @@ export const EnvelopeChallenge: React.FC = () => {
           disabled={opened.length >= TOTAL}
           className="flex-[1.4] py-3 rounded-full bg-cookbook-primary text-cookbook-on-primary font-sans text-[11px] uppercase tracking-widest font-bold shadow-md disabled:opacity-40"
         >
-          🎲 Sortear envelope
+          <span className="inline-flex items-center gap-1.5"><AppIcon name="sparkle" size={16} weight="fill" /> Sortear envelope</span>
         </button>
       </div>
 
@@ -211,7 +212,7 @@ export const EnvelopeChallenge: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-xs rounded-[28px] bg-cookbook-mural p-6 text-center overflow-hidden shadow-2xl"
             >
-              <p className="text-5xl">💌</p>
+              <IconBadge name="envelope" tone="primary" badgeSize="xl" className="mx-auto" />
               <p className="font-sans text-[11px] uppercase tracking-[0.25em] font-bold text-cookbook-text/70 mt-3">Envelope #{confirming}</p>
               <p className="font-serif text-5xl text-cookbook-primary mt-1">{brl(confirming)}</p>
               <p className="font-sans text-xs text-cookbook-text/70 mt-2">Guarde esse valor e registre no pote.</p>
