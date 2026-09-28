@@ -55,6 +55,7 @@ import { InviteNudge } from "./home/InviteNudge";
 import { InstallPrompt } from "./InstallPrompt";
 import { GoalTemplates } from "./home/GoalTemplates";
 import { MonthSummary } from "./home/MonthSummary";
+import { SavingHeatmap } from "./home/SavingHeatmap";
 import { GoalPlanCard } from "./home/GoalPlanCard";
 import { RecentActivity } from "./home/RecentActivity";
 import { useModeCopy } from "../lib/mode";
@@ -303,7 +304,11 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       if (quickImage) {
         depositData.imageUrl = quickImage;
       }
-      await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      const newRef = await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      useAppStore.getState().showUndo(
+        `${quickType === "income" ? "+" : "-"}${fmtBRL(parsedAmount)} · ${depositData.action}`,
+        newRef.path,
+      );
       /* Haptic and audio feedback */ vibrate([30, 50, 30]);
       if (quickType === "income") {
         playCoinSound();
@@ -597,6 +602,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       <QuickActions />
       <InstallPrompt />
       <MonthSummary />
+      <SavingHeatmap />
       <RecentActivity />
         </div>
       </div>{" "}

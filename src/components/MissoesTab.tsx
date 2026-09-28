@@ -170,6 +170,7 @@ const FILTERS: { id: FilterType; label: string; emoji: string }[] = [
 /* Component */ import { compressImage } from "../lib/imageUtils";
 import { Camera, Plane, ArrowRight, Heart, Sparkles } from "lucide-react";
 import { EnvelopeChallenge } from "./missions/EnvelopeChallenge";
+import { WeeklyChallenge } from "./missions/WeeklyChallenge";
 import { CheapDateModal } from "./CheapDateModal";
 export const MissoesTab: React.FC<MissoesTabProps> = ({
   stats,
@@ -348,7 +349,8 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
       if (missionImage) {
         depositData.imageUrl = missionImage;
       }
-      await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      const newRef = await addDoc(collection(db, `casais/${casalId}/deposits`), depositData);
+      useAppStore.getState().showUndo(`+R$ ${finalAmount.toFixed(2).replace(".", ",")} · ${depositData.action}`, newRef.path);
       confetti({
         particleCount: 100,
         spread: 70,
@@ -551,7 +553,8 @@ export const MissoesTab: React.FC<MissoesTabProps> = ({
         </p>{" "}
       </div>{" "}
 
-      <div className="max-w-xl mx-auto w-full">
+      <div className="max-w-xl mx-auto w-full space-y-6">
+        <WeeklyChallenge />
         <EnvelopeChallenge />
       </div>
 

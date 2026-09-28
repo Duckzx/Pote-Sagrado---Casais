@@ -10,6 +10,7 @@ import { useAppStore } from "./store/useAppStore";
 import { ModePicker } from "./components/ModePicker";
 import { LoginScreen } from "./components/LoginScreen";
 import { SyncIssueBanner } from "./components/Diagnostics";
+import { UndoSnackbar } from "./components/UndoSnackbar";
 import { MODE_TABS } from "./lib/mode";
 
 // ========================================
@@ -387,6 +388,7 @@ function AppContent() {
       )}
       
       <SyncIssueBanner />
+      <UndoSnackbar />
 
       {/* LGPD Consent Modal for logged-in users */}
       <LegalConsentPopup />
