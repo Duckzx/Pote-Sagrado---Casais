@@ -15,6 +15,9 @@ if (import.meta.env.VITE_POSTHOG_KEY) {
   });
 }
 
+import { listenForInstallPrompt } from './components/InstallPrompt';
+listenForInstallPrompt();
+
 // Register service worker for offline support
 registerSW({ immediate: true });
 

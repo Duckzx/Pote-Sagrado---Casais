@@ -24,6 +24,7 @@ export const GoalPlanCard: React.FC = () => {
   const mode = useAppStore((s) => s.mode);
   const arrive = mode === "solo" ? "você chega" : mode === "grupo" ? "a turma chega" : "vocês chegam";
   const [editing, setEditing] = useState(false);
+  const [simWeekly, setSimWeekly] = useState<number | null>(null);
 
   const plan = useMemo(
     () => computePlan(deposits, totalSaved, goalAmount, targetDate),
@@ -105,6 +106,34 @@ export const GoalPlanCard: React.FC = () => {
                 : `No ritmo atual (${brl(plan.currentWeeklyPace)}/semana) a meta chega só em ${fmtDate(plan.etaAtCurrentPace)}. Bora acelerar!`
               : "Ainda sem depósitos nos últimos 30 dias. O primeiro passo conta muito!"}
           </div>
+
+          {/* "E se eu guardar...?" simulator */}
+          {(() => {
+            const max = Math.max(50, Math.ceil(plan.remaining / 4 / 10) * 10);
+            const weekly = simWeekly ?? Math.min(max, Math.max(10, Math.round(plan.perWeek / 10) * 10));
+            const weeks = Math.ceil(plan.remaining / weekly);
+            const eta = new Date(Date.now() + weeks * 7 * 24 * 60 * 60 * 1000);
+            return (
+              <div className="mt-4 pt-4 border-t border-cookbook-border/60">
+                <p className="font-sans text-[10px] uppercase tracking-[0.2em] font-bold text-cookbook-text/50">E se guardar…</p>
+                <input
+                  type="range"
+                  min={10}
+                  max={max}
+                  step={10}
+                  value={weekly}
+                  onChange={(e) => setSimWeekly(Number(e.target.value))}
+                  className="w-full mt-3 accent-[var(--theme-primary)]"
+                  aria-label="Valor por semana na simulação"
+                />
+                <p className="font-sans text-sm text-cookbook-text mt-1">
+                  <span data-money className="font-bold text-cookbook-primary">{brl(weekly)}</span> por semana →{" "}
+                  <span className="font-bold">{fmtDate(eta)}</span>{" "}
+                  <span className="text-cookbook-text/50">({weeks} {weeks === 1 ? "semana" : "semanas"})</span>
+                </p>
+              </div>
+            );
+          })()}
         </>
       )}
     </section>

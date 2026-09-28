@@ -51,6 +51,8 @@ import { MomentsWidget } from "./MomentsWidget";
 import { MoodCheckIn } from "./couple/MoodCheckIn";
 import { QuickActions } from "./home/QuickActions";
 import { StreakCard } from "./home/StreakCard";
+import { InviteNudge } from "./home/InviteNudge";
+import { InstallPrompt } from "./InstallPrompt";
 import { GoalTemplates } from "./home/GoalTemplates";
 import { MonthSummary } from "./home/MonthSummary";
 import { GoalPlanCard } from "./home/GoalPlanCard";
@@ -548,6 +550,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       {!goalAmount && <GoalTemplates />}
 
       {/* Couple rituals: mood of the day + mêsversário */}
+      <InviteNudge />
       <StreakCard />
       <GoalPlanCard />
       <MoodCheckIn />
@@ -592,6 +595,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({
       </div>{" "}
 
       <QuickActions />
+      <InstallPrompt />
       <MonthSummary />
       <RecentActivity />
         </div>
